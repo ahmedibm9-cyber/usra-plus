@@ -91,7 +91,6 @@ export function useAnalyticsData(): UseAnalyticsDataReturn {
   const abortRef = useRef<AbortController | null>(null)
 
   const fetchData = useCallback(async () => {
-    // Cancel any in-flight request
     if (abortRef.current) {
       abortRef.current.abort()
     }
@@ -327,4 +326,188 @@ export function useAdminFamilies(params: UseAdminFamiliesParams = {}): UseAdminF
   }, [fetchData])
 
   return { data, total, page, pageSize, hasMore, isLoading, source, error, refetch: fetchData }
+}
+
+// ─── Types for Overview & Subscription APIs ─────────────────────────────────
+
+export interface OverviewMetrics {
+  totalUsers: number
+  monthlyActiveUsers: number
+  newThisMonth: number
+}
+
+export interface OverviewPlanItem {
+  name: string
+  value: number
+  color: string
+}
+
+export interface OverviewRegionalItem {
+  region: string
+  percentage: number
+  users: number
+  flag: string
+}
+
+export interface OverviewActivityItem {
+  id: string
+  type: string
+  text: string
+  time: string
+}
+
+export interface OverviewData {
+  metrics: OverviewMetrics | null
+  revenueTimeSeries: { month: string; mrr: number }[]
+  userGrowthTimeSeries: { month: string; registrations: number }[]
+  planDistribution: OverviewPlanItem[]
+  regionalDistribution: OverviewRegionalItem[]
+  platformHealth: {
+    label: string
+    value: number
+    color: string
+  }[] | null
+  activityFeed: OverviewActivityItem[]
+  keyMetrics: Record<string, string | number> | null
+}
+
+export interface SubscriptionMetrics {
+  mrr: number
+  arr: number
+  avgCLV: number
+  churnRate: number
+  conversionRate: number
+  freeUsers: number
+  proUsers: number
+  familyPlusUsers: number
+}
+
+export interface SubscriptionPlanItem {
+  name: string
+  users: number
+  percentage: number
+  price: string
+  revenue: string
+  pillarColor: string
+  pillarGlow: string
+  accentColor: string
+  lifetime: number
+  trial: number
+}
+
+export interface SubscriptionRevenueItem {
+  month: string
+  newSubs: number
+  churned: number
+  mrr: number
+}
+
+export interface SubscriptionBreakdownItem {
+  month: string
+  newSubs: number
+  churned: number
+  netNew: number
+  revenue: string
+  churnRate: string
+}
+
+export interface SubscriptionConversionItem {
+  from: string
+  to: string
+  rate: number
+  color: string
+}
+
+export interface SubscriptionData {
+  metrics: SubscriptionMetrics | null
+  planDistribution: SubscriptionPlanItem[]
+  revenueTimeSeries: SubscriptionRevenueItem[]
+  monthlyBreakdown: SubscriptionBreakdownItem[]
+  conversionFunnel: SubscriptionConversionItem[]
+  paymentHealth: {
+    label: string
+    value: string
+    sub: string
+    color: string
+    bgGlow: string
+  }[] | null
+  cohortData: { cohort: string; months: number[] }[]
+  cohortSummary: { m1: number; m3: number; m6: number } | null
+}
+
+// ─── Generic data fetch hook ─────────────────────────────────────────────────
+
+function useDataFetch<T>(endpoint: string): {
+  data: T | null
+  isLoading: boolean
+  source: DataSource
+  error: string | null
+  refetch: () => void
+} {
+  const [data, setData] = useState<T | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [source, setSource] = useState<DataSource>('loading')
+  const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
+
+  const fetchData = useCallback(async () => {
+    if (abortRef.current) {
+      abortRef.current.abort()
+    }
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(endpoint, {
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const json = await response.json()
+
+      if (!controller.signal.aborted) {
+        setData(json.data)
+        setSource(json.source === 'live' ? 'live' : 'demo')
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      if (!controller.signal.aborted) {
+        setError(err instanceof Error ? err.message : `Failed to fetch ${endpoint}`)
+        setSource('demo')
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsLoading(false)
+      }
+    }
+  }, [endpoint])
+
+  useEffect(() => {
+    fetchData()
+    return () => {
+      if (abortRef.current) {
+        abortRef.current.abort()
+      }
+    }
+  }, [fetchData])
+
+  return { data, isLoading, source, error, refetch: fetchData }
+}
+
+// ─── Hook: useOverviewData ────────────────────────────────────────────────────
+
+export function useOverviewData() {
+  return useDataFetch<OverviewData>('/api/admin/overview')
+}
+
+// ─── Hook: useSubscriptionData ────────────────────────────────────────────────
+
+export function useSubscriptionData() {
+  return useDataFetch<SubscriptionData>('/api/admin/subscriptions')
 }

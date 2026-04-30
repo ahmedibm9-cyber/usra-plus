@@ -6,12 +6,79 @@ import {
   Ticket, Clock, Star, Gauge,
   TrendingDown, AlertTriangle, MessageSquare,
   ShoppingCart, CheckCircle2, Users, ArrowUpRight, ArrowDownRight,
-  Phone, Mail, Share2, Radar, Headphones
+  Phone, Mail, Share2, Radar, Headphones,
+  Inbox, Lightbulb, BarChart3, UsersRound,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, BarChart, Bar
+  ResponsiveContainer, BarChart, Bar,
 } from 'recharts'
+
+// ─── Types ──────────────────────────────────────────────────
+interface TicketTrendPoint {
+  date: string
+  opened: number
+  resolved: number
+}
+
+interface CommonIssue {
+  issue: string
+  count: number
+}
+
+type FeatureRequestStatus = 'Under Review' | 'Planned' | 'In Progress' | 'Shipped'
+type FeatureRequestPriority = 'High' | 'Medium' | 'Low'
+
+interface FeatureRequest {
+  feature: string
+  votes: number
+  status: FeatureRequestStatus
+  priority: FeatureRequestPriority
+}
+
+type PainPointIconType = 'alert' | 'check' | 'cart' | 'chat'
+
+interface PainPoint {
+  title: string
+  value: string
+  description: string
+  iconType: PainPointIconType
+}
+
+interface TopAgent {
+  name: string
+  tickets: number
+  avatar: string
+}
+
+interface ResolutionChannel {
+  channel: string
+  percentage: number
+  color: string
+}
+
+interface SupportKPIs {
+  openTickets: number
+  avgResolutionHours: number
+  satisfactionScore: number
+  npsScore: number
+  firstResponseMinutes: number
+  weeklyDelta: {
+    openTickets: number
+    resolutionHours: number
+    firstResponseMinutes: number
+  }
+}
+
+interface SupportData {
+  kpis: SupportKPIs
+  ticketTrend: TicketTrendPoint[]
+  commonIssues: CommonIssue[]
+  featureRequests: FeatureRequest[]
+  painPoints: PainPoint[]
+  topAgents: TopAgent[]
+  resolutionChannels: ResolutionChannel[]
+}
 
 // ─── Animation variants ────────────────────────────────────
 const containerVariants = {
@@ -27,63 +94,8 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
 }
 
-// ─── Mock data ─────────────────────────────────────────────
-
-const ticketTrendData = Array.from({ length: 30 }, (_, i) => {
-  const d = new Date()
-  d.setDate(d.getDate() - 29 + i)
-  const label = `${d.getMonth() + 1}/${d.getDate()}`
-  const opened = Math.floor(Math.random() * 6) + 3
-  const resolved = Math.floor(Math.random() * 5) + 2
-  return { date: label, opened, resolved }
-})
-
-const commonIssues = [
-  { issue: 'Cannot join family', count: 34 },
-  { issue: 'Invite code not working', count: 28 },
-  { issue: 'App crashes on upload', count: 22 },
-  { issue: 'Subscription not activating', count: 19 },
-  { issue: 'Language switch stuck', count: 15 },
-  { issue: 'Calendar sync issues', count: 12 },
-  { issue: 'Notification not received', count: 11 },
-  { issue: 'Dark mode not applying', count: 8 },
-]
-
-const featureRequests = [
-  { feature: 'Arabic voice messages', votes: 342, status: 'In Progress' as const, priority: 'High' as const },
-  { feature: 'Hajj/Umrah features', votes: 289, status: 'Planned' as const, priority: 'High' as const },
-  { feature: 'Family budgeting', votes: 234, status: 'Under Review' as const, priority: 'Medium' as const },
-  { feature: 'Ramadan meal planner', votes: 198, status: 'Planned' as const, priority: 'Medium' as const },
-  { feature: 'Photo albums', votes: 167, status: 'Under Review' as const, priority: 'Low' as const },
-  { feature: 'Household chores', votes: 145, status: 'Planned' as const, priority: 'Medium' as const },
-  { feature: 'Prayer time alerts', votes: 123, status: 'Shipped' as const, priority: 'High' as const },
-  { feature: 'Expense splitting', votes: 98, status: 'Under Review' as const, priority: 'Low' as const },
-]
-
-const painPoints = [
-  { title: 'Onboarding Drop-off', value: '28%', description: 'at family creation step', icon: AlertTriangle },
-  { title: 'Task Abandonment', value: '15%', description: 'create but never complete', icon: CheckCircle2 },
-  { title: 'Grocery List Confusion', value: '12%', description: 'create but never check items', icon: ShoppingCart },
-  { title: 'Chat Low Engagement', value: '34%', description: 'never send a message', icon: MessageSquare },
-]
-
-const topAgents = [
-  { name: 'Sara Al-Rashid', tickets: 47, avatar: 'SR' },
-  { name: 'Ahmed Hassan', tickets: 39, avatar: 'AH' },
-  { name: 'Layla Noor', tickets: 34, avatar: 'LN' },
-]
-
-const resolutionChannels = [
-  { channel: 'In-App', percentage: 62, color: '#0EA5E9' },
-  { channel: 'Email', percentage: 28, color: '#3B82F6' },
-  { channel: 'Social', percentage: 10, color: '#7DD3FC' },
-]
-
 // ─── Status badge helper ───────────────────────────────────
-type Status = 'Under Review' | 'Planned' | 'In Progress' | 'Shipped'
-type Priority = 'High' | 'Medium' | 'Low'
-
-function getStatusColor(status: Status) {
+function getStatusColor(status: FeatureRequestStatus) {
   switch (status) {
     case 'Under Review': return 'bg-sky-500/10 text-sky-400 border-sky-500/20'
     case 'Planned': return 'bg-blue-500/10 text-blue-400 border-blue-500/20'
@@ -92,11 +104,21 @@ function getStatusColor(status: Status) {
   }
 }
 
-function getPriorityColor(priority: Priority) {
+function getPriorityColor(priority: FeatureRequestPriority) {
   switch (priority) {
     case 'High': return 'bg-red-500/10 text-red-400 border-red-500/20'
     case 'Medium': return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
     case 'Low': return 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+  }
+}
+
+// ─── Pain point icon mapping ───────────────────────────────
+function getPainPointIcon(iconType: PainPointIconType) {
+  switch (iconType) {
+    case 'alert': return AlertTriangle
+    case 'check': return CheckCircle2
+    case 'cart': return ShoppingCart
+    case 'chat': return MessageSquare
   }
 }
 
@@ -136,24 +158,28 @@ function SemicircularGauge({ value, max, label, color, unit = '' }: { value: num
           strokeLinecap="round"
         />
         {/* Filled arc */}
-        <path
-          d={describeArc(cx, cy, radius, 0, angle)}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          opacity={0.85}
-        />
+        {value > 0 && (
+          <path
+            d={describeArc(cx, cy, radius, 0, angle)}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            opacity={0.85}
+          />
+        )}
         {/* Glow effect */}
-        <path
-          d={describeArc(cx, cy, radius, 0, angle)}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth + 6}
-          strokeLinecap="round"
-          opacity={0.1}
-          filter="blur(4px)"
-        />
+        {value > 0 && (
+          <path
+            d={describeArc(cx, cy, radius, 0, angle)}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth + 6}
+            strokeLinecap="round"
+            opacity={0.1}
+            filter="blur(4px)"
+          />
+        )}
         {/* Center text */}
         <text x={cx} y={cy - 6} textAnchor="middle" fill="white" fontSize="18" fontWeight="bold">
           {typeof value === 'number' && value % 1 !== 0 ? value.toFixed(1) : value}
@@ -236,9 +262,22 @@ function RadarSweep() {
 }
 
 // ─── Donut Chart ────────────────────────────────────────────
-function DonutChart({ data }: { data: typeof resolutionChannels }) {
+function DonutChart({ data }: { data: ResolutionChannel[] }) {
   const total = data.reduce((sum, d) => sum + d.percentage, 0)
-  // Precompute cumulative offsets so we don't mutate during render
+
+  if (total === 0) {
+    return (
+      <div className="relative flex items-center justify-center">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx={80} cy={80} r={60} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={20} />
+          <text x={80} y={76} textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="20" fontWeight="bold">—</text>
+          <text x={80} y={92} textAnchor="middle" fill="rgba(255,255,255,0.15)" fontSize="9">no data</text>
+        </svg>
+      </div>
+    )
+  }
+
+  // Precompute cumulative offsets
   const cumulativeOffsets: number[] = []
   let runningTotal = 0
   for (const d of data) {
@@ -307,10 +346,79 @@ function RankingMedal({ rank }: { rank: number }) {
   return <span className="text-base">{medals[rank] || `#${rank + 1}`}</span>
 }
 
+// ─── Empty State Component ─────────────────────────────────
+function EmptyState({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-12 h-12 rounded-xl bg-sky-500/5 flex items-center justify-center mb-3">
+        <Icon className="w-6 h-6 text-sky-400/20" />
+      </div>
+      <p className="text-sm text-white/30 font-medium">{title}</p>
+      <p className="text-xs text-white/15 mt-1 max-w-[240px]">{description}</p>
+    </div>
+  )
+}
+
 // ─── Main Component ────────────────────────────────────────
 export function AdminSupport() {
-  const maxVotes = Math.max(...featureRequests.map(r => r.votes))
-  const maxIssueCount = Math.max(...commonIssues.map(i => i.count))
+  const [data, setData] = useState<SupportData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchSupportData() {
+      try {
+        const res = await fetch('/api/admin/support?section=all')
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success && json.data) {
+            setData(json.data as SupportData)
+          }
+        }
+      } catch (err) {
+        console.error('[AdminSupport] Failed to fetch data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSupportData()
+  }, [])
+
+  // Derive computed values safely
+  const kpis = data?.kpis ?? { openTickets: 0, avgResolutionHours: 0, satisfactionScore: 0, npsScore: 0, firstResponseMinutes: 0, weeklyDelta: { openTickets: 0, resolutionHours: 0, firstResponseMinutes: 0 } }
+  const ticketTrend = data?.ticketTrend ?? []
+  const commonIssues = data?.commonIssues ?? []
+  const featureRequests = data?.featureRequests ?? []
+  const painPoints = data?.painPoints ?? []
+  const topAgents = data?.topAgents ?? []
+  const resolutionChannels = data?.resolutionChannels ?? []
+
+  const maxVotes = featureRequests.length > 0 ? Math.max(...featureRequests.map(r => r.votes)) : 1
+  const maxIssueCount = commonIssues.length > 0 ? Math.max(...commonIssues.map(i => i.count)) : 1
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-[#0A0A14] border border-sky-500/10 rounded-xl p-5">
+          <div className="flex items-center gap-3">
+            <RadarSweep />
+            <div>
+              <h2 className="text-xl font-bold text-white">Help Desk Radar</h2>
+              <p className="text-sm text-sky-400/50 mt-0.5">Loading support data...</p>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-[#0A0A14] border border-sky-500/10 rounded-xl p-5 h-40 animate-pulse">
+              <div className="w-8 h-8 rounded-lg bg-sky-500/10 mb-4" />
+              <div className="h-4 bg-sky-500/5 rounded w-2/3 mb-2" />
+              <div className="h-8 bg-sky-500/5 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <motion.div
@@ -339,7 +447,6 @@ export function AdminSupport() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">Simulated</span>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
               <span className="text-xs text-sky-400 font-medium">Live</span>
@@ -356,12 +463,14 @@ export function AdminSupport() {
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
               <Ticket className="w-4 h-4 text-blue-400" />
             </div>
-            <span className="flex items-center gap-1 text-[10px] text-emerald-400">
-              <ArrowUpRight className="w-3 h-3" />
-              +8 this week
-            </span>
+            {kpis.weeklyDelta.openTickets !== 0 && (
+              <span className={`flex items-center gap-1 text-[10px] ${kpis.weeklyDelta.openTickets > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                {kpis.weeklyDelta.openTickets > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                {kpis.weeklyDelta.openTickets > 0 ? '+' : ''}{kpis.weeklyDelta.openTickets} this week
+              </span>
+            )}
           </div>
-          <SemicircularGauge value={23} max={50} label="Open Tickets" color="#3B82F6" />
+          <SemicircularGauge value={kpis.openTickets} max={50} label="Open Tickets" color="#3B82F6" />
         </motion.div>
 
         {/* Resolution Time — Green gauge */}
@@ -370,12 +479,14 @@ export function AdminSupport() {
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
               <Clock className="w-4 h-4 text-emerald-400" />
             </div>
-            <span className="flex items-center gap-1 text-[10px] text-emerald-400">
-              <ArrowDownRight className="w-3 h-3" />
-              ↓0.8h
-            </span>
+            {kpis.weeklyDelta.resolutionHours !== 0 && (
+              <span className={`flex items-center gap-1 text-[10px] ${kpis.weeklyDelta.resolutionHours < 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <ArrowDownRight className="w-3 h-3" />
+                {kpis.weeklyDelta.resolutionHours > 0 ? '+' : ''}{kpis.weeklyDelta.resolutionHours.toFixed(1)}h
+              </span>
+            )}
           </div>
-          <SemicircularGauge value={4.2} max={10} label="Avg Resolution (hours)" color="#10B981" unit="hours" />
+          <SemicircularGauge value={kpis.avgResolutionHours} max={10} label="Avg Resolution (hours)" color="#10B981" unit="hours" />
         </motion.div>
 
         {/* Satisfaction — Amber gauge */}
@@ -385,10 +496,12 @@ export function AdminSupport() {
               <Star className="w-4 h-4 text-amber-400" />
             </div>
           </div>
-          <SemicircularGauge value={4.6} max={5} label="Satisfaction Score" color="#F59E0B" unit="/5.0" />
-          <div className="mt-2">
-            <StarRating score={4.6} />
-          </div>
+          <SemicircularGauge value={kpis.satisfactionScore} max={5} label="Satisfaction Score" color="#F59E0B" unit="/5.0" />
+          {kpis.satisfactionScore > 0 && (
+            <div className="mt-2">
+              <StarRating score={kpis.satisfactionScore} />
+            </div>
+          )}
         </motion.div>
 
         {/* NPS — Sky blue gauge */}
@@ -397,11 +510,17 @@ export function AdminSupport() {
             <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
               <Gauge className="w-4 h-4 text-sky-400" />
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-medium border border-emerald-500/20">
-              Excellent
-            </span>
+            {kpis.npsScore > 0 && (
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-medium border ${
+                kpis.npsScore >= 70 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                kpis.npsScore >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                'bg-red-500/10 text-red-400 border-red-500/20'
+              }`}>
+                {kpis.npsScore >= 70 ? 'Excellent' : kpis.npsScore >= 50 ? 'Good' : 'Needs Work'}
+              </span>
+            )}
           </div>
-          <SemicircularGauge value={72} max={100} label="NPS Score" color="#0EA5E9" />
+          <SemicircularGauge value={kpis.npsScore} max={100} label="NPS Score" color="#0EA5E9" />
         </motion.div>
       </div>
 
@@ -412,63 +531,69 @@ export function AdminSupport() {
             <h3 className="text-sm font-semibold text-white">Ticket Trend</h3>
             <p className="text-xs text-sky-400/40 mt-0.5">Opened vs Resolved — Last 30 days</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
-              <span className="text-xs text-white/50">Opened</span>
+          {ticketTrend.length > 0 && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+                <span className="text-xs text-white/50">Opened</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span className="text-xs text-white/50">Resolved</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-              <span className="text-xs text-white/50">Resolved</span>
-            </div>
+          )}
+        </div>
+        {ticketTrend.length > 0 ? (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={ticketTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="skyOpenedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0EA5E9" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#0EA5E9" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="skyResolvedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+                  tickLine={false}
+                  interval={4}
+                />
+                <YAxis
+                  tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="opened"
+                  stroke="#0EA5E9"
+                  strokeWidth={2}
+                  fill="url(#skyOpenedGradient)"
+                  name="Opened"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="resolved"
+                  stroke="#3B82F6"
+                  strokeWidth={2}
+                  fill="url(#skyResolvedGradient)"
+                  name="Resolved"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-        </div>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={ticketTrendData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="skyOpenedGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0EA5E9" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#0EA5E9" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="skyResolvedGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-              <XAxis
-                dataKey="date"
-                tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }}
-                axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
-                tickLine={false}
-                interval={4}
-              />
-              <YAxis
-                tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="opened"
-                stroke="#0EA5E9"
-                strokeWidth={2}
-                fill="url(#skyOpenedGradient)"
-                name="Opened"
-              />
-              <Area
-                type="monotone"
-                dataKey="resolved"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                fill="url(#skyResolvedGradient)"
-                name="Resolved"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        ) : (
+          <EmptyState icon={BarChart3} title="No ticket trend data yet" description="Ticket trends will appear here once support tickets are created and tracked over time." />
+        )}
       </motion.div>
 
       {/* ── 3. Common Issues — Horizontal Bar Chart ──────────── */}
@@ -476,27 +601,31 @@ export function AdminSupport() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-semibold text-white">Common Issues</h3>
-            <p className="text-xs text-sky-400/40 mt-0.5">Top 8 reported issues by frequency</p>
+            <p className="text-xs text-sky-400/40 mt-0.5">Top reported issues by frequency</p>
           </div>
           <TrendingDown className="w-4 h-4 text-sky-400/30" />
         </div>
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={commonIssues} layout="vertical" margin={{ top: 0, right: 20, bottom: 0, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="issue" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} axisLine={false} tickLine={false} width={120} />
-              <Tooltip content={<CustomTooltip />} />
-              <defs>
-                <linearGradient id="skyBarGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#0EA5E9" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.6} />
-                </linearGradient>
-              </defs>
-              <Bar dataKey="count" name="Reports" fill="url(#skyBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={18} barSize={16} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {commonIssues.length > 0 ? (
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={commonIssues} layout="vertical" margin={{ top: 0, right: 20, bottom: 0, left: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
+                <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="issue" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} axisLine={false} tickLine={false} width={120} />
+                <Tooltip content={<CustomTooltip />} />
+                <defs>
+                  <linearGradient id="skyBarGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#0EA5E9" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.6} />
+                  </linearGradient>
+                </defs>
+                <Bar dataKey="count" name="Reports" fill="url(#skyBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={18} barSize={16} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <EmptyState icon={Inbox} title="No support issues yet" description="Common issues will be displayed here once tickets are categorized and tracked." />
+        )}
       </motion.div>
 
       {/* ── 4. Feature Requests ─────────────────────────────── */}
@@ -508,48 +637,52 @@ export function AdminSupport() {
           </div>
           <Headphones className="w-4 h-4 text-sky-400/30" />
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-sky-500/10">
-                <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Feature</th>
-                <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Votes</th>
-                <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Status</th>
-                <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Priority</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-sky-500/[0.05]">
-              {featureRequests.map((req) => (
-                <tr key={req.feature} className="group hover:bg-sky-500/[0.02] transition-colors">
-                  <td className="py-3 pr-4">
-                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">{req.feature}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-sky-500/60"
-                          style={{ width: `${(req.votes / maxVotes) * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-mono text-sky-400/60">{req.votes}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(req.status)}`}>
-                      {req.status}
-                    </span>
-                  </td>
-                  <td className="py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${getPriorityColor(req.priority)}`}>
-                      {req.priority}
-                    </span>
-                  </td>
+        {featureRequests.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-sky-500/10">
+                  <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Feature</th>
+                  <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Votes</th>
+                  <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Status</th>
+                  <th className="pb-3 text-xs font-medium text-sky-400/40 uppercase tracking-wider">Priority</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-sky-500/[0.05]">
+                {featureRequests.map((req) => (
+                  <tr key={req.feature} className="group hover:bg-sky-500/[0.02] transition-colors">
+                    <td className="py-3 pr-4">
+                      <span className="text-sm text-white/80 group-hover:text-white transition-colors">{req.feature}</span>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-sky-500/60"
+                            style={{ width: `${(req.votes / maxVotes) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-mono text-sky-400/60">{req.votes}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(req.status)}`}>
+                        {req.status}
+                      </span>
+                    </td>
+                    <td className="py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${getPriorityColor(req.priority)}`}>
+                        {req.priority}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState icon={Lightbulb} title="No feature requests yet" description="Feature requests from users will appear here once they start voting and submitting ideas." />
+        )}
       </motion.div>
 
       {/* ── 5. User Pain Points — Sky Blue Accents ───────────── */}
@@ -558,30 +691,36 @@ export function AdminSupport() {
           <h3 className="text-sm font-semibold text-white">User Pain Points</h3>
           <p className="text-xs text-sky-400/40 mt-0.5">Key drop-off and engagement issues</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {painPoints.map((point) => {
-            const Icon = point.icon
-            return (
-              <motion.div
-                key={point.title}
-                variants={itemVariants}
-                className="bg-[#0A0A14] border border-sky-500/10 rounded-xl p-5 relative overflow-hidden"
-              >
-                {/* Sky blue accent line */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-sky-500/60 via-blue-400/40 to-transparent" />
+        {painPoints.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {painPoints.map((point) => {
+              const Icon = getPainPointIcon(point.iconType)
+              return (
+                <motion.div
+                  key={point.title}
+                  variants={itemVariants}
+                  className="bg-[#0A0A14] border border-sky-500/10 rounded-xl p-5 relative overflow-hidden"
+                >
+                  {/* Sky blue accent line */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-sky-500/60 via-blue-400/40 to-transparent" />
 
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center">
-                    <Icon className="w-4.5 h-4.5 text-sky-400" />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                      <Icon className="w-4.5 h-4.5 text-sky-400" />
+                    </div>
+                    <span className="text-xl font-bold text-sky-400">{point.value}</span>
                   </div>
-                  <span className="text-xl font-bold text-sky-400">{point.value}</span>
-                </div>
-                <p className="text-sm font-medium text-white/80">{point.title}</p>
-                <p className="text-xs text-sky-400/40 mt-1">{point.description}</p>
-              </motion.div>
-            )
-          })}
-        </div>
+                  <p className="text-sm font-medium text-white/80">{point.title}</p>
+                  <p className="text-xs text-sky-400/40 mt-1">{point.description}</p>
+                </motion.div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="bg-[#0A0A14] border border-sky-500/10 rounded-xl p-5">
+            <EmptyState icon={AlertTriangle} title="No pain points identified yet" description="User drop-off and engagement issues will be displayed here once analytics data is collected." />
+          </div>
+        )}
       </motion.div>
 
       {/* ── 6. Support Resolution Metrics ───────────────────── */}
@@ -597,14 +736,27 @@ export function AdminSupport() {
               <p className="text-xs text-sky-400/40">Average time to first reply</p>
             </div>
           </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-white">12</span>
-            <span className="text-sm text-sky-400/50">min avg</span>
-          </div>
-          <div className="mt-3 flex items-center gap-1.5">
-            <ArrowDownRight className="w-3 h-3 text-emerald-400" />
-            <span className="text-xs text-emerald-400">2 min faster than last week</span>
-          </div>
+          {kpis.firstResponseMinutes > 0 ? (
+            <>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-white">{kpis.firstResponseMinutes}</span>
+                <span className="text-sm text-sky-400/50">min avg</span>
+              </div>
+              {kpis.weeklyDelta.firstResponseMinutes !== 0 && (
+                <div className="mt-3 flex items-center gap-1.5">
+                  <ArrowDownRight className={`w-3 h-3 ${kpis.weeklyDelta.firstResponseMinutes < 0 ? 'text-emerald-400' : 'text-red-400'}`} />
+                  <span className={`text-xs ${kpis.weeklyDelta.firstResponseMinutes < 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {Math.abs(kpis.weeklyDelta.firstResponseMinutes)} min {kpis.weeklyDelta.firstResponseMinutes < 0 ? 'faster' : 'slower'} than last week
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold text-white/15">—</span>
+              <span className="text-sm text-sky-400/20">min avg</span>
+            </div>
+          )}
         </div>
 
         {/* Resolution by Channel — Donut Chart */}
@@ -618,20 +770,25 @@ export function AdminSupport() {
               <p className="text-xs text-sky-400/40">Distribution of support channels</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <DonutChart data={resolutionChannels} />
-            <div className="space-y-2.5 flex-1">
-              {resolutionChannels.map((ch) => (
-                <div key={ch.channel} className="flex items-center gap-2">
-                  {ch.channel === 'In-App' && <Phone className="w-3 h-3 text-sky-400" />}
-                  {ch.channel === 'Email' && <Mail className="w-3 h-3 text-blue-400" />}
-                  {ch.channel === 'Social' && <Share2 className="w-3 h-3 text-sky-300" />}
-                  <span className="text-xs text-white/60 flex-1">{ch.channel}</span>
-                  <span className="text-xs font-mono" style={{ color: ch.color }}>{ch.percentage}%</span>
-                </div>
-              ))}
+          {resolutionChannels.length > 0 ? (
+            <div className="flex items-center gap-4">
+              <DonutChart data={resolutionChannels} />
+              <div className="space-y-2.5 flex-1">
+                {resolutionChannels.map((ch) => (
+                  <div key={ch.channel} className="flex items-center gap-2">
+                    {ch.channel === 'In-App' && <Phone className="w-3 h-3 text-sky-400" />}
+                    {ch.channel === 'Email' && <Mail className="w-3 h-3 text-blue-400" />}
+                    {ch.channel === 'Social' && <Share2 className="w-3 h-3 text-sky-300" />}
+                    {!['In-App', 'Email', 'Social'].includes(ch.channel) && <MessageSquare className="w-3 h-3 text-sky-400" />}
+                    <span className="text-xs text-white/60 flex-1">{ch.channel}</span>
+                    <span className="text-xs font-mono" style={{ color: ch.color }}>{ch.percentage}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <EmptyState icon={Share2} title="No channel data yet" description="Resolution channel distribution will appear once tickets are tracked by source." />
+          )}
         </div>
 
         {/* Top Support Agents — with ranking medals */}
@@ -645,30 +802,34 @@ export function AdminSupport() {
               <p className="text-xs text-sky-400/40">By tickets resolved this month</p>
             </div>
           </div>
-          <div className="space-y-3">
-            {topAgents.map((agent, idx) => (
-              <div key={agent.name} className="flex items-center gap-3">
-                <RankingMedal rank={idx} />
-                <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-[10px] font-medium text-white">
-                    {agent.avatar}
+          {topAgents.length > 0 ? (
+            <div className="space-y-3">
+              {topAgents.map((agent, idx) => (
+                <div key={agent.name} className="flex items-center gap-3">
+                  <RankingMedal rank={idx} />
+                  <div className="relative">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-[10px] font-medium text-white">
+                      {agent.avatar}
+                    </div>
+                    {/* Sky blue ring */}
+                    <div className="absolute -inset-[2px] rounded-full border-2 border-sky-400/30" />
                   </div>
-                  {/* Sky blue ring */}
-                  <div className="absolute -inset-[2px] rounded-full border-2 border-sky-400/30" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white/80 truncate">{agent.name}</p>
+                    <p className="text-xs text-sky-400/40">{agent.tickets} tickets</p>
+                  </div>
+                  <div className="w-16 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-sky-500/60"
+                      style={{ width: `${(agent.tickets / topAgents[0].tickets) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white/80 truncate">{agent.name}</p>
-                  <p className="text-xs text-sky-400/40">{agent.tickets} tickets</p>
-                </div>
-                <div className="w-16 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-sky-500/60"
-                    style={{ width: `${(agent.tickets / topAgents[0].tickets) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={UsersRound} title="No agent data yet" description="Top support agents will be ranked here once tickets are assigned and resolved." />
+          )}
         </div>
       </motion.div>
     </motion.div>

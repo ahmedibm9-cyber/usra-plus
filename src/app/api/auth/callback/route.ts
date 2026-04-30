@@ -6,11 +6,17 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    // Supabase not configured — redirect back without auth
+    return NextResponse.redirect(`${origin}${next}`)
+  }
+
   if (code) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
+    try {
+      const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
         cookies: {
           getAll() {
             return request.cookies.getAll()
@@ -21,33 +27,35 @@ export async function GET(request: NextRequest) {
             )
           },
         },
+      })
+
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      if (!error) {
+        const response = NextResponse.redirect(`${origin}${next}`)
+
+        // Set auth cookies
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          response.cookies.set('sb-access-token', session.access_token, {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+            sameSite: 'lax',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+          })
+          response.cookies.set('sb-refresh-token', session.refresh_token, {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+            sameSite: 'lax',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+          })
+        }
+
+        return response
       }
-    )
-    
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      const response = NextResponse.redirect(`${origin}${next}`)
-      
-      // Set auth cookies
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        response.cookies.set('sb-access-token', session.access_token, {
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-          sameSite: 'lax',
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-        })
-        response.cookies.set('sb-refresh-token', session.refresh_token, {
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-          sameSite: 'lax',
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-        })
-      }
-      
-      return response
+    } catch {
+      // Auth exchange failed — redirect back
     }
   }
 

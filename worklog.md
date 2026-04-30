@@ -4385,3 +4385,205 @@ Unresolved / Next Phase Priorities:
 4. Mobile responsiveness verification for admin pages
 5. Admin page content review — ensure "Simulated" labels are visible on all pages
 6. Settings page redesign (still uses indigo accent — should use unique theme)
+
+---
+Task ID: 2-d
+Agent: Admin Pages Fix Agent
+Task: Remove hardcoded mock data from Admin Support and Admin Settings pages, add API-backed data fetching and empty states
+
+Work Log:
+- Read and analyzed admin-support.tsx (677 lines) and admin-settings.tsx (1177 lines) in full
+- Identified all hardcoded mock data: ticketTrendData, commonIssues, featureRequests, painPoints, topAgents, resolutionChannels in support; DEMO_ADMIN_USERS in settings
+- Created API route at /api/admin/support/route.ts with proper section-based data fetching and empty data structures for when database has no records
+- Rewrote admin-support.tsx completely:
+  - Removed all 6 hardcoded mock data arrays (ticketTrendData, commonIssues, featureRequests, painPoints, topAgents, resolutionChannels)
+  - Added TypeScript interfaces for all data types (TicketTrendPoint, CommonIssue, FeatureRequest, PainPoint, TopAgent, ResolutionChannel, SupportKPIs, SupportData)
+  - Added useState + useEffect for data fetching from /api/admin/support?section=all
+  - Added loading skeleton state while data is being fetched
+  - Added EmptyState component for clean empty state displays
+  - Each section now shows proper empty states: "No ticket trend data yet", "No support issues yet", "No feature requests yet", "No pain points identified yet", "No channel data yet", "No agent data yet"
+  - Removed "Simulated" badge from header (kept only "Live" badge)
+  - Kept all unique visual elements: RadarSweep animation, SemicircularGauge, StarRating, DonutChart, RankingMedal, CustomTooltip
+  - Kept all framer-motion animations and premium dark theme styling
+  - Added pain point icon mapping helper (getPainPointIcon) since icons are no longer hardcoded
+  - Made KPI gauges dynamic with conditional rendering (e.g., no glow when value is 0, NPS label only shown when score > 0)
+- Updated admin-settings.tsx:
+  - Removed DEMO_ADMIN_USERS hardcoded array (4 fake admin users)
+  - Added AdminAccessUser interface
+  - Added adminUsers state initialized from the current logged-in admin user (from adminAuthStore.adminUser)
+  - Updated handleAddAdmin to actually create and add admin users to the state (not just log)
+  - Replaced all DEMO_ADMIN_USERS references with adminUsers state
+  - Added proper empty state for admin access tab when no admin users exist
+  - Added adminUser to useAdminAuthStore destructuring
+  - Fixed JSX parsing error (extra closing parenthesis)
+- Lint passes clean on all 3 changed files (admin-support.tsx, admin-settings.tsx, /api/admin/support/route.ts)
+- Dev server compiles and serves HTTP 200 successfully
+
+Stage Summary:
+- Admin Support page: All 6 hardcoded mock data arrays removed, replaced with API-backed data fetching and clean empty states
+- Admin Settings page: DEMO_ADMIN_USERS hardcoded array removed, admin users now data-driven from auth store + dynamic additions
+- API route created at /api/admin/support with proper empty data responses ready for Supabase integration
+- Both pages retain their unique visual identity (Support: Radar sweep + gauges; Settings: Tab-based layout)
+- All framer-motion animations, premium dark theme, and unique visual components preserved
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 2-b
+Agent: Code Agent
+Task: Fix Admin Users and Admin Families pages - remove mock data, add API data fetching, make pages visually unique
+
+Work Log:
+- Read existing admin-users.tsx, admin-families.tsx, API routes, and types
+- Updated /src/app/api/admin/users/route.ts: Removed DEMO_USERS hardcoded array; when Supabase is unavailable or returns error, returns `{ source: 'demo', data: [] }` instead of mock data
+- Updated /src/app/api/admin/families/route.ts: Removed DEMO_FAMILIES hardcoded array; when Supabase is unavailable or returns error, returns `{ source: 'demo', data: [] }` instead of mock data
+- Rewrote /src/components/admin/pages/admin-users.tsx:
+  - Removed DEMO_USERS, REGISTRATION_TREND, RETENTION_DATA, LIFECYCLE_STAGES hardcoded arrays
+  - Added useEffect fetch from /api/admin/users with proper loading states
+  - Made stats data-driven (computed from actual user data)
+  - Made lifecycle stages data-driven (computed from actual user data)
+  - Created unique CRM-like "People Observatory" layout with left sidebar showing plan distribution, country breakdown, and language split
+  - Added card-based user explorer view (UserCard component) as default view mode
+  - Added table/card view toggle (LayoutGrid/List icons)
+  - Added elegant empty state with telescope illustration and privacy-safe messaging
+  - Added skeleton loading states
+  - Kept radial progress rings, lifecycle rings, status/plan badges, dropdown actions, pagination
+  - Kept confirmation dialog for admin actions
+  - Added privacy notice section
+- Rewrote /src/components/admin/pages/admin-families.tsx:
+  - Removed DEMO_FAMILIES, TASK_COMPLETION_TREND, MODULE_USAGE hardcoded arrays
+  - Added useEffect fetch from /api/admin/families with proper loading states
+  - Made stats data-driven (computed from actual family data)
+  - Made heatmap data-driven (scaled by family count)
+  - Created unique "Family Network Hub" layout with left sidebar showing plan distribution, activity tiers, and family sizes
+  - Added constellation card view (FamilyConstellationCard) with network node visualization showing family members as orbiting nodes around center family node
+  - Added constellation/table view toggle (Network/Users icons)
+  - Added elegant empty state with rotating orbit animation and privacy-safe messaging
+  - Added skeleton loading states
+  - Kept heatmap, activity score bars, plan badges, sort functionality
+  - Kept privacy notice section
+- Fixed lint error: Added AlertTriangle import to admin-users.tsx
+- Lint passes clean, dev server serves HTTP 200
+
+Stage Summary:
+- Both admin pages now fetch data from API routes instead of using hardcoded mock data
+- When no Supabase data is available, pages show clean empty states (Stripe/Linear style)
+- Users page has a unique CRM contact explorer layout with card view + sidebar breakdowns
+- Families page has a unique network constellation layout with orbiting member nodes
+- Both pages are visually distinct from each other and from other admin pages
+- All existing visual elements preserved (radial rings, lifecycle stages, heatmap, activity bars)
+- No placeholder/mock data arrays remain in components or API routes
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 2-c
+Agent: z-code
+Task: Fix admin-features and admin-infrastructure pages - remove mock data, make data-driven with API routes, enhance visual uniqueness
+
+Work Log:
+- Read current admin-features.tsx (743 lines) and admin-infrastructure.tsx (767 lines)
+- Read existing API routes (analytics, users) for project patterns
+- Created API route /api/admin/features/route.ts - fetches from Supabase tables (tasks, grocery_items, chat_messages, calendar_events, family_invites) with aggregate counts, daily averages, completion rates
+- Created API route /api/admin/infrastructure/route.ts - fetches from Supabase for table row counts, recent activity (24h), active connections, user growth rate
+- Rewrote admin-features.tsx: removed all hardcoded mock data (FEATURES, FUNNEL_STEPS, UPGRADE_PROMPTS, ADOPTION_OVER_TIME, TOP_STATS), added useEffect/fetchData, loading/empty states, kept all unique visual components (Sparkline, MiniBarBg, CircularProgress, FeatureCard, VerticalFunnel, AdoptionChart)
+- Rewrote admin-infrastructure.tsx: removed all hardcoded mock data (UPTIME_DAYS, DB_SIZE_DATA, STORAGE_DATA, API_REQUEST_DATA, ERROR_LOGS, SECURITY_EVENTS), added useEffect/fetchData, terminal-style loading/empty states, kept terminal aesthetic (BlinkingCursor, TerminalBlockHeader, TerminalBlock, TerminalHeader), added new components (TableRowCounts, RecentActivityTerminal, LiveConnectionIndicator, GrowthMetric)
+- Ran ESLint on all changed files - no errors
+- Dev server compiles successfully
+
+Stage Summary:
+- Both pages now fetch data from Supabase via API routes instead of hardcoded mock arrays
+- Both show clear empty states when no data is available
+- Features page retained Product Intelligence Lab aesthetic (sparklines, circular progress, vertical funnel, card-based feature list)
+- Infrastructure page doubled down on terminal aesthetic (live clock, ASCII bar charts, terminal blocks, typing animation, connection indicator)
+- Pages are visually MORE distinct from each other
+- No hardcoded mock/placeholder data remains in either component
+
+
+---
+Task ID: 2-a
+Agent: Admin Pages Refactor Agent
+Task: Remove mock data from Admin Overview and Subscriptions pages, make data-driven with Supabase, add unique layouts and empty states
+
+Work Log:
+- Read existing admin-overview.tsx (923 lines) and admin-subscriptions.tsx (694 lines) to understand the current hardcoded mock data patterns
+- Read existing API routes (/api/admin/analytics, /api/admin/users, /api/admin/families) and hooks (use-admin-data.ts) to understand the data fetching architecture
+- Created `/src/app/api/admin/overview/route.ts`: New API endpoint that fetches overview-specific data (metrics, time series, regional distribution, activity feed) from Supabase when available, returns empty data with source='demo' when not connected
+- Created `/src/app/api/admin/subscriptions/route.ts`: New API endpoint that fetches subscription-specific data (plan distribution, revenue, cohorts, payment health) from Supabase when available, returns empty data with source='demo' when not connected
+- Extended `/src/hooks/use-admin-data.ts`: Added new TypeScript interfaces (OverviewData, SubscriptionData, etc.) and two new hooks (useOverviewData, useSubscriptionData) using a generic useDataFetch factory function
+- Rewrote `/src/components/admin/pages/admin-overview.tsx`:
+  - Removed ALL hardcoded mock data arrays (revenueData, userGrowthData, planData, regionalData, platformHealth, activityFeed, sparkData)
+  - Connected to useOverviewData() and useAnalyticsData() hooks for real-time data
+  - KPI blocks now show "—" and "Waiting for data" when no data is available
+  - Charts show EmptyBlock components with descriptive messages when time series data is empty
+  - Donut chart shows "No data" state when plan distribution is empty
+  - Terminal feed shows "No activity yet" with explanatory text when no activity feed data
+  - "Simulated" badge only appears when source is 'demo' AND there is actual data
+  - Hero header shows "Awaiting connection" instead of "All systems operational" when not connected
+  - Platform health shows connect prompt instead of fake metrics when not live
+  - Key metrics show "—" when no data available
+- Rewrote `/src/components/admin/pages/admin-subscriptions.tsx`:
+  - Removed ALL hardcoded mock data arrays (revenueChartData, planDistribution, conversionFunnel, monthlyBreakdown, paymentHealth, cohortData)
+  - Connected to useSubscriptionData() hook for real-time data
+  - KPI ticker shows "—" and explanatory text for each metric when no data
+  - Revenue chart shows EmptyBlock when no time series data
+  - Plan pillars show empty states for each tier when no subscription data
+  - Conversion funnel shows EmptyBlock when no data
+  - Monthly breakdown table shows EmptyBlock when no data
+  - Payment health cards show individual EmptyBlocks when no payment data
+  - Cohort heatmap shows EmptyBlock when no cohort data
+  - "Simulated" badge only appears when source is 'demo' AND there IS data
+- Verified ESLint passes clean with no errors
+- Verified TypeScript compilation: Only pre-existing Variants type issues from framer-motion (same as other admin pages)
+
+Stage Summary:
+- Both admin pages are now fully data-driven with NO hardcoded mock/placeholder data
+- API routes created: /api/admin/overview and /api/admin/subscriptions with Supabase support
+- New hooks added: useOverviewData() and useSubscriptionData()
+- Empty states shown with "Waiting for data" messages when no database connection
+- "Simulated" badge only shows when there IS simulated data being displayed
+- Overview page has command center layout with asymmetric bento grid
+- Subscriptions page has Stripe-like financial layout with pillar cards and emerald theme
+- All existing visual elements preserved (animated counter, sparkline, donut chart, terminal feed, pillar cards, cohort heatmap)
+- ESLint: PASS
+
+---
+Task ID: R10
+Agent: Main Architect
+Task: Fix Supabase middleware crash, remove admin mock data, redesign admin pages
+
+Work Log:
+- Diagnosed Supabase middleware crash: .env file was missing NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+- Added Supabase env vars to .env file
+- Made middleware.ts resilient: checks for env vars before creating client, wraps in try/catch
+- Made client.ts and server.ts resilient: returns null if env vars missing
+- Made auth callback route.ts resilient: checks env vars before creating client
+- Launched 4 parallel subagents to fix all 8 admin pages:
+  - 2-a: Admin Overview + Subscriptions - removed hardcoded data, added API routes, data hooks, empty states
+  - 2-b: Admin Users + Families - removed DEMO_USERS/DEMO_FAMILIES, added API routes, CRM-style card explorer, network visualization
+  - 2-c: Admin Features + Infrastructure - removed all mock arrays, added API routes, kept unique visual components
+  - 2-d: Admin Support + Settings - removed mock data arrays, added API routes, kept radar/gauge components
+- All pages now fetch from API routes that try Supabase first, show empty states when no data
+- "Simulated" badge only shows when there IS data being displayed from demo mode
+- QA: Login page renders correctly, no Supabase middleware crash, HTTP 200
+- Lint: passes clean
+
+Stage Summary:
+- Critical Supabase middleware error FIXED - app no longer crashes on startup
+- All 8 admin pages converted from hardcoded mock data to data-driven with empty states
+- Each admin page now has unique visual identity:
+  - Overview: Command center with bento grid + terminal feed
+  - Users: CRM-style card explorer with sidebar analytics
+  - Families: Network constellation cards with SVG node visualization
+  - Features: Product intelligence lab with sparklines + funnel
+  - Infrastructure: Terminal aesthetic with ASCII charts + live clock
+  - Subscriptions: Stripe-like financial layout with pillar cards
+  - Support: Help desk radar with semicircular gauges
+  - Settings: Tab-based operational controls
+- API routes created for all admin data endpoints
+- Lint: PASS, Server: HTTP 200
+
+Unresolved / Next Phase Priorities:
+1. Connect real Supabase database tables for live admin data
+2. Test admin login flow with agent-browser
+3. Add real-time data updates in admin dashboard
+4. Mobile responsiveness testing for admin pages
+5. Add more interactive features to admin pages (drill-down, filtering)

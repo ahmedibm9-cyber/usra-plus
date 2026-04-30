@@ -22,13 +22,15 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import type { FeatureFlag, PlanConfig, Announcement, AdminRole } from '@/types/admin'
 
-// ─── Demo Admin Users for Admin Access Tab ─────────────────────
-const DEMO_ADMIN_USERS = [
-  { id: 'admin-admin', name: 'USRA Founder', email: 'admin@usraplus.com', role: 'super_admin' as AdminRole, lastLogin: new Date().toISOString(), status: 'online' as const },
-  { id: 'admin-support', name: 'Support Admin', email: 'support@usraplus.com', role: 'support_admin' as AdminRole, lastLogin: new Date(Date.now() - 3600000).toISOString(), status: 'online' as const },
-  { id: 'admin-analytics', name: 'Analytics Admin', email: 'analytics@usraplus.com', role: 'analytics_admin' as AdminRole, lastLogin: new Date(Date.now() - 86400000).toISOString(), status: 'offline' as const },
-  { id: 'admin-billing', name: 'Billing Admin', email: 'billing@usraplus.com', role: 'billing_admin' as AdminRole, lastLogin: new Date(Date.now() - 172800000).toISOString(), status: 'offline' as const },
-]
+// Admin user type for the Admin Access tab
+interface AdminAccessUser {
+  id: string
+  name: string
+  email: string
+  role: AdminRole
+  lastLogin: string
+  status: 'online' | 'offline'
+}
 
 // ─── Helpers ───────────────────────────────────────────────────
 function formatDate(dateStr: string) {
@@ -100,7 +102,7 @@ function SettingsCard({ children, className = '' }: { children: React.ReactNode;
 // ─── Main Component ────────────────────────────────────────────
 export function AdminSettings() {
   const { featureFlags, planConfigs, announcements, toggleFeatureFlag, setPlanConfigs, addAnnouncement, setAnnouncements } = useAdminStore()
-  const { adminRole, adminLogs, addAuditLog } = useAdminAuthStore()
+  const { adminRole, adminUser, adminLogs, addAuditLog } = useAdminAuthStore()
   const { toast } = useToast()
 
   // Feature Flag state
@@ -126,7 +128,20 @@ export function AdminSettings() {
   const [logSearch, setLogSearch] = useState('')
   const [logFilter, setLogFilter] = useState<'all' | 'login' | 'changes' | 'security'>('all')
 
-  // Admin access state
+  // Admin access state — initialized with the current logged-in admin
+  const [adminUsers, setAdminUsers] = useState<AdminAccessUser[]>(() => {
+    if (adminUser) {
+      return [{
+        id: adminUser.id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+        lastLogin: adminUser.last_login ?? new Date().toISOString(),
+        status: 'online' as const,
+      }]
+    }
+    return []
+  })
   const [addAdminOpen, setAddAdminOpen] = useState(false)
   const [newAdmin, setNewAdmin] = useState({ name: '', email: '', role: 'support_admin' as AdminRole })
 
@@ -299,8 +314,17 @@ export function AdminSettings() {
       toast({ title: 'Validation error', description: 'Name and email are required', variant: 'destructive' })
       return
     }
-    addAuditLog('admin_user_added', 'admin_user', null, { email: newAdmin.email, role: newAdmin.role })
-    toast({ title: 'Admin user added', description: `${newAdmin.name} (${newAdmin.role}) has been added` })
+    const newAdminUser: AdminAccessUser = {
+      id: `admin-${Date.now()}`,
+      name: newAdmin.name.trim(),
+      email: newAdmin.email.trim(),
+      role: newAdmin.role,
+      lastLogin: new Date().toISOString(),
+      status: 'offline' as const,
+    }
+    setAdminUsers(prev => [...prev, newAdminUser])
+    addAuditLog('admin_user_added', 'admin_user', newAdminUser.id, { email: newAdminUser.email, role: newAdminUser.role })
+    toast({ title: 'Admin user added', description: `${newAdminUser.name} (${getRoleLabel(newAdminUser.role)}) has been added` })
     setAddAdminOpen(false)
     setNewAdmin({ name: '', email: '', role: 'support_admin' })
   }, [newAdmin, addAuditLog, toast])
@@ -834,7 +858,7 @@ export function AdminSettings() {
           <TabsContent value="admin-access">
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-white/50 text-sm">{DEMO_ADMIN_USERS.length} admin users</p>
+                <p className="text-white/50 text-sm">{adminUsers.length} admin user{adminUsers.length !== 1 ? 's' : ''}</p>
                 <Button
                   onClick={() => setAddAdminOpen(true)}
                   className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 hover:text-indigo-300"
@@ -855,7 +879,7 @@ export function AdminSettings() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {DEMO_ADMIN_USERS.map((admin, i) => (
+                    {adminUsers.map((admin, i) => (
                       <motion.tr
                         key={admin.id}
                         initial={{ opacity: 0, y: 4 }}
@@ -889,6 +913,17 @@ export function AdminSettings() {
                         </TableCell>
                       </motion.tr>
                     ))}
+                    {adminUsers.length === 0 && (
+                      <TableRow className="border-white/[0.04]">
+                        <TableCell colSpan={5} className="text-center py-8 text-white/30">
+                          <div className="flex flex-col items-center gap-2">
+                            <Shield className="w-8 h-8 text-white/10" />
+                            <span>No admin users on record</span>
+                            <span className="text-white/15 text-xs">Add an admin user to get started</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </SettingsCard>
