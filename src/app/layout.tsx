@@ -45,9 +45,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="en" dir="ltr" className="dark" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/logo.svg" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('usra-theme');if(t==='light'){document.documentElement.classList.add('light');document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark');document.documentElement.classList.remove('light')}}catch(e){document.documentElement.classList.add('dark')}})()`,
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${tajawal.variable} antialiased bg-background text-foreground`}>
         {children}
@@ -55,9 +60,9 @@ export default function RootLayout({
           position="bottom-right"
           toastOptions={{
             style: {
-              background: "#111117",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "#E5E7EB",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-primary)",
             },
           }}
         />

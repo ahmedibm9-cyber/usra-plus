@@ -48,9 +48,80 @@
   --color-usra-accent: var(--usra-accent);
   --color-usra-text: var(--usra-text);
   --color-usra-muted: var(--usra-muted);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-2: var(--bg-surface-2);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-medium: var(--border-medium);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
 }
 
-:root {
+/* ─── Light Theme (default for .light) ─────────────────────────── */
+.light {
+  --radius: 0.75rem;
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.15 0.02 260);
+  --card: oklch(0.975 0.002 260);
+  --card-foreground: oklch(0.15 0.02 260);
+  --popover: oklch(0.975 0.002 260);
+  --popover-foreground: oklch(0.15 0.02 260);
+  --primary: oklch(0.55 0.22 270);
+  --primary-foreground: oklch(0.98 0.005 270);
+  --secondary: oklch(0.94 0.01 260);
+  --secondary-foreground: oklch(0.2 0.02 260);
+  --muted: oklch(0.93 0.005 260);
+  --muted-foreground: oklch(0.45 0.02 260);
+  --accent: oklch(0.55 0.18 280);
+  --accent-foreground: oklch(0.98 0.005 270);
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(0 0 0 / 8%);
+  --input: oklch(0 0 0 / 12%);
+  --ring: oklch(0.55 0.22 270);
+  --chart-1: oklch(0.55 0.22 270);
+  --chart-2: oklch(0.65 0.18 160);
+  --chart-3: oklch(0.65 0.2 45);
+  --chart-4: oklch(0.55 0.2 310);
+  --chart-5: oklch(0.65 0.2 20);
+  --sidebar: oklch(0.975 0.002 260);
+  --sidebar-foreground: oklch(0.15 0.02 260);
+  --sidebar-primary: oklch(0.55 0.22 270);
+  --sidebar-primary-foreground: oklch(0.98 0.005 270);
+  --sidebar-accent: oklch(0.92 0.01 270);
+  --sidebar-accent-foreground: oklch(0.15 0.02 260);
+  --sidebar-border: oklch(0 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.22 270);
+
+  /* USRA PLUS Theme Tokens - Light */
+  --usra-bg: #FFFFFF;
+  --usra-surface: #F8F9FA;
+  --usra-primary: #6366F1;
+  --usra-accent: #A78BFA;
+  --usra-text: #1A1A2E;
+  --usra-muted: #6B7280;
+
+  /* Extended Theme Variables - Light */
+  --bg-primary: #FFFFFF;
+  --bg-surface: #F8F9FA;
+  --bg-surface-2: #E9ECEF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border-subtle: rgba(0,0,0,0.08);
+  --border-medium: rgba(0,0,0,0.12);
+  --accent-primary: #6366F1;
+  --accent-secondary: #A78BFA;
+  --glass-bg: rgba(255,255,255,0.8);
+  --glass-border: rgba(0,0,0,0.06);
+}
+
+/* ─── Dark Theme (default) ─────────────────────────────────────── */
+.dark {
   --radius: 0.75rem;
   --background: oklch(0.044 0.017 285);
   --foreground: oklch(0.93 0.01 260);
@@ -83,12 +154,28 @@
   --sidebar-accent-foreground: oklch(0.93 0.01 260);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.55 0.22 270);
+
+  /* USRA PLUS Theme Tokens - Dark */
   --usra-bg: #0B0B0F;
   --usra-surface: #111117;
   --usra-primary: #6366F1;
   --usra-accent: #A78BFA;
   --usra-text: #E5E7EB;
   --usra-muted: #6B7280;
+
+  /* Extended Theme Variables - Dark */
+  --bg-primary: #0B0B0F;
+  --bg-surface: #111117;
+  --bg-surface-2: #1A1A22;
+  --text-primary: #E5E7EB;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+  --border-subtle: rgba(255,255,255,0.08);
+  --border-medium: rgba(255,255,255,0.12);
+  --accent-primary: #6366F1;
+  --accent-secondary: #A78BFA;
+  --glass-bg: rgba(17,17,23,0.8);
+  --glass-border: rgba(255,255,255,0.08);
 }
 
 @layer base {
@@ -98,13 +185,14 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Tajawal', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
   html[dir="rtl"] body {
     font-family: 'Tajawal', 'Inter', sans-serif;
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - theme-aware */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -113,26 +201,26 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(1 0 0 / 15%);
+  background: var(--border-medium);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(1 0 0 / 25%);
+  background: var(--accent-primary);
 }
 
-/* Glass morphism */
+/* Glass morphism - uses CSS variables for theme support */
 .glass {
-  background: oklch(1 0 0 / 5%);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid oklch(1 0 0 / 8%);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-strong {
-  background: oklch(1 0 0 / 8%);
+  background: var(--glass-bg);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1px solid oklch(1 0 0 / 12%);
+  border: 1px solid var(--border-medium);
 }
 
 /* Premium animations */
@@ -202,7 +290,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 4%), transparent);
+  background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -314,8 +402,8 @@ html[dir="rtl"] .sidebar-collapse-icon {
 }
 
 .auth-input-wrapper:focus-within {
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3), 0 0 12px -2px rgba(99, 102, 241, 0.15);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-primary) 30%, transparent), 0 0 12px -2px color-mix(in srgb, var(--accent-primary) 15%, transparent);
 }
 
 /* Demo mode button pulse on hover */
@@ -426,7 +514,7 @@ html[dir="rtl"] .sidebar-collapse-icon {
   animation: online-pulse 2s ease-in-out infinite;
 }
 
-/* Bottom nav ripple effect (CSS fallback) */
+/* Bottom nav ripple effect (CSS fallback) - theme-aware */
 @keyframes ripple-expand {
   0% {
     transform: scale(0);
@@ -441,7 +529,7 @@ html[dir="rtl"] .sidebar-collapse-icon {
 .bottom-nav-ripple {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--border-medium);
   pointer-events: none;
   animation: ripple-expand 0.5s ease-out forwards;
 }
@@ -460,7 +548,7 @@ html[dir="rtl"] .sidebar-collapse-icon {
   animation: dot-glow 2s ease-in-out infinite;
 }
 
-/* Button ripple effect */
+/* Button ripple effect - theme-aware */
 .btn-ripple {
   position: relative;
   overflow: hidden;
@@ -469,11 +557,27 @@ html[dir="rtl"] .sidebar-collapse-icon {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), var(--border-medium) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.5s;
 }
 .btn-ripple:active::after {
   opacity: 1;
   transition: opacity 0s;
+}
+
+/* ─── Theme Toggle Animation ─────────────────────────────────── */
+@keyframes theme-icon-enter {
+  from {
+    transform: rotate(-90deg) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.theme-icon-animate {
+  animation: theme-icon-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }

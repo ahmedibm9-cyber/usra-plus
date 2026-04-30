@@ -1,7 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
-import type { AppPage, Family, FamilyMember } from '@/types'
+import type { AppPage, Family, FamilyMember, Theme } from '@/types'
 
 interface AppState {
   currentPage: AppPage
@@ -16,6 +16,7 @@ interface AppState {
   showJoinFamily: boolean
   familyAvatar: string
   familyColor: string
+  theme: Theme
   setCurrentPage: (page: AppPage) => void
   setSidebarOpen: (open: boolean) => void
   setSidebarCollapsed: (collapsed: boolean) => void
@@ -28,7 +29,31 @@ interface AppState {
   setShowJoinFamily: (show: boolean) => void
   setFamilyAvatar: (avatar: string) => void
   setFamilyColor: (color: string) => void
+  setTheme: (theme: Theme) => void
   toggleSidebar: () => void
+}
+
+function applyThemeToDOM(theme: Theme) {
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+  if (theme === 'dark') {
+    root.classList.add('dark')
+    root.classList.remove('light')
+  } else {
+    root.classList.add('light')
+    root.classList.remove('dark')
+  }
+}
+
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'dark'
+  try {
+    const stored = localStorage.getItem('usra-theme')
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch {
+    // localStorage not available
+  }
+  return 'dark'
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -44,6 +69,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   showJoinFamily: false,
   familyAvatar: '🏠',
   familyColor: 'indigo',
+  theme: getInitialTheme(),
   setCurrentPage: (page) => set({ currentPage: page }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
@@ -56,5 +82,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   setShowJoinFamily: (show) => set({ showJoinFamily: show }),
   setFamilyAvatar: (avatar) => set({ familyAvatar: avatar }),
   setFamilyColor: (color) => set({ familyColor: color }),
+  setTheme: (theme) => {
+    set({ theme })
+    applyThemeToDOM(theme)
+    try {
+      localStorage.setItem('usra-theme', theme)
+    } catch {
+      // localStorage not available
+    }
+  },
   toggleSidebar: () => set({ sidebarCollapsed: !get().sidebarCollapsed }),
 }))
+
+// Initialize theme on load
+if (typeof window !== 'undefined') {
+  const initialTheme = getInitialTheme()
+  applyThemeToDOM(initialTheme)
+}

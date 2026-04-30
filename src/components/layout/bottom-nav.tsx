@@ -120,8 +120,8 @@ export function BottomNav() {
     <nav
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
-        border-t border-white/[0.05]
-        bg-[#0B0B0F]/90
+        border-t border-[--border-subtle]
+        bg-[--bg-primary]/90
         pb-[max(env(safe-area-inset-bottom),8px)]
       "
       style={{
@@ -133,7 +133,7 @@ export function BottomNav() {
       <div
         className="absolute top-0 left-0 right-0 h-px"
         style={{
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--border-medium), transparent)',
         }}
       />
 
@@ -153,7 +153,7 @@ export function BottomNav() {
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
                 transition-colors duration-200 overflow-hidden
-                ${isActive ? 'text-white' : 'text-gray-500 active:text-gray-300'}
+                ${isActive ? 'text-[--text-primary]' : 'text-[--text-muted] active:text-[--text-secondary]'}
               `}
             >
               {/* Ripple effect */}
@@ -165,7 +165,7 @@ export function BottomNav() {
               {isActive && (
                 <motion.div
                   layoutId="bottom-nav-active"
-                  className="absolute inset-0 rounded-xl bg-white/[0.08]"
+                  className="absolute inset-0 rounded-xl bg-[--bg-surface-2]"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -210,7 +210,7 @@ export function BottomNav() {
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
                 transition-colors duration-200 overflow-hidden
-                ${isMoreItemActive ? 'text-white' : 'text-gray-500 active:text-gray-300'}
+                ${isMoreItemActive ? 'text-[--text-primary]' : 'text-[--text-muted] active:text-[--text-secondary]'}
               `}
             >
               {/* Ripple effect */}
@@ -221,7 +221,7 @@ export function BottomNav() {
               {isMoreItemActive && (
                 <motion.div
                   layoutId="bottom-nav-active"
-                  className="absolute inset-0 rounded-xl bg-white/[0.08]"
+                  className="absolute inset-0 rounded-xl bg-[--bg-surface-2]"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -256,7 +256,7 @@ export function BottomNav() {
           </SheetTrigger>
           <SheetContent
             side="bottom"
-            className="bg-[#111117]/95 border-t border-white/[0.08] rounded-t-2xl px-0 pt-0 pb-[max(env(safe-area-inset-bottom),16px)]"
+            className="bg-[--bg-surface]/95 border-t border-[--border-subtle] rounded-t-2xl px-0 pt-0 pb-[max(env(safe-area-inset-bottom),16px)]"
             style={{
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
@@ -268,21 +268,21 @@ export function BottomNav() {
 
             {/* Drag handle */}
             <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+              <div className="w-10 h-1 rounded-full bg-[--border-medium]" />
             </div>
 
             {/* Header */}
             <div className="flex items-center gap-2 px-5 pt-2 pb-3">
-              <div className="flex items-center justify-center size-7 rounded-lg bg-white/[0.06]">
+              <div className="flex items-center justify-center size-7 rounded-lg bg-[--bg-surface-2]">
                 <MoreHorizontal className="size-4 text-indigo-400" />
               </div>
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-[--text-primary]">
                 {isRTL ? 'المزيد' : 'More'}
               </h3>
             </div>
 
             {/* Divider */}
-            <div className="h-px mx-5 bg-white/[0.06]" />
+            <div className="h-px mx-5 bg-[--border-subtle]" />
 
             {/* Navigation items */}
             <div className="flex flex-col gap-1 px-3 py-2">
@@ -304,14 +304,14 @@ export function BottomNav() {
                       text-sm font-medium transition-all duration-200
                       ${
                         isActive
-                          ? 'bg-indigo-500/10 text-white border border-indigo-500/20'
-                          : 'text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 active:bg-white/[0.08] border border-transparent'
+                          ? 'bg-[--accent-primary]/10 text-[--text-primary] border border-[--accent-primary]/20'
+                          : 'text-[--text-muted] hover:bg-[--bg-surface-2] hover:text-[--text-secondary] active:bg-[--bg-surface-2] border border-transparent'
                       }
                     `}
                   >
                     <div className={`
                       flex items-center justify-center size-9 rounded-lg transition-colors duration-200
-                      ${isActive ? 'bg-indigo-500/15' : 'bg-white/[0.04]'}
+                      ${isActive ? 'bg-[--accent-primary]/15' : 'bg-[--bg-surface-2]/50'}
                     `}>
                       <Icon
                         className={`size-5 transition-colors duration-200 ${
@@ -321,7 +321,7 @@ export function BottomNav() {
                     </div>
                     <span className="flex-1 text-left">{label}</span>
                     {isActive && (
-                      <div className="size-2 rounded-full bg-indigo-400" style={{ boxShadow: '0 0 6px rgba(99,102,241,0.5)' }} />
+                      <div className="size-2 rounded-full bg-[--accent-primary]" style={{ boxShadow: '0 0 6px var(--accent-primary)' }} />
                     )}
                   </motion.button>
                 )

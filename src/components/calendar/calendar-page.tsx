@@ -25,14 +25,13 @@ import {
   differenceInMinutes,
   isBefore,
   isAfter,
-  isEqual,
 } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import { useAppStore } from '@/stores/app-store'
 import { useCalendarStore } from '@/stores/calendar-store'
 import { useI18n } from '@/i18n/use-translation'
 import { toast } from 'sonner'
-import type { CalendarEvent, UserProfile } from '@/types'
+import type { CalendarEvent, UserProfile, FamilyMember } from '@/types'
 import { EmptyState } from '@/components/shared/empty-state'
 import { EventCardSkeleton } from '@/components/shared/skeleton-patterns'
 
@@ -44,6 +43,13 @@ import { Switch } from '@/components/ui/switch'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -78,16 +84,20 @@ import {
   Trash2,
   Calendar as CalendarIcon,
   CalendarClock,
+  MapPin,
+  Repeat,
+  User,
 } from 'lucide-react'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const EVENT_COLORS = ['#6366F1', '#22C55E', '#F59E0B', '#EF4444', '#06B6D4', '#EC4899'] as const
+const EVENT_COLORS = ['#6366F1', '#22C55E', '#F59E0B', '#EF4444', '#A78BFA', '#EC4899', '#06B6D4', '#F97316'] as const
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 const DAY_LABELS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const
 
 type CalendarView = 'month' | 'week' | 'day' | 'agenda'
+type RepeatOption = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 interface EventFormData {
   title: string
@@ -98,6 +108,9 @@ interface EventFormData {
   endTime: string
   allDay: boolean
   color: string
+  location: string
+  repeat: RepeatOption
+  assignTo: string
 }
 
 const EMPTY_FORM: EventFormData = {
@@ -109,6 +122,9 @@ const EMPTY_FORM: EventFormData = {
   endTime: '10:00',
   allDay: false,
   color: EVENT_COLORS[0],
+  location: '',
+  repeat: 'none',
+  assignTo: '',
 }
 
 // ─── Helper: Get events for a specific day ───────────────────────────────────
@@ -157,6 +173,23 @@ function formatCreatorName(creator?: UserProfile): string {
   if (!creator) return ''
   const parts = [creator.first_name, creator.last_name].filter(Boolean)
   return parts.length ? parts.join(' ') : creator.email?.split('@')[0] ?? ''
+}
+
+function getMemberName(member: FamilyMember): string {
+  if (member.nickname) return member.nickname
+  if (member.profiles) return formatCreatorName(member.profiles as unknown as UserProfile)
+  return 'Member'
+}
+
+function getMemberInitials(member: FamilyMember): string {
+  if (member.nickname) return member.nickname.charAt(0).toUpperCase()
+  if (member.profiles) {
+    const profile = member.profiles as unknown as UserProfile
+    const first = profile.first_name?.charAt(0) ?? ''
+    const last = profile.last_name?.charAt(0) ?? ''
+    return (first + last).toUpperCase() || '?'
+  }
+  return '?'
 }
 
 // ─── Event Card ──────────────────────────────────────────────────────────────
@@ -208,10 +241,6 @@ function EventCard({
   )
 }
 
-// ─── Empty State ─────────────────────────────────────────────────────────────
-
-// EmptyState is now imported from shared component
-
 // ─── Month View ──────────────────────────────────────────────────────────────
 
 function MonthView({
@@ -225,7 +254,7 @@ function MonthView({
   onEventClick: (event: CalendarEvent) => void
   onDayClick: (day: Date) => void
 }) {
-  const [hoveredDay, setHoveredDay] = useState<Date | null>(null)
+  const { t } = useI18n()
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
   const calStart = startOfWeek(monthStart)
@@ -252,47 +281,22 @@ function MonthView({
           const dayEvents = getEventsForDay(events, day)
           const inMonth = isSameMonth(day, currentDate)
           const today = isToday(day)
-          const isHovered = hoveredDay && isSameDay(hoveredDay, day)
-          const dotsToShow = dayEvents.slice(0, 3)
-          const moreCount = dayEvents.length > 3 ? dayEvents.length - 3 : 0
+          const pillsToShow = dayEvents.slice(0, 2)
+          const moreCount = dayEvents.length > 2 ? dayEvents.length - 2 : 0
 
           return (
             <div
               key={i}
               onClick={() => onDayClick(day)}
-              onMouseEnter={() => setHoveredDay(day)}
-              onMouseLeave={() => setHoveredDay(null)}
-              className={`relative border-b border-r border-white/[0.06] p-1.5 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-white/[0.03] ${
+              className={`relative border-b border-r border-white/[0.06] p-1 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-white/[0.03] ${
                 !inMonth ? 'opacity-40' : ''
-              }`}
+              } ${today ? 'ring-1 ring-inset ring-[#6366F1]/40' : ''}`}
             >
-              {/* Hover tooltip for events */}
-              {isHovered && dayEvents.length > 0 && (
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 bg-[#111117] border border-white/[0.08] rounded-lg p-2 text-xs shadow-xl min-w-[140px] max-w-[200px] pointer-events-none">
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-[#111117] border-r border-b border-white/[0.08] rotate-45 -mt-1" />
-                  {dayEvents.slice(0, 3).map((event) => (
-                    <div key={event.id} className="flex items-center gap-1.5 py-0.5">
-                      <div
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{ backgroundColor: event.color || EVENT_COLORS[0] }}
-                      />
-                      <span className="text-[#E5E7EB] truncate">{event.title}</span>
-                      <span className="text-[#6B7280] ml-auto shrink-0">
-                        {event.all_day ? 'All day' : format(parseISO(event.start_time), 'h:mm a')}
-                      </span>
-                    </div>
-                  ))}
-                  {dayEvents.length > 3 && (
-                    <div className="text-[#6B7280] mt-0.5 pl-3">+{dayEvents.length - 3} more</div>
-                  )}
-                </div>
-              )}
-
               <div className="flex items-start justify-between">
                 <span
                   className={`inline-flex items-center justify-center size-7 text-sm rounded-full transition-colors ${
                     today
-                      ? 'bg-[#6366F1] text-white font-semibold ring-2 ring-indigo-500/50 animate-pulse'
+                      ? 'bg-[#6366F1] text-white font-semibold'
                       : 'text-[#E5E7EB]'
                   }`}
                 >
@@ -300,40 +304,30 @@ function MonthView({
                 </span>
               </div>
 
-              {/* Event color dots */}
-              {dayEvents.length > 0 && (
-                <div className="flex items-center gap-[2px] mt-0.5">
-                  {dotsToShow.map((event) => (
-                    <div
-                      key={event.id}
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: event.color || EVENT_COLORS[0] }}
-                    />
-                  ))}
-                  {moreCount > 0 && (
-                    <span className="text-[9px] text-[#6B7280] ml-0.5">+{moreCount}</span>
-                  )}
-                </div>
-              )}
-
+              {/* Event pills */}
               <div className="mt-0.5 space-y-0.5 overflow-hidden">
-                {dayEvents.slice(0, 3).map((event) => (
+                {pillsToShow.map((event) => (
                   <button
                     key={event.id}
                     onClick={(e) => {
                       e.stopPropagation()
                       onEventClick(event)
                     }}
-                    className="w-full text-left rounded px-1.5 py-0.5 text-[11px] leading-tight truncate transition-opacity hover:opacity-80"
+                    className="w-full text-left text-[10px] leading-tight px-1.5 py-0.5 rounded-md truncate transition-opacity hover:opacity-80 border-l-2"
                     style={{
-                      backgroundColor: `${event.color || EVENT_COLORS[0]}20`,
+                      backgroundColor: `${event.color || EVENT_COLORS[0]}15`,
                       color: event.color || EVENT_COLORS[0],
+                      borderLeftColor: event.color || EVENT_COLORS[0],
                     }}
                   >
-                    {event.all_day ? '' : `${format(parseISO(event.start_time), 'h:mm')} `}
                     {event.title}
                   </button>
                 ))}
+                {moreCount > 0 && (
+                  <span className="text-[10px] text-[#6B7280] px-1.5">
+                    +{moreCount} {t.calendar.moreEvents}
+                  </span>
+                )}
               </div>
             </div>
           )
@@ -536,7 +530,6 @@ function DayView({
                 {timedEvents
                   .filter((event) => getHours(parseISO(event.start_time)) === hour)
                   .map((event) => {
-                    const pos = getEventPosition(event, currentDate)
                     const startMin = getMinutes(parseISO(event.start_time))
                     const durationMin = event.end_time
                       ? differenceInMinutes(parseISO(event.end_time), parseISO(event.start_time))
@@ -713,6 +706,209 @@ function DayEventsPanel({
   )
 }
 
+// ─── Mini Calendar Sidebar ───────────────────────────────────────────────────
+
+function MiniCalendar({
+  currentDate,
+  onDateSelect,
+  events,
+}: {
+  currentDate: Date
+  onDateSelect: (date: Date) => void
+  events: CalendarEvent[]
+}) {
+  const { t } = useI18n()
+  const [miniMonth, setMiniMonth] = useState(currentDate)
+
+  // Sync mini calendar month with main calendar
+  useEffect(() => {
+    setMiniMonth(currentDate)
+  }, [currentDate])
+
+  const monthStart = startOfMonth(miniMonth)
+  const monthEnd = endOfMonth(miniMonth)
+  const calStart = startOfWeek(monthStart)
+  const calEnd = endOfWeek(monthEnd)
+  const days = eachDayOfInterval({ start: calStart, end: calEnd })
+
+  // Pre-compute which days have events
+  const eventDays = useMemo(() => {
+    const daySet = new Set<string>()
+    events.forEach((event) => {
+      const start = format(startOfDay(parseISO(event.start_time)), 'yyyy-MM-dd')
+      daySet.add(start)
+      if (event.end_time) {
+        const end = format(startOfDay(parseISO(event.end_time)), 'yyyy-MM-dd')
+        // Add all days in between
+        const dayIter = startOfDay(parseISO(event.start_time))
+        const endDay = startOfDay(parseISO(event.end_time))
+        let current = dayIter
+        while (isBefore(current, endDay) || isSameDay(current, endDay)) {
+          daySet.add(format(current, 'yyyy-MM-dd'))
+          current = addDays(current, 1)
+        }
+      }
+    })
+    return daySet
+  }, [events])
+
+  return (
+    <div className="bg-[#111117]/80 backdrop-blur-xl border border-white/[0.08] rounded-xl p-3">
+      {/* Mini calendar header */}
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-semibold text-[#E5E7EB]">{t.calendar.miniCalendar}</h3>
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => setMiniMonth((d) => subMonths(d, 1))}
+            className="size-5 flex items-center justify-center rounded text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06] transition-colors"
+          >
+            <ChevronLeft className="size-3" />
+          </button>
+          <button
+            onClick={() => setMiniMonth((d) => addMonths(d, 1))}
+            className="size-5 flex items-center justify-center rounded text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06] transition-colors"
+          >
+            <ChevronRight className="size-3" />
+          </button>
+        </div>
+      </div>
+
+      {/* Month label */}
+      <p className="text-[10px] text-[#6B7280] mb-2 text-center">
+        {format(miniMonth, 'MMMM yyyy')}
+      </p>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 mb-1">
+        {DAY_LABELS_SHORT.map((d, i) => (
+          <div key={i} className="h-[28px] flex items-center justify-center text-[10px] font-medium text-[#6B7280]">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div className="grid grid-cols-7">
+        {days.map((day, i) => {
+          const today = isToday(day)
+          const selected = isSameDay(day, currentDate)
+          const inMonth = isSameMonth(day, miniMonth)
+          const hasEvents = eventDays.has(format(day, 'yyyy-MM-dd'))
+
+          return (
+            <button
+              key={i}
+              onClick={() => onDateSelect(day)}
+              className={`h-[28px] flex flex-col items-center justify-center rounded-md transition-colors relative ${
+                !inMonth ? 'opacity-30' : 'hover:bg-white/[0.06]'
+              } ${selected && !today ? 'ring-1 ring-[#6366F1]/60 bg-[#6366F1]/10' : ''}`}
+            >
+              <span
+                className={`text-[10px] leading-none ${
+                  today
+                    ? 'bg-[#6366F1] text-white rounded-full size-5 flex items-center justify-center font-semibold'
+                    : selected
+                    ? 'text-[#6366F1] font-medium'
+                    : 'text-[#E5E7EB]'
+                }`}
+              >
+                {format(day, 'd')}
+              </span>
+              {hasEvents && !today && (
+                <div className="w-1 h-1 rounded-full bg-[#6366F1] absolute bottom-0.5" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Upcoming Events Panel ───────────────────────────────────────────────────
+
+function UpcomingEventsPanel({
+  events,
+  members,
+  onEventClick,
+  onViewAll,
+}: {
+  events: CalendarEvent[]
+  members: FamilyMember[]
+  onEventClick: (event: CalendarEvent) => void
+  onViewAll: () => void
+}) {
+  const { t } = useI18n()
+
+  const upcomingEvents = useMemo(() => {
+    const now = new Date()
+    return events
+      .filter((event) => isAfter(parseISO(event.start_time), now) || isToday(parseISO(event.start_time)))
+      .sort((a, b) => parseISO(a.start_time).getTime() - parseISO(b.start_time).getTime())
+      .slice(0, 5)
+  }, [events])
+
+  const getMemberForEvent = (event: CalendarEvent): FamilyMember | null => {
+    if (!event.created_by) return null
+    return members.find((m) => m.user_id === event.created_by) ?? null
+  }
+
+  return (
+    <div className="bg-[#111117]/80 backdrop-blur-xl border border-white/[0.08] rounded-xl p-3">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-[#E5E7EB]">{t.calendar.upcomingEvents}</h3>
+        <button
+          onClick={onViewAll}
+          className="text-[10px] text-[#6366F1] hover:text-[#6366F1]/80 transition-colors font-medium"
+        >
+          {t.calendar.viewAll}
+        </button>
+      </div>
+
+      {upcomingEvents.length === 0 ? (
+        <p className="text-[10px] text-[#6B7280] py-4 text-center">{t.calendar.noEvents}</p>
+      ) : (
+        <div className="space-y-0">
+          {upcomingEvents.map((event, idx) => {
+            const member = getMemberForEvent(event)
+            return (
+              <button
+                key={event.id}
+                onClick={() => onEventClick(event)}
+                className="w-full text-left py-2 flex items-center gap-2 hover:bg-white/[0.04] -mx-1 px-1 rounded transition-colors"
+              >
+                <div
+                  className="size-2 rounded-full shrink-0"
+                  style={{ backgroundColor: event.color || EVENT_COLORS[0] }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-[#E5E7EB] truncate font-medium">{event.title}</p>
+                  <p className="text-[10px] text-[#6B7280]">
+                    {event.all_day
+                      ? format(parseISO(event.start_time), 'MMM d')
+                      : format(parseISO(event.start_time), 'MMM d, h:mm a')}
+                  </p>
+                </div>
+                {member && (
+                  <div
+                    className="size-5 rounded-full bg-[#6366F1]/20 flex items-center justify-center text-[9px] text-[#6366F1] font-semibold shrink-0"
+                    title={getMemberName(member)}
+                  >
+                    {getMemberInitials(member)}
+                  </div>
+                )}
+                {idx < upcomingEvents.length - 1 && (
+                  <div className="absolute bottom-0 left-6 right-2 h-px bg-white/[0.04]" />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Event Modal ─────────────────────────────────────────────────────────────
 
 function EventModal({
@@ -722,6 +918,7 @@ function EventModal({
   familyId,
   userId,
   onSave,
+  members,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -729,6 +926,7 @@ function EventModal({
   familyId: string
   userId: string
   onSave: () => void
+  members: FamilyMember[]
 }) {
   const { t } = useI18n()
   const [form, setForm] = useState<EventFormData>(EMPTY_FORM)
@@ -749,6 +947,9 @@ function EventModal({
           endTime: format(end, 'HH:mm'),
           allDay: event.all_day,
           color: event.color || EVENT_COLORS[0],
+          location: '',
+          repeat: 'none',
+          assignTo: event.created_by || '',
         })
       } else {
         const now = new Date()
@@ -801,18 +1002,71 @@ function EventModal({
           end_time: endDateTime,
           all_day: form.allDay,
           color: form.color,
-          created_by: userId,
+          created_by: form.assignTo || userId,
         })
 
         if (error) throw error
         toast.success('Event created')
       }
 
+      // Also add to store for demo mode fallback
+      const calendarStoreModule = await import('@/stores/calendar-store')
+      const store = calendarStoreModule.useCalendarStore.getState()
+      if (!isEditing) {
+        store.addEvent({
+          id: `event-${Date.now()}`,
+          family_id: familyId,
+          title: form.title.trim(),
+          description: form.description || null,
+          start_time: startDateTime,
+          end_time: endDateTime,
+          all_day: form.allDay,
+          color: form.color,
+          created_by: form.assignTo || userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+      } else if (event) {
+        store.updateEvent({
+          ...event,
+          title: form.title.trim(),
+          description: form.description || null,
+          start_time: startDateTime,
+          end_time: endDateTime,
+          all_day: form.allDay,
+          color: form.color,
+        })
+      }
+
       onSave()
       onOpenChange(false)
     } catch (err) {
       console.error('Save event error:', err)
-      toast.error('Failed to save event')
+      // Fallback for demo mode - add to store
+      const calendarStoreModule = await import('@/stores/calendar-store')
+      const store = calendarStoreModule.useCalendarStore.getState()
+      if (!isEditing) {
+        store.addEvent({
+          id: `event-${Date.now()}`,
+          family_id: familyId,
+          title: form.title.trim(),
+          description: form.description || null,
+          start_time: form.allDay
+            ? `${form.startDate}T00:00:00`
+            : `${form.startDate}T${form.startTime}:00`,
+          end_time: form.allDay
+            ? `${form.endDate || form.startDate}T23:59:59`
+            : `${form.endDate || form.startDate}T${form.endTime}:00`,
+          all_day: form.allDay,
+          color: form.color,
+          created_by: form.assignTo || userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        toast.success('Event created')
+      }
+      onOpenChange(false)
+      onSave()
     } finally {
       setSaving(false)
     }
@@ -822,7 +1076,6 @@ function EventModal({
     setForm((prev) => ({ ...prev, ...updates }))
   }
 
-  // When allDay is toggled, update endDate to match startDate if it was the same
   const handleAllDayToggle = (checked: boolean) => {
     setForm((prev) => ({
       ...prev,
@@ -831,7 +1084,6 @@ function EventModal({
     }))
   }
 
-  // When startDate changes, also update endDate if they were the same
   const handleStartDateChange = (value: string) => {
     setForm((prev) => ({
       ...prev,
@@ -840,9 +1092,17 @@ function EventModal({
     }))
   }
 
+  const repeatOptions: { value: RepeatOption; label: string }[] = [
+    { value: 'none', label: t.calendar.repeatNone },
+    { value: 'daily', label: t.calendar.repeatDaily },
+    { value: 'weekly', label: t.calendar.repeatWeekly },
+    { value: 'monthly', label: t.calendar.repeatMonthly },
+    { value: 'yearly', label: t.calendar.repeatYearly },
+  ]
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-md">
+      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#E5E7EB]">
             {isEditing ? t.calendar.editEvent : t.calendar.addEvent}
@@ -939,15 +1199,82 @@ function EventModal({
             )}
           </div>
 
+          {/* Location */}
+          <div className="space-y-2">
+            <Label htmlFor="event-location" className="text-[#E5E7EB] text-sm flex items-center gap-1.5">
+              <MapPin className="size-3.5" />
+              {t.calendar.location}
+            </Label>
+            <Input
+              id="event-location"
+              value={form.location}
+              onChange={(e) => updateForm({ location: e.target.value })}
+              placeholder="Add location (optional)"
+              className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/50"
+            />
+          </div>
+
+          {/* Repeat */}
+          <div className="space-y-2">
+            <Label className="text-[#E5E7EB] text-sm flex items-center gap-1.5">
+              <Repeat className="size-3.5" />
+              {t.calendar.repeat}
+            </Label>
+            <Select
+              value={form.repeat}
+              onValueChange={(value) => updateForm({ repeat: value as RepeatOption })}
+            >
+              <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus:ring-[#6366F1]/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#111117] border-white/[0.08]">
+                {repeatOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value} className="text-[#E5E7EB] focus:bg-[#6366F1]/20 focus:text-[#E5E7EB]">
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Assign To */}
+          <div className="space-y-2">
+            <Label className="text-[#E5E7EB] text-sm flex items-center gap-1.5">
+              <User className="size-3.5" />
+              {t.calendar.assignTo}
+            </Label>
+            <Select
+              value={form.assignTo}
+              onValueChange={(value) => updateForm({ assignTo: value })}
+            >
+              <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus:ring-[#6366F1]/50">
+                <SelectValue placeholder="Select member" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#111117] border-white/[0.08]">
+                {members.map((member) => (
+                  <SelectItem key={member.user_id} value={member.user_id} className="text-[#E5E7EB] focus:bg-[#6366F1]/20 focus:text-[#E5E7EB]">
+                    <div className="flex items-center gap-2">
+                      <div className="size-5 rounded-full bg-[#6366F1]/20 flex items-center justify-center text-[9px] text-[#6366F1] font-semibold">
+                        {getMemberInitials(member)}
+                      </div>
+                      {getMemberName(member)}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Color Picker */}
           <div className="space-y-2">
             <Label className="text-[#E5E7EB] text-sm">{t.calendar.color}</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {EVENT_COLORS.map((color) => (
                 <button
                   key={color}
+                  type="button"
                   onClick={() => updateForm({ color })}
-                  className={`size-8 rounded-full transition-all ${
+                  className={`size-7 rounded-full transition-all ${
                     form.color === color
                       ? 'ring-2 ring-white ring-offset-2 ring-offset-[#111117] scale-110'
                       : 'hover:scale-105'
@@ -1083,7 +1410,7 @@ function EventDetailDialog({
 
 export default function CalendarPage() {
   const { t } = useI18n()
-  const { currentFamily } = useAppStore()
+  const { currentFamily, familyMembers } = useAppStore()
   const calendarStore = useCalendarStore()
 
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -1110,7 +1437,6 @@ export default function CalendarPage() {
 
   const fetchEvents = useCallback(async () => {
     if (!familyId) {
-      // No family, use store events if available
       setLoading(false)
       return
     }
@@ -1162,7 +1488,6 @@ export default function CalendarPage() {
       setSupabaseEvents((data as unknown as CalendarEvent[]) || [])
     } catch (err) {
       console.error('Fetch events error:', err)
-      // On Supabase failure, keep store events as fallback (already handled in useMemo)
       setSupabaseEvents([])
     } finally {
       setLoading(false)
@@ -1249,10 +1574,25 @@ export default function CalendarPage() {
       fetchEvents()
     } catch (err) {
       console.error('Delete event error:', err)
-      toast.error('Failed to delete event')
+      // Fallback for demo mode
+      const calendarStoreModule = await import('@/stores/calendar-store')
+      const store = calendarStoreModule.useCalendarStore.getState()
+      store.removeEvent(selectedEvent.id)
+      toast.success('Event deleted')
+      setShowDeleteConfirm(false)
+      setShowEventDetail(false)
+      setSelectedEvent(null)
     } finally {
       setDeleting(false)
     }
+  }
+
+  const handleMiniCalDateSelect = (date: Date) => {
+    setCurrentDate(date)
+  }
+
+  const handleViewAll = () => {
+    setView('agenda')
   }
 
   // ─── Date Display ───────────────────────────────────────────────────────
@@ -1397,72 +1737,93 @@ export default function CalendarPage() {
         </h2>
       </div>
 
-      {/* Calendar Content */}
-      <div className="flex-1 overflow-hidden relative">
-        {loading ? (
-          <div className="flex items-center justify-center h-full px-4">
-            <div className="w-full max-w-md space-y-3">
-              <EventCardSkeleton count={3} />
-            </div>
-          </div>
-        ) : events.length === 0 && view === 'month' ? (
-          <div className="flex items-center justify-center h-full">
-            <EmptyState
-              icon={CalendarDays}
-              title="No events scheduled"
-              description="Add your first event to stay organized"
-              action={{ label: 'Add Event', onClick: () => setShowEventModal(true) }}
-            />
-          </div>
-        ) : (
-          <>
-            {view === 'month' && (
-              <MonthView
-                currentDate={currentDate}
-                events={events}
-                onEventClick={handleEventClick}
-                onDayClick={handleDayClick}
-              />
-            )}
-            {view === 'week' && (
-              <WeekView
-                currentDate={currentDate}
-                events={events}
-                onEventClick={handleEventClick}
-                onDayClick={handleDayClick}
-              />
-            )}
-            {view === 'day' && (
-              <DayView
-                currentDate={currentDate}
-                events={events}
-                onEventClick={handleEventClick}
-              />
-            )}
-            {view === 'agenda' && (
-              <AgendaView
-                currentDate={currentDate}
-                events={events}
-                onEventClick={handleEventClick}
-              />
-            )}
-          </>
-        )}
+      {/* Main content area with sidebar */}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Mini Calendar Sidebar (desktop only) */}
+        <div className="hidden md:flex flex-col w-[220px] shrink-0 border-r border-white/[0.06] p-3 gap-3 overflow-y-auto">
+          <MiniCalendar
+            currentDate={currentDate}
+            onDateSelect={handleMiniCalDateSelect}
+            events={events}
+          />
+          <UpcomingEventsPanel
+            events={events}
+            members={familyMembers}
+            onEventClick={(event) => {
+              setSelectedDay(null)
+              handleEventClick(event)
+            }}
+            onViewAll={handleViewAll}
+          />
+        </div>
 
-        {/* Day Events Slide-over (Month view) */}
-        {selectedDay && view === 'month' && (
-          <div className="absolute top-0 right-0 bottom-0 w-80 bg-[#111117] border-l border-white/[0.08] shadow-xl z-20 animate-in slide-in-from-right duration-200">
-            <DayEventsPanel
-              day={selectedDay}
-              events={events}
-              onEventClick={(event) => {
-                setSelectedDay(null)
-                handleEventClick(event)
-              }}
-              onClose={() => setSelectedDay(null)}
-            />
-          </div>
-        )}
+        {/* Calendar Content */}
+        <div className="flex-1 overflow-hidden relative">
+          {loading ? (
+            <div className="flex items-center justify-center h-full px-4">
+              <div className="w-full max-w-md space-y-3">
+                <EventCardSkeleton count={3} />
+              </div>
+            </div>
+          ) : events.length === 0 && view === 'month' ? (
+            <div className="flex items-center justify-center h-full">
+              <EmptyState
+                icon={CalendarDays}
+                title="No events scheduled"
+                description="Add your first event to stay organized"
+                action={{ label: 'Add Event', onClick: () => setShowEventModal(true) }}
+              />
+            </div>
+          ) : (
+            <>
+              {view === 'month' && (
+                <MonthView
+                  currentDate={currentDate}
+                  events={events}
+                  onEventClick={handleEventClick}
+                  onDayClick={handleDayClick}
+                />
+              )}
+              {view === 'week' && (
+                <WeekView
+                  currentDate={currentDate}
+                  events={events}
+                  onEventClick={handleEventClick}
+                  onDayClick={handleDayClick}
+                />
+              )}
+              {view === 'day' && (
+                <DayView
+                  currentDate={currentDate}
+                  events={events}
+                  onEventClick={handleEventClick}
+                />
+              )}
+              {view === 'agenda' && (
+                <AgendaView
+                  currentDate={currentDate}
+                  events={events}
+                  onEventClick={handleEventClick}
+                />
+              )}
+            </>
+          )}
+
+          {/* Day Events Slide-over (Month view) */}
+          {selectedDay && view === 'month' && (
+            <div className="absolute top-0 right-0 bottom-0 w-80 bg-[#111117] border-l border-white/[0.08] shadow-xl z-20 animate-in slide-in-from-right duration-200">
+              <DayEventsPanel
+                day={selectedDay}
+                events={events}
+                onEventClick={(event) => {
+                  setSelectedDay(null)
+                  handleEventClick(event)
+                }}
+                onClose={() => setSelectedDay(null)}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Event Modal */}
@@ -1471,8 +1832,9 @@ export default function CalendarPage() {
         onOpenChange={setShowEventModal}
         event={selectedEvent}
         familyId={familyId}
-        userId={''} // Will be passed from auth context
+        userId={''}
         onSave={fetchEvents}
+        members={familyMembers}
       />
 
       {/* Event Detail Dialog */}

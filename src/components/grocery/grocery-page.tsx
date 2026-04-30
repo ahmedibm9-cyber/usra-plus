@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus,
@@ -19,6 +19,8 @@ import {
   Package,
   X,
   Sparkles,
+  GripVertical,
+  ArrowUpDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -51,6 +53,31 @@ import { Separator } from '@/components/ui/separator'
 import { triggerConfetti } from '@/lib/confetti'
 import { EmptyState } from '@/components/shared/empty-state'
 import { GroceryItemSkeleton } from '@/components/shared/skeleton-patterns'
+import { cn } from '@/lib/utils'
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+  useDndContext,
+} from '@dnd-kit/core'
+import type {
+  DragStartEvent,
+  DragEndEvent,
+  DraggableSyntheticListeners,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { CSS } from '@dnd-kit/utilities'
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },
@@ -91,10 +118,11 @@ function suggestCategory(itemName: string): string | null {
   return null
 }
 
-function getCategoryIcon(category: string | null) {
+// Render a category icon element (avoids creating components during render)
+function CategoryIconRender({ category, className }: { category: string | null; className?: string }) {
   const found = CATEGORIES.find((c) => c.key === category)
-  if (!found) return Package
-  return found.icon
+  const IconComp = found?.icon ?? Package
+  return <IconComp className={className} />
 }
 
 function getCategoryColor(category: string | null) {
@@ -112,24 +140,205 @@ function getCategoryColor(category: string | null) {
   return colors[category ?? 'other'] ?? colors.other
 }
 
+// ─── Grocery Item Card (used for both regular + drag overlay) ────────────
+function GroceryItemCard({
+  item,
+  onToggleChecked,
+  onDelete,
+  deletingId,
+  flashItemId,
+  dragHandleProps,
+  isDragOverlay,
+  isRTL,
+  t,
+}: {
+  item: GroceryItem
+  onToggleChecked: (item: GroceryItem) => void
+  onDelete: (id: string) => void
+  deletingId: string | null
+  flashItemId: string | null
+  dragHandleProps?: DraggableSyntheticListeners
+  isDragOverlay?: boolean
+  isRTL: boolean
+  t: ReturnType<typeof useI18n>['t']
+}) {
+  const [hovered, setHovered] = useState(false)
+  const colorClass = getCategoryColor(item.category)
+  const isChecked = item.checked
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={cn(
+        'group bg-[#111117] border border-white/[0.08] rounded-xl p-3 sm:p-4 transition-all duration-300',
+        hovered && !isDragOverlay && 'border-white/[0.12] -translate-y-px shadow-lg shadow-black/20',
+        flashItemId === item.id && 'bg-green-500/10',
+        isChecked && !isDragOverlay && 'bg-[#111117]/50 border-white/[0.04]',
+        isDragOverlay && 'shadow-2xl ring-1 ring-white/10 scale-[1.02]'
+      )}
+    >
+      <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
+        {/* Drag handle */}
+        {dragHandleProps && !isChecked && (
+          <button
+            {...dragHandleProps}
+            className={cn(
+              'w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[#6B7280] hover:text-[#E5E7EB]',
+              isRTL ? 'ml-0 mr-0' : 'mr-0 ml-0'
+            )}
+            aria-label="Drag to reorder"
+          >
+            <GripVertical className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Checkbox */}
+        <Checkbox
+          checked={item.checked}
+          onCheckedChange={() => onToggleChecked(item)}
+          className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
+        />
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
+            <CategoryIconRender category={item.category} />
+            <span
+              className={cn(
+                'text-sm font-medium truncate',
+                isChecked ? 'text-[#6B7280] line-through' : 'text-[#E5E7EB]'
+              )}
+            >
+              {item.name}
+            </span>
+          </div>
+          {item.adder && !isChecked && (
+            <p className="text-xs text-[#6B7280] mt-0.5">
+              Added by {item.adder.first_name ?? 'Someone'}
+            </p>
+          )}
+        </div>
+
+        {/* Right side: quantity, category badge, delete */}
+        <div className={cn('flex items-center gap-2 flex-shrink-0', isRTL && 'flex-row-reverse')}>
+          <span
+            className={cn(
+              'text-xs font-medium',
+              isChecked ? 'text-[#6B7280]/60 line-through' : 'text-[#6B7280]'
+            )}
+          >
+            x{item.quantity}
+          </span>
+          {!isChecked && (
+            <Badge
+              variant="outline"
+              className={cn('text-[10px] px-2 py-0 h-5 border', colorClass)}
+            >
+              {item.category
+                ? t.grocery.categories[item.category as keyof typeof t.grocery.categories] ??
+                  item.category
+                : 'Other'}
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(item.id)}
+            disabled={deletingId === item.id}
+            className="h-8 w-8 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Sortable Grocery Item (DnD wrapper) ─────────────────────────────────
+function SortableGroceryItem({
+  item,
+  onToggleChecked,
+  onDelete,
+  deletingId,
+  flashItemId,
+  isRTL,
+  t,
+}: {
+  item: GroceryItem
+  onToggleChecked: (item: GroceryItem) => void
+  onDelete: (id: string) => void
+  deletingId: string | null
+  flashItemId: string | null
+  isRTL: boolean
+  t: ReturnType<typeof useI18n>['t']
+}) {
+  const { over, active } = useDndContext()
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id })
+
+  const isOver = over?.id === item.id && active?.id !== item.id
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className={cn('relative', isDragging && 'opacity-40 z-0')}
+    >
+      {/* Drop indicator line */}
+      {isOver && (
+        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-indigo-500 rounded-full z-10" />
+      )}
+      <GroceryItemCard
+        item={item}
+        onToggleChecked={onToggleChecked}
+        onDelete={onDelete}
+        deletingId={deletingId}
+        flashItemId={flashItemId}
+        dragHandleProps={item.checked ? undefined : listeners}
+        isRTL={isRTL}
+        t={t}
+      />
+    </div>
+  )
+}
+
+// ─── Main Grocery Page ──────────────────────────────────────────────────
 export function GroceryPage() {
   const { currentFamily } = useAppStore()
   const { user } = useAuthStore()
-  const { t } = useI18n()
+  const { t, isRTL: storeIsRTL } = useI18n()
+  const isRTL = storeIsRTL
   const {
     items,
     isLoading,
     searchQuery,
     filterCategory,
+    sortBy,
     showAddItem,
     recentItems,
     setItems,
     addItem,
     removeItem,
     toggleChecked,
+    reorderItems,
     setIsLoading,
     setSearchQuery,
     setFilterCategory,
+    setSortBy,
     setShowAddItem,
     addRecentItem,
     getFilteredItems,
@@ -145,6 +354,59 @@ export function GroceryPage() {
   const [flashItemId, setFlashItemId] = useState<string | null>(null)
   const [autoDetectedCategory, setAutoDetectedCategory] = useState<string | null>(null)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+
+  // ─── DnD State & Handlers ────────────────────────────────────────────
+  const [activeId, setActiveId] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }, [])
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveId(null)
+
+    if (!over || active.id === over.id) return
+
+    const fromIndex = items.findIndex((i) => i.id === active.id)
+    const toIndex = items.findIndex((i) => i.id === over.id)
+
+    if (fromIndex === -1 || toIndex === -1) return
+
+    // Only reorder within the same category (if filtering)
+    const activeItem = items[fromIndex]
+    const overItem = items[toIndex]
+
+    // When viewing a specific category, both items must be in that category
+    if (filterCategory !== 'all') {
+      if (activeItem.category !== overItem.category) return
+    }
+
+    // Only reorder within the same checked/unchecked group
+    if (activeItem.checked !== overItem.checked) return
+
+    reorderItems(fromIndex, toIndex)
+  }, [items, filterCategory, reorderItems])
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null)
+  }, [])
+
+  const activeItem = useMemo(
+    () => (activeId ? items.find((i) => i.id === activeId) : null),
+    [activeId, items]
+  )
 
   const familyId = currentFamily?.id
   const userId = user?.id
@@ -372,6 +634,9 @@ export function GroceryPage() {
   const uncheckedItems = filteredItems.filter((i) => !i.checked)
   const checkedItems = filteredItems.filter((i) => i.checked)
 
+  // Sortable IDs for unchecked items (only these participate in DnD)
+  const uncheckedIds = useMemo(() => uncheckedItems.map((i) => i.id), [uncheckedItems])
+
   return (
     <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
       {/* Header */}
@@ -390,13 +655,28 @@ export function GroceryPage() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => setShowAddItem(true)}
-            className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4 btn-ripple"
-          >
-            <Plus className="w-4 h-4" />
-            {t.grocery.addItem}
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Sort dropdown */}
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+              <SelectTrigger className="h-9 text-xs bg-[#111117] border-white/[0.06] text-[#E5E7EB] w-[140px] rounded-lg">
+                <ArrowUpDown className="size-3 mr-1 text-[#6B7280]" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#111117] border-white/[0.08]">
+                <SelectItem value="created_at" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Created Date</SelectItem>
+                <SelectItem value="name" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Name</SelectItem>
+                <SelectItem value="category" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Category</SelectItem>
+                <SelectItem value="manual" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Manual Order</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setShowAddItem(true)}
+              className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4 btn-ripple"
+            >
+              <Plus className="w-4 h-4" />
+              {t.grocery.addItem}
+            </Button>
+          </div>
         </div>
 
         {/* Progress bar */}
@@ -434,12 +714,18 @@ export function GroceryPage() {
 
         {/* Search */}
         <div className="mt-4 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
+          <Search className={cn(
+            'absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]',
+            isRTL ? 'right-3' : 'left-3'
+          )} />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.grocery.search}
-            className="pl-10 bg-[#111117] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+            className={cn(
+              'bg-[#111117] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0',
+              isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'
+            )}
           />
         </div>
 
@@ -489,105 +775,67 @@ export function GroceryPage() {
             action={{ label: 'Add Item', onClick: () => setShowAddItem(true) }}
           />
         ) : (
-          <ScrollArea className="h-full">
-            <div className="space-y-2">
-              {/* Unchecked items */}
-              <AnimatePresence mode="popLayout">
-                {uncheckedItems.map((item, index) => {
-                  const Icon = getCategoryIcon(item.category)
-                  const colorClass = getCategoryColor(item.category)
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20, height: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      className={`group bg-[#111117] border border-white/[0.08] rounded-xl p-3 sm:p-4 hover:border-white/[0.12] transition-all duration-300 hover:-translate-y-px hover:shadow-lg hover:shadow-black/20 ${flashItemId === item.id ? 'bg-green-500/10' : ''}`}
-                      data-grocery-item={item.id}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Checkbox
-                          checked={item.checked}
-                          onCheckedChange={() => handleToggleChecked(item)}
-                          className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Icon className="w-4 h-4 text-[#6B7280] flex-shrink-0" />
-                            <span className="text-sm font-medium text-[#E5E7EB] truncate">
-                              {item.name}
-                            </span>
-                          </div>
-                          {item.adder && (
-                            <p className="text-xs text-[#6B7280] mt-0.5">
-                              Added by {item.adder.first_name ?? 'Someone'}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs text-[#6B7280] font-medium">
-                            x{item.quantity}
-                          </span>
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] px-2 py-0 h-5 border ${colorClass}`}
-                          >
-                            {item.category
-                              ? t.grocery.categories[
-                                  item.category as keyof typeof t.grocery.categories
-                                ] ?? item.category
-                              : 'Other'}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteItem(item.id)}
-                            disabled={deletingId === item.id}
-                            className="h-8 w-8 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <ScrollArea className="h-full">
+              <div className="space-y-2">
+                {/* Unchecked items - sortable */}
+                <SortableContext
+                  items={uncheckedIds}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <AnimatePresence mode="popLayout">
+                    {uncheckedItems.map((item) => (
+                      <SortableGroceryItem
+                        key={item.id}
+                        item={item}
+                        onToggleChecked={handleToggleChecked}
+                        onDelete={handleDeleteItem}
+                        deletingId={deletingId}
+                        flashItemId={flashItemId}
+                        isRTL={isRTL}
+                        t={t}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </SortableContext>
 
-              {/* Separator between checked and unchecked */}
-              {checkedItems.length > 0 && uncheckedItems.length > 0 && (
-                <Separator className="bg-white/[0.06] my-3" />
-              )}
+                {/* Separator between checked and unchecked */}
+                {checkedItems.length > 0 && uncheckedItems.length > 0 && (
+                  <Separator className="bg-white/[0.06] my-3" />
+                )}
 
-              {/* Checked items */}
-              <AnimatePresence mode="popLayout">
-                {checkedItems.map((item, index) => {
-                  const Icon = getCategoryIcon(item.category)
-                  return (
+                {/* Checked items (not sortable, display-only) */}
+                <AnimatePresence mode="popLayout">
+                  {checkedItems.map((item) => (
                     <motion.div
                       key={item.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 0.5 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ delay: index * 0.03 }}
                       className="group bg-[#111117]/50 border border-white/[0.04] rounded-xl p-3 sm:p-4"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
                         <Checkbox
                           checked={item.checked}
                           onCheckedChange={() => handleToggleChecked(item)}
-                          className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white"
+                          className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Icon className="w-4 h-4 text-[#6B7280] flex-shrink-0" />
+                          <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
+                            <CategoryIconRender category={item.category} />
                             <span className="text-sm font-medium text-[#6B7280] line-through truncate">
                               {item.name}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className={cn('flex items-center gap-2 flex-shrink-0', isRTL && 'flex-row-reverse')}>
                           <span className="text-xs text-[#6B7280]/60 font-medium line-through">
                             x{item.quantity}
                           </span>
@@ -603,11 +851,29 @@ export function GroceryPage() {
                         </div>
                       </div>
                     </motion.div>
-                  )
-                })}
-              </AnimatePresence>
-            </div>
-          </ScrollArea>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </ScrollArea>
+
+            {/* Drag Overlay */}
+            <DragOverlay adjustScale={false} dropAnimation={null}>
+              {activeItem ? (
+                <div className="w-full">
+                  <GroceryItemCard
+                    item={activeItem}
+                    onToggleChecked={handleToggleChecked}
+                    onDelete={handleDeleteItem}
+                    deletingId={deletingId}
+                    flashItemId={flashItemId}
+                    isDragOverlay
+                    isRTL={isRTL}
+                    t={t}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
       </div>
 

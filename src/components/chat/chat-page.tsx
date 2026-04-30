@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, isToday, isYesterday } from 'date-fns'
 import {
@@ -13,6 +13,9 @@ import {
   ArrowDown,
   Check,
   CheckCheck,
+  Mic,
+  Play,
+  Pause,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -73,6 +76,12 @@ function formatMessageTime(dateStr: string): string {
   return format(new Date(dateStr), 'h:mm a')
 }
 
+function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
 // Read receipt type for demo purposes
 type ReadStatus = 'sent' | 'delivered' | 'read'
 
@@ -84,6 +93,151 @@ function getDemoReadStatus(messageId: string): ReadStatus {
   if (mod === 0) return 'read'
   if (mod === 1) return 'delivered'
   return 'sent'
+}
+
+// Voice message bubble component
+function VoiceMessageBubble({
+  msg,
+  isOwn,
+  isRTL,
+  voiceMessageLabel,
+  durationLabel,
+}: {
+  msg: ChatMessage
+  isOwn: boolean
+  isRTL: boolean
+  voiceMessageLabel: string
+  durationLabel: string
+}) {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [playProgress, setPlayProgress] = useState(0)
+  const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const duration = msg.voice_duration ?? 0
+
+  // Generate deterministic waveform bar heights based on message id
+  const barHeights = useMemo(() => {
+    const seed = msg.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const heights: number[] = []
+    for (let i = 0; i < 7; i++) {
+      const h = ((seed * (i + 1) * 7) % 14) + 2 // range 2-16px
+      heights.push(h)
+    }
+    return heights
+  }, [msg.id])
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      setIsPlaying(false)
+      if (playIntervalRef.current) {
+        clearInterval(playIntervalRef.current)
+        playIntervalRef.current = null
+      }
+    } else {
+      setIsPlaying(true)
+      setPlayProgress(0)
+      const totalSteps = duration > 0 ? duration * 10 : 30 // 100ms steps
+      let step = 0
+      playIntervalRef.current = setInterval(() => {
+        step++
+        setPlayProgress(step / totalSteps)
+        if (step >= totalSteps) {
+          setIsPlaying(false)
+          setPlayProgress(0)
+          if (playIntervalRef.current) {
+            clearInterval(playIntervalRef.current)
+            playIntervalRef.current = null
+          }
+        }
+      }, 100)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (playIntervalRef.current) {
+        clearInterval(playIntervalRef.current)
+      }
+    }
+  }, [])
+
+  return (
+    <div className="bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-2xl p-3 min-w-[200px]">
+      <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        {/* Play button */}
+        <button
+          onClick={handlePlayPause}
+          className="w-8 h-8 bg-[#6366F1] rounded-full flex items-center justify-center text-white flex-shrink-0 hover:bg-[#5558E6] transition-colors"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
+        >
+          {isPlaying ? (
+            <Pause className="w-3.5 h-3.5" />
+          ) : (
+            <Play className="w-3.5 h-3.5 ml-0.5" />
+          )}
+        </button>
+
+        {/* Waveform */}
+        <div className={`flex-1 flex items-center gap-[1px] h-8 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+          {barHeights.map((h, i) => {
+            const progressIndex = playProgress * barHeights.length
+            const isFilled = i < progressIndex
+            return (
+              <motion.div
+                key={i}
+                className={`rounded-full w-[3px] transition-colors duration-150 ${
+                  isFilled ? 'bg-[#6366F1]' : isOwn ? 'bg-white/30' : 'bg-[#6366F1]/30'
+                }`}
+                style={{ height: `${h}px` }}
+                initial={false}
+                animate={{ height: isPlaying ? `${h + Math.sin(Date.now() / 200 + i) * 2}px` : `${h}px` }}
+                transition={{ duration: 0.15 }}
+              />
+            )
+          })}
+        </div>
+
+        {/* Duration */}
+        <span className="text-xs text-[#6B7280] flex-shrink-0 min-w-[32px] text-center">
+          {formatDuration(duration)}
+        </span>
+      </div>
+
+      {/* Voice message label */}
+      <div className={`flex items-center gap-1 mt-1.5 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        <Mic className="w-3 h-3 text-[#6366F1]/60" />
+        <span className="text-[10px] text-[#6366F1]/60">
+          {voiceMessageLabel}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// Recording waveform bars component
+function RecordingWaveform() {
+  const [bars, setBars] = useState<number[]>([4, 8, 12, 6, 14, 10, 8, 12])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBars((prev) =>
+        prev.map(() => Math.floor(Math.random() * 14) + 2)
+      )
+    }, 200)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="flex items-center gap-[1px] h-8">
+      {bars.map((h, i) => (
+        <motion.div
+          key={i}
+          className="rounded-full w-[3px] bg-[#6366F1]"
+          animate={{ height: `${h}px` }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
+        />
+      ))}
+    </div>
+  )
 }
 
 export function ChatPage() {
@@ -104,7 +258,6 @@ export function ChatPage() {
   } = useChatStore()
 
   const {
-    onlineUsers,
     setOnline,
     setOffline,
     setTyping,
@@ -119,6 +272,12 @@ export function ChatPage() {
   const [showSearch, setShowSearch] = useState(false)
   const [showScrollBottom, setShowScrollBottom] = useState(false)
   const [showDemoTyping, setShowDemoTyping] = useState(false)
+
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -126,6 +285,92 @@ export function ChatPage() {
 
   const familyId = currentFamily?.id
   const userId = user?.id
+
+  // Start recording
+  const handleStartRecording = useCallback(() => {
+    setIsRecording(true)
+    setRecordingTime(0)
+    recordingIntervalRef.current = setInterval(() => {
+      setRecordingTime((prev) => prev + 1)
+    }, 1000)
+  }, [])
+
+  // Cancel recording
+  const handleCancelRecording = useCallback(() => {
+    setIsRecording(false)
+    setRecordingTime(0)
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current)
+      recordingIntervalRef.current = null
+    }
+    inputRef.current?.focus()
+  }, [])
+
+  // Send voice message (demo - adds mock voice message to chat)
+  const handleSendVoiceMessage = useCallback(async () => {
+    if (!familyId || !userId) return
+    const duration = recordingTime
+
+    // Stop recording timer
+    setIsRecording(false)
+    setRecordingTime(0)
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current)
+      recordingIntervalRef.current = null
+    }
+
+    // Create mock voice message
+    const voiceMessage: ChatMessage = {
+      id: `voice-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      family_id: familyId,
+      content: isRTL ? t.chat.voiceMessage : t.chat.voiceMessage,
+      sender_id: userId,
+      message_type: 'voice',
+      voice_duration: duration,
+      reply_to: null,
+      created_at: new Date().toISOString(),
+      sender: user ? {
+        id: user.id,
+        email: user.email ?? '',
+        first_name: user.user_metadata?.first_name ?? null,
+        last_name: user.user_metadata?.last_name ?? null,
+        avatar_url: user.user_metadata?.avatar_url ?? null,
+        phone: null,
+        country_code: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } : undefined,
+    }
+
+    addMessage(voiceMessage)
+
+    // Auto-scroll to bottom
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+
+    // Try to send to Supabase (will fail gracefully if tables don't exist)
+    try {
+      const supabase = createClient()
+      await supabase.from('chat_messages').insert({
+        family_id: familyId,
+        content: t.chat.voiceMessage,
+        sender_id: userId,
+        message_type: 'voice',
+      })
+    } catch {
+      // Silent fail in demo mode
+    }
+  }, [familyId, userId, recordingTime, addMessage, user, isRTL, t])
+
+  // Cleanup recording on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current)
+      }
+    }
+  }, [])
 
   // Demo typing indicator: show "Noura is typing..." for 3 seconds on load
   useEffect(() => {
@@ -333,6 +578,9 @@ export function ChatPage() {
   // Get typing users (excluding current user)
   const typingUsers = getTypingUsers().filter((u) => u.userId !== userId)
 
+  // Determine if send button or mic button should show
+  const showSendButton = newMessage.trim().length > 0
+
   return (
     <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
       {/* Header */}
@@ -457,6 +705,7 @@ export function ChatPage() {
                     {group.messages.map((msg, index) => {
                       const isOwn = msg.sender_id === userId
                       const isSystem = msg.message_type === 'system'
+                      const isVoice = msg.message_type === 'voice'
                       const prevMsg = index > 0 ? group.messages[index - 1] : null
                       const isConsecutive =
                         prevMsg && prevMsg.sender_id === msg.sender_id && !isSystem
@@ -530,20 +779,39 @@ export function ChatPage() {
                               </div>
                             )}
 
-                            <div
-                              className={`
-                                rounded-2xl px-4 py-2.5 inline-block
-                                ${
-                                  isOwn
-                                    ? 'bg-[#6366F1] text-white rounded-br-md'
-                                    : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
-                                }
-                              `}
-                            >
-                              <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                                {msg.content}
-                              </p>
-                            </div>
+                            {/* Voice message bubble */}
+                            {isVoice ? (
+                              <div
+                                className={`
+                                  rounded-2xl inline-block
+                                  ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
+                                `}
+                              >
+                                <VoiceMessageBubble
+                                  msg={msg}
+                                  isOwn={isOwn}
+                                  isRTL={isRTL}
+                                  voiceMessageLabel={t.chat.voiceMessage}
+                                  durationLabel={t.chat.duration}
+                                />
+                              </div>
+                            ) : (
+                              /* Text message bubble */
+                              <div
+                                className={`
+                                  rounded-2xl px-4 py-2.5 inline-block
+                                  ${
+                                    isOwn
+                                      ? 'bg-[#6366F1] text-white rounded-br-md'
+                                      : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
+                                  }
+                                `}
+                              >
+                                <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                                  {msg.content}
+                                </p>
+                              </div>
+                            )}
 
                             {/* Timestamp + Read Receipts */}
                             {!isConsecutive && (
@@ -649,48 +917,143 @@ export function ChatPage() {
         )}
       </div>
 
-      {/* Message Input */}
+      {/* Message Input / Recording Panel */}
       <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-white/[0.06]">
-        <div className="flex items-center gap-2 bg-[#111117] border border-white/[0.08] rounded-2xl px-4 py-2 focus-within:border-[#6366F1]/30 transition-colors">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-transparent rounded-lg flex-shrink-0"
-          >
-            <Paperclip className="w-4 h-4" />
-          </Button>
-          <Input
-            ref={inputRef}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={t.chat.placeholder}
-            className="flex-1 border-0 bg-transparent text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-0 focus-visible:ring-offset-0 h-8 px-0 text-sm"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSendMessage()
-              }
-            }}
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-transparent rounded-lg flex-shrink-0"
-          >
-            <Smile className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim() || isSending}
-            className="h-8 w-8 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg flex-shrink-0 disabled:opacity-50"
-          >
-            {isSending ? (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </Button>
-        </div>
+        <AnimatePresence mode="wait">
+          {isRecording ? (
+            /* Recording Panel */
+            <motion.div
+              key="recording"
+              initial={{ opacity: 0, y: 20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: 20, height: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="overflow-hidden"
+            >
+              <div className="bg-[#111117] border border-[#6366F1]/20 rounded-2xl px-4 py-3">
+                <div className="flex items-center gap-3">
+                  {/* Cancel button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleCancelRecording}
+                    className="h-9 w-9 text-[#6B7280] hover:text-red-400 hover:bg-red-400/10 rounded-full flex-shrink-0 transition-colors"
+                    aria-label={t.chat.cancelRecording}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+
+                  {/* Recording indicator */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-sm text-[#E5E7EB] font-medium">
+                      {t.chat.recording}
+                    </span>
+                  </div>
+
+                  {/* Elapsed time */}
+                  <span className="text-sm text-[#6B7280] font-mono tabular-nums flex-shrink-0">
+                    {formatDuration(recordingTime)}
+                  </span>
+
+                  {/* Waveform visualization */}
+                  <div className="flex-1 flex justify-center">
+                    <RecordingWaveform />
+                  </div>
+
+                  {/* Send voice button */}
+                  <Button
+                    onClick={handleSendVoiceMessage}
+                    className="h-9 w-9 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-full flex-shrink-0 transition-colors"
+                    aria-label={t.chat.sendVoice}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            /* Normal Input */
+            <motion.div
+              key="input"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-center gap-2 bg-[#111117] border border-white/[0.08] rounded-2xl px-4 py-2 focus-within:border-[#6366F1]/30 transition-colors">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-transparent rounded-lg flex-shrink-0"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+                <Input
+                  ref={inputRef}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={t.chat.placeholder}
+                  className="flex-1 border-0 bg-transparent text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-0 focus-visible:ring-offset-0 h-8 px-0 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSendMessage()
+                    }
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-transparent rounded-lg flex-shrink-0"
+                >
+                  <Smile className="w-4 h-4" />
+                </Button>
+
+                {/* Multi-function button: Send when text typed, Mic when empty */}
+                <AnimatePresence mode="wait">
+                  {showSendButton ? (
+                    <motion.div
+                      key="send"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={isSending}
+                        className="h-8 w-8 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg flex-shrink-0 disabled:opacity-50"
+                      >
+                        {isSending ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="mic"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Button
+                        onClick={handleStartRecording}
+                        className="h-8 w-8 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg flex-shrink-0"
+                        aria-label={t.chat.tapToRecord}
+                      >
+                        <Mic className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

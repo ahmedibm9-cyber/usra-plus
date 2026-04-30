@@ -95,7 +95,8 @@ export interface ChatMessage {
   family_id: string;
   content: string;
   sender_id: string;
-  message_type: 'text' | 'image' | 'file' | 'system';
+  message_type: 'text' | 'image' | 'file' | 'system' | 'voice';
+  voice_duration?: number;
   reply_to: string | null;
   created_at: string;
   sender?: UserProfile;

@@ -6,6 +6,7 @@ import {
   User,
   Shield,
   SlidersHorizontal,
+  Bell,
   Lock,
   Database,
   Plug,
@@ -41,6 +42,14 @@ import {
   BarChart3,
   ShieldCheck,
   Loader2,
+  Volume2,
+  Vibrate,
+  CalendarDays,
+  ShoppingCart,
+  MessageCircle,
+  UserPlus,
+  UserMinus,
+  AtSign,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -76,6 +85,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store'
 import { useTaskStore } from '@/stores/task-store'
 import { useGroceryStore } from '@/stores/grocery-store'
 import { useCalendarStore } from '@/stores/calendar-store'
+import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
 import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
 import { createClient } from '@/lib/supabase/client'
@@ -88,6 +98,7 @@ const settingsTabs = [
   { id: 'user', icon: User, labelKey: 'user' as const },
   { id: 'account', icon: Shield, labelKey: 'account' as const },
   { id: 'preferences', icon: SlidersHorizontal, labelKey: 'preferences' as const },
+  { id: 'notifications', icon: Bell, labelKey: 'notifications' as const },
   { id: 'security', icon: Lock, labelKey: 'security' as const },
   { id: 'data', icon: Database, labelKey: 'data' as const },
   { id: 'integrations', icon: Plug, labelKey: 'integrations' as const },
@@ -105,7 +116,7 @@ function SectionCard({
 }) {
   return (
     <div
-      className={`bg-[#111117] border border-white/[0.08] rounded-2xl p-6 ${className ?? ''}`}
+      className={`bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-6 ${className ?? ''}`}
     >
       {children}
     </div>
@@ -114,12 +125,12 @@ function SectionCard({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[#E5E7EB] text-base font-semibold mb-1">{children}</h3>
+    <h3 className="text-[--text-primary] text-base font-semibold mb-1">{children}</h3>
   )
 }
 
 function SectionDescription({ children }: { children: React.ReactNode }) {
-  return <p className="text-[#6B7280] text-sm mb-4">{children}</p>
+  return <p className="text-[--text-muted] text-sm mb-4">{children}</p>
 }
 
 function SettingRow({
@@ -134,8 +145,8 @@ function SettingRow({
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <div className="flex-1 min-w-0">
-        <p className="text-[#E5E7EB] text-sm font-medium">{label}</p>
-        {description && <p className="text-[#6B7280] text-xs mt-0.5">{description}</p>}
+        <p className="text-[--text-primary] text-sm font-medium">{label}</p>
+        {description && <p className="text-[--text-muted] text-xs mt-0.5">{description}</p>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -250,9 +261,9 @@ function FamilyManagementTab() {
     return (
       <SectionCard>
         <div className="text-center py-12">
-          <Users className="size-12 text-[#6B7280] mx-auto mb-3" />
-          <p className="text-[#6B7280] text-sm">{t.settings.family}</p>
-          <p className="text-[#6B7280] text-xs mt-1">No family selected</p>
+          <Users className="size-12 text-[--text-muted] mx-auto mb-3" />
+          <p className="text-[--text-muted] text-sm">{t.settings.family}</p>
+          <p className="text-[--text-muted] text-xs mt-1">No family selected</p>
         </div>
       </SectionCard>
     )
@@ -260,8 +271,8 @@ function FamilyManagementTab() {
 
   const roleBadgeColor: Record<FamilyRole, string> = {
     owner: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    admin: 'bg-[#6366F1]/20 text-[#A78BFA] border-[#6366F1]/30',
-    member: 'bg-white/5 text-[#6B7280] border-white/10',
+    admin: 'bg-[--accent-primary]/20 text-[--accent-secondary] border-[#6366F1]/30',
+    member: 'bg-white/5 text-[--text-muted] border-white/10',
   }
 
   return (
@@ -274,7 +285,7 @@ function FamilyManagementTab() {
             <SectionDescription>Manage your family details and members</SectionDescription>
           </div>
           {isOwnerOrAdmin && !isEditing && (
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-[#6366F1]">
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-[--accent-primary]">
               <Pencil className="size-4" />
             </Button>
           )}
@@ -283,19 +294,19 @@ function FamilyManagementTab() {
         {isEditing ? (
           <div className="space-y-4">
             <div>
-              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.settings.familyName}</Label>
+              <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.settings.familyName}</Label>
               <Input
                 value={familyName}
                 onChange={(e) => setFamilyName(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB]"
+                className="bg-white/5 border-white/10 text-[--text-primary]"
               />
             </div>
             <div>
-              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Description</Label>
+              <Label className="text-[--text-primary] text-xs mb-1.5 block">Description</Label>
               <Input
                 value={familyDesc}
                 onChange={(e) => setFamilyDesc(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB]"
+                className="bg-white/5 border-white/10 text-[--text-primary]"
                 placeholder="Family description..."
               />
             </div>
@@ -304,12 +315,12 @@ function FamilyManagementTab() {
                 size="sm"
                 onClick={handleSaveFamily}
                 disabled={saving}
-                className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white"
+                className="bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white"
               >
                 {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                 {t.common.save}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} className="text-[#6B7280]">
+              <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} className="text-[--text-muted]">
                 <X className="size-4" />
                 {t.common.cancel}
               </Button>
@@ -318,30 +329,30 @@ function FamilyManagementTab() {
         ) : (
           <div className="space-y-3">
             <div>
-              <span className="text-[#6B7280] text-xs">{t.settings.familyName}</span>
-              <p className="text-[#E5E7EB] font-medium">{currentFamily.name}</p>
+              <span className="text-[--text-muted] text-xs">{t.settings.familyName}</span>
+              <p className="text-[--text-primary] font-medium">{currentFamily.name}</p>
             </div>
             <div>
-              <span className="text-[#6B7280] text-xs">Description</span>
-              <p className="text-[#E5E7EB]">{currentFamily.description || 'No description'}</p>
+              <span className="text-[--text-muted] text-xs">Description</span>
+              <p className="text-[--text-primary]">{currentFamily.description || 'No description'}</p>
             </div>
           </div>
         )}
 
-        <Separator className="my-4 bg-white/[0.06]" />
+        <Separator className="my-4 bg-[--border-subtle]" />
 
         {/* Invite Code */}
         <div>
-          <span className="text-[#6B7280] text-xs block mb-2">{t.settings.inviteCode}</span>
+          <span className="text-[--text-muted] text-xs block mb-2">{t.settings.inviteCode}</span>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[#A78BFA] font-mono text-sm">
+            <code className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[--accent-secondary] font-mono text-sm">
               {currentFamily.invite_code}
             </code>
             <Button
               variant="outline"
               size="sm"
               onClick={handleCopyCode}
-              className="border-white/10 text-[#E5E7EB] hover:bg-white/5"
+              className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2]"
             >
               {copied ? <Check className="size-4 text-green-400" /> : <Copy className="size-4" />}
               {copied ? t.common.copied : t.settings.copyCode}
@@ -360,21 +371,21 @@ function FamilyManagementTab() {
             {familyMembers.map((member: FamilyMember) => (
               <div
                 key={member.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.05] transition-colors"
+                className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle] hover:bg-[--bg-surface-2] transition-colors"
               >
                 <Avatar className="size-9">
                   <AvatarImage src={member.profiles?.avatar_url ?? ''} />
-                  <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-xs">
+                  <AvatarFallback className="bg-[--accent-primary]/20 text-[--accent-secondary] text-xs">
                     {member.profiles?.first_name?.[0] ?? member.nickname?.[0] ?? '?'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#E5E7EB] text-sm font-medium truncate">
+                  <p className="text-[--text-primary] text-sm font-medium truncate">
                     {member.profiles?.first_name
                       ? `${member.profiles.first_name} ${member.profiles.last_name ?? ''}`
                       : member.nickname ?? 'Unknown'}
                   </p>
-                  <p className="text-[#6B7280] text-xs truncate">
+                  <p className="text-[--text-muted] text-xs truncate">
                     {member.profiles?.email ?? ''}
                   </p>
                 </div>
@@ -395,14 +406,14 @@ function FamilyManagementTab() {
                     value={member.role}
                     onValueChange={(v) => handleChangeRole(member.id, v as FamilyRole)}
                   >
-                    <SelectTrigger className="h-7 w-24 text-xs bg-white/5 border-white/10 text-[#6B7280]">
+                    <SelectTrigger className="h-7 w-24 text-xs bg-white/5 border-white/10 text-[--text-muted]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#111117] border-white/10">
-                      <SelectItem value="admin" className="text-[#E5E7EB] text-xs">
+                    <SelectContent className="bg-[--bg-surface] border-white/10">
+                      <SelectItem value="admin" className="text-[--text-primary] text-xs">
                         {t.settings.admin}
                       </SelectItem>
-                      <SelectItem value="member" className="text-[#E5E7EB] text-xs">
+                      <SelectItem value="member" className="text-[--text-primary] text-xs">
                         {t.settings.member}
                       </SelectItem>
                     </SelectContent>
@@ -417,15 +428,15 @@ function FamilyManagementTab() {
                         <Trash2 className="size-3.5" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-[#111117] border-white/10">
+                    <AlertDialogContent className="bg-[--bg-surface] border-white/10">
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="text-[#E5E7EB]">{t.settings.removeMember}</AlertDialogTitle>
-                        <AlertDialogDescription className="text-[#6B7280]">
+                        <AlertDialogTitle className="text-[--text-primary]">{t.settings.removeMember}</AlertDialogTitle>
+                        <AlertDialogDescription className="text-[--text-muted]">
                           Are you sure you want to remove this member? This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-white/5 border-white/10 text-[#E5E7EB]">
+                        <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
                           {t.common.cancel}
                         </AlertDialogCancel>
                         <AlertDialogAction
@@ -455,8 +466,8 @@ function FamilyManagementTab() {
             <AlertDialog>
               <div className="flex items-center justify-between p-3 rounded-xl bg-[#EF4444]/5 border border-[#EF4444]/10">
                 <div>
-                  <p className="text-[#E5E7EB] text-sm font-medium">Leave Family</p>
-                  <p className="text-[#6B7280] text-xs">You will lose access to all family data</p>
+                  <p className="text-[--text-primary] text-sm font-medium">Leave Family</p>
+                  <p className="text-[--text-muted] text-xs">You will lose access to all family data</p>
                 </div>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="border-[#EF4444]/30 text-[#EF4444] hover:bg-[#EF4444]/10">
@@ -465,15 +476,15 @@ function FamilyManagementTab() {
                   </Button>
                 </AlertDialogTrigger>
               </div>
-              <AlertDialogContent className="bg-[#111117] border-white/10">
+              <AlertDialogContent className="bg-[--bg-surface] border-white/10">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-[#E5E7EB]">Leave Family</AlertDialogTitle>
-                  <AlertDialogDescription className="text-[#6B7280]">
+                  <AlertDialogTitle className="text-[--text-primary]">Leave Family</AlertDialogTitle>
+                  <AlertDialogDescription className="text-[--text-muted]">
                     Are you sure you want to leave &quot;{currentFamily.name}&quot;? You will lose access to all shared data, tasks, and events.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white/5 border-white/10 text-[#E5E7EB]">
+                  <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
                     {t.common.cancel}
                   </AlertDialogCancel>
                   <AlertDialogAction onClick={handleLeaveFamily} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -489,8 +500,8 @@ function FamilyManagementTab() {
             <AlertDialog>
               <div className="flex items-center justify-between p-3 rounded-xl bg-[#EF4444]/5 border border-[#EF4444]/10">
                 <div>
-                  <p className="text-[#E5E7EB] text-sm font-medium">{t.common.delete} Family</p>
-                  <p className="text-[#6B7280] text-xs">Permanently delete this family and all its data</p>
+                  <p className="text-[--text-primary] text-sm font-medium">{t.common.delete} Family</p>
+                  <p className="text-[--text-muted] text-xs">Permanently delete this family and all its data</p>
                 </div>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">
@@ -499,15 +510,15 @@ function FamilyManagementTab() {
                   </Button>
                 </AlertDialogTrigger>
               </div>
-              <AlertDialogContent className="bg-[#111117] border-white/10">
+              <AlertDialogContent className="bg-[--bg-surface] border-white/10">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-[#E5E7EB]">Delete Family</AlertDialogTitle>
-                  <AlertDialogDescription className="text-[#6B7280]">
+                  <AlertDialogTitle className="text-[--text-primary]">Delete Family</AlertDialogTitle>
+                  <AlertDialogDescription className="text-[--text-muted]">
                     This will permanently delete &quot;{currentFamily.name}&quot; and remove all members, tasks, events, and data. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white/5 border-white/10 text-[#E5E7EB]">
+                  <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
                     {t.common.cancel}
                   </AlertDialogCancel>
                   <AlertDialogAction onClick={handleDeleteFamily} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -595,25 +606,25 @@ function UserManagementTab() {
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="size-16 border-2 border-[#6366F1]/30">
             <AvatarImage src={user?.avatar_url ?? ''} />
-            <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-xl">
+            <AvatarFallback className="bg-[--accent-primary]/20 text-[--accent-secondary] text-xl">
               {user?.first_name?.[0] ?? user?.email?.[0] ?? '?'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="text-[#E5E7EB] text-lg font-semibold">
+            <h3 className="text-[--text-primary] text-lg font-semibold">
               {user?.first_name && user?.last_name
                 ? `${user.first_name} ${user.last_name}`
                 : user?.email ?? 'User'}
             </h3>
-            <p className="text-[#6B7280] text-sm">{user?.email}</p>
+            <p className="text-[--text-muted] text-sm">{user?.email}</p>
             <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline" className="bg-[#6366F1]/10 text-[#A78BFA] border-[#6366F1]/20 text-[10px]">
+              <Badge variant="outline" className="bg-[--accent-primary]/10 text-[--accent-secondary] border-[#6366F1]/20 text-[10px]">
                 {t.settings.owner}
               </Badge>
             </div>
           </div>
           {!isEditing && (
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-[#6366F1]">
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-[--accent-primary]">
               <Pencil className="size-4" />
               {t.settings.editProfile}
             </Button>
@@ -629,20 +640,20 @@ function UserManagementTab() {
           >
             {/* Change Photo */}
             <div>
-              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">
+              <Label className="text-[--text-primary] text-xs mb-1.5 block">
                 {t.settings.editProfile}
               </Label>
               <div className="flex items-center gap-3">
                 <Avatar className="size-14 border border-white/10">
                   <AvatarImage src={user?.avatar_url ?? ''} />
-                  <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-lg">
+                  <AvatarFallback className="bg-[--accent-primary]/20 text-[--accent-secondary] text-lg">
                     {user?.first_name?.[0] ?? '?'}
                   </AvatarFallback>
                 </Avatar>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-white/[0.08] bg-[#0B0B0F] text-[#E5E7EB] hover:bg-white/5 hover:border-white/[0.12]"
+                  className="border-[--border-medium] bg-[--bg-primary] text-[--text-primary] hover:bg-[--bg-surface-2] hover:border-[--border-medium]"
                   onClick={() => toast.info(isRTL ? 'سيكون رفع الصور متاحاً قريباً' : 'Photo upload coming soon')}
                 >
                   Change Photo
@@ -650,25 +661,25 @@ function UserManagementTab() {
               </div>
             </div>
 
-            <Separator className="bg-white/[0.06]" />
+            <Separator className="bg-[--border-subtle]" />
 
             {/* First Name & Last Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.firstName}</Label>
+                <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.auth.firstName}</Label>
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/30"
+                  className="bg-[--bg-primary] border-[--border-medium] text-[--text-primary] focus-visible:ring-[#6366F1]/30"
                   placeholder={isRTL ? 'الاسم الأول' : 'First name'}
                 />
               </div>
               <div>
-                <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.lastName}</Label>
+                <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.auth.lastName}</Label>
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/30"
+                  className="bg-[--bg-primary] border-[--border-medium] text-[--text-primary] focus-visible:ring-[#6366F1]/30"
                   placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
                 />
               </div>
@@ -676,31 +687,31 @@ function UserManagementTab() {
 
             {/* Email (read-only) */}
             <div>
-              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.email}</Label>
+              <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.auth.email}</Label>
               <Input
                 value={user?.email ?? ''}
                 readOnly
-                className="bg-[#0B0B0F]/60 border-white/[0.04] text-[#6B7280] cursor-not-allowed focus-visible:ring-0"
+                className="bg-[--bg-primary]/60 border-[--border-subtle] text-[--text-muted] cursor-not-allowed focus-visible:ring-0"
               />
-              <p className="text-[10px] text-[#6B7280] mt-1">
+              <p className="text-[10px] text-[--text-muted] mt-1">
                 {isRTL ? 'لا يمكن تغيير البريد الإلكتروني من هنا' : 'Email cannot be changed here'}
               </p>
             </div>
 
             {/* Phone with country code */}
             <div>
-              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.phone}</Label>
+              <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.auth.phone}</Label>
               <div className="flex gap-2">
                 <Select value={countryCode} onValueChange={setCountryCode}>
-                  <SelectTrigger className="w-[120px] bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus:ring-[#6366F1]/30 shrink-0">
+                  <SelectTrigger className="w-[120px] bg-[--bg-primary] border-[--border-medium] text-[--text-primary] focus:ring-[#6366F1]/30 shrink-0">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] max-h-64">
+                  <SelectContent className="bg-[--bg-surface] border-[--border-medium] text-[--text-primary] max-h-64">
                     {countryCodes.map((cc) => (
                       <SelectItem
                         key={cc.code}
                         value={cc.code}
-                        className="focus:bg-[#6366F1]/10 focus:text-[#A78BFA] cursor-pointer"
+                        className="focus:bg-[--accent-primary]/10 focus:text-[--accent-secondary] cursor-pointer"
                       >
                         <span className="flex items-center gap-1.5">
                           <span>{cc.flag}</span>
@@ -713,13 +724,13 @@ function UserManagementTab() {
                 <Input
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="flex-1 bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/30"
+                  className="flex-1 bg-[--bg-primary] border-[--border-medium] text-[--text-primary] focus-visible:ring-[#6366F1]/30"
                   placeholder="501234567"
                 />
               </div>
             </div>
 
-            <Separator className="bg-white/[0.06]" />
+            <Separator className="bg-[--border-subtle]" />
 
             {/* Save / Cancel */}
             <div className="flex gap-2">
@@ -727,12 +738,12 @@ function UserManagementTab() {
                 size="sm"
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white"
+                className="bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white"
               >
                 {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                 {t.common.save}
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleCancel} className="text-[#6B7280] hover:text-[#E5E7EB]">
+              <Button size="sm" variant="ghost" onClick={handleCancel} className="text-[--text-muted] hover:text-[--text-primary]">
                 <X className="size-4" />
                 {t.common.cancel}
               </Button>
@@ -747,21 +758,21 @@ function UserManagementTab() {
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <span className="text-[#6B7280] text-xs">{t.auth.firstName}</span>
-                <p className="text-[#E5E7EB] text-sm">{user?.first_name || 'Not set'}</p>
+                <span className="text-[--text-muted] text-xs">{t.auth.firstName}</span>
+                <p className="text-[--text-primary] text-sm">{user?.first_name || 'Not set'}</p>
               </div>
               <div>
-                <span className="text-[#6B7280] text-xs">{t.auth.lastName}</span>
-                <p className="text-[#E5E7EB] text-sm">{user?.last_name || 'Not set'}</p>
+                <span className="text-[--text-muted] text-xs">{t.auth.lastName}</span>
+                <p className="text-[--text-primary] text-sm">{user?.last_name || 'Not set'}</p>
               </div>
             </div>
             <div>
-              <span className="text-[#6B7280] text-xs">{t.auth.email}</span>
-              <p className="text-[#E5E7EB] text-sm">{user?.email || 'Not set'}</p>
+              <span className="text-[--text-muted] text-xs">{t.auth.email}</span>
+              <p className="text-[--text-primary] text-sm">{user?.email || 'Not set'}</p>
             </div>
             <div>
-              <span className="text-[#6B7280] text-xs">{t.auth.phone}</span>
-              <p className="text-[#E5E7EB] text-sm">{user?.phone || 'Not set'}</p>
+              <span className="text-[--text-muted] text-xs">{t.auth.phone}</span>
+              <p className="text-[--text-primary] text-sm">{user?.phone || 'Not set'}</p>
             </div>
           </motion.div>
         )}
@@ -777,23 +788,23 @@ function UserManagementTab() {
             {families.map((family) => (
               <div
                 key={family.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+                className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
               >
-                <div className="size-9 rounded-lg bg-[#6366F1]/20 flex items-center justify-center">
-                  <Users className="size-4 text-[#A78BFA]" />
+                <div className="size-9 rounded-lg bg-[--accent-primary]/20 flex items-center justify-center">
+                  <Users className="size-4 text-[--accent-secondary]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#E5E7EB] text-sm font-medium truncate">{family.name}</p>
-                  <p className="text-[#6B7280] text-xs truncate">{family.description || 'No description'}</p>
+                  <p className="text-[--text-primary] text-sm font-medium truncate">{family.name}</p>
+                  <p className="text-[--text-muted] text-xs truncate">{family.description || 'No description'}</p>
                 </div>
-                <ChevronRight className="size-4 text-[#6B7280]" />
+                <ChevronRight className="size-4 text-[--text-muted]" />
               </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-6">
-            <Users className="size-8 text-[#6B7280] mx-auto mb-2" />
-            <p className="text-[#6B7280] text-sm">No family memberships yet</p>
+            <Users className="size-8 text-[--text-muted] mx-auto mb-2" />
+            <p className="text-[--text-muted] text-sm">No family memberships yet</p>
           </div>
         )}
       </SectionCard>
@@ -872,26 +883,26 @@ function AccountSettingsTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Mail className="size-4 text-[#6366F1]" /> Change Email
+            <Mail className="size-4 text-[--accent-primary]" /> Change Email
           </span>
         </SectionTitle>
         <SectionDescription>Update your email address</SectionDescription>
 
         <div className="space-y-3">
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.email}</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.auth.email}</Label>
             <div className="flex gap-2">
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB] flex-1"
+                className="bg-white/5 border-white/10 text-[--text-primary] flex-1"
               />
               <Button
                 size="sm"
                 onClick={handleEmailChange}
                 disabled={savingEmail}
-                className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white shrink-0"
+                className="bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white shrink-0"
               >
                 {savingEmail ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                 {t.common.save}
@@ -905,57 +916,57 @@ function AccountSettingsTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <KeyRound className="size-4 text-[#6366F1]" /> {t.settings.changePassword}
+            <KeyRound className="size-4 text-[--accent-primary]" /> {t.settings.changePassword}
           </span>
         </SectionTitle>
         <SectionDescription>Update your password to keep your account secure</SectionDescription>
 
         <div className="space-y-3">
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Current Password</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">Current Password</Label>
             <div className="relative">
               <Input
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
                 placeholder="Enter current password"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary]"
               >
                 {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">New Password</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">New Password</Label>
             <div className="relative">
               <Input
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
                 placeholder="Enter new password"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary]"
               >
                 {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.confirmPassword}</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">{t.auth.confirmPassword}</Label>
             <Input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="bg-white/5 border-white/10 text-[#E5E7EB]"
+              className="bg-white/5 border-white/10 text-[--text-primary]"
               placeholder="Confirm new password"
             />
           </div>
@@ -963,7 +974,7 @@ function AccountSettingsTab() {
             size="sm"
             onClick={handlePasswordChange}
             disabled={savingPassword}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white"
+            className="bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white"
           >
             {savingPassword ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
             {t.settings.changePassword}
@@ -987,15 +998,15 @@ function AccountSettingsTab() {
               {t.settings.deleteAccount}
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-[#111117] border-white/10">
+          <AlertDialogContent className="bg-[--bg-surface] border-white/10">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-[#E5E7EB]">{t.settings.deleteAccount}</AlertDialogTitle>
-              <AlertDialogDescription className="text-[#6B7280]">
+              <AlertDialogTitle className="text-[--text-primary]">{t.settings.deleteAccount}</AlertDialogTitle>
+              <AlertDialogDescription className="text-[--text-muted]">
                 This will permanently delete your account, all your families, tasks, events, and data. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-white/5 border-white/10 text-[#E5E7EB]">
+              <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
                 {t.common.cancel}
               </AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteAccount} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -1012,9 +1023,9 @@ function AccountSettingsTab() {
 // ─── Preferences Tab ─────────────────────────────────────────────────────────
 
 function PreferencesTab() {
-  const { t, language, setLanguage } = useI18n()
+  const { t, language, setLanguage, isRTL } = useI18n()
   const { user, setUser } = useAuthStore()
-  const [theme, setTheme] = useState<Theme>(user?.theme ?? 'dark')
+  const { theme, setTheme } = useAppStore()
   const [notifications, setNotifications] = useState<Record<Notification['type'], boolean>>({
     task: true,
     calendar: true,
@@ -1024,13 +1035,21 @@ function PreferencesTab() {
     system: true,
   })
 
-  const handleThemeToggle = useCallback(() => {
-    const newTheme: Theme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(newTheme)
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('dark', newTheme === 'dark')
-    }
-  }, [theme])
+  const handleThemeChange = useCallback(
+    (newTheme: Theme) => {
+      setTheme(newTheme)
+      if (user) {
+        try {
+          const supabase = createClient()
+          supabase.from('profiles').update({ theme: newTheme }).eq('id', user.id).then()
+        } catch {
+          // silently fail - theme changed locally already
+        }
+        setUser({ ...user, theme: newTheme })
+      }
+    },
+    [setTheme, user, setUser]
+  )
 
   const handleLanguageChange = useCallback(
     async (lang: Language) => {
@@ -1067,7 +1086,7 @@ function PreferencesTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Globe className="size-4 text-[#6366F1]" /> {t.settings.language}
+            <Globe className="size-4 text-[--accent-primary]" /> {t.settings.language}
           </span>
         </SectionTitle>
         <SectionDescription>Choose your preferred language</SectionDescription>
@@ -1077,8 +1096,8 @@ function PreferencesTab() {
             onClick={() => handleLanguageChange('en')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
               language === 'en'
-                ? 'bg-[#6366F1]/10 border-[#6366F1]/30 text-[#A78BFA]'
-                : 'bg-white/[0.03] border-white/[0.05] text-[#6B7280] hover:bg-white/[0.05]'
+                ? 'bg-[--accent-primary]/10 border-[#6366F1]/30 text-[--accent-secondary]'
+                : 'bg-[--bg-surface-2] border-[--border-subtle] text-[--text-muted] hover:bg-[--bg-surface-2]'
             }`}
           >
             <span className="text-lg">🇺🇸</span>
@@ -1089,8 +1108,8 @@ function PreferencesTab() {
             onClick={() => handleLanguageChange('ar')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
               language === 'ar'
-                ? 'bg-[#6366F1]/10 border-[#6366F1]/30 text-[#A78BFA]'
-                : 'bg-white/[0.03] border-white/[0.05] text-[#6B7280] hover:bg-white/[0.05]'
+                ? 'bg-[--accent-primary]/10 border-[#6366F1]/30 text-[--accent-secondary]'
+                : 'bg-[--bg-surface-2] border-[--border-subtle] text-[--text-muted] hover:bg-[--bg-surface-2]'
             }`}
           >
             <span className="text-lg">🇸🇦</span>
@@ -1104,35 +1123,35 @@ function PreferencesTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            {theme === 'dark' ? <Moon className="size-4 text-[#6366F1]" /> : <Sun className="size-4 text-[#6366F1]" />}
+            {theme === 'dark' ? <Moon className="size-4 text-[--accent-primary]" /> : <Sun className="size-4 text-[--accent-primary]" />}
             {t.settings.theme}
           </span>
         </SectionTitle>
-        <SectionDescription>Customize your visual experience</SectionDescription>
+        <SectionDescription>{isRTL ? 'خصّص تجربتك البصرية' : 'Customize your visual experience'}</SectionDescription>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => { setTheme('dark'); if (typeof document !== 'undefined') document.documentElement.classList.add('dark') }}
+            onClick={() => handleThemeChange('dark')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all flex-1 ${
               theme === 'dark'
-                ? 'bg-[#6366F1]/10 border-[#6366F1]/30 text-[#A78BFA]'
-                : 'bg-white/[0.03] border-white/[0.05] text-[#6B7280] hover:bg-white/[0.05]'
+                ? 'bg-[--accent-primary]/10 border-[--accent-primary]/30 text-[--accent-secondary]'
+                : 'bg-[--bg-surface-2]/50 border-[--border-subtle] text-[--text-muted] hover:bg-[--bg-surface-2]'
             }`}
           >
-            <Moon className="size-5" />
-            <span className="text-sm font-medium">{t.settings.darkMode}</span>
+            <Moon className={`size-5 ${theme === 'dark' ? 'theme-icon-animate' : ''}`} />
+            <span className="text-sm font-medium">{isRTL ? 'داكن' : 'Dark'}</span>
             {theme === 'dark' && <Check className="size-4 ml-auto" />}
           </button>
           <button
-            onClick={() => { setTheme('light'); if (typeof document !== 'undefined') document.documentElement.classList.remove('dark') }}
+            onClick={() => handleThemeChange('light')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all flex-1 ${
               theme === 'light'
-                ? 'bg-[#6366F1]/10 border-[#6366F1]/30 text-[#A78BFA]'
-                : 'bg-white/[0.03] border-white/[0.05] text-[#6B7280] hover:bg-white/[0.05]'
+                ? 'bg-[--accent-primary]/10 border-[--accent-primary]/30 text-[--accent-secondary]'
+                : 'bg-[--bg-surface-2]/50 border-[--border-subtle] text-[--text-muted] hover:bg-[--bg-surface-2]'
             }`}
           >
-            <Sun className="size-5" />
-            <span className="text-sm font-medium">{t.settings.lightMode}</span>
+            <Sun className={`size-5 ${theme === 'light' ? 'theme-icon-animate' : ''}`} />
+            <span className="text-sm font-medium">{isRTL ? 'فاتح' : 'Light'}</span>
             {theme === 'light' && <Check className="size-4 ml-auto" />}
           </button>
         </div>
@@ -1149,6 +1168,285 @@ function PreferencesTab() {
               <Switch checked={notifications[type]} onCheckedChange={() => toggleNotification(type)} />
             </SettingRow>
           ))}
+        </div>
+      </SectionCard>
+    </div>
+  )
+}
+
+// ─── Notifications Tab ────────────────────────────────────────────────────────
+
+function NotificationsTab() {
+  const { t, isRTL } = useI18n()
+  const store = useNotificationPreferencesStore()
+
+  const categoryGroups = [
+    {
+      id: 'tasks',
+      icon: CheckCircle2,
+      label: t.notifications.tasks,
+      items: [
+        { key: 'taskAssigned' as const, label: t.notifications.taskAssigned },
+        { key: 'taskCompleted' as const, label: t.notifications.taskCompleted },
+        { key: 'taskDueReminder' as const, label: t.notifications.taskDueReminder },
+      ],
+    },
+    {
+      id: 'calendar',
+      icon: CalendarDays,
+      label: t.notifications.calendar,
+      items: [
+        { key: 'eventReminder' as const, label: t.notifications.eventReminder },
+        { key: 'eventStarting' as const, label: t.notifications.eventStarting },
+      ],
+    },
+    {
+      id: 'grocery',
+      icon: ShoppingCart,
+      label: t.notifications.grocery,
+      items: [
+        { key: 'groceryReminder' as const, label: t.notifications.groceryReminder },
+        { key: 'groceryChecked' as const, label: t.notifications.groceryChecked },
+      ],
+    },
+    {
+      id: 'family',
+      icon: UserPlus,
+      label: t.notifications.family,
+      items: [
+        { key: 'familyMemberJoined' as const, label: t.notifications.memberJoined },
+        { key: 'familyMemberLeft' as const, label: t.notifications.memberLeft },
+      ],
+    },
+    {
+      id: 'chat',
+      icon: MessageCircle,
+      label: t.notifications.chat,
+      items: [
+        { key: 'chatMention' as const, label: t.notifications.chatMention },
+        { key: 'chatMessage' as const, label: t.notifications.chatMessage },
+      ],
+    },
+  ]
+
+  const reminderAdvanceOptions = [
+    { value: 5, label: t.notifications.min5 },
+    { value: 15, label: t.notifications.min15 },
+    { value: 30, label: t.notifications.min30 },
+    { value: 60, label: t.notifications.hour1 },
+    { value: 1440, label: t.notifications.day1 },
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* Section 1: Channels */}
+      <SectionCard>
+        <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-3">
+          {t.notifications.channels}
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Push */}
+          <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+            <div className="size-10 rounded-lg bg-[--accent-primary]/10 flex items-center justify-center">
+              <Bell className="size-5 text-[--accent-secondary]" />
+            </div>
+            <span className="text-[--text-primary] text-sm font-medium text-center">{t.notifications.pushNotifications}</span>
+            <p className="text-[--text-muted] text-xs text-center">{t.notifications.pushDesc}</p>
+            <Switch
+              checked={store.pushEnabled}
+              onCheckedChange={(v) => store.setPreference('pushEnabled', v)}
+              className="data-[state=checked]:bg-[--accent-primary]"
+            />
+          </div>
+          {/* Email */}
+          <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+            <div className="size-10 rounded-lg bg-[--accent-primary]/10 flex items-center justify-center">
+              <Mail className="size-5 text-[--accent-secondary]" />
+            </div>
+            <span className="text-[--text-primary] text-sm font-medium text-center">{t.notifications.emailNotifications}</span>
+            <p className="text-[--text-muted] text-xs text-center">{t.notifications.emailDesc}</p>
+            <Switch
+              checked={store.emailEnabled}
+              onCheckedChange={(v) => store.setPreference('emailEnabled', v)}
+              className="data-[state=checked]:bg-[--accent-primary]"
+            />
+          </div>
+          {/* In-App */}
+          <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+            <div className="size-10 rounded-lg bg-[--accent-primary]/10 flex items-center justify-center">
+              <Monitor className="size-5 text-[--accent-secondary]" />
+            </div>
+            <span className="text-[--text-primary] text-sm font-medium text-center">{t.notifications.inAppNotifications}</span>
+            <p className="text-[--text-muted] text-xs text-center">{t.notifications.inAppDesc}</p>
+            <Switch
+              checked={store.inAppEnabled}
+              onCheckedChange={(v) => store.setPreference('inAppEnabled', v)}
+              className="data-[state=checked]:bg-[--accent-primary]"
+            />
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Section 2: Categories */}
+      <SectionCard>
+        <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-3">
+          {t.notifications.categories}
+        </h4>
+        <div className="space-y-4">
+          {categoryGroups.map((group) => {
+            const allEnabled = group.items.every((item) => store[item.key])
+            return (
+              <div key={group.id}>
+                {/* Group Header */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <group.icon className="size-4 text-[--accent-primary]" />
+                    <span className="text-[--text-primary] text-sm font-semibold">{group.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => store.setCategoryGroup(group.id, true)}
+                      className={`text-xs px-2 py-0.5 rounded-md transition-colors ${
+                        allEnabled
+                          ? 'text-[--accent-primary] bg-[--accent-primary]/10'
+                          : 'text-[--text-muted] hover:text-[--accent-secondary] hover:bg-[--bg-surface-2]'
+                      }`}
+                    >
+                      {t.notifications.enableAll}
+                    </button>
+                    <button
+                      onClick={() => store.setCategoryGroup(group.id, false)}
+                      className={`text-xs px-2 py-0.5 rounded-md transition-colors ${
+                        !allEnabled
+                          ? 'text-[#EF4444] bg-[#EF4444]/10'
+                          : 'text-[--text-muted] hover:text-[#EF4444] hover:bg-[--bg-surface-2]'
+                      }`}
+                    >
+                      {t.notifications.disableAll}
+                    </button>
+                  </div>
+                </div>
+                {/* Category Items */}
+                <div className="space-y-0">
+                  {group.items.map((item, idx) => (
+                    <div
+                      key={item.key}
+                      className={`flex items-center justify-between py-3 ${idx < group.items.length - 1 ? 'border-b border-[--border-subtle]' : ''}`}
+                    >
+                      <span className="text-[--text-primary] text-sm">{item.label}</span>
+                      <Switch
+                        checked={store[item.key]}
+                        onCheckedChange={(v) => store.setPreference(item.key, v)}
+                        className="data-[state=checked]:bg-[--accent-primary]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </SectionCard>
+
+      {/* Section 3: Schedule & Sound */}
+      <SectionCard>
+        <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-3">
+          {t.notifications.scheduleAndSound}
+        </h4>
+
+        <div className="space-y-0">
+          {/* Quiet Hours */}
+          <div className="flex items-center justify-between py-3 border-b border-[--border-subtle]">
+            <div className="flex-1 min-w-0">
+              <p className="text-[--text-primary] text-sm font-medium">{t.notifications.quietHours}</p>
+              <p className="text-[--text-muted] text-xs mt-0.5">{t.notifications.quietHoursDesc}</p>
+            </div>
+            <Switch
+              checked={store.quietHoursEnabled}
+              onCheckedChange={(v) => store.setPreference('quietHoursEnabled', v)}
+              className="data-[state=checked]:bg-[--accent-primary]"
+            />
+          </div>
+
+          {/* Quiet Hours Time Pickers */}
+          {store.quietHoursEnabled && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-4 py-3 border-b border-[--border-subtle] pl-2"
+            >
+              <div className="flex-1">
+                <Label className="text-[--text-muted] text-xs mb-1 block">{t.notifications.startTime}</Label>
+                <Input
+                  type="time"
+                  value={store.quietHoursStart}
+                  onChange={(e) => store.setPreference('quietHoursStart', e.target.value)}
+                  className="bg-[--bg-primary] border-[--border-medium] text-[--text-primary] w-full"
+                />
+              </div>
+              <div className="flex-1">
+                <Label className="text-[--text-muted] text-xs mb-1 block">{t.notifications.endTime}</Label>
+                <Input
+                  type="time"
+                  value={store.quietHoursEnd}
+                  onChange={(e) => store.setPreference('quietHoursEnd', e.target.value)}
+                  className="bg-[--bg-primary] border-[--border-medium] text-[--text-primary] w-full"
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Reminder Advance */}
+          <div className="flex items-center justify-between py-3 border-b border-[--border-subtle]">
+            <span className="text-[--text-primary] text-sm font-medium">{t.notifications.reminderAdvance}</span>
+            <Select
+              value={String(store.reminderAdvanceMinutes)}
+              onValueChange={(v) => store.setPreference('reminderAdvanceMinutes', Number(v))}
+            >
+              <SelectTrigger className="w-[140px] bg-[--bg-primary] border-[--border-medium] text-[--text-primary] text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[--bg-surface] border-[--border-medium]">
+                {reminderAdvanceOptions.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={String(option.value)}
+                    className="text-[--text-primary] text-sm focus:bg-[--accent-primary]/10 focus:text-[--accent-secondary]"
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Sound */}
+          <div className="flex items-center justify-between py-3 border-b border-[--border-subtle]">
+            <div className="flex items-center gap-2">
+              <Volume2 className="size-4 text-[--text-muted]" />
+              <span className="text-[--text-primary] text-sm font-medium">{t.notifications.sound}</span>
+            </div>
+            <Switch
+              checked={store.soundEnabled}
+              onCheckedChange={(v) => store.setPreference('soundEnabled', v)}
+              className="data-[state=checked]:bg-[--accent-primary]"
+            />
+          </div>
+
+          {/* Vibration */}
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center gap-2">
+              <Vibrate className="size-4 text-[--text-muted]" />
+              <span className="text-[--text-primary] text-sm font-medium">{t.notifications.vibration}</span>
+            </div>
+            <Switch
+              checked={store.vibrationEnabled}
+              onCheckedChange={(v) => store.setPreference('vibrationEnabled', v)}
+              className="data-[state=checked]:bg-[--accent-primary]"
+            />
+          </div>
         </div>
       </SectionCard>
     </div>
@@ -1190,19 +1488,19 @@ function SecurityTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-[#6366F1]" /> Two-Factor Authentication
+            <ShieldCheck className="size-4 text-[--accent-primary]" /> Two-Factor Authentication
           </span>
         </SectionTitle>
         <SectionDescription>Add an extra layer of security to your account</SectionDescription>
 
-        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-[#6366F1]/10 flex items-center justify-center">
-              <Lock className="size-4 text-[#A78BFA]" />
+            <div className="size-9 rounded-lg bg-[--accent-primary]/10 flex items-center justify-center">
+              <Lock className="size-4 text-[--accent-secondary]" />
             </div>
             <div>
-              <p className="text-[#E5E7EB] text-sm font-medium">Two-Factor Authentication</p>
-              <p className="text-[#6B7280] text-xs">Add an extra layer of security to your account</p>
+              <p className="text-[--text-primary] text-sm font-medium">Two-Factor Authentication</p>
+              <p className="text-[--text-muted] text-xs">Add an extra layer of security to your account</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1216,7 +1514,7 @@ function SecurityTab() {
                 toast.info('2FA setup coming soon!')
               }}
               disabled
-              className="data-[state=checked]:bg-[#6366F1]/50"
+              className="data-[state=checked]:bg-[--accent-primary]/50"
             />
           </div>
         </div>
@@ -1226,7 +1524,7 @@ function SecurityTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Smartphone className="size-4 text-[#6366F1]" /> Active Sessions
+            <Smartphone className="size-4 text-[--accent-primary]" /> Active Sessions
           </span>
         </SectionTitle>
         <SectionDescription>Devices currently signed in to your account</SectionDescription>
@@ -1235,22 +1533,22 @@ function SecurityTab() {
           {sessions.map((session) => (
             <div
               key={session.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+              className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
             >
               <div className="size-9 rounded-lg bg-white/5 flex items-center justify-center">
-                <session.icon className="size-4 text-[#6B7280]" />
+                <session.icon className="size-4 text-[--text-muted]" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className={`size-2 rounded-full ${session.current ? 'bg-green-400' : 'bg-[#6B7280]/40'}`} />
-                  <p className="text-[#E5E7EB] text-sm font-medium">{session.device}</p>
+                  <p className="text-[--text-primary] text-sm font-medium">{session.device}</p>
                   {session.current && (
                     <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px] px-1.5 py-0">
                       Current
                     </Badge>
                   )}
                 </div>
-                <p className="text-[#6B7280] text-xs">
+                <p className="text-[--text-muted] text-xs">
                   {session.ip} &middot; {session.lastActive}
                 </p>
               </div>
@@ -1273,64 +1571,64 @@ function SecurityTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <KeyRound className="size-4 text-[#6366F1]" /> Change Password
+            <KeyRound className="size-4 text-[--accent-primary]" /> Change Password
           </span>
         </SectionTitle>
         <SectionDescription>Update your password to keep your account secure</SectionDescription>
 
         <div className="space-y-3">
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Current Password</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">Current Password</Label>
             <div className="relative">
               <Input
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
                 placeholder="Enter current password"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary]"
               >
                 {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">New Password</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">New Password</Label>
             <div className="relative">
               <Input
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
                 placeholder="Enter new password"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary]"
               >
                 {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
           <div>
-            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Confirm New Password</Label>
+            <Label className="text-[--text-primary] text-xs mb-1.5 block">Confirm New Password</Label>
             <div className="relative">
               <Input
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
                 placeholder="Confirm new password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary]"
               >
                 {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -1339,7 +1637,7 @@ function SecurityTab() {
           <Button
             size="sm"
             onClick={handleUpdatePassword}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white"
+            className="bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white"
           >
             <KeyRound className="size-4" />
             Update Password
@@ -1351,7 +1649,7 @@ function SecurityTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Eye className="size-4 text-[#6366F1]" /> Privacy Controls
+            <Eye className="size-4 text-[--accent-primary]" /> Privacy Controls
           </span>
         </SectionTitle>
         <SectionDescription>Manage your privacy and visibility settings</SectionDescription>
@@ -1505,7 +1803,7 @@ function DataControlTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <HardDrive className="size-4 text-[#6366F1]" /> Storage Usage
+            <HardDrive className="size-4 text-[--accent-primary]" /> Storage Usage
           </span>
         </SectionTitle>
         <SectionDescription>Your current storage consumption</SectionDescription>
@@ -1513,28 +1811,28 @@ function DataControlTab() {
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[#E5E7EB] text-sm">2.4 GB of 5 GB</span>
-              <span className="text-[#A78BFA] text-sm font-medium">48%</span>
+              <span className="text-[--text-primary] text-sm">2.4 GB of 5 GB</span>
+              <span className="text-[--accent-secondary] text-sm font-medium">48%</span>
             </div>
-            <Progress value={48} className="h-2 bg-white/5 [&>div]:bg-[#6366F1]" />
+            <Progress value={48} className="h-2 bg-white/5 [&>div]:bg-[--accent-primary]" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-              <p className="text-[#6B7280] text-xs">Files</p>
-              <p className="text-[#E5E7EB] text-sm font-medium">1.8 GB</p>
+            <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+              <p className="text-[--text-muted] text-xs">Files</p>
+              <p className="text-[--text-primary] text-sm font-medium">1.8 GB</p>
             </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-              <p className="text-[#6B7280] text-xs">Messages</p>
-              <p className="text-[#E5E7EB] text-sm font-medium">0.4 GB</p>
+            <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+              <p className="text-[--text-muted] text-xs">Messages</p>
+              <p className="text-[--text-primary] text-sm font-medium">0.4 GB</p>
             </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-              <p className="text-[#6B7280] text-xs">Tasks & Events</p>
-              <p className="text-[#E5E7EB] text-sm font-medium">0.1 GB</p>
+            <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+              <p className="text-[--text-muted] text-xs">Tasks & Events</p>
+              <p className="text-[--text-primary] text-sm font-medium">0.1 GB</p>
             </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-              <p className="text-[#6B7280] text-xs">Other</p>
-              <p className="text-[#E5E7EB] text-sm font-medium">0.1 GB</p>
+            <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+              <p className="text-[--text-muted] text-xs">Other</p>
+              <p className="text-[--text-primary] text-sm font-medium">0.1 GB</p>
             </div>
           </div>
         </div>
@@ -1544,7 +1842,7 @@ function DataControlTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Download className="size-4 text-[#6366F1]" /> {t.settings.exportData}
+            <Download className="size-4 text-[--accent-primary]" /> {t.settings.exportData}
           </span>
         </SectionTitle>
         <SectionDescription>Download a copy of all your data in your preferred format</SectionDescription>
@@ -1554,7 +1852,7 @@ function DataControlTab() {
             onClick={handleExportJSON}
             disabled={exporting}
             variant="outline"
-            className="border-white/10 text-[#E5E7EB] hover:bg-white/5 gap-2"
+            className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2] gap-2"
           >
             {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
             Export as JSON
@@ -1563,7 +1861,7 @@ function DataControlTab() {
             onClick={handleExportCSV}
             disabled={exportingCSV}
             variant="outline"
-            className="border-white/10 text-[#E5E7EB] hover:bg-white/5 gap-2"
+            className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2] gap-2"
           >
             {exportingCSV ? <Loader2 className="size-4 animate-spin" /> : <BarChart3 className="size-4" />}
             Export Tasks as CSV
@@ -1587,15 +1885,15 @@ function DataControlTab() {
               {t.settings.clearData}
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-[#111117] border-white/10">
+          <AlertDialogContent className="bg-[--bg-surface] border-white/10">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-[#E5E7EB]">Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription className="text-[#6B7280]">
+              <AlertDialogTitle className="text-[--text-primary]">Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-[--text-muted]">
                 This will delete all your data including tasks, grocery items, events, and family members. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-white/5 border-white/10 text-[#E5E7EB]">
+              <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
                 {t.common.cancel}
               </AlertDialogCancel>
               <AlertDialogAction onClick={handleClearData} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -1644,7 +1942,7 @@ function IntegrationsTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Plug className="size-4 text-[#6366F1]" /> Connected Services
+            <Plug className="size-4 text-[--accent-primary]" /> Connected Services
           </span>
         </SectionTitle>
         <SectionDescription>Manage your third-party integrations</SectionDescription>
@@ -1653,14 +1951,14 @@ function IntegrationsTab() {
           {integrations.map((integration) => (
             <div
               key={integration.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+              className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
             >
               <div className={`size-10 rounded-lg ${integration.bgColor} flex items-center justify-center`}>
                 <integration.icon className={`size-5 ${integration.color}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[#E5E7EB] text-sm font-medium">{integration.name}</p>
-                <p className="text-[#6B7280] text-xs">{integration.description}</p>
+                <p className="text-[--text-primary] text-sm font-medium">{integration.name}</p>
+                <p className="text-[--text-muted] text-xs">{integration.description}</p>
               </div>
               <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-xs">
                 Coming Soon
@@ -1670,9 +1968,9 @@ function IntegrationsTab() {
         </div>
       </SectionCard>
 
-      <Alert className="bg-[#6366F1]/5 border-[#6366F1]/20">
-        <Sparkles className="size-4 text-[#A78BFA]" />
-        <AlertDescription className="text-[#A78BFA] text-sm">
+      <Alert className="bg-[--accent-primary]/5 border-[#6366F1]/20">
+        <Sparkles className="size-4 text-[--accent-secondary]" />
+        <AlertDescription className="text-[--accent-secondary] text-sm">
           More integrations are coming soon! Stay tuned for Google Calendar, Apple Calendar, and Amazon Alexa support.
         </AlertDescription>
       </Alert>
@@ -1785,25 +2083,25 @@ function PremiumTab() {
           <motion.div
             key={plan.id}
             whileHover={{ y: -2 }}
-            className={`relative bg-[#111117] border rounded-2xl p-5 flex flex-col ${
+            className={`relative bg-[--bg-surface] border rounded-2xl p-5 flex flex-col ${
               plan.popular
                 ? 'border-[#6366F1]/50 shadow-[0_0_24px_-4px_rgba(99,102,241,0.15)]'
-                : 'border-white/[0.08]'
+                : 'border-[--border-medium]'
             }`}
           >
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-[#6366F1] text-white border-0 text-xs px-3">
+                <Badge className="bg-[--accent-primary] text-white border-0 text-xs px-3">
                   <Sparkles className="size-3 mr-1" /> {isRTL ? 'موصى به' : 'Popular'}
                 </Badge>
               </div>
             )}
 
             <div className="mb-4">
-              <h3 className="text-[#E5E7EB] text-lg font-semibold">{plan.name}</h3>
+              <h3 className="text-[--text-primary] text-lg font-semibold">{plan.name}</h3>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl font-bold text-[#E5E7EB]">{plan.price}</span>
-                <span className="text-[#6B7280] text-sm">{plan.period}</span>
+                <span className="text-2xl font-bold text-[--text-primary]">{plan.price}</span>
+                <span className="text-[--text-muted] text-sm">{plan.period}</span>
               </div>
             </div>
 
@@ -1813,11 +2111,11 @@ function PremiumTab() {
                   {feature.included ? (
                     <Check className="size-3.5 text-green-400 shrink-0" />
                   ) : (
-                    <X className="size-3.5 text-[#6B7280]/50 shrink-0" />
+                    <X className="size-3.5 text-[--text-muted]/50 shrink-0" />
                   )}
                   <span
                     className={`text-xs ${
-                      feature.included ? 'text-[#E5E7EB]' : 'text-[#6B7280]/50'
+                      feature.included ? 'text-[--text-primary]' : 'text-[--text-muted]/50'
                     }`}
                   >
                     {feature.label}
@@ -1830,7 +2128,7 @@ function PremiumTab() {
               <Button
                 variant="outline"
                 disabled
-                className="w-full border-white/10 text-[#6B7280]"
+                className="w-full border-white/10 text-[--text-muted]"
               >
                 {isRTL ? 'الخطة الحالية' : 'Current Plan'}
               </Button>
@@ -1839,8 +2137,8 @@ function PremiumTab() {
                 onClick={() => handleUpgrade(plan.id)}
                 className={`w-full ${
                   plan.popular
-                    ? 'bg-[#6366F1] hover:bg-[#6366F1]/80 text-white'
-                    : 'bg-white/5 border border-white/10 text-[#E5E7EB] hover:bg-white/10'
+                    ? 'bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white'
+                    : 'bg-white/5 border border-white/10 text-[--text-primary] hover:bg-white/10'
                 }`}
                 variant={plan.popular ? 'default' : 'outline'}
               >
@@ -1858,20 +2156,20 @@ function PremiumTab() {
         <SectionDescription>{isRTL ? 'ما تحصل عليه مع الخطط المميزة' : 'What you get with premium plans'}</SectionDescription>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-            <Infinity className="size-6 text-[#6366F1] mb-2" />
-            <p className="text-[#E5E7EB] text-sm font-medium">{isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}</p>
-            <p className="text-[#6B7280] text-xs">{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</p>
+          <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+            <Infinity className="size-6 text-[--accent-primary] mb-2" />
+            <p className="text-[--text-primary] text-sm font-medium">{isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}</p>
+            <p className="text-[--text-muted] text-xs">{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</p>
           </div>
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-            <Zap className="size-6 text-[#A78BFA] mb-2" />
-            <p className="text-[#E5E7EB] text-sm font-medium">{isRTL ? 'مزامنة فورية' : 'Real-time Sync'}</p>
-            <p className="text-[#6B7280] text-xs">{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</p>
+          <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
+            <Zap className="size-6 text-[--accent-secondary] mb-2" />
+            <p className="text-[--text-primary] text-sm font-medium">{isRTL ? 'مزامنة فورية' : 'Real-time Sync'}</p>
+            <p className="text-[--text-muted] text-xs">{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</p>
           </div>
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+          <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
             <BarChart3 className="size-6 text-amber-400 mb-2" />
-            <p className="text-[#E5E7EB] text-sm font-medium">{isRTL ? 'التحليلات' : 'Analytics'}</p>
-            <p className="text-[#6B7280] text-xs">{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</p>
+            <p className="text-[--text-primary] text-sm font-medium">{isRTL ? 'التحليلات' : 'Analytics'}</p>
+            <p className="text-[--text-muted] text-xs">{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</p>
           </div>
         </div>
       </SectionCard>
@@ -1886,26 +2184,26 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('family')
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F]">
+    <div className="min-h-screen bg-[--bg-primary]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-[#E5E7EB] text-2xl sm:text-3xl font-bold">{t.settings.title}</h1>
-          <p className="text-[#6B7280] text-sm mt-1">Manage your account, family, and preferences</p>
+          <h1 className="text-[--text-primary] text-2xl sm:text-3xl font-bold">{t.settings.title}</h1>
+          <p className="text-[--text-muted] text-sm mt-1">Manage your account, family, and preferences</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Navigation - Desktop */}
           <div className="hidden lg:block w-64 shrink-0">
-            <nav className="bg-[#111117] border border-white/[0.08] rounded-2xl p-2 sticky top-6">
+            <nav className="bg-[--bg-surface] border border-[--border-medium] rounded-2xl p-2 sticky top-6">
               {settingsTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'bg-[#6366F1]/15 text-[#A78BFA]'
-                      : 'text-[#6B7280] hover:bg-white/[0.03] hover:text-[#E5E7EB]'
+                      ? 'bg-[--accent-primary]/15 text-[--accent-secondary]'
+                      : 'text-[--text-muted] hover:bg-[--bg-surface-2] hover:text-[--text-primary]'
                   }`}
                 >
                   <tab.icon className="size-4" />
@@ -1925,8 +2223,8 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
                       activeTab === tab.id
-                        ? 'bg-[#6366F1]/15 text-[#A78BFA] border border-[#6366F1]/30'
-                        : 'text-[#6B7280] bg-white/[0.03] border border-white/[0.05] hover:text-[#E5E7EB]'
+                        ? 'bg-[--accent-primary]/15 text-[--accent-secondary] border border-[#6366F1]/30'
+                        : 'text-[--text-muted] bg-[--bg-surface-2] border border-[--border-subtle] hover:text-[--text-primary]'
                     }`}
                   >
                     <tab.icon className="size-3.5" />
@@ -1951,6 +2249,7 @@ export default function SettingsPage() {
                 {activeTab === 'user' && <UserManagementTab />}
                 {activeTab === 'account' && <AccountSettingsTab />}
                 {activeTab === 'preferences' && <PreferencesTab />}
+                {activeTab === 'notifications' && <NotificationsTab />}
                 {activeTab === 'security' && <SecurityTab />}
                 {activeTab === 'data' && <DataControlTab />}
                 {activeTab === 'integrations' && <IntegrationsTab />}

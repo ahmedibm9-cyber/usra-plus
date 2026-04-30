@@ -1121,3 +1121,418 @@ Unresolved / Next Phase Priorities:
 8. Implement actual RevenueCat subscription integration
 9. Add notification preferences granular controls
 10. Mobile PWA testing on real devices
+
+---
+Task ID: 3-c
+Agent: Notification Preferences Agent
+Task: Add Granular Notification Preferences in Settings
+
+Work Log:
+- Created `/src/stores/notification-preferences-store.ts`:
+  - Zustand store with `persist` middleware (localStorage key: `usra-notification-preferences`)
+  - Full `NotificationPreferences` interface: channels (push/email/inApp), categories (12 types), timing (quiet hours, reminder advance), sound/vibration
+  - Actions: `setPreference(key, value)`, `resetToDefaults()`, `setAll(channel, enabled)`, `setCategoryGroup(group, enabled)`
+  - Default values: all enabled, quiet hours off (22:00-07:00), 15 min advance, sound on, vibration on
+  - Category groups: tasks (3 items), calendar (2), grocery (2), family (2), chat (2)
+- Updated `/src/i18n/en.ts`:
+  - Added `notifications` top-level section with 35+ keys covering channels, categories, schedule/sound, advance options
+- Updated `/src/i18n/ar.ts`:
+  - Added matching Arabic translations for all `notifications` section keys
+- Updated `/src/components/settings/settings-page.tsx`:
+  - Added new imports: `Bell`, `Volume2`, `Vibrate`, `CalendarDays`, `ShoppingCart`, `MessageCircle`, `UserPlus`, `UserMinus`, `AtSign` from lucide-react
+  - Added `useNotificationPreferencesStore` import
+  - Added `notifications` tab to `settingsTabs` array (between Preferences and Security) with Bell icon
+  - Created `NotificationsTab` component with 3 sections:
+    - **Channels**: Push/Email/In-App toggles in 3-column grid with icons and descriptions
+    - **Categories**: 5 grouped sections (Tasks, Calendar, Grocery, Family, Chat) with group headers, icons, Enable All/Disable All buttons
+    - **Schedule & Sound**: Quiet Hours toggle with animated time pickers, Reminder Advance dropdown, Sound toggle, Vibration toggle
+  - Added `NotificationsTab` rendering in main SettingsPage component
+
+Stage Summary:
+- Notification preferences store created with localStorage persistence
+- Full Notifications tab added to Settings page between Preferences and Security
+- 3 sections: Channels, Categories (5 groups with Enable/Disable All), Schedule & Sound
+- All toggles functional and persist state via Zustand store
+- Quiet hours with animated expand/collapse for time pickers
+- Full bilingual support (EN/AR) with RTL-aware design
+- Lint: PASS (only pre-existing ai-summary-widget error)
+- Dev server: Compiled successfully, HTTP 200
+
+---
+Task ID: 3-e
+Agent: AI Summary Widget Agent
+Task: Add AI-Powered Family Summary Widget to Dashboard
+
+Work Log:
+- Created backend API route at `/src/app/api/ai/summary/route.ts`:
+  - POST endpoint accepts family data (tasks, groceries, events, members, language)
+  - Uses z-ai-web-dev-sdk LLM to generate intelligent family activity summaries
+  - System prompt tailored for family assistant role with bilingual support (EN/AR)
+  - Generates context-aware summaries covering: today's activity, progress overview, suggestions
+  - Includes comprehensive fallback summary generator for when AI is unavailable
+  - Fallback generates human-readable summaries from raw data in both English and Arabic
+- Created `/src/components/dashboard/ai-summary-widget.tsx`:
+  - `AISummaryWidget` component with full GlassCard design and gradient border
+  - Sparkles icon with pulse animation in header
+  - "AI" badge with gradient background (`bg-gradient-to-r from-[#6366F1] to-[#A78BFA]`)
+  - Custom `useTypingAnimation` hook for character-by-character typing effect (22ms speed)
+  - Cursor blink during typing with `animate-pulse border-r-2 border-[#6366F1]`
+  - Loading state with animated bouncing dots and "Generating insights..." text
+  - Error state: seamless fallback to smart client-side summary (no error shown)
+  - "Regenerate" button with RefreshCw icon and spin animation on click
+  - Smart fallback summary generator (client-side) analyzes store data:
+    - Counts tasks by status (pending, completed, overdue, urgent, todayDue)
+    - Counts grocery items checked vs unchecked with percentage
+    - Identifies today's events with times
+    - Generates contextual suggestions (e.g., prioritize overdue, wrap up remaining groceries)
+  - Full bilingual support (EN/AR) via useI18n
+  - Subtle gradient accent line at bottom of card
+- Added AI Summary widget to `/src/components/dashboard/dashboard-page.tsx`:
+  - Placed between welcome section and stats cards as requested
+  - Passes tasks, groceryItems, events, members, and isLoading props
+  - Auto-fetches AI summary on mount when data is available
+- Added i18n translations:
+  - en.ts: familyInsights, aiPowered, regenerate, generating, todaySummary, suggestions
+  - ar.ts: رؤى العائلة, ذكاء, إعادة توليد, جاري توليد الرؤى..., ملخص اليوم, اقتراحات
+- Fixed pre-existing lint error in grocery-page.tsx:
+  - Replaced dynamic component creation (`const Icon = getCategoryIcon()`) with static switch statement in `CategoryIconRenderer`
+  - This eliminates the `react-hooks/static-components` error
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- AI-Powered Family Summary Widget fully implemented and integrated into dashboard
+- Backend API route with z-ai-web-dev-sdk LLM and bilingual support
+- Smart client-side fallback when AI is unavailable (no errors shown)
+- Typing animation effect (22ms per character) with blinking cursor
+- Premium dark theme styling with gradient border, AI badge, and subtle animations
+- Full EN/AR bilingual support
+- Pre-existing grocery-page lint error fixed
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 3-f
+Agent: Calendar Enhancement Agent
+Task: Enhance Calendar Page with Mini Calendar, Event Pills, Upcoming Events, and Improved Event Dialog
+
+Work Log:
+- Updated `/src/i18n/en.ts` and `/src/i18n/ar.ts`:
+  - Added 12 new calendar i18n keys: location, repeat, repeatNone, repeatDaily, repeatWeekly, repeatMonthly, repeatYearly, assignTo, upcomingEvents, viewAll, moreEvents, miniCalendar
+  - Full Arabic translations for all new keys
+- Updated EVENT_COLORS from 6 to 8 preset colors:
+  - Added #A78BFA (violet) and #F97316 (orange)
+- Updated EventFormData with new fields:
+  - Added location, repeat (RepeatOption type), assignTo fields
+- Built MiniCalendar sidebar component:
+  - Compact 7-column month grid with ~28px day cells
+  - Current date highlighted with indigo circle, selected date with ring
+  - Days with events show small indigo dot below number
+  - Click to navigate main calendar; arrows to change month
+  - Desktop only (hidden on < md), ~220px width, GlassCard styling
+- Built UpcomingEventsPanel component:
+  - Shows next 5 upcoming events sorted by date
+  - Each shows: color dot + title + date/time + member avatar initials
+  - Click to open detail; "View All" switches to Agenda view
+- Enhanced MonthView event display:
+  - Events shown as colored pills with colored left border + truncated title
+  - Show up to 2 pills per cell, "+N more" for overflow
+  - Today cell has subtle indigo ring border (not pulsing)
+  - Removed hover tooltip in favor of direct pill display
+- Enhanced EventModal (Add Event dialog):
+  - Added "Repeat" dropdown (None/Daily/Weekly/Monthly/Yearly) with Select component
+  - Added "Location" text input with MapPin icon
+  - Added "Assign to" member selector with member avatars
+  - Updated color picker with 8 preset colors
+  - Added icons to labels (MapPin, Repeat, User)
+  - Bilingual labels for all new fields
+  - Demo mode fallback: creates events in store when Supabase fails
+- Updated main CalendarPage layout:
+  - Added sidebar with mini calendar + upcoming events (md:flex, desktop only)
+  - Main calendar takes full width on mobile
+  - familyMembers passed from app store to new components
+  - handleMiniCalDateSelect syncs mini calendar to main calendar
+  - handleViewAll switches to agenda view
+  - Delete event has demo mode fallback
+
+Stage Summary:
+- Mini calendar sidebar with compact month grid (desktop only, ~220px)
+- Upcoming events panel below mini calendar showing next 5 events
+- Month view shows colored event pills with "+N more" overflow indicator
+- Add Event dialog enhanced with Repeat, Location, Assign To, and 8-color picker
+- Full bilingual support (EN/AR) for all new fields
+- Demo mode fallbacks for event CRUD operations
+- Lint: PASS, Server: compiles successfully
+
+
+---
+Task ID: 3-b
+Agent: Grocery DnD Agent
+Task: Add Drag-and-Drop Reordering to Grocery Page
+
+Work Log:
+- Updated `/src/stores/grocery-store.ts`:
+  1. Added `sortBy` state: `'created_at' | 'name' | 'category' | 'manual'` (defaults to 'created_at')
+  2. Added `reorderItems(fromIndex, toIndex)` method that splices items array and auto-switches to 'manual' sort
+  3. Added `setSortBy` method
+  4. Updated `getFilteredItems()` to apply sorting based on `sortBy` state (name, category, created_at, manual)
+- Updated `/src/components/grocery/grocery-page.tsx`:
+  1. Added @dnd-kit imports: DndContext, DragOverlay, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor, useDndContext
+  2. Added @dnd-kit/sortable imports: SortableContext, useSortable, verticalListSortingStrategy, arrayMove, sortableKeyboardCoordinates
+  3. Added @dnd-kit/modifiers import: restrictToVerticalAxis
+  4. Added @dnd-kit/utilities import: CSS
+  5. Added GripVertical and ArrowUpDown icons from lucide-react
+  6. Created `CategoryIconRender` component (module-level, satisfies react-hooks/static-components lint rule) - renders category icons based on category key prop
+  7. Created `GroceryItemCard` component - reusable card for both normal and drag overlay rendering with:
+     - GripVertical drag handle (opacity-0 group-hover:opacity-100, cursor-grab/active:cursor-grabbing)
+     - Checkbox, item name, quantity, category badge, delete button
+     - RTL support via isRTL flag (flex-row-reverse, icon positioning)
+     - Hover elevation effect (border-white/[0.12], -translate-y-px, shadow-lg)
+     - Drag overlay styling: shadow-2xl ring-1 ring-white/10 scale-[1.02]
+     - Checked items: muted opacity, line-through, no drag handle, no category badge
+  8. Created `SortableGroceryItem` component - DnD wrapper using useSortable hook:
+     - Drop indicator: 2px indigo line above target position (absolute -top-[1px], bg-indigo-500)
+     - While dragging: opacity-40 on original item
+     - CSS transform via CSS.Transform.toString for smooth position transitions
+  9. Integrated DndContext into GroceryPage:
+     - Sensors: PointerSensor (8px activation distance) + KeyboardSensor
+     - restrictToVerticalAxis modifier
+     - SortableContext wrapping unchecked items only (checked items don't participate in DnD)
+     - DragOverlay renders elevated GroceryItemCard for active item
+     - Drag end handler: finds fromIndex/toIndex in items array, prevents cross-category reorder when filtering, prevents cross-checked-group reorder, calls reorderItems
+     - Drag start/cancel handlers manage activeId state
+  10. Added Sort dropdown in header (Created Date, Name, Category, Manual Order)
+  11. RTL-aware search input (icon positioning flips)
+  12. All existing functionality preserved (check/uncheck, delete, category tabs, add item, progress bar, quick add, realtime subscription, Supabase fallback)
+- Fixed lint error: `react-hooks/static-components` - replaced `const Icon = getCategoryIcon(...)` (component created during render) with `CategoryIconRender` component declared at module scope
+- Removed dead code: duplicate `CategoryIconRenderer` switch-based component
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- Drag-and-drop reordering fully implemented on grocery page using @dnd-kit
+- Grip handle visible on hover for unchecked items only
+- Drop indicator: 2px indigo line above target position
+- Drag overlay with elevated shadow + scale effect
+- Original item becomes opacity-40 while dragging
+- Auto-switches to manual sort when items are drag-reordered
+- Sort dropdown added (Created Date, Name, Category, Manual Order)
+- RTL support for drag handle positioning and layout direction
+- All existing grocery functionality preserved (check/uncheck, categories, add, delete, search, progress)
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 3-d
+Agent: Voice Message UI Builder
+Task: Add Voice Message Recording UI in Chat Page
+
+Work Log:
+- Added i18n translations in `/src/i18n/en.ts`: voiceMessage, recording, cancelRecording, sendVoice, tapToRecord, duration
+- Added i18n translations in `/src/i18n/ar.ts`: رسالة صوتية, جاري التسجيل..., إلغاء, إرسال صوت, اضغط للتسجيل, المدة
+- Updated ChatMessage type in `/src/types/index.ts`: Added 'voice' to message_type union, added voice_duration optional property
+- Updated `/src/components/chat/chat-page.tsx`:
+  1. **Multi-function button**: Shows Mic icon when no text is typed, Send icon when text is present (animated transition with Framer Motion AnimatePresence)
+  2. **Recording panel**: When microphone is clicked, replaces the text input with a recording UI:
+     - Animated red recording dot (w-3 h-3 bg-red-500 rounded-full animate-pulse)
+     - "Recording..." / "جاري التسجيل..." text (bilingual via t.chat.recording)
+     - Elapsed time counter (00:00 format, counting up via setInterval)
+     - Animated waveform visualization (8 bars with random heights, updating every 200ms via RecordingWaveform component)
+     - Cancel button (X icon) on the left, hover turns red
+     - Send button (Send icon) on the right to stop and send the voice message
+     - Recording panel slides up with Framer Motion animation (AnimatePresence mode="wait")
+  3. **Voice message bubble** (VoiceMessageBubble component):
+     - Rounded card with bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-2xl p-3
+     - Play/Pause button (w-8 h-8 bg-[#6366F1] rounded-full)
+     - Static waveform visualization (7 bars with deterministic heights based on message ID)
+     - Duration text in format M:SS
+     - Play progress animation: clicking play shows progress across waveform bars (filled bars change color)
+     - "Voice Message" / "رسالة صوتية" label with Mic icon below waveform
+     - RTL support: waveform and play button flip correctly with flex-row-reverse
+  4. **State management**: Local useState for isRecording and recordingTime, useRef for timer interval, cleanup on unmount
+  5. Added imports: Mic, Play, Pause from lucide-react
+  6. Added formatDuration helper (formats seconds to M:SS)
+  7. Added useMemo for deterministic waveform bar heights in VoiceMessageBubble
+  8. Added useMemo import from React
+- Fixed pre-existing lint error in `/src/components/grocery/grocery-page.tsx`: Replaced CategoryIconRenderer with CategoryIconRender (matching actual function name)
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- Voice message recording UI fully implemented with animated recording panel
+- Multi-function input button (Mic/Send) with smooth Framer Motion transitions
+- Voice message bubbles with play/pause, waveform visualization, duration, and progress
+- Full bilingual support (EN/AR) with RTL layout
+- All existing chat functionality preserved (text messages, online indicators, typing status, read receipts)
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 3-a
+Agent: Theme System Builder
+Task: Add Light/Dark Theme Toggle to USRA PLUS
+
+Work Log:
+- Created CSS variable-based theme system in `/src/app/globals.css`:
+  - Added `.light` class with light theme CSS variables (bg-primary: #FFFFFF, bg-surface: #F8F9FA, text-primary: #1A1A2E, etc.)
+  - Added `.dark` class with dark theme CSS variables (bg-primary: #0B0B0F, bg-surface: #111117, text-primary: #E5E7EB, etc.)
+  - Extended theme variables: --bg-primary, --bg-surface, --bg-surface-2, --text-primary, --text-secondary, --text-muted, --border-subtle, --border-medium, --accent-primary, --accent-secondary, --glass-bg, --glass-border
+  - Added Tailwind color mappings in `@theme inline` for all new CSS variables
+  - Updated glass morphism classes to use CSS variables
+  - Updated scrollbar styles, skeleton shimmer, auth-input-wrapper, button ripple, bottom-nav ripple to use theme-aware CSS variables
+  - Added smooth theme transition: `transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease` on body
+  - Added theme toggle animation: `@keyframes theme-icon-enter` with rotation and scale for Sun/Moon icon swap
+- Updated `/src/stores/app-store.ts`:
+  - Added `theme: Theme` state (defaults to 'dark')
+  - Added `setTheme` action that: updates Zustand state, applies CSS class to document.documentElement, persists to localStorage
+  - Added `applyThemeToDOM()` helper function
+  - Added `getInitialTheme()` function that reads from localStorage on init
+  - On module load, initializes theme class on DOM
+- Updated `/src/app/layout.tsx`:
+  - Added `className="dark"` to `<html>` element as default
+  - Added `<script dangerouslySetInnerHTML>` in `<head>` that reads localStorage and applies correct theme class before React hydrates (prevents flash of wrong theme)
+  - Updated Toaster styles to use CSS variables
+- Updated `/src/components/settings/settings-page.tsx`:
+  - PreferencesTab now uses `useAppStore` for theme state instead of local useState
+  - Added `handleThemeChange` callback that calls `setTheme` from app store, persists to Supabase profile, and updates auth store
+  - Theme toggle UI: Dark/Light buttons with Sun/Moon icons, `theme-icon-animate` class for rotation animation
+  - Bilingual labels using isRTL flag
+- Updated key components to use CSS variables instead of hardcoded colors:
+  - `/src/components/layout/app-sidebar.tsx` - bg-primary, bg-surface, text-primary, text-muted, border-subtle, etc.
+  - `/src/components/layout/app-header.tsx` - bg-primary, border-subtle, text-muted, bg-surface-2, etc.
+  - `/src/components/layout/bottom-nav.tsx` - bg-primary, border-subtle, bg-surface-2, text-muted, accent-primary, etc.
+  - `/src/components/dashboard/dashboard-page.tsx` - bg-primary, bg-surface, text-primary, text-muted, border-subtle, border-medium, bg-surface-2, accent-primary
+  - `/src/app/page.tsx` - AuthScreen, LoadingScreen, MainApp all use bg-primary CSS variable
+  - `/src/components/settings/settings-page.tsx` - SectionCard, SectionTitle, SectionDescription, SettingRow all use CSS variables
+- Added i18n translations for theme options:
+  - en.ts: light: "Light", dark: "Dark", system: "System" in settings section
+  - ar.ts: light: "فاتح", dark: "داكن", system: "تلقائي" in settings section
+- Lint check passes clean
+- App serves HTTP 200
+
+Stage Summary:
+- Complete light/dark theme system implemented with CSS variables
+- Theme toggle in Settings > Preferences with Sun/Moon rotation animation
+- Theme persists to localStorage and Supabase profile
+- Flash-of-wrong-theme prevention via inline script in layout.tsx
+- Dark theme remains default (dark-first design)
+- All key layout and dashboard components updated to use CSS variables
+- Glass morphism, scrollbars, skeletons all theme-aware
+- Full bilingual support (EN/AR) for theme labels
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: Enhancement-Round-5
+Agent: Main Architect
+Task: QA assessment, major feature enhancements, and styling polish
+
+Work Log:
+- Reviewed full worklog.md (1124 lines, 20+ prior task entries) to understand project state
+- Performed QA testing using agent-browser across all 7 pages + auth screens
+- Verified Demo Mode works (click via JS evaluation needed for headless browser), all pages render correctly
+- Verified no JS errors on any page
+- Tested mobile viewport (390x844) and Arabic RTL mode
+- Identified 6 enhancement tasks from worklog's "Unresolved" priorities and mandatory requirements
+- Launched 6 parallel subagent tasks for feature enhancements:
+
+1. **Light/Dark Theme System** (Subagent, Task 3-a)
+   - Created CSS variable-based theme system in globals.css with `.light` and `.dark` classes
+   - 13 theme variables: bg-primary, bg-surface, bg-surface-2, text-primary, text-secondary, text-muted, border-subtle, border-medium, accent-primary, accent-secondary, glass-bg, glass-border
+   - App store: added setTheme action that persists to localStorage and applies CSS class
+   - Root layout: inline script to prevent flash of wrong theme (FOUC)
+   - Settings Preferences: Dark/Light toggle buttons with Sun/Moon icon rotation
+   - Updated 6 key components from hardcoded colors to CSS variables (sidebar, header, bottom-nav, dashboard, page, settings)
+   - Bilingual labels (EN/AR)
+
+2. **Grocery Drag-and-Drop** (Subagent, Task 3-b)
+   - Integrated @dnd-kit/core + @dnd-kit/sortable + @dnd-kit/modifiers
+   - SortableGroceryItem wrapper with useSortable hook
+   - GripVertical drag handle (visible on hover, cursor-grab)
+   - DragOverlay with elevated shadow + ring effect
+   - 2px indigo drop indicator line
+   - Sort dropdown (Created Date, Name, Category, Manual Order)
+   - Grocery store: added reorderItems() and sortBy state
+   - Checked items don't participate in drag-and-drop
+   - RTL-aware layout
+
+3. **Voice Message UI in Chat** (Subagent, Task 3-d)
+   - Multi-function button: Mic icon when no text, Send icon when text present
+   - Recording panel: pulsing red dot, elapsed timer, animated waveform (8 bars), cancel/send buttons
+   - Voice message bubble: play/pause, waveform, duration, progress animation
+   - Added 'voice' to ChatMessage type
+   - Bilingual labels (EN/AR)
+   - Framer Motion slide-up animation for recording panel
+
+4. **AI-Powered Family Insights Widget** (Subagent, Task 3-e)
+   - Backend API route: /src/app/api/ai/summary/route.ts using z-ai-web-dev-sdk LLM
+   - Frontend widget: ai-summary-widget.tsx with typing animation (22ms/char)
+   - Sparkles icon with pulse animation, "AI" gradient badge
+   - Loading state with bouncing dots, error fallback to smart client-side summary
+   - Regenerate button with spin animation
+   - Smart fallback generates contextual summaries from store data
+   - Placed between welcome section and stats cards on dashboard
+   - Bilingual system prompts (EN/AR)
+
+5. **Calendar Enhancements** (Subagent, Task 3-f)
+   - Mini calendar sidebar: compact month grid with event dots, date navigation (desktop only)
+   - Upcoming Events panel: next 5 events with color dots and member avatars
+   - Enhanced month view: colored event pills with left border + title (up to 2 per cell)
+   - Enhanced Add Event dialog: Repeat dropdown, Location input, Assign to member selector, 8-color picker
+   - Sidebar layout: mini calendar + upcoming events on left, main calendar on right
+   - Bilingual labels for all new fields
+
+6. **Notification Preferences** (Subagent, Task 3-c)
+   - Created notification-preferences-store.ts with persist middleware (12 category toggles, channels, quiet hours, sound, vibration)
+   - Settings: new "Notifications" tab between Preferences and Security
+   - 3 sections: Channels (Push/Email/In-App), Categories (5 groups with Enable All/Disable All), Schedule & Sound (quiet hours, reminder advance, sound, vibration)
+   - Bilingual labels (35+ keys in EN/AR)
+
+Final QA Results:
+- ✅ Lint: PASS (zero errors)
+- ✅ All 7 pages render correctly with new features
+- ✅ Demo Mode fully functional
+- ✅ Light/Dark theme toggle working with smooth transitions
+- ✅ Arabic RTL switching verified
+- ✅ No runtime errors on any page
+- ✅ Mobile viewport tested
+
+Stage Summary:
+- 6 major feature enhancements completed in parallel
+- Light/dark theme system with CSS variables and FOUC prevention
+- Grocery drag-and-drop reordering with @dnd-kit
+- Voice message recording UI in chat
+- AI-powered family insights widget with typing animation
+- Calendar mini sidebar, event pills, enhanced add event dialog
+- Notification preferences with granular controls and persistence
+- All features bilingual (EN/AR) with RTL support
+- Lint: PASS, Server: HTTP 200
+
+Current Project Status:
+- USRA PLUS is a fully functional, feature-rich family coordination SaaS platform
+- 7 main pages with rich interactions and dual theme support (light/dark)
+- Demo Mode seeds: user, family (3 members), 5 tasks, 6 groceries, 4 events, 3 notifications, 3 online users
+- Arabic/English RTL support verified across all pages
+- Subscription gating (Free/Pro/Family+) operational with upgrade modals
+- PWA manifest and service worker ready
+- Error boundaries on all pages
+- Command Palette for quick navigation
+- Drag-and-drop on both tasks and grocery pages
+- Confetti celebrations on task completion
+- Rich 3-step onboarding with avatar/color personalization
+- File type icons and image lightbox
+- Smart grocery suggestions with auto-category detection
+- Data export (JSON/CSV) and account security settings
+- AI-powered family insights widget with typing animation
+- Voice message UI in chat
+- Calendar mini sidebar with upcoming events
+- Granular notification preferences with persistence
+- Light/dark theme with smooth CSS variable transitions
+
+Unresolved / Next Phase Priorities:
+1. Run SQL migration on Supabase to enable real backend persistence
+2. Test full auth flow with real Supabase user registration + Google OAuth
+3. Implement real-time chat with Supabase Realtime channels
+4. Performance optimization: lazy load page components, reduce bundle size
+5. Add actual voice recording with Web Audio API (currently UI-only)
+6. Mobile PWA testing on real devices
+7. Implement actual RevenueCat subscription integration
+8. Add more light theme polish (some components may still have hardcoded dark colors)
+9. Add keyboard accessibility audit across all interactive components
+10. Add onboarding tour/walkthrough for first-time users

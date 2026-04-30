@@ -86,15 +86,15 @@ export function AppHeader() {
       className="
         sticky top-0 z-40
         flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3
-        border-b border-white/[0.08]
-        backdrop-blur-xl bg-[#0B0B0F]/70
+        border-b border-[--border-subtle]
+        backdrop-blur-xl bg-[--bg-primary]/70
       "
     >
       {/* Mobile Menu Toggle */}
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden shrink-0 text-gray-400 hover:text-white hover:bg-white/[0.05]"
+        className="md:hidden shrink-0 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
         onClick={() => setSidebarOpen(true)}
         aria-label="Open menu"
       >
@@ -105,15 +105,15 @@ export function AppHeader() {
       <Breadcrumb className="hidden sm:flex">
         <BreadcrumbList className="text-sm">
           <BreadcrumbItem>
-            <span className="text-gray-500 font-medium text-xs tracking-wide uppercase">
+            <span className="text-[--text-muted] font-medium text-xs tracking-wide uppercase">
               USRA
             </span>
           </BreadcrumbItem>
-          <BreadcrumbSeparator className="text-gray-600">
+          <BreadcrumbSeparator className="text-[--text-muted]">
             <ChevronRight className="size-3" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-white font-semibold">
+            <BreadcrumbPage className="text-[--text-primary] font-semibold">
               {pageTitle}
             </BreadcrumbPage>
           </BreadcrumbItem>
@@ -121,7 +121,7 @@ export function AppHeader() {
       </Breadcrumb>
 
       {/* Mobile-only simple page title */}
-      <h2 className="sm:hidden text-base font-semibold text-white shrink-0 truncate">
+      <h2 className="sm:hidden text-base font-semibold text-[--text-primary] shrink-0 truncate">
         {pageTitle}
       </h2>
 
@@ -134,11 +134,11 @@ export function AppHeader() {
         <button
           type="button"
           onClick={() => setCommandPaletteOpen(true)}
-          className="hidden md:flex items-center relative w-56 lg:w-64 h-9 bg-white/[0.05] border border-white/[0.08] rounded-xl hover:border-white/20 transition-colors"
+          className="hidden md:flex items-center relative w-56 lg:w-64 h-9 bg-[--bg-surface-2]/50 border border-[--border-subtle] rounded-xl hover:border-[--border-medium] transition-colors"
         >
-          <Search className="absolute left-3 size-4 text-gray-500 pointer-events-none" />
-          <span className="pl-9 pr-14 text-sm text-gray-500 truncate">{t.nav.search}</span>
-          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 bg-white/[0.06] border border-white/[0.08] rounded-md pointer-events-none">
+          <Search className="absolute left-3 size-4 text-[--text-muted] pointer-events-none" />
+          <span className="pl-9 pr-14 text-sm text-[--text-muted] truncate">{t.nav.search}</span>
+          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-[--text-muted] bg-[--bg-surface-2]/50 border border-[--border-subtle] rounded-md pointer-events-none">
             <span className="text-[10px]">{kbdSymbol}</span>
             <span>K</span>
           </kbd>
@@ -150,14 +150,14 @@ export function AppHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden shrink-0 text-gray-400 hover:text-white hover:bg-white/[0.05]"
+              className="md:hidden shrink-0 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
               onClick={() => setCommandPaletteOpen(true)}
               aria-label="Search"
             >
               <Search className="size-5" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="bg-[#1a1a22] border-white/[0.08] text-gray-300 text-xs">
+          <TooltipContent side="bottom" className="bg-[--bg-surface-2] border-[--border-subtle] text-[--text-secondary] text-xs">
             {kbdSymbol}K
           </TooltipContent>
         </Tooltip>
@@ -169,7 +169,7 @@ export function AppHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0 text-gray-400 hover:text-white hover:bg-white/[0.05]"
+            className="shrink-0 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
             onClick={toggleLanguage}
             aria-label="Switch language"
           >
@@ -179,7 +179,7 @@ export function AppHeader() {
             </span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="bg-[#1a1a22] border-white/[0.08] text-gray-300 text-xs">
+        <TooltipContent side="bottom" className="bg-[--bg-surface-2] border-[--border-subtle] text-[--text-secondary] text-xs">
           {language === 'en' ? 'العربية' : 'English'}
         </TooltipContent>
       </Tooltip>
@@ -190,7 +190,7 @@ export function AppHeader() {
       {/* User Avatar Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="shrink-0 rounded-full ring-2 ring-white/10 hover:ring-white/20 transition-all">
+          <button className="shrink-0 rounded-full ring-2 ring-[--border-subtle] hover:ring-[--border-medium] transition-all">
             <Avatar className="size-8">
               <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
               <AvatarFallback className="bg-violet-500/20 text-violet-400 text-xs font-semibold">
@@ -201,27 +201,27 @@ export function AppHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-56 bg-[#111117] border-white/[0.08] text-gray-200"
+          className="w-56 bg-[--bg-surface] border-[--border-subtle] text-[--text-secondary]"
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-gray-200">{displayName}</p>
-              <p className="text-xs text-gray-500">{user?.email}</p>
+              <p className="text-sm font-medium text-[--text-primary]">{displayName}</p>
+              <p className="text-xs text-[--text-muted]">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-white/[0.06]" />
-          <DropdownMenuItem className="focus:bg-white/[0.05] focus:text-white">
+          <DropdownMenuSeparator className="bg-[--border-subtle]" />
+          <DropdownMenuItem className="focus:bg-[--bg-surface-2] focus:text-[--text-primary]">
             <User className="size-4 mr-2" />
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="focus:bg-white/[0.05] focus:text-white"
+            className="focus:bg-[--bg-surface-2] focus:text-[--text-primary]"
             onClick={() => useAppStore.getState().setCurrentPage('settings')}
           >
             <Settings className="size-4 mr-2" />
             {t.nav.settings}
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-white/[0.06]" />
+          <DropdownMenuSeparator className="bg-[--border-subtle]" />
           <DropdownMenuItem
             onClick={logout}
             className="text-red-400 focus:text-red-300 focus:bg-red-500/10"

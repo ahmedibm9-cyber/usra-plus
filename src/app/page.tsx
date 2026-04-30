@@ -36,7 +36,7 @@ function AuthScreen() {
   const { authView } = useAuthStore()
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F] flex items-center justify-center p-4 auth-bg">
+    <div className="min-h-screen bg-[--bg-primary] flex items-center justify-center p-4 auth-bg">
       {/* Animated gradient blobs */}
       <div className="auth-blob-1" />
       <div className="auth-blob-2" />
@@ -51,7 +51,7 @@ function AuthScreen() {
 // Loading Screen
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-[#0B0B0F] flex items-center justify-center">
+    <div className="min-h-screen bg-[--bg-primary] flex items-center justify-center">
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 mb-4 animate-pulse-glow">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -237,7 +237,7 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F] flex">
+    <div className="min-h-screen bg-[--bg-primary] flex">
       {/* Sidebar - Desktop */}
       <div className="hidden md:block">
         <AppSidebar />

@@ -50,6 +50,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { EmptyState } from '@/components/shared/empty-state'
 import { StatCardSkeleton, TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
+import { AISummaryWidget } from '@/components/dashboard/ai-summary-widget'
 
 // ─── Sub-components ─────────────────────────────────────────────
 
@@ -112,7 +113,7 @@ function GlassCard({
       transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div
-        className={`glass rounded-2xl border border-white/[0.08] bg-[#111117] ${className}`}
+        className={`glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] ${className}`}
       >
         {children}
       </div>
@@ -170,7 +171,7 @@ function StatCard({
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold tracking-tight text-[#E5E7EB]">{value}</p>
+              <p className="text-2xl font-bold tracking-tight text-[--text-primary]">{value}</p>
               {trend && trend !== 'neutral' && (
                 <span className={`flex items-center text-[10px] font-medium ${trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
                   {trend === 'up' ? (
@@ -182,9 +183,9 @@ function StatCard({
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#6B7280] truncate">{label}</p>
+            <p className="text-sm text-[--text-muted] truncate">{label}</p>
             {subValue && (
-              <p className="mt-0.5 text-xs text-[#6B7280]/70 truncate">{subValue}</p>
+              <p className="mt-0.5 text-xs text-[--text-muted]/70 truncate">{subValue}</p>
             )}
           </div>
         </div>
@@ -592,10 +593,10 @@ export default function DashboardPage() {
           className="text-center max-w-md"
         >
           <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-2xl bg-[#6366F1]/10 border border-[#6366F1]/20">
-            <Home className="size-10 text-[#6366F1]" />
+            <Home className="size-10 text-[--accent-primary]" />
           </div>
-          <h2 className="text-2xl font-bold text-[#E5E7EB] mb-2">{t.onboarding.welcome}</h2>
-          <p className="text-[#6B7280] mb-8 leading-relaxed">
+          <h2 className="text-2xl font-bold text-[--text-primary] mb-2">{t.onboarding.welcome}</h2>
+          <p className="text-[--text-muted] mb-8 leading-relaxed">
             Create or join a family to start managing your household together. Track tasks, plan
             events, share grocery lists, and more.
           </p>
@@ -610,7 +611,7 @@ export default function DashboardPage() {
             <Button
               variant="outline"
               onClick={() => setShowOnboarding(true)}
-              className="border-white/[0.08] bg-[#111117] hover:bg-white/[0.04] text-[#E5E7EB] rounded-xl h-11 px-6"
+              className="border-[--border-medium] bg-[--bg-surface] hover:bg-[--bg-surface-2] text-[--text-primary] rounded-xl h-11 px-6"
             >
               {t.onboarding.joinFamily}
             </Button>
@@ -633,8 +634,8 @@ export default function DashboardPage() {
           <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-red-500/10 border border-red-500/20">
             <AlertTriangle className="size-8 text-red-500" />
           </div>
-          <p className="text-lg font-semibold text-[#E5E7EB] mb-2">{t.common.error}</p>
-          <p className="text-sm text-[#6B7280] mb-6">{error}</p>
+          <p className="text-lg font-semibold text-[--text-primary] mb-2">{t.common.error}</p>
+          <p className="text-sm text-[--text-muted] mb-6">{error}</p>
           <Button
             onClick={fetchData}
             className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white rounded-xl"
@@ -649,7 +650,7 @@ export default function DashboardPage() {
   // ─── Dashboard Layout ───────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F] px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[--bg-primary] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* ─── Welcome Section with Animated Background ───────── */}
         <div className="relative overflow-hidden rounded-2xl">
@@ -667,25 +668,34 @@ export default function DashboardPage() {
             className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between px-2 py-3"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[#E5E7EB] sm:text-3xl">
+              <h1 className="text-2xl font-bold text-[--text-primary] sm:text-3xl">
                 {greeting}
                 {userName ? `, ${userName}` : ''} 👋
               </h1>
-              <p className="mt-1 text-sm text-[#6B7280]">
+              <p className="mt-1 text-sm text-[--text-muted]">
                 {currentDate} &middot; ١٤٤٦ هـ &middot; {currentFamily.name}
               </p>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="mt-2 self-start text-[#6B7280] hover:text-[#E5E7EB] sm:mt-0"
+              className="mt-2 self-start text-[--text-muted] hover:text-[--text-primary] sm:mt-0"
               onClick={() => setCurrentPage('settings')}
             >
-              <Sparkles className="mr-1.5 size-4 text-[#6366F1]" />
+              <Sparkles className="mr-1.5 size-4 text-[--accent-primary]" />
               {currentFamily.name}
             </Button>
           </motion.div>
         </div>
+
+        {/* ─── AI Family Insights ─────────────────────────────── */}
+        <AISummaryWidget
+          tasks={tasks}
+          groceryItems={groceryItems}
+          events={events}
+          members={familyMembers}
+          isLoading={isLoading}
+        />
 
         {/* ─── Stats Cards Row ────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -748,10 +758,10 @@ export default function DashboardPage() {
           {/* Weekly Activity Bar Chart */}
           <GlassCard delay={0.22} className="p-5 sm:col-span-1 lg:col-span-2">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[#E5E7EB]">
+              <h3 className="text-sm font-semibold text-[--text-primary]">
                 {isRTL ? 'هذا الأسبوع' : 'This Week'}
               </h3>
-              <span className="text-xs text-[#6B7280]">
+              <span className="text-xs text-[--text-muted]">
                 {isRTL ? 'المهام المنجزة' : 'Tasks completed'}
               </span>
             </div>
@@ -774,7 +784,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-2 flex justify-between px-1">
               {WEEKLY_ACTIVITY_DATA.map((d) => (
-                <span key={d.day} className="text-[10px] text-[#6B7280]">
+                <span key={d.day} className="text-[10px] text-[--text-muted]">
                   {isRTL ? d.dayAr : d.day}
                 </span>
               ))}
@@ -785,7 +795,7 @@ export default function DashboardPage() {
           <GlassCard delay={0.24} className="p-5 sm:col-span-1">
             <div className="mb-4 flex items-center gap-2">
               <Moon className="size-4 text-[#A78BFA]" />
-              <h3 className="text-sm font-semibold text-[#E5E7EB]">
+              <h3 className="text-sm font-semibold text-[--text-primary]">
                 {isRTL ? 'أوقات الصلاة' : 'Prayer Times'}
               </h3>
             </div>
@@ -796,7 +806,7 @@ export default function DashboardPage() {
                   className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
                     prayer.isNext
                       ? 'border-[#6366F1]/30 bg-[#6366F1]/10'
-                      : 'border-white/[0.04] bg-white/[0.02]'
+                      : 'border-[--border-subtle] bg-[--bg-surface-2]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -804,18 +814,18 @@ export default function DashboardPage() {
                       className={`flex size-7 items-center justify-center rounded-md ${
                         prayer.isNext
                           ? 'bg-[#6366F1]/20'
-                          : 'bg-white/[0.04]'
+                          : 'bg-[--bg-surface-2]'
                       }`}
                     >
                       <Moon
                         className={`size-3.5 ${
-                          prayer.isNext ? 'text-[#6366F1]' : 'text-[#6B7280]'
+                          prayer.isNext ? 'text-[--accent-primary]' : 'text-[--text-muted]'
                         }`}
                       />
                     </div>
                     <span
                       className={`text-sm font-medium ${
-                        prayer.isNext ? 'text-[#E5E7EB]' : 'text-[#6B7280]'
+                        prayer.isNext ? 'text-[--text-primary]' : 'text-[--text-muted]'
                       }`}
                     >
                       {isRTL ? prayer.nameAr : prayer.name}
@@ -824,13 +834,13 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-sm font-semibold ${
-                        prayer.isNext ? 'text-[#6366F1]' : 'text-[#E5E7EB]'
+                        prayer.isNext ? 'text-[--accent-primary]' : 'text-[--text-primary]'
                       }`}
                     >
                       {prayer.time}
                     </span>
                     {prayer.isNext && (
-                      <span className="rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-[9px] font-medium text-[#6366F1]">
+                      <span className="rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-[9px] font-medium text-[--accent-primary]">
                         {isRTL ? 'التالي' : 'Next'}
                       </span>
                     )}
@@ -838,7 +848,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-[10px] text-[#6B7280]/60 text-center">
+            <p className="mt-3 text-[10px] text-[--text-muted]/60 text-center">
               {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
             </p>
           </GlassCard>
@@ -876,18 +886,18 @@ export default function DashboardPage() {
                     </Pie>
                   </PieChart>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-[#E5E7EB]">
+                    <span className="text-3xl font-bold text-[--text-primary]">
                       {stats.productivityScore}
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider text-[#6B7280]">
+                    <span className="text-[10px] uppercase tracking-wider text-[--text-muted]">
                       Score
                     </span>
                   </div>
                 </div>
-                <p className="mt-3 text-sm font-semibold text-[#E5E7EB]">
+                <p className="mt-3 text-sm font-semibold text-[--text-primary]">
                   {t.dashboard.productivityScore}
                 </p>
-                <p className="mt-1 text-xs text-[#6B7280] text-center">
+                <p className="mt-1 text-xs text-[--text-muted] text-center">
                   Based on task completion &amp; grocery progress
                 </p>
               </div>
@@ -896,7 +906,7 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <GlassCard delay={0.3} className="p-6 lg:col-span-2">
-            <h3 className="mb-4 text-sm font-semibold text-[#E5E7EB]">
+            <h3 className="mb-4 text-sm font-semibold text-[--text-primary]">
               {t.dashboard.quickActions}
             </h3>
             {isLoading ? (
@@ -913,7 +923,7 @@ export default function DashboardPage() {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={action.onClick}
-                    className="group flex flex-col items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
+                    className="group flex flex-col items-center gap-2 rounded-xl border border-[--border-subtle] bg-[--bg-surface-2] p-4 transition-colors hover:border-[--border-medium] hover:bg-[--bg-surface-2]"
                   >
                     <div
                       className="flex size-10 items-center justify-center rounded-lg transition-transform group-hover:scale-110"
@@ -921,7 +931,7 @@ export default function DashboardPage() {
                     >
                       <action.icon className="size-5" style={{ color: action.color }} />
                     </div>
-                    <span className="text-xs font-medium text-[#E5E7EB]">{action.label}</span>
+                    <span className="text-xs font-medium text-[--text-primary]">{action.label}</span>
                   </motion.button>
                 ))}
               </div>
@@ -929,8 +939,8 @@ export default function DashboardPage() {
 
             {/* Family Members Avatars Row */}
             {!isLoading && familyMembers.length > 0 && (
-              <div className="mt-5 flex items-center gap-3 border-t border-white/[0.06] pt-4">
-                <span className="text-xs text-[#6B7280]">{t.dashboard.members}:</span>
+              <div className="mt-5 flex items-center gap-3 border-t border-[--border-subtle] pt-4">
+                <span className="text-xs text-[--text-muted]">{t.dashboard.members}:</span>
                 <div className="flex -space-x-2">
                   {familyMembers.slice(0, 5).map((member) => (
                     <Avatar key={member.id} className="size-7 border-2 border-[#111117]">
@@ -941,7 +951,7 @@ export default function DashboardPage() {
                     </Avatar>
                   ))}
                   {familyMembers.length > 5 && (
-                    <div className="flex size-7 items-center justify-center rounded-full border-2 border-[#111117] bg-white/[0.06] text-[10px] text-[#6B7280]">
+                    <div className="flex size-7 items-center justify-center rounded-full border-2 border-[#111117] bg-[--bg-surface-2] text-[10px] text-[--text-muted]">
                       +{familyMembers.length - 5}
                     </div>
                   )}
@@ -956,11 +966,11 @@ export default function DashboardPage() {
           {/* Upcoming Tasks */}
           <GlassCard delay={0.35} className="p-5 lg:col-span-1">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[#E5E7EB]">{t.dashboard.upcomingTasks}</h3>
+              <h3 className="text-sm font-semibold text-[--text-primary]">{t.dashboard.upcomingTasks}</h3>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-xs text-[#6B7280] hover:text-[#6366F1]"
+                className="h-7 text-xs text-[--text-muted] hover:text-[--accent-primary]"
                 onClick={() => setCurrentPage('tasks')}
               >
                 {t.dashboard.viewAll}
@@ -987,7 +997,7 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="group flex items-center gap-3 rounded-lg border border-white/[0.04] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.08] hover:bg-white/[0.04]"
+                        className="group flex items-center gap-3 rounded-lg border border-[--border-subtle] bg-[--bg-surface-2] p-3 transition-colors hover:border-[--border-medium] hover:bg-[--bg-surface-2]"
                       >
                         <div
                           className={`flex size-8 items-center justify-center rounded-lg ${
@@ -1013,12 +1023,12 @@ export default function DashboardPage() {
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-[#E5E7EB]">
+                          <p className="truncate text-sm font-medium text-[--text-primary]">
                             {task.title}
                           </p>
                           <div className="mt-0.5 flex items-center gap-2">
                             {task.due_date && (
-                              <span className="flex items-center gap-1 text-[10px] text-[#6B7280]">
+                              <span className="flex items-center gap-1 text-[10px] text-[--text-muted]">
                                 <Clock className="size-3" />
                                 {formatDueDate(task.due_date)}
                               </span>
@@ -1039,13 +1049,13 @@ export default function DashboardPage() {
             {/* Upcoming Events */}
             <GlassCard delay={0.4} className="p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#E5E7EB]">
+                <h3 className="text-sm font-semibold text-[--text-primary]">
                   {t.dashboard.upcomingEvents}
                 </h3>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs text-[#6B7280] hover:text-[#A78BFA]"
+                  className="h-7 text-xs text-[--text-muted] hover:text-[#A78BFA]"
                   onClick={() => setCurrentPage('calendar')}
                 >
                   {t.dashboard.viewAll}
@@ -1079,23 +1089,23 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="flex items-center gap-3 rounded-lg border border-white/[0.04] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.08] hover:bg-white/[0.04]"
+                        className="flex items-center gap-3 rounded-lg border border-[--border-subtle] bg-[--bg-surface-2] p-3 transition-colors hover:border-[--border-medium] hover:bg-[--bg-surface-2]"
                       >
                         <div
                           className="size-3 shrink-0 rounded-full"
                           style={{ backgroundColor: event.color || '#6366F1' }}
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-[#E5E7EB]">
+                          <p className="truncate text-sm font-medium text-[--text-primary]">
                             {event.title}
                           </p>
-                          <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#6B7280]">
+                          <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[--text-muted]">
                             <Clock className="size-3" />
                             <span>{formatEventTime(event.start_time)}</span>
                             {event.all_day && (
                               <Badge
                                 variant="outline"
-                                className="border-white/[0.06] bg-white/[0.02] px-1 py-0 text-[9px] text-[#6B7280]"
+                                className="border-[--border-subtle] bg-[--bg-surface-2] px-1 py-0 text-[9px] text-[--text-muted]"
                               >
                                 All day
                               </Badge>
@@ -1112,13 +1122,13 @@ export default function DashboardPage() {
             {/* Grocery Reminders */}
             <GlassCard delay={0.45} className="p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#E5E7EB]">
+                <h3 className="text-sm font-semibold text-[--text-primary]">
                   {t.dashboard.groceryReminders}
                 </h3>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs text-[#6B7280] hover:text-[#22C55E]"
+                  className="h-7 text-xs text-[--text-muted] hover:text-[#22C55E]"
                   onClick={() => setCurrentPage('grocery')}
                 >
                   {t.dashboard.viewAll}
@@ -1134,10 +1144,10 @@ export default function DashboardPage() {
                 <>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#6B7280]">
+                      <span className="text-[--text-muted]">
                         {stats.groceryChecked} of {stats.groceryItems} items
                       </span>
-                      <span className="font-medium text-[#E5E7EB]">
+                      <span className="font-medium text-[--text-primary]">
                         {stats.groceryItems > 0
                           ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
                           : 0}
@@ -1150,11 +1160,11 @@ export default function DashboardPage() {
                           ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
                           : 0
                       }
-                      className="h-2.5 bg-white/[0.06] [&>div]:bg-[#22C55E]"
+                      className="h-2.5 bg-[--bg-surface-2] [&>div]:bg-[#22C55E]"
                     />
                   </div>
                   {stats.groceryItems - stats.groceryChecked > 0 ? (
-                    <p className="mt-3 text-xs text-[#6B7280]">
+                    <p className="mt-3 text-xs text-[--text-muted]">
                       <ShoppingCart className="mr-1 inline size-3" />
                       {stats.groceryItems - stats.groceryChecked} items still needed
                     </p>
@@ -1178,8 +1188,8 @@ export default function DashboardPage() {
           {/* Recent Activity */}
           <GlassCard delay={0.5} className="p-5 lg:col-span-1">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[#E5E7EB]">{t.dashboard.recentActivity}</h3>
-              <Activity className="size-4 text-[#6B7280]" />
+              <h3 className="text-sm font-semibold text-[--text-primary]">{t.dashboard.recentActivity}</h3>
+              <Activity className="size-4 text-[--text-muted]" />
             </div>
             <ScrollArea className="max-h-80">
               {isLoading ? (
@@ -1209,7 +1219,7 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.04 }}
-                        className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-white/[0.02]"
+                        className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-[--bg-surface-2]"
                       >
                         <div
                           className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg"
@@ -1218,8 +1228,8 @@ export default function DashboardPage() {
                           <item.icon className="size-3.5" style={{ color: item.color }} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm text-[#E5E7EB]">{item.message}</p>
-                          <p className="mt-0.5 text-[10px] text-[#6B7280]/60">
+                          <p className="truncate text-sm text-[--text-primary]">{item.message}</p>
+                          <p className="mt-0.5 text-[10px] text-[--text-muted]/60">
                             {format(parseISO(item.timestamp), 'MMM d, h:mm a')}
                           </p>
                         </div>
