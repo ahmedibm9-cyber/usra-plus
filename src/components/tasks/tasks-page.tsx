@@ -8,6 +8,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useSubscriptionStore } from '@/stores/subscription-store'
 import { UpgradeModal } from '@/components/shared/upgrade-modal'
 import { UpgradePrompt } from '@/components/shared/plan-badge'
+import { EmptyState } from '@/components/shared/empty-state'
+import { TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
 import { useI18n } from '@/i18n/use-translation'
 import type { Task, TaskPriority, TaskStatus, FamilyMember, UserProfile } from '@/types'
 import { format, isToday, isTomorrow, isPast, isThisWeek, formatDistanceToNow, parseISO } from 'date-fns'
@@ -59,8 +61,34 @@ import {
   MoreHorizontal,
   X,
   User,
+  GripVertical,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+  useDndContext,
+} from '@dnd-kit/core'
+import type {
+  DragStartEvent,
+  DragEndEvent,
+  DraggableSyntheticListeners,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { CSS } from '@dnd-kit/utilities'
+import { triggerConfetti } from '@/lib/confetti'
 
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { color: string; bg: string; border: string; label: string }> = {
@@ -137,11 +165,15 @@ function TaskCard({
   onToggleDone,
   onEdit,
   onDelete,
+  dragHandleProps,
+  isDragOverlay,
 }: {
   task: Task
   onToggleDone: (task: Task) => void
   onEdit: (task: Task) => void
   onDelete: (id: string) => void
+  dragHandleProps?: DraggableSyntheticListeners
+  isDragOverlay?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
   const priority = PRIORITY_CONFIG[task.priority]
@@ -166,7 +198,6 @@ function TaskCard({
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8, scale: 0.97 }}
@@ -175,22 +206,53 @@ function TaskCard({
       onMouseLeave={() => setHovered(false)}
       className={cn(
         'group relative flex items-start gap-3 rounded-xl border border-white/[0.06] bg-[#111117] p-4 transition-all duration-200',
-        hovered && 'border-white/[0.12] bg-[#14141b] shadow-lg shadow-black/20',
-        task.status === 'done' && 'opacity-60'
+        hovered && 'border-white/[0.12] bg-[#14141b] shadow-lg shadow-black/20 -translate-y-px',
+        task.status === 'done' && 'opacity-60',
+        isDragOverlay && 'shadow-2xl shadow-indigo-500/10 ring-1 ring-indigo-500/20 scale-[1.03]'
       )}
     >
+      {/* Drag handle */}
+      {dragHandleProps && (
+        <button
+          {...dragHandleProps}
+          className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[#6B7280] hover:text-[#E5E7EB]"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="size-5" />
+        </button>
+      )}
+
       {/* Checkbox */}
-      <button
+      <motion.button
         onClick={() => onToggleDone(task)}
         className="mt-0.5 flex-shrink-0 transition-transform duration-150 hover:scale-110"
+        whileTap={{ scale: 0.8 }}
         aria-label={task.status === 'done' ? 'Mark as incomplete' : 'Mark as complete'}
       >
-        {task.status === 'done' ? (
-          <CheckCircle2 className="size-5 text-green-400" />
-        ) : (
-          <Circle className="size-5 text-gray-500 transition-colors hover:text-[#6366F1]" />
-        )}
-      </button>
+        <AnimatePresence mode="wait">
+          {task.status === 'done' ? (
+            <motion.div
+              key="done"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+            >
+              <CheckCircle2 className="size-5 text-green-400" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="undone"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+            >
+              <Circle className="size-5 text-gray-500 transition-colors hover:text-[#6366F1]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
@@ -290,6 +352,57 @@ function TaskCard({
         )}
       </AnimatePresence>
     </motion.div>
+  )
+}
+
+// ─── Sortable Task Card (DnD wrapper) ───────────────────────────────
+function SortableTaskCard({
+  task,
+  onToggleDone,
+  onEdit,
+  onDelete,
+}: {
+  task: Task
+  onToggleDone: (task: Task) => void
+  onEdit: (task: Task) => void
+  onDelete: (id: string) => void
+}) {
+  const { over, active } = useDndContext()
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id })
+
+  const isOver = over?.id === task.id && active?.id !== task.id
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className={cn('relative', isDragging && 'opacity-40 z-0')}
+    >
+      {/* Drop indicator line */}
+      {isOver && (
+        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-indigo-500 rounded-full z-10" />
+      )}
+      <TaskCard
+        task={task}
+        onToggleDone={onToggleDone}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        dragHandleProps={listeners}
+      />
+    </div>
   )
 }
 
@@ -544,37 +657,7 @@ function TaskModal({
   )
 }
 
-// ─── Empty State ────────────────────────────────────────────────────
-function EmptyState({ onCreateTask }: { onCreateTask: () => void }) {
-  const { t } = useI18n()
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex flex-col items-center justify-center py-20 px-4"
-    >
-      <div className="relative mb-6">
-        <div className="size-24 rounded-2xl bg-[#6366F1]/10 border border-[#6366F1]/20 flex items-center justify-center">
-          <ClipboardList className="size-10 text-[#6366F1]" />
-        </div>
-        <div className="absolute -top-1 -right-1 size-5 rounded-full bg-[#6366F1]/20 border border-[#6366F1]/30 flex items-center justify-center">
-          <Plus className="size-3 text-[#6366F1]" />
-        </div>
-      </div>
-      <h3 className="text-lg font-semibold text-[#E5E7EB] mb-2">{t.tasks.noTasks}</h3>
-      <p className="text-sm text-[#6B7280] text-center max-w-sm mb-6">{t.tasks.noTasksDesc}</p>
-      <Button
-        onClick={onCreateTask}
-        className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl px-6"
-      >
-        <Plus className="size-4" />
-        {t.tasks.addTask}
-      </Button>
-    </motion.div>
-  )
-}
+// EmptyState is now imported from shared component
 
 // ─── Date Section Header ────────────────────────────────────────────
 function DateSectionHeader({ group, count }: { group: DateGroup; count: number }) {
@@ -654,6 +737,50 @@ export default function TasksPage() {
     setShowAddTask(true)
   }, [canCreateTask, tasks.length, setEditingTask, setShowAddTask])
 
+  // ─── DnD State & Handlers ────────────────────────────────────────
+  const [activeId, setActiveId] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }, [])
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveId(null)
+
+    if (!over || active.id === over.id) return
+
+    const activeTask = tasks.find((t) => t.id === active.id)
+    const overTask = tasks.find((t) => t.id === over.id)
+    if (!activeTask || !overTask) return
+
+    // Only reorder within the same group
+    if (viewMode === 'status' && activeTask.status !== overTask.status) return
+    if (viewMode === 'date' && getDateGroup(activeTask) !== getDateGroup(overTask)) return
+
+    const oldIndex = tasks.findIndex((t) => t.id === active.id)
+    const newIndex = tasks.findIndex((t) => t.id === over.id)
+    const reorderedTasks = arrayMove(tasks, oldIndex, newIndex)
+
+    useTaskStore.getState().setTasks(reorderedTasks)
+    useTaskStore.getState().setSortBy('manual')
+  }, [tasks, viewMode])
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null)
+  }, [])
+
   // Fetch tasks from Supabase
   const fetchTasks = useCallback(async () => {
     if (!currentFamily) return
@@ -712,7 +839,12 @@ export default function TasksPage() {
 
         if (error) throw error
         updateTask({ ...task, status: newStatus, completed_at: completedAt })
-        toast.success(newStatus === 'done' ? 'Task completed!' : 'Task reopened')
+        if (newStatus === 'done') {
+          triggerConfetti()
+          toast.success('🎉 Task completed!')
+        } else {
+          toast.success('Task reopened')
+        }
       } catch {
         toast.error('Failed to update task')
       }
@@ -855,7 +987,7 @@ export default function TasksPage() {
             )}
             <Button
               onClick={handleAddTask}
-              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl"
+              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl btn-ripple"
             >
               <Plus className="size-4" />
               {t.tasks.addTask}
@@ -945,6 +1077,7 @@ export default function TasksPage() {
               <SelectItem value="due_date" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Due Date</SelectItem>
               <SelectItem value="priority" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Priority</SelectItem>
               <SelectItem value="status" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Status</SelectItem>
+              <SelectItem value="manual" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Manual Order</SelectItem>
             </SelectContent>
           </Select>
 
@@ -977,21 +1110,25 @@ export default function TasksPage() {
       </div>
 
       {/* ─── Task List ──────────────────────────────────────────── */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
       <div className="flex-1 min-h-0 px-4 sm:px-6 pb-6">
         {isLoading ? (
-          // Loading skeleton
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-[72px] rounded-xl border border-white/[0.06] bg-[#111117] skeleton-shimmer"
-              />
-            ))}
+          <div className="space-y-2">
+            <TaskCardSkeleton count={5} />
           </div>
         ) : filteredTasks.length === 0 ? (
-          // Empty state
           <EmptyState
-            onCreateTask={handleAddTask}
+            icon={ClipboardList}
+            title="No tasks yet"
+            description="Create your first task to get started"
+            action={{ label: 'Add Task', onClick: handleAddTask }}
           />
         ) : (
           <ScrollArea className="h-full">
@@ -1004,17 +1141,19 @@ export default function TasksPage() {
                   return (
                     <div key={status}>
                       <StatusSectionHeader status={status} count={group.length} />
-                      <div className="space-y-2">
-                        {group.map((task) => (
-                          <TaskCard
-                            key={task.id}
-                            task={task}
-                            onToggleDone={handleToggleDone}
-                            onEdit={(task) => setEditingTask(task)}
-                            onDelete={handleDeleteTask}
-                          />
-                        ))}
-                      </div>
+                      <SortableContext items={group.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-2">
+                          {group.map((task) => (
+                            <SortableTaskCard
+                              key={task.id}
+                              task={task}
+                              onToggleDone={handleToggleDone}
+                              onEdit={(task) => setEditingTask(task)}
+                              onDelete={handleDeleteTask}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
                     </div>
                   )
                 })
@@ -1026,17 +1165,19 @@ export default function TasksPage() {
                   return (
                     <div key={group}>
                       <DateSectionHeader group={group} count={tasksInGroup.length} />
-                      <div className="space-y-2">
-                        {tasksInGroup.map((task) => (
-                          <TaskCard
-                            key={task.id}
-                            task={task}
-                            onToggleDone={handleToggleDone}
-                            onEdit={(task) => setEditingTask(task)}
-                            onDelete={handleDeleteTask}
-                          />
-                        ))}
-                      </div>
+                      <SortableContext items={tasksInGroup.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-2">
+                          {tasksInGroup.map((task) => (
+                            <SortableTaskCard
+                              key={task.id}
+                              task={task}
+                              onToggleDone={handleToggleDone}
+                              onEdit={(task) => setEditingTask(task)}
+                              onDelete={handleDeleteTask}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
                     </div>
                   )
                 })
@@ -1045,6 +1186,20 @@ export default function TasksPage() {
           </ScrollArea>
         )}
       </div>
+
+      {/* ─── Drag Overlay ───────────────────────────────────────── */}
+      <DragOverlay>
+        {activeId ? (
+          <TaskCard
+            task={filteredTasks.find((t) => t.id === activeId)!}
+            onToggleDone={handleToggleDone}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            isDragOverlay
+          />
+        ) : null}
+      </DragOverlay>
+      </DndContext>
 
       {/* ─── Upgrade Modal ─────────────────────────────────────── */}
       <UpgradeModal

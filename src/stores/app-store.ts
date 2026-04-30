@@ -14,6 +14,8 @@ interface AppState {
   showOnboarding: boolean
   showCreateFamily: boolean
   showJoinFamily: boolean
+  familyAvatar: string
+  familyColor: string
   setCurrentPage: (page: AppPage) => void
   setSidebarOpen: (open: boolean) => void
   setSidebarCollapsed: (collapsed: boolean) => void
@@ -24,6 +26,8 @@ interface AppState {
   setShowOnboarding: (show: boolean) => void
   setShowCreateFamily: (show: boolean) => void
   setShowJoinFamily: (show: boolean) => void
+  setFamilyAvatar: (avatar: string) => void
+  setFamilyColor: (color: string) => void
   toggleSidebar: () => void
 }
 
@@ -38,6 +42,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   showOnboarding: false,
   showCreateFamily: false,
   showJoinFamily: false,
+  familyAvatar: '🏠',
+  familyColor: 'indigo',
   setCurrentPage: (page) => set({ currentPage: page }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
@@ -48,5 +54,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setShowOnboarding: (show) => set({ showOnboarding: show }),
   setShowCreateFamily: (show) => set({ showCreateFamily: show }),
   setShowJoinFamily: (show) => set({ showJoinFamily: show }),
+  setFamilyAvatar: (avatar) => set({ familyAvatar: avatar }),
+  setFamilyColor: (color) => set({ familyColor: color }),
   toggleSidebar: () => set({ sidebarCollapsed: !get().sidebarCollapsed }),
 }))

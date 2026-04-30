@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
 import {
@@ -23,6 +23,11 @@ import {
   MoreVertical,
   FolderOpen,
   AlertTriangle,
+  Video,
+  FileType2,
+  Table,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -32,6 +37,8 @@ import { useSubscriptionStore } from '@/stores/subscription-store'
 import { UpgradeModal } from '@/components/shared/upgrade-modal'
 import { useI18n } from '@/i18n/use-translation'
 import type { FamilyFile } from '@/types'
+import { EmptyState } from '@/components/shared/empty-state'
+import { FileCardSkeleton } from '@/components/shared/skeleton-patterns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -57,39 +64,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 type ViewMode = 'grid' | 'list'
 type SortBy = 'name' | 'date' | 'size' | 'type'
 
-function getFileIcon(fileType: string) {
+function getFileExtension(fileName: string): string {
+  const parts = fileName.split('.')
+  return parts.length > 1 ? parts.pop()!.toLowerCase() : ''
+}
+
+function getFileIcon(fileType: string, fileName?: string) {
+  const ext = fileName ? getFileExtension(fileName) : ''
+  // Specific extension-based icons
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return ImageIcon
+  if (['pdf'].includes(ext) || fileType.includes('pdf')) return FileText
+  if (['mp4', 'mov', 'avi', 'webm'].includes(ext) || fileType.startsWith('video/')) return Video
+  if (['mp3', 'wav', 'ogg', 'flac'].includes(ext) || fileType.startsWith('audio/')) return Music
+  if (['doc', 'docx'].includes(ext) || fileType.includes('word') || fileType.includes('document'))
+    return FileType2
+  if (['xls', 'xlsx', 'csv'].includes(ext) || fileType.includes('spreadsheet') || fileType.includes('excel'))
+    return Table
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext) || fileType.includes('zip') || fileType.includes('rar'))
+    return Archive
+  // Fallback to MIME type
   if (fileType.startsWith('image/')) return ImageIcon
   if (fileType.startsWith('video/')) return Film
   if (fileType.startsWith('audio/')) return Music
-  if (
-    fileType.includes('pdf') ||
-    fileType.includes('document') ||
-    fileType.includes('text') ||
-    fileType.includes('word') ||
-    fileType.includes('spreadsheet')
-  )
-    return FileText
-  if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('7z'))
-    return Archive
   return File
 }
 
-function getFileIconColor(fileType: string) {
-  if (fileType.startsWith('image/')) return 'text-pink-400 bg-pink-500/10'
-  if (fileType.startsWith('video/')) return 'text-purple-400 bg-purple-500/10'
-  if (fileType.startsWith('audio/')) return 'text-amber-400 bg-amber-500/10'
-  if (fileType.includes('pdf')) return 'text-red-400 bg-red-500/10'
-  if (fileType.includes('word') || fileType.includes('document'))
-    return 'text-blue-400 bg-blue-500/10'
-  if (fileType.includes('spreadsheet') || fileType.includes('excel'))
-    return 'text-green-400 bg-green-500/10'
-  if (fileType.includes('zip') || fileType.includes('rar')) return 'text-orange-400 bg-orange-500/10'
-  return 'text-gray-400 bg-gray-500/10'
+function getFileIconColor(fileType: string, fileName?: string) {
+  const ext = fileName ? getFileExtension(fileName) : ''
+  // Specific extension-based colors
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext) || fileType.startsWith('image/'))
+    return 'bg-pink-500/15 text-pink-400'
+  if (['pdf'].includes(ext) || fileType.includes('pdf'))
+    return 'bg-red-500/15 text-red-400'
+  if (['mp4', 'mov', 'avi', 'webm'].includes(ext) || fileType.startsWith('video/'))
+    return 'bg-purple-500/15 text-purple-400'
+  if (['mp3', 'wav', 'ogg', 'flac'].includes(ext) || fileType.startsWith('audio/'))
+    return 'bg-amber-500/15 text-amber-400'
+  if (['doc', 'docx'].includes(ext) || fileType.includes('word') || fileType.includes('document'))
+    return 'bg-blue-500/15 text-blue-400'
+  if (['xls', 'xlsx', 'csv'].includes(ext) || fileType.includes('spreadsheet') || fileType.includes('excel'))
+    return 'bg-green-500/15 text-green-400'
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext) || fileType.includes('zip') || fileType.includes('rar'))
+    return 'bg-orange-500/15 text-orange-400'
+  return 'bg-gray-500/15 text-gray-400'
 }
 
 function formatFileSize(bytes: number): string {
@@ -318,6 +339,31 @@ export function FilesPage() {
     return member?.nickname ?? 'Unknown'
   }
 
+  // Image files for lightbox navigation
+  const imageFiles = useMemo(() => filteredFiles.filter((f) => f.file_type.startsWith('image/')), [filteredFiles])
+
+  const navigateLightbox = useCallback((direction: 'prev' | 'next') => {
+    if (!previewFile || imageFiles.length <= 1) return
+    const currentIndex = imageFiles.findIndex((f) => f.id === previewFile.id)
+    if (currentIndex === -1) return
+    const newIndex = direction === 'next'
+      ? (currentIndex + 1) % imageFiles.length
+      : (currentIndex - 1 + imageFiles.length) % imageFiles.length
+    setPreviewFile(imageFiles[newIndex])
+  }, [previewFile, imageFiles])
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!previewFile) return
+      if (e.key === 'Escape') setPreviewFile(null)
+      if (e.key === 'ArrowLeft') navigateLightbox('prev')
+      if (e.key === 'ArrowRight') navigateLightbox('next')
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [previewFile, navigateLightbox])
+
   return (
     <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
       {/* Header */}
@@ -432,31 +478,23 @@ export function FilesPage() {
       {/* Files Area */}
       <div className="flex-1 overflow-hidden px-4 sm:px-6 pb-6">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#6366F1] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[#6B7280]">{t.common.loading}</p>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <FileCardSkeleton count={6} />
           </div>
         ) : filteredFiles.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center h-64 text-center"
-          >
-            <div className="p-5 rounded-2xl bg-[#111117] border border-white/[0.08] mb-4">
-              <Cloud className="w-12 h-12 text-[#6B7280]" />
-            </div>
-            <h3 className="text-lg font-semibold text-[#E5E7EB] mb-1">{t.files.noFiles}</h3>
-            <p className="text-sm text-[#6B7280] max-w-[250px]">{t.files.noFilesDesc}</p>
-          </motion.div>
+          <EmptyState
+            icon={FolderOpen}
+            title="No files uploaded"
+            description="Upload your first file to share with family"
+            action={{ label: 'Upload File', onClick: handleUploadClick }}
+          />
         ) : viewMode === 'grid' ? (
           <ScrollArea className="h-full">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               <AnimatePresence mode="popLayout">
                 {filteredFiles.map((file, index) => {
-                  const Icon = getFileIcon(file.file_type)
-                  const iconColor = getFileIconColor(file.file_type)
+                  const Icon = getFileIcon(file.file_type, file.name)
+                  const iconColor = getFileIconColor(file.file_type, file.name)
                   const isImage = file.file_type.startsWith('image/')
 
                   return (
@@ -466,18 +504,22 @@ export function FilesPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ delay: index * 0.03 }}
-                      className="group bg-[#111117] border border-white/[0.08] rounded-2xl p-4 hover:border-white/[0.12] transition-all duration-200 cursor-pointer"
+                      className="group bg-[#111117] border border-white/[0.08] rounded-2xl p-4 hover:border-white/[0.16] hover:scale-[1.02] transition-all duration-200 cursor-pointer"
                       onClick={() => isImage && setPreviewFile(file)}
                     >
                       {/* File icon / preview */}
                       <div className="flex items-center justify-center h-20 mb-3">
-                        {isImage && file.url ? (
-                          <div className="w-full h-full rounded-lg overflow-hidden bg-white/[0.02]">
-                            <img
-                              src={file.url}
-                              alt={file.name}
-                              className="w-full h-full object-cover"
-                            />
+                        {isImage ? (
+                          <div className="w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-pink-500/10 to-purple-500/10 flex items-center justify-center">
+                            {file.url ? (
+                              <img
+                                src={file.url}
+                                alt={file.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="w-8 h-8 text-pink-400/60" />
+                            )}
                           </div>
                         ) : (
                           <div className={`p-3 rounded-xl ${iconColor}`}>
@@ -487,23 +529,23 @@ export function FilesPage() {
                       </div>
 
                       {/* File info */}
-                      <p className="text-xs font-medium text-[#E5E7EB] truncate mb-1">
+                      <p className="text-xs font-medium text-[#E5E7EB] truncate mb-0.5">
                         {file.name}
+                      </p>
+                      <p className="text-[10px] text-[#6B7280] mb-1">
+                        {formatFileSize(file.file_size)}
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-[#6B7280]">
-                          {formatFileSize(file.file_size)}
-                        </span>
-                        <span className="text-[10px] text-[#6B7280]">
                           {format(new Date(file.created_at), 'MMM d')}
+                        </span>
+                        <span className="text-[10px] text-[#A78BFA]">
+                          {getUploaderName(file.uploaded_by)}
                         </span>
                       </div>
 
                       {/* Hover actions */}
-                      <div className="mt-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-[10px] text-[#A78BFA]">
-                          {getUploaderName(file.uploaded_by)}
-                        </span>
+                      <div className="mt-2 flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -569,8 +611,8 @@ export function FilesPage() {
             <div className="space-y-1">
               <AnimatePresence mode="popLayout">
                 {filteredFiles.map((file, index) => {
-                  const Icon = getFileIcon(file.file_type)
-                  const iconColor = getFileIconColor(file.file_type)
+                  const Icon = getFileIcon(file.file_type, file.name)
+                  const iconColor = getFileIconColor(file.file_type, file.name)
                   const isImage = file.file_type.startsWith('image/')
 
                   return (
@@ -744,80 +786,116 @@ export function FilesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Preview Modal */}
-      <Dialog open={!!previewFile} onOpenChange={(open) => !open && setPreviewFile(null)}>
-        <DialogContent className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] sm:max-w-[700px] rounded-2xl p-0 overflow-hidden">
-          {previewFile && (
-            <>
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2">
+      {/* Image Preview Lightbox */}
+      <AnimatePresence>
+        {previewFile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center"
+            onClick={() => setPreviewFile(null)}
+          >
+            {/* Close button */}
+            <button
+              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                setPreviewFile(null)
+              }}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Navigation arrows */}
+            {imageFiles.length > 1 && (
+              <>
+                <button
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    navigateLightbox('prev')
+                  }}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    navigateLightbox('next')
+                  }}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+
+            {/* Image container */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {previewFile.url && (
+                <img
+                  src={previewFile.url}
+                  alt={previewFile.name}
+                  className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                />
+              )}
+            </motion.div>
+
+            {/* File info at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+              <div className="flex items-center justify-between max-w-3xl mx-auto">
+                <div className="flex items-center gap-3">
                   <ImageIcon className="w-4 h-4 text-pink-400" />
-                  <span className="text-sm font-medium text-[#E5E7EB] truncate max-w-[300px]">
-                    {previewFile.name}
-                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-white truncate max-w-[300px]">
+                      {previewFile.name}
+                    </p>
+                    <p className="text-xs text-white/60">
+                      {formatFileSize(previewFile.file_size)} · {format(new Date(previewFile.created_at), 'MMM d, yyyy')}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-[#6B7280] mr-2">
-                    {formatFileSize(previewFile.file_size)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-[#6B7280] hover:text-red-400"
-                    onClick={() => handleDeleteFile(previewFile)}
-                    disabled={deletingId === previewFile.id}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB]"
-                    onClick={() => setPreviewFile(null)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-center bg-black/40 p-4 min-h-[300px] max-h-[70vh]">
-                {previewFile.url && (
-                  <img
-                    src={previewFile.url}
-                    alt={previewFile.name}
-                    className="max-w-full max-h-[65vh] object-contain rounded-lg"
-                  />
-                )}
-              </div>
-              <div className="px-4 py-3 border-t border-white/[0.06] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-[10px]">
-                      {getUploaderName(previewFile.uploaded_by)
-                        .charAt(0)
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs text-[#6B7280]">
-                    {getUploaderName(previewFile.uploaded_by)} ·{' '}
-                    {format(new Date(previewFile.created_at), 'MMM d, yyyy h:mm a')}
-                  </span>
-                </div>
-                {previewFile.url && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-[#A78BFA] hover:text-[#A78BFA] hover:bg-[#A78BFA]/10 rounded-lg text-xs"
-                    onClick={() => window.open(previewFile.url!, '_blank')}
+                    className="text-white/70 hover:text-white hover:bg-white/10 rounded-lg text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (previewFile.url) window.open(previewFile.url!, '_blank')
+                    }}
                   >
                     <Download className="w-3.5 h-3.5 mr-1" />
                     Download
                   </Button>
-                )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteFile(previewFile)
+                    }}
+                    disabled={deletingId === previewFile.id}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    Delete
+                  </Button>
+                </div>
               </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

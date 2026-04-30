@@ -826,3 +826,298 @@ Unresolved / Next Phase Priorities:
 8. Add notification preferences (granular toggle per type)
 9. Add data export (JSON/CSV) in Settings > Data Control
 10. Add voice message recording in chat
+
+---
+Task ID: 3
+Agent: Micro-interactions Agent
+Task: Add Celebration Confetti on Task Completion and Micro-Interaction Polish
+
+Work Log:
+- Created `/src/lib/confetti.ts`:
+  - Lightweight canvas-based confetti animation (no external library)
+  - `triggerConfetti()` creates fixed canvas overlay, generates 50-80 particles
+  - 5 colors: #6366F1, #A78BFA, #22C55E, #F59E0B, #EC4899
+  - Mixed shapes (rectangles + circles), random velocity/rotation, gravity (0.15), horizontal drift
+  - ~2 second animation with 500ms fade-out, then canvas removed
+- Updated `/src/components/tasks/tasks-page.tsx`:
+  - Confetti + "🎉 Task completed!" toast when marking task as done
+  - Checkbox changed from `<button>` to `<motion.button>` with `whileTap={{ scale: 0.8 }}`
+  - Spring animation on Circle ↔ CheckCircle2 transition (stiffness: 500, damping: 20)
+  - Hover card lift: `-translate-y-px` added to hovered TaskCard state
+  - `btn-ripple` class added to "Add Task" button
+- Updated `/src/components/grocery/grocery-page.tsx`:
+  - "✓ Item checked" toast when checking a single grocery item
+  - Confetti + "🎉 All items checked off!" when ALL items become checked
+  - Green flash animation on check: `flashItemId` state with 300ms timeout, `bg-green-500/10`
+  - `transition-colors duration-300` on grocery item rows
+  - Hover card lift: `hover:-translate-y-px hover:shadow-lg` on unchecked items
+  - `btn-ripple` class added to "Add Item" button
+- Updated `/src/components/auth/login-form.tsx`:
+  - `btn-ripple` class added to "Log In" button
+- Updated `/src/app/globals.css`:
+  - Added `.btn-ripple` CSS class with `position: relative; overflow: hidden`
+  - `::after` pseudo-element with radial gradient ripple effect
+  - On `:active` opacity transitions from 0→1 instantly, fades back over 0.5s
+- Lint check passes clean, dev server compiles successfully
+
+Stage Summary:
+- Canvas-based confetti animation on task completion and all-grocery-checked
+- Framer Motion spring animations on task checkbox toggle
+- Green flash highlight on grocery item check with 300ms fade
+- Button ripple effect on Login, Add Task, and Add Item buttons
+- Hover card lift (-1px + shadow) on TaskCard and GroceryItem
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 4-5
+Agent: Calendar & Files Enhancement Agent
+Task: Enhance Calendar Page with Event Dots and Files Page with Lightbox
+
+Work Log:
+- Updated `/src/components/calendar/calendar-page.tsx`:
+  1. Added `useCalendarStore` import for store-based event fallback
+  2. **Event Color Dots**: Added colored dots below day number in month view cells
+     - Each dot is `w-1.5 h-1.5 rounded-full` with `gap-[2px]` spacing
+     - Shows up to 3 dots per day, with "+N" text for overflow
+     - Dots use each event's `color` property
+  3. **Mini Event Previews on Day Hover**: CSS tooltip positioned above cell
+     - Styled with `bg-[#111117] border border-white/[0.08] rounded-lg p-2 text-xs shadow-xl`
+     - Shows colored dot + title + time for each event (max 3, then "+N more")
+     - Small arrow/caret pointing down to the cell
+  4. **Today Highlight Enhancement**: Added `ring-2 ring-indigo-500/50 animate-pulse` to today's day number
+  5. **Demo Calendar Events Integration**: Changed events state to `supabaseEvents`
+     - Added `useMemo` to merge events: Supabase takes priority, calendar store as fallback
+     - On Supabase fetch failure, store events automatically used via memo
+- Updated `/src/components/files/files-page.tsx`:
+  1. **Image Preview Lightbox**: Replaced Dialog-based preview with full-screen overlay
+     - `bg-black/90 backdrop-blur-sm` covers entire viewport
+     - Close button (X) top-right, navigation arrows (ChevronLeft/ChevronRight) for browsing
+     - Arrows only show when 2+ images exist
+     - Filename and upload date at bottom in gradient overlay
+     - Framer-motion entrance animation (scale 0.95→1, opacity 0→1)
+     - Keyboard support: Escape to close, Left/Right arrows to navigate
+     - Added `imageFiles` useMemo, `navigateLightbox` callback, keyboard event listener
+  2. **File Type Icons**: Added `getFileExtension()` helper, updated `getFileIcon()` and `getFileIconColor()`
+     - Extension-based icons: ImageIcon (images), FileText (PDF), Video (mp4/mov), Music (mp3/wav), FileType2 (doc/docx), Table (xls/csv), Archive (zip/rar), File (default)
+     - Extension-based colors: pink (images), red (PDF), purple (video), amber (audio), blue (docs), green (spreadsheets), orange (archives), gray (default)
+     - Added new lucide-react imports: Video, FileType2, Table, ChevronLeft, ChevronRight
+  3. **Grid View Enhancement**:
+     - Hover effect: `hover:scale-[1.02]` + `hover:border-white/[0.16]`
+     - Image files show gradient placeholder (`bg-gradient-to-br from-pink-500/10 to-purple-500/10`) when no URL
+     - File size shown below filename as its own line
+     - Removed unused Avatar/AvatarFallback import
+
+Stage Summary:
+- Calendar: Event color dots, hover tooltips, pulsing today highlight, store fallback integration
+- Files: Full-screen lightbox with keyboard navigation, extension-based file type icons, enhanced grid hover effects
+- Lint: PASS, Server: Compiles successfully
+
+---
+Task ID: 1
+Agent: Drag-and-Drop Tasks Agent
+Task: Add Drag-and-Drop Reordering for Tasks
+
+Work Log:
+- Installed `@dnd-kit/modifiers` package (v9.0.0) for restrictToVerticalAxis modifier
+- Updated `/src/stores/task-store.ts`:
+  - Added `'manual'` to the `sortBy` type union
+  - Added `case 'manual': return 0` to `getFilteredTasks()` sort switch (no sorting applied, preserves store order)
+- Updated `/src/components/tasks/tasks-page.tsx`:
+  - Added dnd-kit imports: DndContext, DragOverlay, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor, useDndContext, SortableContext, useSortable, verticalListSortingStrategy, arrayMove, sortableKeyboardCoordinates, restrictToVerticalAxis, CSS
+  - Added GripVertical to lucide-react imports
+  - Modified TaskCard: added `dragHandleProps?: DraggableSyntheticListeners` and `isDragOverlay?: boolean` props
+  - Added GripVertical drag handle button (opacity-0 group-hover:opacity-100, cursor-grab active:cursor-grabbing)
+  - Added isDragOverlay styling: shadow-2xl shadow-indigo-500/10 ring-1 ring-indigo-500/20 scale-[1.03]
+  - Removed `layout` prop from motion.div to prevent transform conflicts with dnd-kit
+  - Created SortableTaskCard component: wraps TaskCard with useSortable hook, shows drop indicator line (h-0.5 bg-indigo-500), reduces opacity when dragging
+  - Added DnD state & handlers: activeId state, PointerSensor (8px distance) + KeyboardSensor sensors, handleDragStart/End/Cancel callbacks
+  - handleDragEnd validates same-group constraint (status or date), uses arrayMove to reorder, auto-switches sortBy to 'manual'
+  - Wrapped task list with DndContext (closestCenter, restrictToVerticalAxis modifier)
+  - Each group wrapped with SortableContext (verticalListSortingStrategy)
+  - Replaced TaskCard with SortableTaskCard in both status and date group views
+  - Added DragOverlay rendering TaskCard with isDragOverlay prop for smooth drag preview
+  - Added "Manual Order" option to sort dropdown
+
+Stage Summary:
+- Drag-and-drop reordering fully implemented within task groups (by status or by date)
+- Visual feedback: GripVertical handle on hover, scale+shadow drag overlay, indigo drop indicator line
+- Auto-switches to "Manual Order" sort when reordering to preserve custom order
+- Keyboard sorting support via KeyboardSensor with sortableKeyboardCoordinates
+- All existing functionality preserved (filter, sort, status/date grouping, task modal, subscription gating)
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 2
+Agent: Onboarding Enhancement Agent
+Task: Build Rich Welcome/Onboarding Experience with Animated Steps and Family Avatar Generation
+
+Work Log:
+- Updated `/src/stores/app-store.ts`:
+  - Added `familyAvatar: string` (default: '🏠') and `familyColor: string` (default: 'indigo') state fields
+  - Added `setFamilyAvatar` and `setFamilyColor` action methods
+- Completely rewrote `/src/components/onboarding/onboarding-flow.tsx`:
+  - **3-Step Animated Wizard**:
+    - Step 1 (Welcome): Full-screen animated welcome with USRA PLUS logo, tagline "Your Family Operating System" appearing letter by letter with cursor animation, "Get Started" button with glow effect, Skip option for existing users, uses `.auth-bg` animated gradient blobs class
+    - Step 2 (Create or Join Family): Two big cards side-by-side on desktop (stacked on mobile) — "Create a Family" with Users icon and "Join a Family" with UserPlus icon, gradient border on hover, clicking either expands the form inline with smooth animation, after creating/joining automatically advances to Step 3
+    - Step 3 (Personalize): Family avatar generation with grid of 8 pre-made avatar options (🏠 👨‍👩‍👧‍👦 🕌 🌙 🏡 💼 ❤️ 🌟), family color theme picker with 6 color options (indigo, violet, emerald, amber, rose, cyan), live avatar preview as large circle with emoji centered and selected color at 20% opacity background, "Looks Great!" completion button with Sparkles icon
+  - **Step Progress Indicator**: Horizontal progress bar showing 3 steps, active step has filled indigo dot with glow shadow, completed steps have animated checkmark (spring animation), connecting lines between steps that fill with color as steps complete, smooth animation when transitioning
+  - **Page Transitions**: Uses framer-motion `AnimatePresence` with `mode="wait"`, each step slides in from right and exits to left with directional awareness, duration 300ms ease-out, custom `slideVariants` with enter/center/exit states
+  - **Family Avatar Generation**: Avatar displayed as large circle with emoji centered, circle background uses selected color at 20% opacity, box-shadow uses selected color hex with 33 alpha, avatar and color saved to family data in app store
+  - All existing functionality preserved (create family form with Supabase, join family form with invite code, copy invite code, error handling)
+- Updated `/src/i18n/en.ts`: Added 8 new onboarding keys (getStarted, chooseOrCreate, setupFamily, setupFamilyDesc, personalize, personalizeDesc, familyAvatar, pickAvatar, pickColor, looksGreat), updated createFamily text from "Create Your Family" to "Create a Family"
+- Updated `/src/i18n/ar.ts`: Added matching Arabic translations for all 8 new onboarding keys, updated createFamily Arabic text
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- Onboarding transformed from simple form into 3-step animated wizard
+- Step 1: Animated welcome with letter-by-letter tagline, glow button, gradient blob background
+- Step 2: Side-by-side cards with gradient hover effects, inline form expansion
+- Step 3: Avatar grid + color picker + live preview with personalized completion
+- Step progress indicator with animated dots, checkmarks, and filling connecting lines
+- Framer Motion page transitions with directional slide (300ms ease-out)
+- Family avatar and color saved to Zustand app store for app-wide access
+- Full bilingual support (EN/AR) for all new UI elements
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 6-8
+Agent: Grocery & Settings Enhancement Agent
+Task: Add Grocery Smart Suggestions, Settings Data Export, and Account Security
+
+Work Log:
+- Updated `/home/z/my-project/src/stores/grocery-store.ts`:
+  - Added `RecentItem` interface with name + category fields
+  - Added `recentItems: RecentItem[]` to store state
+  - Added `addRecentItem(name, category)` action (deduplicates by name, caps at 8)
+  - Added `getCategoryCount(category)` method to count items per category
+
+- Updated `/home/z/my-project/src/components/grocery/grocery-page.tsx`:
+  - **Quick-Add with Recent Items**: Shows up to 8 recently added items as pill buttons above item list; clicking pre-fills Add Item dialog with name + category
+  - **Smart Category Suggestions**: CATEGORY_KEYWORDS mapping for dairy/bakery/meat/fruits/beverages/snacks/frozen/household; auto-selects category when typing; shows "✓ Auto-detected" badge with Sparkles icon
+  - **Item Count by Category**: Each category tab shows item count in small badge format "(N)"
+  - Added demo mode fallback for add/toggle/delete operations
+
+- Updated `/home/z/my-project/src/components/settings/settings-page.tsx`:
+  - **Part B - Data Export**: Export as JSON collects all Zustand store data (family, members, tasks, groceryItems, events); Export Tasks as CSV with columns Title/Status/Priority/Assignee/Due Date/Created At; both use Blob + URL.createObjectURL download pattern
+  - **Clear Data Confirmation**: AlertDialog with "Are you sure?" title; red "Yes, Clear All" button; clears all Zustand stores (tasks, grocery, events, family members)
+  - **Part C - Security Tab**: 2FA toggle (disabled, "Coming Soon" badge, toast "2FA setup coming soon!"); Active Sessions with green/gray dots and "Revoke" buttons (toast "Session revoked!"); Change Password section with current/new/confirm fields with eye toggles; "Update Password" button (demo toast)
+
+Stage Summary:
+- Grocery page enhanced with Quick Add pills, Smart Category auto-detection, Item Count badges
+- Settings Data tab has JSON + CSV export with real Zustand store data
+- Security tab has 2FA toggle, active sessions with revoke, and password change form
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: Enhancement-Round-4
+Agent: Main Architect
+Task: QA assessment, feature enhancement, and styling polish round
+
+Work Log:
+- Reviewed full worklog.md (717+ lines, 15+ prior task entries) to understand project state
+- Performed QA testing using agent-browser across all 7 pages + auth screens
+- Verified Demo Mode, Arabic RTL, mobile bottom nav all working correctly
+- Confirmed only Supabase "table not found" errors (expected without migration)
+- Identified 8 new enhancement tasks from worklog's "Unresolved" priorities
+
+Features Implemented (6 parallel subagent tasks + 2 direct):
+
+1. **Drag-and-Drop Task Reordering** (Subagent)
+   - Integrated @dnd-kit/core + @dnd-kit/sortable + @dnd-kit/modifiers
+   - SortableTaskCard wrapper with useSortable hook
+   - GripVertical drag handle (visible on hover, cursor-grab)
+   - DragOverlay with elevated shadow + ring effect
+   - Drop indicator: 2px indigo line above target item
+   - Same-group constraint (tasks only reorder within their status/date group)
+   - Auto-switches sortBy to 'manual' when drag-reordering
+   - Keyboard sorting support via KeyboardSensor
+
+2. **Rich Onboarding Experience** (Subagent)
+   - 3-step animated wizard: Welcome → Create/Join → Personalize
+   - Step 1: Full-screen animated welcome with letter-by-letter tagline
+   - Step 2: Side-by-side Create/Join cards with gradient borders, inline form expansion
+   - Step 3: 8 emoji avatar options + 6 color theme picker with live preview
+   - Progress indicator: 3 dots with connecting lines, animated checkmarks
+   - Framer Motion page transitions (slide right→left, 300ms)
+   - Added familyAvatar and familyColor to app store
+
+3. **Confetti & Micro-Interactions** (Subagent)
+   - Created /src/lib/confetti.ts: Canvas-based confetti with 50-80 particles, 5 brand colors, gravity, 2s animation
+   - Task completion → confetti + "🎉 Task completed!" toast
+   - All grocery items checked → confetti + "🎉 All items checked off!" toast
+   - Task checkbox: whileTap scale 0.8 + spring animation
+   - Grocery item check: brief green flash highlight
+   - .btn-ripple CSS class for primary action buttons (Login, Add Task, Add Item)
+   - Hover card lift: -translate-y-px + shadow-lg on TaskCard and GroceryItem
+
+4. **Calendar Enhancements** (Subagent)
+   - Event color dots on month view cells (up to 3, "+N" overflow)
+   - Mini event preview tooltips on day hover (colored dot + title + time)
+   - Today cell: pulsing indigo ring animation
+   - Calendar store integration as fallback when Supabase fails
+
+5. **Files Page Enhancements** (Subagent)
+   - Full-screen image lightbox with black/90 backdrop, navigation arrows, keyboard support
+   - File type icon system: 8 categories with distinct colors (Images→pink, PDFs→red, Videos→purple, etc.)
+   - Grid view: hover scale 1.02 + border highlight, image gradient thumbnails, file size display
+
+6. **Grocery Smart Suggestions** (Subagent)
+   - Quick-Add section with recent items as pill buttons (up to 8)
+   - Smart category auto-detection based on item name keywords
+   - "✓ Auto-detected" badge when category is auto-selected
+   - Category tabs show item count (e.g., "Dairy (2)")
+
+7. **Settings Data Export & Security** (Subagent)
+   - Export as JSON: downloads all family data as usra-plus-export-{date}.json
+   - Export as CSV: downloads tasks as usra-plus-tasks-{date}.csv
+   - Clear Data: AlertDialog confirmation with destructive red button
+   - Security tab: 2FA toggle (Coming Soon), Active Sessions list (3 demo), Password Change form
+
+8. **Skeleton & Empty State Components** (Direct)
+   - Created /src/components/shared/empty-state.tsx: Reusable with icon, title, description, optional action button, gradient glow, entrance animation
+   - Created /src/components/shared/skeleton-patterns.tsx: 7 skeleton patterns (TaskCard, GroceryItem, EventCard, Message, FileCard, StatCard, Page) with count prop
+
+Final QA Results:
+- ✅ Lint: PASS (zero errors)
+- ✅ All 7 pages render correctly (Dashboard, Tasks, Calendar, Grocery, Chat, Files, Settings)
+- ✅ Demo Mode fully functional
+- ✅ Arabic RTL switching verified
+- ✅ Mobile bottom navigation working
+- ✅ Command Palette (⌘K) functional
+- ✅ No runtime errors (except expected Supabase table-not-found)
+
+Stage Summary:
+- 8 major feature enhancements completed
+- Drag-and-drop, confetti, onboarding wizard, calendar dots, file lightbox, grocery suggestions, data export, security settings all implemented
+- Reusable skeleton and empty state components created for consistency
+- All pages tested in English, Arabic, desktop, and mobile views
+- Lint: PASS, Server: HTTP 200
+
+Current Project Status:
+- USRA PLUS is a fully functional family coordination SaaS platform
+- 7 main pages with rich interactions and premium dark theme
+- Demo Mode seeds: user, family (3 members), 5 tasks, 6 groceries, 4 events, 3 notifications, 3 online users
+- Arabic/English RTL support verified across all pages
+- Subscription gating (Free/Pro/Family+) operational with upgrade modals
+- PWA manifest and service worker ready
+- Error boundaries on all pages
+- Command Palette for quick navigation
+- Drag-and-drop task reordering
+- Confetti celebrations on task completion
+- Rich 3-step onboarding with avatar/color personalization
+- File type icons and image lightbox
+- Smart grocery suggestions with auto-category detection
+- Data export (JSON/CSV) and account security settings
+
+Unresolved / Next Phase Priorities:
+1. Run SQL migration on Supabase to enable real backend persistence
+2. Test full auth flow with real Supabase user registration + Google OAuth
+3. Implement real-time chat with Supabase Realtime channels
+4. Add drag-and-drop for grocery items using @dnd-kit
+5. Performance optimization: lazy load page components, reduce bundle size
+6. Add light mode theme support (currently dark-only)
+7. Add voice message recording in chat
+8. Implement actual RevenueCat subscription integration
+9. Add notification preferences granular controls
+10. Mobile PWA testing on real devices

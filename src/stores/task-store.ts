@@ -9,7 +9,7 @@ interface TaskState {
   searchQuery: string
   filterStatus: TaskStatus | 'all'
   filterPriority: TaskPriority | 'all'
-  sortBy: 'due_date' | 'priority' | 'created_at' | 'status'
+  sortBy: 'due_date' | 'priority' | 'created_at' | 'status' | 'manual'
   showAddTask: boolean
   editingTask: Task | null
   setTasks: (tasks: Task[]) => void
@@ -75,6 +75,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           const statusOrder = { todo: 0, in_progress: 1, done: 2 }
           return statusOrder[a.status] - statusOrder[b.status]
         }
+        case 'manual':
+          return 0
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       }

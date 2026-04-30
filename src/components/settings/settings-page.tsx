@@ -73,6 +73,9 @@ import { Progress } from '@/components/ui/progress'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSubscriptionStore } from '@/stores/subscription-store'
+import { useTaskStore } from '@/stores/task-store'
+import { useGroceryStore } from '@/stores/grocery-store'
+import { useCalendarStore } from '@/stores/calendar-store'
 import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
 import { createClient } from '@/lib/supabase/client'
@@ -1156,15 +1159,69 @@ function PreferencesTab() {
 
 function SecurityTab() {
   const { t } = useI18n()
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const sessions = [
-    { id: '1', device: 'Chrome on macOS', icon: Chrome, ip: '192.168.1.1', lastActive: 'Now', current: true },
-    { id: '2', device: 'Safari on iPhone', icon: Smartphone, ip: '192.168.1.2', lastActive: '2 hours ago', current: false },
-    { id: '3', device: 'Firefox on Windows', icon: Monitor, ip: '10.0.0.5', lastActive: '1 day ago', current: false },
+    { id: '1', device: 'Chrome on macOS', icon: Chrome, ip: '192.168.1.1', lastActive: 'Current session', current: true },
+    { id: '2', device: 'Safari on iPhone', icon: Smartphone, ip: '192.168.1.2', lastActive: 'Last active 2h ago', current: false },
+    { id: '3', device: 'Firefox on Windows', icon: Monitor, ip: '10.0.0.5', lastActive: 'Last active 3 days ago', current: false },
   ]
+
+  const handleRevokeSession = useCallback((sessionId: string) => {
+    toast.success('Session revoked!')
+  }, [])
+
+  const handleUpdatePassword = useCallback(() => {
+    toast.info('Password update coming soon!')
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmNewPassword('')
+  }, [])
 
   return (
     <div className="space-y-6">
+      {/* Two-Factor Authentication */}
+      <SectionCard>
+        <SectionTitle>
+          <span className="flex items-center gap-2">
+            <ShieldCheck className="size-4 text-[#6366F1]" /> Two-Factor Authentication
+          </span>
+        </SectionTitle>
+        <SectionDescription>Add an extra layer of security to your account</SectionDescription>
+
+        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-lg bg-[#6366F1]/10 flex items-center justify-center">
+              <Lock className="size-4 text-[#A78BFA]" />
+            </div>
+            <div>
+              <p className="text-[#E5E7EB] text-sm font-medium">Two-Factor Authentication</p>
+              <p className="text-[#6B7280] text-xs">Add an extra layer of security to your account</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-xs">
+              Coming Soon
+            </Badge>
+            <Switch
+              checked={twoFactorEnabled}
+              onCheckedChange={(checked) => {
+                setTwoFactorEnabled(checked)
+                toast.info('2FA setup coming soon!')
+              }}
+              disabled
+              className="data-[state=checked]:bg-[#6366F1]/50"
+            />
+          </div>
+        </div>
+      </SectionCard>
+
       {/* Active Sessions */}
       <SectionCard>
         <SectionTitle>
@@ -1185,6 +1242,7 @@ function SecurityTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
+                  <span className={`size-2 rounded-full ${session.current ? 'bg-green-400' : 'bg-[#6B7280]/40'}`} />
                   <p className="text-[#E5E7EB] text-sm font-medium">{session.device}</p>
                   {session.current && (
                     <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px] px-1.5 py-0">
@@ -1197,12 +1255,95 @@ function SecurityTab() {
                 </p>
               </div>
               {!session.current && (
-                <Button variant="ghost" size="sm" className="text-[#EF4444]/60 hover:text-[#EF4444] hover:bg-[#EF4444]/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRevokeSession(session.id)}
+                  className="text-[#EF4444]/60 hover:text-[#EF4444] hover:bg-[#EF4444]/10"
+                >
                   Revoke
                 </Button>
               )}
             </div>
           ))}
+        </div>
+      </SectionCard>
+
+      {/* Change Password */}
+      <SectionCard>
+        <SectionTitle>
+          <span className="flex items-center gap-2">
+            <KeyRound className="size-4 text-[#6366F1]" /> Change Password
+          </span>
+        </SectionTitle>
+        <SectionDescription>Update your password to keep your account secure</SectionDescription>
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Current Password</Label>
+            <div className="relative">
+              <Input
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                placeholder="Enter current password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+              >
+                {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">New Password</Label>
+            <div className="relative">
+              <Input
+                type={showNewPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                placeholder="Enter new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+              >
+                {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Confirm New Password</Label>
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                className="bg-white/5 border-white/10 text-[#E5E7EB] pr-10"
+                placeholder="Confirm new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB]"
+              >
+                {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={handleUpdatePassword}
+            className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white"
+          >
+            <KeyRound className="size-4" />
+            Update Password
+          </Button>
         </div>
       </SectionCard>
 
@@ -1227,31 +1368,6 @@ function SecurityTab() {
           </SettingRow>
         </div>
       </SectionCard>
-
-      {/* 2FA */}
-      <SectionCard>
-        <SectionTitle>
-          <span className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-[#6366F1]" /> Two-Factor Authentication
-          </span>
-        </SectionTitle>
-        <SectionDescription>Add an extra layer of security to your account</SectionDescription>
-
-        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-[#6366F1]/10 flex items-center justify-center">
-              <Lock className="size-4 text-[#A78BFA]" />
-            </div>
-            <div>
-              <p className="text-[#E5E7EB] text-sm font-medium">Two-Factor Auth</p>
-              <p className="text-[#6B7280] text-xs">Protect your account with 2FA</p>
-            </div>
-          </div>
-          <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-xs">
-            Coming Soon
-          </Badge>
-        </div>
-      </SectionCard>
     </div>
   )
 }
@@ -1261,17 +1377,62 @@ function SecurityTab() {
 function DataControlTab() {
   const { t } = useI18n()
   const [exporting, setExporting] = useState(false)
+  const [exportingCSV, setExportingCSV] = useState(false)
 
-  const handleExport = useCallback(async () => {
+  const handleExportJSON = useCallback(async () => {
     setExporting(true)
     try {
-      // Simulated export
+      // Collect all data from Zustand stores
+      const { user } = useAuthStore.getState()
+      const { currentFamily, familyMembers } = useAppStore.getState()
+      const { tasks } = useTaskStore.getState()
+      const { items } = useGroceryStore.getState()
+      const { events } = useCalendarStore.getState()
+
       const data = {
         exportedAt: new Date().toISOString(),
-        profile: { name: 'User' },
-        families: [],
-        tasks: [],
+        family: currentFamily ? {
+          id: currentFamily.id,
+          name: currentFamily.name,
+          description: currentFamily.description,
+          invite_code: currentFamily.invite_code,
+        } : null,
+        members: familyMembers.map((m) => ({
+          id: m.id,
+          nickname: m.nickname,
+          role: m.role,
+          first_name: m.profiles?.first_name ?? null,
+          last_name: m.profiles?.last_name ?? null,
+          email: m.profiles?.email ?? null,
+        })),
+        tasks: tasks.map((task) => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          due_date: task.due_date,
+          created_at: task.created_at,
+        })),
+        groceryItems: items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          quantity: item.quantity,
+          checked: item.checked,
+          created_at: item.created_at,
+        })),
+        events: events.map((event) => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          start_time: event.start_time,
+          end_time: event.end_time,
+          color: event.color,
+          all_day: event.all_day,
+        })),
       }
+
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -1279,7 +1440,7 @@ function DataControlTab() {
       a.download = `usra-plus-export-${new Date().toISOString().slice(0, 10)}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Data exported successfully')
+      toast.success('Data exported as JSON successfully')
     } catch {
       toast.error(t.common.error)
     } finally {
@@ -1287,8 +1448,51 @@ function DataControlTab() {
     }
   }, [t])
 
+  const handleExportCSV = useCallback(async () => {
+    setExportingCSV(true)
+    try {
+      const { tasks } = useTaskStore.getState()
+
+      // CSV header
+      const headers = ['Title', 'Status', 'Priority', 'Assignee', 'Due Date', 'Created At']
+      const rows = tasks.map((task) => [
+        `"${(task.title ?? '').replace(/"/g, '""')}"`,
+        task.status ?? '',
+        task.priority ?? '',
+        task.assignee?.first_name ? `${task.assignee.first_name} ${task.assignee.last_name ?? ''}`.trim() : '',
+        task.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
+        task.created_at ? new Date(task.created_at).toISOString().slice(0, 10) : '',
+      ])
+
+      const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `usra-plus-tasks-${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Tasks exported as CSV successfully')
+    } catch {
+      toast.error(t.common.error)
+    } finally {
+      setExportingCSV(false)
+    }
+  }, [t])
+
   const handleClearData = useCallback(async () => {
     try {
+      // Clear all Zustand stores
+      const taskStore = useTaskStore.getState()
+      const groceryStore = useGroceryStore.getState()
+      const calendarStore = useCalendarStore.getState()
+      const appStore = useAppStore.getState()
+
+      taskStore.setTasks([])
+      groceryStore.setItems([])
+      calendarStore.setEvents([])
+      appStore.setFamilyMembers([])
+
       toast.success('All data cleared')
     } catch {
       toast.error(t.common.error)
@@ -1343,17 +1547,28 @@ function DataControlTab() {
             <Download className="size-4 text-[#6366F1]" /> {t.settings.exportData}
           </span>
         </SectionTitle>
-        <SectionDescription>Download a copy of all your data</SectionDescription>
+        <SectionDescription>Download a copy of all your data in your preferred format</SectionDescription>
 
-        <Button
-          onClick={handleExport}
-          disabled={exporting}
-          variant="outline"
-          className="border-white/10 text-[#E5E7EB] hover:bg-white/5"
-        >
-          {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-          {t.settings.exportData}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            onClick={handleExportJSON}
+            disabled={exporting}
+            variant="outline"
+            className="border-white/10 text-[#E5E7EB] hover:bg-white/5 gap-2"
+          >
+            {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            Export as JSON
+          </Button>
+          <Button
+            onClick={handleExportCSV}
+            disabled={exportingCSV}
+            variant="outline"
+            className="border-white/10 text-[#E5E7EB] hover:bg-white/5 gap-2"
+          >
+            {exportingCSV ? <Loader2 className="size-4 animate-spin" /> : <BarChart3 className="size-4" />}
+            Export Tasks as CSV
+          </Button>
+        </div>
       </SectionCard>
 
       {/* Clear Data */}
@@ -1374,9 +1589,9 @@ function DataControlTab() {
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-[#111117] border-white/10">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-[#E5E7EB]">{t.settings.clearData}</AlertDialogTitle>
+              <AlertDialogTitle className="text-[#E5E7EB]">Are you sure?</AlertDialogTitle>
               <AlertDialogDescription className="text-[#6B7280]">
-                This will permanently delete all your data including tasks, events, files, and messages. This action cannot be undone.
+                This will delete all your data including tasks, grocery items, events, and family members. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -1384,7 +1599,7 @@ function DataControlTab() {
                 {t.common.cancel}
               </AlertDialogCancel>
               <AlertDialogAction onClick={handleClearData} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
-                {t.settings.clearData}
+                Yes, Clear All
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

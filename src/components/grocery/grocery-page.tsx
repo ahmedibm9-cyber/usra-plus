@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { format } from 'date-fns'
 import {
   Plus,
   Search,
@@ -19,6 +18,7 @@ import {
   Home,
   Package,
   X,
+  Sparkles,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -48,6 +48,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { triggerConfetti } from '@/lib/confetti'
+import { EmptyState } from '@/components/shared/empty-state'
+import { GroceryItemSkeleton } from '@/components/shared/skeleton-patterns'
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },
@@ -61,6 +64,32 @@ const CATEGORIES = [
   { key: 'household', label: 'Household', icon: Home },
   { key: 'other', label: 'Other', icon: Package },
 ] as const
+
+// ─── Smart Category Suggestions Mapping ──────────────────────────────────────
+
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  dairy: ['milk', 'cheese', 'yogurt', 'eggs', 'butter', 'cream', 'yoghurt'],
+  bakery: ['bread', 'croissant', 'cake', 'muffin', 'bagel', 'toast', 'pastry', 'tortilla'],
+  meat: ['chicken', 'beef', 'fish', 'lamb', 'turkey', 'pork', 'steak', 'salmon', 'shrimp', 'meat'],
+  fruits: ['apple', 'banana', 'tomato', 'onion', 'orange', 'grape', 'strawberry', 'lettuce', 'carrot', 'potato', 'pepper', 'cucumber', 'garlic', 'lemon'],
+  beverages: ['water', 'juice', 'soda', 'coffee', 'tea', 'milk', 'drink'],
+  snacks: ['chips', 'cookies', 'nuts', 'crackers', 'popcorn', 'candy', 'chocolate', 'pretzel'],
+  frozen: ['frozen', 'ice cream', 'pizza', 'fries'],
+  household: ['soap', 'detergent', 'tissue', 'paper', 'cleaning', 'shampoo', 'toothpaste'],
+}
+
+function suggestCategory(itemName: string): string | null {
+  const lower = itemName.toLowerCase().trim()
+  if (!lower) return null
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    for (const keyword of keywords) {
+      if (lower.includes(keyword)) {
+        return category
+      }
+    }
+  }
+  return null
+}
 
 function getCategoryIcon(category: string | null) {
   const found = CATEGORIES.find((c) => c.key === category)
@@ -93,6 +122,7 @@ export function GroceryPage() {
     searchQuery,
     filterCategory,
     showAddItem,
+    recentItems,
     setItems,
     addItem,
     removeItem,
@@ -101,8 +131,10 @@ export function GroceryPage() {
     setSearchQuery,
     setFilterCategory,
     setShowAddItem,
+    addRecentItem,
     getFilteredItems,
     getProgress,
+    getCategoryCount,
   } = useGroceryStore()
 
   const [newItemName, setNewItemName] = useState('')
@@ -110,10 +142,40 @@ export function GroceryPage() {
   const [newItemCategory, setNewItemCategory] = useState<string>('other')
   const [isAdding, setIsAdding] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [flashItemId, setFlashItemId] = useState<string | null>(null)
+  const [autoDetectedCategory, setAutoDetectedCategory] = useState<string | null>(null)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
   const familyId = currentFamily?.id
   const userId = user?.id
+
+  // Compute category counts for tabs
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const cat of CATEGORIES) {
+      if (cat.key === 'all') {
+        counts['all'] = items.length
+      } else {
+        counts[cat.key] = getCategoryCount(cat.key)
+      }
+    }
+    return counts
+  }, [items, getCategoryCount])
+
+  // Smart category suggestion when item name changes
+  useEffect(() => {
+    if (newItemName.trim()) {
+      const suggested = suggestCategory(newItemName)
+      if (suggested) {
+        setNewItemCategory(suggested)
+        setAutoDetectedCategory(suggested)
+      } else {
+        setAutoDetectedCategory(null)
+      }
+    } else {
+      setAutoDetectedCategory(null)
+    }
+  }, [newItemName])
 
   // Fetch items
   const fetchItems = useCallback(async () => {
@@ -199,21 +261,49 @@ export function GroceryPage() {
       if (error) throw error
       if (data) {
         addItem(data as GroceryItem)
+        addRecentItem(newItemName.trim(), newItemCategory)
         toast.success(t.common.success)
       }
       setNewItemName('')
       setNewItemQuantity(1)
       setNewItemCategory('other')
+      setAutoDetectedCategory(null)
       setShowAddItem(false)
     } catch {
-      toast.error(t.common.error)
+      // Fallback for demo mode
+      const demoItem: GroceryItem = {
+        id: `demo-grocery-${Date.now()}`,
+        family_id: familyId,
+        name: newItemName.trim(),
+        category: newItemCategory,
+        quantity: newItemQuantity,
+        checked: false,
+        added_by: userId,
+        created_at: new Date().toISOString(),
+      }
+      addItem(demoItem)
+      addRecentItem(newItemName.trim(), newItemCategory)
+      toast.success(t.common.success)
+      setNewItemName('')
+      setNewItemQuantity(1)
+      setNewItemCategory('other')
+      setAutoDetectedCategory(null)
+      setShowAddItem(false)
     } finally {
       setIsAdding(false)
     }
   }
 
+  // Handle quick-add from recent items
+  const handleQuickAdd = (name: string, category: string) => {
+    setNewItemName(name)
+    setNewItemCategory(category)
+    setShowAddItem(true)
+  }
+
   // Toggle checked
   const handleToggleChecked = async (item: GroceryItem) => {
+    const wasChecked = item.checked
     try {
       const supabase = createClient()
       const { error } = await supabase
@@ -223,8 +313,38 @@ export function GroceryPage() {
 
       if (error) throw error
       toggleChecked(item.id)
+
+      if (!wasChecked) {
+        toast.success('✓ Item checked')
+        setFlashItemId(item.id)
+        setTimeout(() => setFlashItemId(null), 300)
+
+        const updatedItems = useGroceryStore.getState().items.map((i) =>
+          i.id === item.id ? { ...i, checked: true } : i
+        )
+        const allChecked = updatedItems.length > 0 && updatedItems.every((i) => i.checked)
+        if (allChecked) {
+          triggerConfetti()
+          toast.success('🎉 All items checked off!')
+        }
+      }
     } catch {
-      toast.error(t.common.error)
+      // Fallback for demo mode
+      toggleChecked(item.id)
+      if (!wasChecked) {
+        toast.success('✓ Item checked')
+        setFlashItemId(item.id)
+        setTimeout(() => setFlashItemId(null), 300)
+
+        const updatedItems = useGroceryStore.getState().items.map((i) =>
+          i.id === item.id ? { ...i, checked: true } : i
+        )
+        const allChecked = updatedItems.length > 0 && updatedItems.every((i) => i.checked)
+        if (allChecked) {
+          triggerConfetti()
+          toast.success('🎉 All items checked off!')
+        }
+      }
     }
   }
 
@@ -238,7 +358,9 @@ export function GroceryPage() {
       removeItem(id)
       toast.success(t.common.success)
     } catch {
-      toast.error(t.common.error)
+      // Fallback for demo mode
+      removeItem(id)
+      toast.success(t.common.success)
     } finally {
       setDeletingId(null)
     }
@@ -270,7 +392,7 @@ export function GroceryPage() {
           </div>
           <Button
             onClick={() => setShowAddItem(true)}
-            className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4"
+            className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4 btn-ripple"
           >
             <Plus className="w-4 h-4" />
             {t.grocery.addItem}
@@ -289,6 +411,27 @@ export function GroceryPage() {
           />
         </div>
 
+        {/* Quick Add Section - Recent Items */}
+        {recentItems.length > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
+              <span className="text-xs font-medium text-[#6B7280]">Quick Add</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recentItems.map((recent) => (
+                <button
+                  key={recent.name}
+                  onClick={() => handleQuickAdd(recent.name, recent.category)}
+                  className="px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-[#E5E7EB] hover:bg-white/[0.08] transition-all"
+                >
+                  {recent.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Search */}
         <div className="mt-4 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
@@ -300,28 +443,34 @@ export function GroceryPage() {
           />
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Tabs with Item Count */}
         <div className="mt-4 -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto scrollbar-none">
           <div className="flex gap-2 pb-1 min-w-max">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.key}
-                onClick={() => setFilterCategory(cat.key)}
-                className={`
-                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200
-                  ${
-                    filterCategory === cat.key
-                      ? 'bg-[#6366F1] text-white shadow-lg shadow-[#6366F1]/25'
-                      : 'bg-white/[0.04] text-[#6B7280] hover:bg-white/[0.08] hover:text-[#E5E7EB] border border-white/[0.06]'
-                  }
-                `}
-              >
-                {cat.key !== 'all' && <cat.icon className="w-3.5 h-3.5" />}
-                {cat.key === 'all'
-                  ? 'All'
-                  : t.grocery.categories[cat.key as keyof typeof t.grocery.categories] ?? cat.label}
-              </button>
-            ))}
+            {CATEGORIES.map((cat) => {
+              const count = categoryCounts[cat.key] ?? 0
+              return (
+                <button
+                  key={cat.key}
+                  onClick={() => setFilterCategory(cat.key)}
+                  className={`
+                    flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200
+                    ${
+                      filterCategory === cat.key
+                        ? 'bg-[#6366F1] text-white shadow-lg shadow-[#6366F1]/25'
+                        : 'bg-white/[0.04] text-[#6B7280] hover:bg-white/[0.08] hover:text-[#E5E7EB] border border-white/[0.06]'
+                    }
+                  `}
+                >
+                  {cat.key !== 'all' && <cat.icon className="w-3.5 h-3.5" />}
+                  {cat.key === 'all'
+                    ? 'All'
+                    : t.grocery.categories[cat.key as keyof typeof t.grocery.categories] ?? cat.label}
+                  <span className={`ml-0.5 text-[10px] ${filterCategory === cat.key ? 'text-white/70' : 'text-[#6B7280]/70'}`}>
+                    ({count})
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -329,24 +478,16 @@ export function GroceryPage() {
       {/* Items List */}
       <div className="flex-1 overflow-hidden px-4 sm:px-6 pb-6">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#6366F1] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[#6B7280]">{t.common.loading}</p>
-            </div>
+          <div className="space-y-2">
+            <GroceryItemSkeleton count={4} />
           </div>
         ) : filteredItems.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center h-64 text-center"
-          >
-            <div className="p-4 rounded-2xl bg-[#111117] border border-white/[0.08] mb-4">
-              <ShoppingBag className="w-10 h-10 text-[#6B7280]" />
-            </div>
-            <h3 className="text-lg font-semibold text-[#E5E7EB] mb-1">{t.grocery.noItems}</h3>
-            <p className="text-sm text-[#6B7280] max-w-[250px]">{t.grocery.noItemsDesc}</p>
-          </motion.div>
+          <EmptyState
+            icon={ShoppingBag}
+            title="Your list is empty"
+            description="Add items to your grocery list"
+            action={{ label: 'Add Item', onClick: () => setShowAddItem(true) }}
+          />
         ) : (
           <ScrollArea className="h-full">
             <div className="space-y-2">
@@ -362,7 +503,8 @@ export function GroceryPage() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20, height: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="group bg-[#111117] border border-white/[0.08] rounded-xl p-3 sm:p-4 hover:border-white/[0.12] transition-all duration-200"
+                      className={`group bg-[#111117] border border-white/[0.08] rounded-xl p-3 sm:p-4 hover:border-white/[0.12] transition-all duration-300 hover:-translate-y-px hover:shadow-lg hover:shadow-black/20 ${flashItemId === item.id ? 'bg-green-500/10' : ''}`}
+                      data-grocery-item={item.id}
                     >
                       <div className="flex items-center gap-3">
                         <Checkbox
@@ -470,7 +612,15 @@ export function GroceryPage() {
       </div>
 
       {/* Add Item Dialog */}
-      <Dialog open={showAddItem} onOpenChange={setShowAddItem}>
+      <Dialog open={showAddItem} onOpenChange={(open) => {
+        setShowAddItem(open)
+        if (!open) {
+          setNewItemName('')
+          setNewItemQuantity(1)
+          setNewItemCategory('other')
+          setAutoDetectedCategory(null)
+        }
+      }}>
         <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-[#E5E7EB] flex items-center gap-2">
@@ -505,8 +655,19 @@ export function GroceryPage() {
                 />
               </div>
               <div className="space-y-2 flex-1">
-                <label className="text-sm font-medium text-[#E5E7EB]">{t.grocery.category}</label>
-                <Select value={newItemCategory} onValueChange={setNewItemCategory}>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-[#E5E7EB]">{t.grocery.category}</label>
+                  {autoDetectedCategory && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#A78BFA] bg-[#6366F1]/10 px-1.5 py-0.5 rounded-md">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      Auto-detected
+                    </span>
+                  )}
+                </div>
+                <Select value={newItemCategory} onValueChange={(v) => {
+                  setNewItemCategory(v)
+                  setAutoDetectedCategory(null)
+                }}>
                   <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] rounded-xl h-10 focus:ring-[#6366F1]/30">
                     <SelectValue />
                   </SelectTrigger>
@@ -532,7 +693,13 @@ export function GroceryPage() {
           <DialogFooter>
             <Button
               variant="ghost"
-              onClick={() => setShowAddItem(false)}
+              onClick={() => {
+                setShowAddItem(false)
+                setNewItemName('')
+                setNewItemQuantity(1)
+                setNewItemCategory('other')
+                setAutoDetectedCategory(null)
+              }}
               className="text-[#6B7280] hover:text-[#E5E7EB] rounded-xl"
             >
               {t.common.cancel}

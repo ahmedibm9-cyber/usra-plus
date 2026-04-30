@@ -22,6 +22,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import { usePresenceStore } from '@/stores/presence-store'
 import { useI18n } from '@/i18n/use-translation'
 import type { ChatMessage } from '@/types'
+import { EmptyState } from '@/components/shared/empty-state'
+import { MessageSkeleton } from '@/components/shared/skeleton-patterns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -422,28 +424,16 @@ export function ChatPage() {
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden relative">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#6366F1] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[#6B7280]">{t.common.loading}</p>
-            </div>
+          <div className="px-4 sm:px-6 py-6">
+            <MessageSkeleton count={4} />
           </div>
         ) : messages.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center h-full text-center px-6"
-          >
-            <div className="p-5 rounded-2xl bg-[#111117] border border-white/[0.08] mb-4">
-              <MessageCircle className="w-12 h-12 text-[#6B7280]" />
-            </div>
-            <h3 className="text-lg font-semibold text-[#E5E7EB] mb-1">
-              {t.chat.noMessages}
-            </h3>
-            <p className="text-sm text-[#6B7280] max-w-[250px]">
-              {t.chat.noMessagesDesc}
-            </p>
-          </motion.div>
+          <EmptyState
+            icon={MessageCircle}
+            title="No messages yet"
+            description="Start the conversation with your family"
+            action={{ label: 'Send Message', onClick: () => inputRef.current?.focus() }}
+          />
         ) : (
           <>
             <ScrollArea

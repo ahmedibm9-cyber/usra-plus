@@ -23,6 +23,7 @@ import {
   Moon,
   TrendingUp,
   TrendingDown,
+  LayoutDashboard,
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
@@ -47,6 +48,8 @@ import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { EmptyState } from '@/components/shared/empty-state'
+import { StatCardSkeleton, TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
 
 // ─── Sub-components ─────────────────────────────────────────────
 
@@ -239,25 +242,7 @@ function formatEventTime(dateStr: string): string {
   }
 }
 
-function EmptyState({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: React.ElementType
-  title: string
-  description: string
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-8 text-center">
-      <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-white/[0.04]">
-        <Icon className="size-6 text-[#6B7280]" />
-      </div>
-      <p className="text-sm font-medium text-[#6B7280]">{title}</p>
-      <p className="mt-1 text-xs text-[#6B7280]/60">{description}</p>
-    </div>
-  )
-}
+// EmptyState is now imported from shared component
 
 // ─── Activity Feed Item Types ───────────────────────────────────
 
@@ -984,22 +969,14 @@ export default function DashboardPage() {
             </div>
             <ScrollArea className="max-h-72">
               {isLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <Skeleton className="size-8 rounded-lg" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-2">
+                  <TaskCardSkeleton count={4} />
                 </div>
               ) : upcomingTasks.length === 0 ? (
                 <EmptyState
-                  icon={ListTodo}
-                  title={t.dashboard.noTasks}
-                  description="Create a task to get started"
+                  icon={LayoutDashboard}
+                  title="Welcome to your dashboard"
+                  description="Start by creating your first task or adding family members"
                 />
               ) : (
                 <div className="space-y-2">
