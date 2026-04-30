@@ -53,6 +53,12 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('usra-theme');if(t==='light'){document.documentElement.classList.add('light');document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark');document.documentElement.classList.remove('light')}}catch(e){document.documentElement.classList.add('dark')}})()`,
           }}
         />
+        {/* Chunk load error recovery — auto-reload on ChunkLoadError */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var origError=window.onerror;window.onerror=function(msg,src,line,col,err){if(err&&err.name==='ChunkLoadError'){console.warn('[USRA] ChunkLoadError detected, reloading...');window.location.reload();return true}if(origError)return origError.apply(this,arguments);return false};window.addEventListener('unhandledrejection',function(e){if(e.reason&&e.reason.name==='ChunkLoadError'){console.warn('[USRA] ChunkLoadError in promise, reloading...');e.preventDefault();window.location.reload()}})})()`,
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${tajawal.variable} antialiased bg-background text-foreground`} suppressHydrationWarning>
         {children}
