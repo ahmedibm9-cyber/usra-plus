@@ -15,6 +15,8 @@ import {
   LogOut,
   Users,
   ChevronsUpDown,
+  Wallet,
+  UtensilsCrossed,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -52,8 +54,10 @@ const navItems: NavItem[] = [
   { page: 'tasks', icon: CheckSquare, labelKey: 'tasks' },
   { page: 'calendar', icon: CalendarDays, labelKey: 'calendar' },
   { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery' },
+  { page: 'meal-plan', icon: UtensilsCrossed, labelKey: 'mealPlan' },
   { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
   { page: 'files', icon: FolderOpen, labelKey: 'files' },
+  { page: 'budget', icon: Wallet, labelKey: 'budget' },
   { page: 'settings', icon: Settings, labelKey: 'settings' },
 ]
 
@@ -75,6 +79,7 @@ function NavItemButton({
   const button = (
     <button
       onClick={onClick}
+      aria-current={isActive ? 'page' : undefined}
       className={`
         group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5
         text-sm font-medium transition-all duration-200
@@ -237,7 +242,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-2 py-3">
-        <nav data-tour="sidebar" className="flex flex-col gap-1">
+        <nav role="navigation" aria-label="Main navigation" data-tour="sidebar" className="flex flex-col gap-1">
           {/* Active nav background styling */}
           {navItems.map((item) => (
             <NavItemButton
@@ -258,6 +263,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
+              aria-label="User menu"
               className={`
                 flex w-full items-center gap-3 rounded-xl px-2.5 py-2
                 transition-colors hover:bg-[--bg-surface-2]

@@ -172,15 +172,15 @@ export function WeatherWidget() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.23, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      <div className="relative overflow-hidden glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-5">
+      <div className="relative overflow-hidden glass-card card-hover rounded-xl border border-[--border-subtle] bg-[--glass-bg] backdrop-blur-xl shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 p-4 lg:p-5">
         {/* Weather-themed subtle gradient overlay */}
-        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400/[0.03] via-transparent to-orange-500/[0.02]" />
+        <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-amber-400/[0.03] via-transparent to-orange-500/[0.02]" />
 
         {/* Header: Title + City Selector */}
-        <div className="relative mb-4 flex items-center justify-between">
+        <div className="relative mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MapPin className="size-4 text-amber-400" />
-            <h3 className="text-sm font-semibold text-[--text-primary]">
+            <h3 className="section-header-lg">
               {t.weather.weather}
             </h3>
           </div>
@@ -229,72 +229,68 @@ export function WeatherWidget() {
 
         {/* Main Weather Display */}
         {isLoading ? (
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-8 w-20" />
-              <Skeleton className="h-4 w-28" />
+          <div className="flex items-center gap-3">
+            <Skeleton className="size-10 rounded-full" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-3 w-24" />
             </div>
           </div>
         ) : (
           <div className="relative">
-            <div className="flex items-center gap-4">
-              {/* Weather Icon Container */}
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center text-amber-400">
-                <WeatherIcon icon={weather?.icon || 'sun'} className="size-6" animate />
+            <div className="flex items-center gap-3">
+              {/* Weather Icon Container with CSS animation */}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center text-amber-400">
+                <WeatherIcon icon={weather?.icon || 'sun'} className="size-5" animate />
               </div>
 
               {/* Temperature + Condition */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-bold text-[var(--text-primary)]">
+                  <span className="text-heading-2 text-[--text-primary]">
                     {weather?.temp ?? '--'}°
                   </span>
-                  <span className="text-xs text-[--text-muted]">
+                  <span className="text-caption text-[--text-muted]">
                     {weather ? getConditionLabel(weather.condition, isRTL) : ''}
                   </span>
                 </div>
-                <p className="text-xs text-[--text-muted] mt-0.5">
+                <p className="text-[10px] text-[--text-muted]">
                   {t.weather.feelsLike} {weather?.feelsLike ?? '--'}°
                 </p>
               </div>
             </div>
 
             {/* Humidity + Wind Row */}
-            <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-4 mt-2.5">
               <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-                <Droplets className="size-3.5 text-blue-400" />
-                <span>{t.weather.humidity}</span>
-                <span className="text-[--text-primary] font-medium">{weather?.humidity ?? '--'}%</span>
+                <Droplets className="size-3 text-blue-400" />
+                <span>{weather?.humidity ?? '--'}%</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-                <Wind className="size-3.5 text-emerald-400" />
-                <span>{t.weather.wind}</span>
-                <span className="text-[--text-primary] font-medium">{weather?.windSpeed ?? '--'} km/h</span>
+                <Wind className="size-3 text-emerald-400" />
+                <span>{weather?.windSpeed ?? '--'} km/h</span>
               </div>
             </div>
 
-            {/* 3-Day Mini Forecast */}
+            {/* 3-Day Forecast - Horizontal on desktop, vertical on mobile */}
             {weather?.forecast && weather.forecast.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-[--border-subtle]">
+              <div className="mt-3 pt-2.5 border-t border-[--border-subtle]">
                 <p className="text-[10px] uppercase tracking-wider text-[--text-muted] mb-2">
                   {t.weather.forecast}
                 </p>
-                <div className="space-y-1.5">
+                <div className="flex gap-3 sm:flex-row sm:justify-between">
                   {weather.forecast.map((day) => (
                     <div
                       key={day.day}
-                      className="flex items-center gap-2 text-xs text-[--text-muted]"
+                      className="flex items-center gap-1.5 text-xs text-[--text-muted] min-w-0"
                     >
-                      <span className="w-8 text-[--text-primary] font-medium">
+                      <span className="text-[--text-primary] font-medium text-[11px] shrink-0">
                         {isRTL ? day.dayAr : day.day}
                       </span>
-                      <WeatherIcon icon={day.icon} className="size-3.5" />
-                      <div className="flex items-center gap-1 ml-auto">
-                        <span className="text-[--text-primary] font-medium">{day.high}°</span>
-                        <span className="text-[--text-muted]">/</span>
-                        <span>{day.low}°</span>
-                      </div>
+                      <WeatherIcon icon={day.icon} className="size-3.5 shrink-0" />
+                      <span className="text-[--text-primary] font-medium">{day.high}°</span>
+                      <span className="text-[--text-muted]">/</span>
+                      <span>{day.low}°</span>
                     </div>
                   ))}
                 </div>

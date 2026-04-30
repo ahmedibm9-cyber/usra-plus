@@ -611,6 +611,39 @@ export function LoginForm() {
                 { id: 'comment-6', task_id: 'task-2', parent_id: null, author_id: 'demo-user-003', author_name: isRTL ? 'خالد' : 'Khalid', author_avatar: null, content: isRTL ? 'سأنظف المطبخ والصالة' : "I'll clean the kitchen and living room", created_at: new Date(Date.now() - 10800000).toISOString(), updated_at: new Date(Date.now() - 10800000).toISOString() },
               ])
 
+              // Seed demo budget data
+              const { useBudgetStore } = await import('@/stores/budget-store')
+              const budgetStore = useBudgetStore.getState()
+              const budgetNow = new Date()
+              const budgetMonthStr = `${budgetNow.getFullYear()}-${String(budgetNow.getMonth() + 1).padStart(2, '0')}`
+              budgetStore.setBudgetMonth({
+                month: budgetMonthStr,
+                totalBudget: 12000,
+                categories: {
+                  food: 3000,
+                  housing: 3500,
+                  transport: 1500,
+                  education: 1000,
+                  health: 500,
+                  entertainment: 800,
+                  shopping: 700,
+                  utilities: 700,
+                  other: 300,
+                },
+              })
+              budgetStore.setExpenses([
+                { id: 'exp-1', title: isRTL ? 'تسوق البقالة الأسبوعية' : 'Weekly grocery shopping', amount: 850, currency: 'SAR', category: 'food', date: new Date(Date.now() - 6*86400000).toISOString().split('T')[0], paidBy: 'demo-user-001', paidByName: isRTL ? 'أحمد' : 'Ahmed', familyId: 'demo-family-001', notes: isRTL ? 'خضروات وفواكه ولحوم' : 'Vegetables, fruits, and meat', createdAt: new Date(Date.now() - 6*86400000).toISOString() },
+                { id: 'exp-2', title: isRTL ? 'إيجار الشهر' : 'Monthly rent', amount: 3200, currency: 'SAR', category: 'housing', date: new Date(Date.now() - 10*86400000).toISOString().split('T')[0], paidBy: 'demo-user-001', paidByName: isRTL ? 'أحمد' : 'Ahmed', familyId: 'demo-family-001', createdAt: new Date(Date.now() - 10*86400000).toISOString() },
+                { id: 'exp-3', title: isRTL ? 'بنزين السيارة' : 'Car fuel', amount: 250, currency: 'SAR', category: 'transport', date: new Date(Date.now() - 3*86400000).toISOString().split('T')[0], paidBy: 'demo-user-003', paidByName: isRTL ? 'خالد' : 'Khalid', familyId: 'demo-family-001', createdAt: new Date(Date.now() - 3*86400000).toISOString() },
+                { id: 'exp-4', title: isRTL ? 'دروس تعليمية' : 'Tutoring classes', amount: 600, currency: 'SAR', category: 'education', date: new Date(Date.now() - 5*86400000).toISOString().split('T')[0], paidBy: 'demo-user-002', paidByName: isRTL ? 'نورة' : 'Noura', familyId: 'demo-family-001', notes: isRTL ? 'دروس رياضيات للأطفال' : 'Math classes for the kids', createdAt: new Date(Date.now() - 5*86400000).toISOString() },
+                { id: 'exp-5', title: isRTL ? 'فحص طبي' : 'Medical checkup', amount: 350, currency: 'SAR', category: 'health', date: new Date(Date.now() - 8*86400000).toISOString().split('T')[0], paidBy: 'demo-user-002', paidByName: isRTL ? 'نورة' : 'Noura', familyId: 'demo-family-001', createdAt: new Date(Date.now() - 8*86400000).toISOString() },
+                { id: 'exp-6', title: isRTL ? 'اشتراك نتفليكس' : 'Netflix subscription', amount: 60, currency: 'SAR', category: 'entertainment', date: new Date(Date.now() - 2*86400000).toISOString().split('T')[0], paidBy: 'demo-user-003', paidByName: isRTL ? 'خالد' : 'Khalid', familyId: 'demo-family-001', createdAt: new Date(Date.now() - 2*86400000).toISOString() },
+                { id: 'exp-7', title: isRTL ? 'ملابس جديدة' : 'New clothes', amount: 450, currency: 'SAR', category: 'shopping', date: new Date(Date.now() - 4*86400000).toISOString().split('T')[0], paidBy: 'demo-user-001', paidByName: isRTL ? 'أحمد' : 'Ahmed', familyId: 'demo-family-001', notes: isRTL ? 'للعيد' : 'For Eid', createdAt: new Date(Date.now() - 4*86400000).toISOString() },
+                { id: 'exp-8', title: isRTL ? 'فاتورة الكهرباء' : 'Electricity bill', amount: 380, currency: 'SAR', category: 'utilities', date: new Date(Date.now() - 7*86400000).toISOString().split('T')[0], paidBy: 'demo-user-001', paidByName: isRTL ? 'أحمد' : 'Ahmed', familyId: 'demo-family-001', createdAt: new Date(Date.now() - 7*86400000).toISOString() },
+                { id: 'exp-9', title: isRTL ? 'هدية عيد' : 'Eid gift', amount: 200, currency: 'SAR', category: 'other', date: new Date(Date.now() - 1*86400000).toISOString().split('T')[0], paidBy: 'demo-user-003', paidByName: isRTL ? 'خالد' : 'Khalid', familyId: 'demo-family-001', createdAt: new Date(Date.now() - 1*86400000).toISOString() },
+                { id: 'exp-10', title: isRTL ? 'عشاء المطعم' : 'Restaurant dinner', amount: 320, currency: 'SAR', category: 'food', date: new Date().toISOString().split('T')[0], paidBy: 'demo-user-002', paidByName: isRTL ? 'نورة' : 'Noura', familyId: 'demo-family-001', notes: isRTL ? 'عشاء عائلي' : 'Family dinner out', createdAt: new Date().toISOString() },
+              ])
+
               // Seed demo chat messages with reactions
               const { useChatStore } = await import('@/stores/chat-store')
               useChatStore.getState().setMessages([
@@ -741,6 +774,26 @@ export function LoginForm() {
                     { emoji: '🙏', users: ['demo-user-001'] },
                   ],
                 },
+              ])
+
+              // Seed demo meal plan data
+              const { useMealStore } = await import('@/stores/meal-store')
+              const mealNow = new Date()
+              const mealToday = new Date(mealNow.getFullYear(), mealNow.getMonth(), mealNow.getDate())
+              const mealMonday = new Date(mealToday)
+              mealMonday.setDate(mealMonday.getDate() - ((mealMonday.getDay() + 6) % 7))
+              const mealDay = (offset: number) => {
+                const d = new Date(mealMonday)
+                d.setDate(d.getDate() + offset)
+                return d.toISOString().split('T')[0]
+              }
+              useMealStore.getState().setMeals([
+                { id: 'meal-1', title: isRTL ? 'بانكيك بالعسل' : 'Pancakes with Honey', description: isRTL ? 'بانكيك طازج مع العسل والزبدة' : 'Fresh pancakes with honey and butter', mealType: 'breakfast', date: mealDay(0), assignedTo: ['demo-user-001', 'demo-user-002'], ingredients: [isRTL ? 'دقيق' : 'Flour', isRTL ? 'حليب' : 'Milk', isRTL ? 'بيض' : 'Eggs', isRTL ? 'عسل' : 'Honey', isRTL ? 'زبدة' : 'Butter'], prepTime: 20, calories: 450, createdBy: 'demo-user-001', createdAt: new Date().toISOString() },
+                { id: 'meal-2', title: isRTL ? 'كبسة دجاج' : 'Chicken Kabsa', description: isRTL ? 'كبسة دجاج تقليدية مع الأرز البسمتي' : 'Traditional chicken kabsa with basmati rice', mealType: 'lunch', date: mealDay(0), assignedTo: ['demo-user-001'], ingredients: [isRTL ? 'أرز بسمتي' : 'Basmati Rice', isRTL ? 'دجاج' : 'Chicken', isRTL ? 'بصل' : 'Onion', isRTL ? 'توابل' : 'Spices', isRTL ? 'طماطم' : 'Tomatoes'], prepTime: 60, calories: 650, createdBy: 'demo-user-001', createdAt: new Date().toISOString() },
+                { id: 'meal-3', title: isRTL ? 'سمك مشوي' : 'Grilled Fish', description: isRTL ? 'سمك مشوي مع الأعشاب والخضروات' : 'Grilled fish with herbs and vegetables', mealType: 'dinner', date: mealDay(1), assignedTo: ['demo-user-002', 'demo-user-003'], ingredients: [isRTL ? 'سمك' : 'Fish', isRTL ? 'ليمون' : 'Lemon', isRTL ? 'أعشاب' : 'Herbs', isRTL ? 'زيت زيتون' : 'Olive Oil'], prepTime: 35, calories: 320, recipeUrl: 'https://example.com/grilled-fish', createdBy: 'demo-user-002', createdAt: new Date().toISOString() },
+                { id: 'meal-4', title: isRTL ? 'مندي' : 'Mandi Rice', description: isRTL ? 'مندي لحم تقليدي' : 'Traditional lamb mandi', mealType: 'lunch', date: mealDay(2), assignedTo: ['demo-user-001', 'demo-user-003'], ingredients: [isRTL ? 'أرز بسمتي' : 'Basmati Rice', isRTL ? 'لحم' : 'Lamb', isRTL ? 'توابل مندي' : 'Mandi Spices', isRTL ? 'بصل' : 'Onion'], prepTime: 90, calories: 720, createdBy: 'demo-user-003', createdAt: new Date().toISOString() },
+                { id: 'meal-5', title: isRTL ? 'فول مدمس' : 'Foul Medames', description: isRTL ? 'فول مدمس مع زيت الزيتون والليمون' : 'Foul medames with olive oil and lemon', mealType: 'breakfast', date: mealDay(3), assignedTo: ['demo-user-001', 'demo-user-002'], ingredients: [isRTL ? 'فول' : 'Fava Beans', isRTL ? 'زيت زيتون' : 'Olive Oil', isRTL ? 'ليمون' : 'Lemon', isRTL ? 'ثوم' : 'Garlic'], prepTime: 15, calories: 280, createdBy: 'demo-user-002', createdAt: new Date().toISOString() },
+                { id: 'meal-6', title: isRTL ? 'مندي لحم' : 'Lamb Mandi', description: isRTL ? 'مندي لحم مع رز بسمتي' : 'Lamb mandi with basmati rice', mealType: 'dinner', date: mealDay(4), assignedTo: ['demo-user-001'], ingredients: [isRTL ? 'لحم' : 'Lamb', isRTL ? 'أرز' : 'Rice', isRTL ? 'توابل' : 'Spices', isRTL ? 'زبيب' : 'Raisins'], prepTime: 120, calories: 800, recipeUrl: 'https://example.com/lamb-mandi', createdBy: 'demo-user-001', createdAt: new Date().toISOString() },
               ])
 
               toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')

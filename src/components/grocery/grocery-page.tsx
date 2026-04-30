@@ -81,6 +81,7 @@ import { triggerConfetti } from '@/lib/confetti'
 import { EmptyState } from '@/components/shared/empty-state'
 import { GroceryItemSkeleton } from '@/components/shared/skeleton-patterns'
 import { cn } from '@/lib/utils'
+import { announce } from '@/lib/live-announcer'
 import {
   DndContext,
   DragOverlay,
@@ -235,6 +236,7 @@ function GroceryItemCard({
         <Checkbox
           checked={item.checked}
           onCheckedChange={() => onToggleChecked(item)}
+          aria-label={`Check off ${item.name}`}
           className="h-5 w-5 rounded-md border-[--border-medium] data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
         />
 
@@ -786,6 +788,7 @@ export function GroceryPage() {
       toggleChecked(item.id)
 
       if (!wasChecked) {
+        announce(`Item '${item.name}' checked off`)
         toast.success('✓ Item checked')
         setFlashItemId(item.id)
         setTimeout(() => setFlashItemId(null), 300)
@@ -803,6 +806,7 @@ export function GroceryPage() {
       // Fallback for demo mode
       toggleChecked(item.id)
       if (!wasChecked) {
+        announce(`Item '${item.name}' checked off`)
         toast.success('✓ Item checked')
         setFlashItemId(item.id)
         setTimeout(() => setFlashItemId(null), 300)
@@ -1153,7 +1157,7 @@ export function GroceryPage() {
               onDragCancel={handleDragCancel}
             >
               <ScrollArea className="h-full">
-                <div className="space-y-2">
+                <div role="list" className="space-y-2">
                   {/* Unchecked items - sortable */}
                   <SortableContext
                     items={uncheckedIds}
@@ -1194,6 +1198,7 @@ export function GroceryPage() {
                           <Checkbox
                             checked={item.checked}
                             onCheckedChange={() => handleToggleChecked(item)}
+                            aria-label={`Check off ${item.name}`}
                             className="h-5 w-5 rounded-md border-[--border-medium] data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">

@@ -95,9 +95,11 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { CSS } from '@dnd-kit/utilities'
 import { triggerConfetti, triggerTaskCompletionConfetti } from '@/lib/confetti'
 import { playCompletionSound } from '@/lib/completion-sound'
+import { announce } from '@/lib/live-announcer'
 import { KanbanBoard } from '@/components/tasks/kanban-board'
 import { useCommentStore } from '@/stores/comment-store'
 import type { TaskComment } from '@/stores/comment-store'
+import { FAB } from '@/components/shared/fab'
 
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { color: string; bg: string; border: string; label: string }> = {
@@ -496,7 +498,7 @@ function TaskCard({
         onClick={() => onToggleDone(task)}
         className="mt-0.5 flex-shrink-0 transition-transform duration-150 hover:scale-110"
         whileTap={{ scale: 0.8 }}
-        aria-label={task.status === 'done' ? 'Mark as incomplete' : 'Mark as complete'}
+        aria-label={task.status === 'done' ? `Mark ${task.title} as incomplete` : `Mark ${task.title} as complete`}
       >
         <AnimatePresence mode="wait">
           {task.status === 'done' ? (
@@ -1123,8 +1125,10 @@ export default function TasksPage() {
         if (isCompleting) {
           triggerTaskCompletionConfetti()
           playCompletionSound()
+          announce(`Task '${task.title}' marked as complete`)
           toast.success('🎉 Task completed!')
         } else {
+          announce(`Task '${task.title}' marked as incomplete`)
           toast.success('Task reopened')
         }
       } catch {
@@ -1133,8 +1137,10 @@ export default function TasksPage() {
         if (isCompleting) {
           triggerTaskCompletionConfetti()
           playCompletionSound()
+          announce(`Task '${task.title}' marked as complete`)
           toast.success('🎉 Task completed!')
         } else {
+          announce(`Task '${task.title}' marked as incomplete`)
           toast.success('Task reopened')
         }
       }
@@ -1343,7 +1349,7 @@ export default function TasksPage() {
       </div>
 
       {/* ─── Filter Bar ─────────────────────────────────────────── */}
-      <div className="flex-shrink-0 px-4 sm:px-6 pb-3">
+      <div className="flex-shrink-0 px-4 sm:px-6 pb-3" aria-label="Task filters">
         <div className="flex items-center gap-2 flex-wrap">
           {/* Status filter */}
           <div className="flex items-center gap-1 bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5">
@@ -1355,6 +1361,7 @@ export default function TasksPage() {
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
+                  aria-pressed={isActive}
                   className={cn(
                     'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
                     isActive
@@ -1516,6 +1523,7 @@ export default function TasksPage() {
           ) : (
             <ScrollArea className="h-full">
               <AnimatePresence mode="popLayout">
+                <div role="list">
                 {viewMode === 'status' ? (
                   // Group by status
                   (['todo', 'in_progress', 'done'] as TaskStatus[]).map((status) => {
@@ -1565,6 +1573,7 @@ export default function TasksPage() {
                     )
                   })
                 )}
+              </div>
               </AnimatePresence>
             </ScrollArea>
           )}
@@ -1609,6 +1618,9 @@ export default function TasksPage() {
         familyId={currentFamily?.id || ''}
         userId={user?.id || ''}
       />
+
+      {/* ─── FAB for mobile ─────────────────────────────────────── */}
+      <FAB onClick={handleAddTask} label="Add task" />
     </div>
   )
 }

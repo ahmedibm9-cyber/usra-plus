@@ -88,6 +88,7 @@ import {
   Repeat,
   User,
 } from 'lucide-react'
+import { FAB } from '@/components/shared/fab'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -262,7 +263,7 @@ function MonthView({
   const days = eachDayOfInterval({ start: calStart, end: calEnd })
 
   return (
-    <div className="flex flex-col h-full">
+    <div role="grid" aria-label="Calendar" className="flex flex-col h-full">
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b border-[--border-subtle]">
         {WEEK_DAYS.map((day, i) => (
@@ -276,7 +277,7 @@ function MonthView({
       </div>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 flex-1 auto-rows-fr">
+      <div className="grid grid-cols-7 flex-1 auto-rows-fr" role="row">
         {days.map((day, i) => {
           const dayEvents = getEventsForDay(events, day)
           const inMonth = isSameMonth(day, currentDate)
@@ -288,6 +289,8 @@ function MonthView({
             <div
               key={i}
               onClick={() => onDayClick(day)}
+              role="gridcell"
+              aria-label={format(day, 'EEEE, MMMM d, yyyy')}
               className={`relative border-b border-r border-[--border-subtle] p-1 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-[--border-subtle] ${
                 !inMonth ? 'opacity-40' : ''
               } ${today ? 'ring-1 ring-inset ring-[#6366F1]/40' : ''}`}

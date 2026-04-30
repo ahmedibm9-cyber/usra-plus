@@ -1336,7 +1336,7 @@ export function ChatPage() {
               onScroll={handleScroll}
               ref={scrollRef}
             >
-              <div className="space-y-1 pb-4">
+              <div role="log" aria-label="Chat messages" className="space-y-1 pb-4">
                 {messageGroups.map((group) => (
                   <div key={group.label}>
                     {/* Date separator */}
@@ -1556,6 +1556,7 @@ export function ChatPage() {
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.2 }}
                       className="flex items-center gap-2.5 mt-3 px-1"
+                      aria-live="polite"
                     >
                       <div className="flex-shrink-0 w-8">
                         <div className="relative">
@@ -1821,6 +1822,7 @@ export function ChatPage() {
                       <Button
                         onClick={handleSendMessage}
                         disabled={isSending}
+                        aria-label="Send message"
                         className="h-8 w-8 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg flex-shrink-0 disabled:opacity-50"
                       >
                         {isSending ? (
@@ -1841,7 +1843,7 @@ export function ChatPage() {
                       <Button
                         onClick={handleStartRecording}
                         className="h-8 w-8 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg flex-shrink-0"
-                        aria-label={t.chat.tapToRecord}
+                        aria-label="Record voice message"
                       >
                         <Mic className="w-4 h-4" />
                       </Button>

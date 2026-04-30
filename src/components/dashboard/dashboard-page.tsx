@@ -22,8 +22,9 @@ import {
   TrendingUp,
   TrendingDown,
   LayoutDashboard,
+  BarChart3,
 } from 'lucide-react'
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts'
 
 import { createClient } from '@/lib/supabase/client'
 import { useAppStore } from '@/stores/app-store'
@@ -114,7 +115,7 @@ function GlassCard({
       transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div
-        className={`glass-card glass card-hover rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-[inset_0_1px_0_var(--border-subtle)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
+        className={`glass-card card-hover rounded-xl border border-[--border-subtle] bg-[--glass-bg] backdrop-blur-xl shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
       >
         {children}
       </div>
@@ -163,7 +164,6 @@ function StatCard({
   useEffect(() => {
     if (isLoading || hasAnimated.current) return
     if (isFraction) {
-      // For fraction values like "1/5", animate numerator and denominator separately
       const parts = String(value).split('/')
       const num = parseInt(parts[0], 10) || 0
       const den = parseInt(parts[1], 10) || 0
@@ -174,7 +174,6 @@ function StatCard({
       function animate() {
         const elapsed = Date.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
-        // Ease-out curve
         const eased = 1 - Math.pow(1 - progress, 3)
 
         const currentNum = Math.round(eased * num)
@@ -199,7 +198,6 @@ function StatCard({
       function animate() {
         const elapsed = Date.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
-        // Ease-out curve
         const eased = 1 - Math.pow(1 - progress, 3)
 
         setDisplayValue(Math.round(eased * numericValue))
@@ -224,38 +222,35 @@ function StatCard({
   }, [value])
 
   return (
-    <GlassCard delay={delay} className="stat-card-wrapper p-5">
+    <GlassCard delay={delay} className="stat-card-wrapper p-4 lg:p-5">
       {isLoading ? (
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-xl" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-4 w-24" />
+        <div className="flex items-center gap-3">
+          <Skeleton className="size-10 rounded-full" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-5 w-12" />
+            <Skeleton className="h-3 w-20" />
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-4">
-          {progress !== undefined ? (
-            <div className="relative flex items-center justify-center">
-              <CircularProgress value={progress} size={56} strokeWidth={5} color={progressColor} />
-              <Icon className="absolute size-5" style={{ color: progressColor }} />
-            </div>
-          ) : (
-            <div
-              className="flex size-12 items-center justify-center rounded-xl"
-              style={{ backgroundColor: `${progressColor}15` }}
-            >
-              <Icon className="size-5" style={{ color: progressColor }} />
-            </div>
-          )}
+        <div className="flex items-center gap-3">
+          {/* 40px gradient icon circle */}
+          <div
+            className="flex size-10 shrink-0 items-center justify-center rounded-full"
+            style={{
+              background: `linear-gradient(135deg, ${progressColor}25, ${progressColor}10)`,
+            }}
+          >
+            <Icon className="size-[18px]" style={{ color: progressColor }} />
+          </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <p className="text-caption text-[--text-muted] truncate">{label}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
               <motion.p
-                className="text-2xl font-bold tracking-tight text-[--text-primary]"
+                className="text-heading-3 text-[--text-primary] leading-tight stat-value-mobile"
                 animate={{ scale: bounceScale }}
                 transition={{ duration: 0.15, ease: 'easeOut' }}
               >
-                {isLoading ? value : displayValue}
+                {displayValue}
               </motion.p>
               {trend && trend !== 'neutral' && (
                 <span className={`flex items-center text-[10px] font-medium ${trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -268,9 +263,8 @@ function StatCard({
                 </span>
               )}
             </div>
-            <p className="text-sm text-[--text-muted] truncate">{label}</p>
             {subValue && (
-              <p className="mt-0.5 text-xs text-[--text-muted]/70 truncate">{subValue}</p>
+              <p className="mt-0.5 text-[10px] text-[--text-muted]/70 truncate">{subValue}</p>
             )}
           </div>
         </div>
@@ -637,10 +631,10 @@ export default function DashboardPage() {
   // ─── Dashboard Layout ───────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[--bg-primary] px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        {/* ─── Welcome Section with Animated Background ───────── */}
-        <div className="relative overflow-hidden rounded-2xl">
+    <div className="min-h-screen bg-[--bg-primary] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+      <div className="mx-auto max-w-7xl space-y-4 lg:space-y-6">
+        {/* ─── Welcome Section (Full Width, Gradient BG) ──────── */}
+        <section className="scroll-mt-20 relative overflow-hidden rounded-xl">
           {/* Animated gradient mesh blobs */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="animate-float-blob-1 absolute -left-20 -top-10 h-60 w-60 rounded-full bg-indigo-500/[0.04] blur-3xl" />
@@ -652,14 +646,14 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between px-2 py-3"
+            className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between px-4 lg:px-6 py-4"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[--text-primary] sm:text-3xl">
+              <h1 className="text-heading-1 text-[--text-primary]">
                 {greeting}
                 {userName ? `, ${userName}` : ''} 👋
               </h1>
-              <p className="mt-1 text-sm text-[--text-muted]">
+              <p className="mt-1 text-body text-[--text-muted]">
                 {currentDate} &middot; ١٤٤٦ هـ &middot; {currentFamily.name}
               </p>
             </div>
@@ -673,19 +667,10 @@ export default function DashboardPage() {
               {currentFamily.name}
             </Button>
           </motion.div>
-        </div>
+        </section>
 
-        {/* ─── AI Family Insights ─────────────────────────────── */}
-        <AISummaryWidget
-          tasks={tasks}
-          groceryItems={groceryItems}
-          events={events}
-          members={familyMembers}
-          isLoading={isLoading}
-        />
-
-        {/* ─── Stats Cards Row ────────────────────────────────── */}
-        <div data-tour="dashboard-stats" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {/* ─── Stat Cards Row (2x2 on mobile/tablet, 4-col on desktop) ── */}
+        <section data-tour="dashboard-stats" className="scroll-mt-20 grid grid-cols-2 md:grid-cols-2 gap-3 lg:gap-4 lg:grid-cols-4">
           <StatCard
             icon={CheckCircle2}
             value={isLoading ? '' : `${stats.completedTasks}/${stats.totalTasks}`}
@@ -695,7 +680,6 @@ export default function DashboardPage() {
                 ? `${stats.overdueTasks} ${t.dashboard.overdue.toLowerCase()}`
                 : undefined
             }
-            progress={isLoading ? 0 : stats.completionRate}
             progressColor="#6366F1"
             delay={0.05}
             isLoading={isLoading}
@@ -725,51 +709,47 @@ export default function DashboardPage() {
             icon={ShoppingCart}
             value={isLoading ? '' : `${stats.groceryChecked}/${stats.groceryItems}`}
             label={t.dashboard.groceryReminders}
-            progress={
-              isLoading
-                ? 0
-                : stats.groceryItems > 0
-                  ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
-                  : 0
-            }
             progressColor="#F59E0B"
             delay={0.2}
             isLoading={isLoading}
             trend="up"
             trendLabel="+3"
           />
-        </div>
+        </section>
 
-        {/* ─── Family Analytics (Full Width) ────────────────── */}
-        <FamilyAnalyticsWidget />
+        {/* ─── Family Analytics (Full Width, Compact) ──────────── */}
+        <section className="scroll-mt-20">
+          <FamilyAnalyticsWidget />
+        </section>
 
-        {/* ─── Weekly Activity + Prayer Times + Weather Row ──── */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {/* ─── Weekly Chart (left) + Prayer Times + Weather (right) ── */}
+        <section className="scroll-mt-20 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Weekly Activity Bar Chart */}
-          <GlassCard delay={0.22} className="p-5 sm:col-span-1 lg:col-span-3">
+          <GlassCard delay={0.22} className="p-4 lg:p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[--text-primary]">
+              <h3 className="section-header-lg flex items-center gap-2">
+                <BarChart3 className="size-4 text-[--accent-primary]" />
                 {isRTL ? 'هذا الأسبوع' : 'This Week'}
               </h3>
-              <span className="text-xs text-[--text-muted]">
+              <span className="text-caption text-[--text-muted]">
                 {isRTL ? 'المهام المنجزة' : 'Tasks completed'}
               </span>
             </div>
-            <div className="h-[200px] w-full">
+            <div className="h-[180px] lg:h-[200px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
+                <RechartsBarChart
                   data={WEEKLY_ACTIVITY_DATA}
                   margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
                 >
                   <Bar
                     dataKey="tasks"
-                    fill="#6366F1"
+                    fill="var(--accent-primary)"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={32}
                     animationBegin={200}
                     animationDuration={600}
                   />
-                </BarChart>
+                </RechartsBarChart>
               </ResponsiveContainer>
             </div>
             <div className="mt-2 flex justify-between px-1">
@@ -781,245 +761,201 @@ export default function DashboardPage() {
             </div>
           </GlassCard>
 
-          {/* Prayer Times Widget */}
-          <GlassCard delay={0.24} className="p-5 sm:col-span-1" data-tour="dashboard-prayer">
-            <div className="mb-4 flex items-center gap-2">
-              <Moon className="size-4 text-[#A78BFA]" />
-              <h3 className="text-sm font-semibold text-[--text-primary]">
-                {isRTL ? 'أوقات الصلاة' : 'Prayer Times'}
-              </h3>
-            </div>
-            <div className="space-y-2.5">
-              {nextPrayers.map((prayer) => (
-                <div
-                  key={prayer.name}
-                  className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
-                    prayer.isNext
-                      ? 'border-[#6366F1]/30 bg-[#6366F1]/10'
-                      : 'border-[--border-subtle] bg-[--bg-surface-2]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`flex size-7 items-center justify-center rounded-md ${
-                        prayer.isNext
-                          ? 'bg-[#6366F1]/20'
-                          : 'bg-[--bg-surface-2]'
-                      }`}
-                    >
-                      <Moon
-                        className={`size-3.5 ${
-                          prayer.isNext ? 'text-[--accent-primary]' : 'text-[--text-muted]'
+          {/* Prayer Times + Weather combined column */}
+          <div className="flex flex-col gap-4 lg:gap-6">
+            {/* Prayer Times Widget */}
+            <GlassCard delay={0.24} className="p-4 lg:p-5" data-tour="dashboard-prayer">
+              <div className="mb-3 flex items-center gap-2">
+                <Moon className="size-4 text-[--accent-secondary]" />
+                <h3 className="section-header-lg">
+                  {isRTL ? 'أوقات الصلاة' : 'Prayer Times'}
+                </h3>
+              </div>
+              <div className="space-y-2">
+                {nextPrayers.map((prayer) => (
+                  <div
+                    key={prayer.name}
+                    className={`flex items-center justify-between rounded-lg border p-2.5 transition-colors ${
+                      prayer.isNext
+                        ? 'border-[--accent-primary]/30 bg-[--accent-primary]/10'
+                        : 'border-[--border-subtle] bg-[--bg-surface-2]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex size-6 items-center justify-center rounded-md ${
+                          prayer.isNext
+                            ? 'bg-[--accent-primary]/20'
+                            : 'bg-[--bg-surface-2]'
                         }`}
-                      />
-                    </div>
-                    <span
-                      className={`text-sm font-medium ${
-                        prayer.isNext ? 'text-[--text-primary]' : 'text-[--text-muted]'
-                      }`}
-                    >
-                      {isRTL ? prayer.nameAr : prayer.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-sm font-semibold ${
-                        prayer.isNext ? 'text-[--accent-primary]' : 'text-[--text-primary]'
-                      }`}
-                    >
-                      {prayer.time}
-                    </span>
-                    {prayer.isNext && (
-                      <span className="rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-[9px] font-medium text-[--accent-primary]">
-                        {isRTL ? 'التالي' : 'Next'}
+                      >
+                        <Moon
+                          className={`size-3 ${
+                            prayer.isNext ? 'text-[--accent-primary]' : 'text-[--text-muted]'
+                          }`}
+                        />
+                      </div>
+                      <span
+                        className={`text-sm font-medium ${
+                          prayer.isNext ? 'text-[--text-primary]' : 'text-[--text-muted]'
+                        }`}
+                      >
+                        {isRTL ? prayer.nameAr : prayer.name}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-sm font-semibold ${
+                          prayer.isNext ? 'text-[--accent-primary]' : 'text-[--text-primary]'
+                        }`}
+                      >
+                        {prayer.time}
+                      </span>
+                      {prayer.isNext && (
+                        <span className="rounded-full bg-[--accent-primary]/20 px-2 py-0.5 text-[9px] font-medium text-[--accent-primary]">
+                          {isRTL ? 'التالي' : 'Next'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-[10px] text-[--text-muted]/60 text-center">
+                {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
+              </p>
+            </GlassCard>
+
+            {/* Weather Widget */}
+            <WeatherWidget />
+          </div>
+        </section>
+
+        {/* ─── Activity Timeline (left) + Quick Actions + Upcoming (right) ── */}
+        <section className="scroll-mt-20 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          {/* Activity Timeline */}
+          <ActivityTimelineWidget />
+
+          {/* Right Column: Quick Actions + Upcoming Tasks/Events/Grocery */}
+          <div className="flex flex-col gap-4 lg:gap-6">
+            {/* Quick Actions */}
+            <GlassCard delay={0.3} className="p-4 lg:p-5" data-tour="quick-actions">
+              <h3 className="section-header-lg mb-3">
+                {t.dashboard.quickActions}
+              </h3>
+              {isLoading ? (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {quickActions.map((action) => (
+                    <motion.button
+                      key={action.label}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={action.onClick}
+                      className="group flex flex-col items-center gap-1.5 rounded-xl border border-[--border-subtle] bg-[--bg-surface-2] p-3 transition-colors hover:border-[--border-medium]"
+                    >
+                      <div
+                        className="flex size-9 items-center justify-center rounded-lg transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: `${action.color}15` }}
+                      >
+                        <action.icon className="size-4" style={{ color: action.color }} />
+                      </div>
+                      <span className="text-[11px] font-medium text-[--text-primary]">{action.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+
+              {/* Family Members Avatars Row */}
+              {!isLoading && familyMembers.length > 0 && (
+                <div className="mt-3 flex items-center gap-2 border-t border-[--border-subtle] pt-3">
+                  <span className="text-caption text-[--text-muted]">{t.dashboard.members}:</span>
+                  <div className="flex -space-x-2">
+                    {familyMembers.slice(0, 5).map((member) => (
+                      <Avatar key={member.id} className="size-6 border-2 border-[--glass-bg]">
+                        <AvatarImage src={member.profiles?.avatar_url || undefined} />
+                        <AvatarFallback className="bg-[--accent-primary]/20 text-[9px] text-[--accent-secondary]">
+                          {member.profiles?.first_name?.[0] || member.nickname?.[0] || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {familyMembers.length > 5 && (
+                      <div className="flex size-6 items-center justify-center rounded-full border-2 border-[--glass-bg] bg-[--bg-surface-2] text-[9px] text-[--text-muted]">
+                        +{familyMembers.length - 5}
+                      </div>
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
-            <p className="mt-3 text-[10px] text-[--text-muted]/60 text-center">
-              {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
-            </p>
-          </GlassCard>
+              )}
+            </GlassCard>
 
-          {/* Weather Widget */}
-          <WeatherWidget />
-        </div>
-
-        {/* ─── Middle Row: Productivity + Quick Actions ───────── */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Productivity Score Widget */}
-          <GlassCard delay={0.25} className="p-6 lg:col-span-1">
-            {isLoading ? (
-              <div className="flex flex-col items-center">
-                <Skeleton className="h-[140px] w-[140px] rounded-full" />
-                <Skeleton className="mt-4 h-5 w-32" />
-                <Skeleton className="mt-2 h-4 w-24" />
+            {/* Upcoming Tasks */}
+            <GlassCard delay={0.35} className="p-4 lg:p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="section-header-lg">{t.dashboard.upcomingTasks}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-[--text-muted] hover:text-[--accent-primary]"
+                  onClick={() => setCurrentPage('tasks')}
+                >
+                  {t.dashboard.viewAll}
+                  <ArrowRight className="ml-1 size-3" />
+                </Button>
               </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <div className="relative">
-                  <PieChart width={160} height={160}>
-                    <Pie
-                      data={productivityChartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={72}
-                      startAngle={90}
-                      endAngle={-270}
-                      dataKey="value"
-                      stroke="none"
-                      animationBegin={200}
-                      animationDuration={800}
-                    >
-                      <Cell fill="#6366F1" />
-                      <Cell fill="var(--border-subtle)" />
-                    </Pie>
-                  </PieChart>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-[--text-primary]">
-                      {stats.productivityScore}
-                    </span>
-                    <span className="text-[10px] uppercase tracking-wider text-[--text-muted]">
-                      Score
-                    </span>
+              <ScrollArea className="max-h-64">
+                {isLoading ? (
+                  <div className="space-y-2">
+                    <TaskCardSkeleton count={3} />
                   </div>
-                </div>
-                <p className="mt-3 text-sm font-semibold text-[--text-primary]">
-                  {t.dashboard.productivityScore}
-                </p>
-                <p className="mt-1 text-xs text-[--text-muted] text-center">
-                  Based on task completion &amp; grocery progress
-                </p>
-              </div>
-            )}
-          </GlassCard>
-
-          {/* Quick Actions */}
-          <GlassCard delay={0.3} className="p-6 lg:col-span-2" data-tour="quick-actions">
-            <h3 className="mb-4 text-sm font-semibold text-[--text-primary]">
-              {t.dashboard.quickActions}
-            </h3>
-            {isLoading ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 rounded-xl" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {quickActions.map((action) => (
-                  <motion.button
-                    key={action.label}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={action.onClick}
-                    className="group flex flex-col items-center gap-2 rounded-xl border border-[--border-subtle] bg-[--bg-surface-2] p-4 transition-colors hover:border-[--border-medium] hover:bg-[--bg-surface-2]"
-                  >
-                    <div
-                      className="flex size-10 items-center justify-center rounded-lg transition-transform group-hover:scale-110"
-                      style={{ backgroundColor: `${action.color}15` }}
-                    >
-                      <action.icon className="size-5" style={{ color: action.color }} />
-                    </div>
-                    <span className="text-xs font-medium text-[--text-primary]">{action.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            )}
-
-            {/* Family Members Avatars Row */}
-            {!isLoading && familyMembers.length > 0 && (
-              <div className="mt-5 flex items-center gap-3 border-t border-[--border-subtle] pt-4">
-                <span className="text-xs text-[--text-muted]">{t.dashboard.members}:</span>
-                <div className="flex -space-x-2">
-                  {familyMembers.slice(0, 5).map((member) => (
-                    <Avatar key={member.id} className="size-7 border-2 border-[--bg-surface]">
-                      <AvatarImage src={member.profiles?.avatar_url || undefined} />
-                      <AvatarFallback className="bg-[#6366F1]/20 text-[10px] text-[#A78BFA]">
-                        {member.profiles?.first_name?.[0] || member.nickname?.[0] || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-                  {familyMembers.length > 5 && (
-                    <div className="flex size-7 items-center justify-center rounded-full border-2 border-[--bg-surface] bg-[--bg-surface-2] text-[10px] text-[--text-muted]">
-                      +{familyMembers.length - 5}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </GlassCard>
-        </div>
-
-        {/* ─── Bottom Row: Activity Timeline + Quick Actions + Upcoming ──── */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Upcoming Tasks */}
-          <GlassCard delay={0.35} className="p-5 lg:col-span-1">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[--text-primary]">{t.dashboard.upcomingTasks}</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-[--text-muted] hover:text-[--accent-primary]"
-                onClick={() => setCurrentPage('tasks')}
-              >
-                {t.dashboard.viewAll}
-                <ArrowRight className="ml-1 size-3" />
-              </Button>
-            </div>
-            <ScrollArea className="max-h-72">
-              {isLoading ? (
-                <div className="space-y-2">
-                  <TaskCardSkeleton count={4} />
-                </div>
-              ) : upcomingTasks.length === 0 ? (
-                <EmptyState
-                  icon={LayoutDashboard}
-                  title="Welcome to your dashboard"
-                  description="Start by creating your first task or adding family members"
-                />
-              ) : (
-                <div className="space-y-2">
-                  <AnimatePresence>
-                    {upcomingTasks.map((task, index) => (
-                      <motion.div
-                        key={task.id}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="group flex items-center gap-3 rounded-lg border border-[--border-subtle] bg-[--bg-surface-2] p-3 transition-colors hover:border-[--border-medium] hover:bg-[--bg-surface-2]"
-                      >
-                        <div
-                          className={`flex size-8 items-center justify-center rounded-lg ${
-                            task.priority === 'urgent'
-                              ? 'bg-red-500/10'
-                              : task.priority === 'high'
-                                ? 'bg-orange-500/10'
-                                : task.priority === 'medium'
-                                  ? 'bg-amber-500/10'
-                                  : 'bg-emerald-500/10'
-                          }`}
+                ) : upcomingTasks.length === 0 ? (
+                  <EmptyState
+                    icon={LayoutDashboard}
+                    title="Welcome to your dashboard"
+                    description="Start by creating your first task or adding family members"
+                  />
+                ) : (
+                  <div className="space-y-1.5">
+                    <AnimatePresence>
+                      {upcomingTasks.map((task, index) => (
+                        <motion.div
+                          key={task.id}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="group flex items-center gap-2.5 rounded-lg border border-[--border-subtle] bg-[--bg-surface-2] p-2.5 transition-colors hover:border-[--border-medium]"
                         >
-                          <ListTodo
-                            className={`size-4 ${
+                          <div
+                            className={`flex size-7 items-center justify-center rounded-lg shrink-0 ${
                               task.priority === 'urgent'
-                                ? 'text-red-400'
+                                ? 'bg-red-500/10'
                                 : task.priority === 'high'
-                                  ? 'text-orange-400'
+                                  ? 'bg-orange-500/10'
                                   : task.priority === 'medium'
-                                    ? 'text-amber-400'
-                                    : 'text-emerald-400'
+                                    ? 'bg-amber-500/10'
+                                    : 'bg-emerald-500/10'
                             }`}
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-[--text-primary]">
-                            {task.title}
-                          </p>
-                          <div className="mt-0.5 flex items-center gap-2">
+                          >
+                            <ListTodo
+                              className={`size-3.5 ${
+                                task.priority === 'urgent'
+                                  ? 'text-red-400'
+                                  : task.priority === 'high'
+                                    ? 'text-orange-400'
+                                    : task.priority === 'medium'
+                                      ? 'text-amber-400'
+                                      : 'text-emerald-400'
+                              }`}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-[--text-primary]">
+                              {task.title}
+                            </p>
                             {task.due_date && (
                               <span className="flex items-center gap-1 text-[10px] text-[--text-muted]">
                                 <Clock className="size-3" />
@@ -1027,28 +963,25 @@ export default function DashboardPage() {
                               </span>
                             )}
                           </div>
-                        </div>
-                        <PriorityBadge priority={task.priority} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
-            </ScrollArea>
-          </GlassCard>
+                          <PriorityBadge priority={task.priority} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </ScrollArea>
+            </GlassCard>
 
-          {/* Upcoming Events + Grocery Reminders */}
-          <div className="flex flex-col gap-4 lg:col-span-1">
             {/* Upcoming Events */}
-            <GlassCard delay={0.4} className="p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[--text-primary]">
+            <GlassCard delay={0.4} className="p-4 lg:p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="section-header-lg">
                   {t.dashboard.upcomingEvents}
                 </h3>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs text-[--text-muted] hover:text-[#A78BFA]"
+                  className="h-7 text-xs text-[--text-muted] hover:text-[--accent-secondary]"
                   onClick={() => setCurrentPage('calendar')}
                 >
                   {t.dashboard.viewAll}
@@ -1113,9 +1046,9 @@ export default function DashboardPage() {
             </GlassCard>
 
             {/* Grocery Reminders */}
-            <GlassCard delay={0.45} className="p-5">
+            <GlassCard delay={0.45} className="p-4 lg:p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[--text-primary]">
+                <h3 className="section-header-lg">
                   {t.dashboard.groceryReminders}
                 </h3>
                 <Button
@@ -1177,10 +1110,7 @@ export default function DashboardPage() {
               )}
             </GlassCard>
           </div>
-
-          {/* Activity Feed Timeline */}
-          <ActivityTimelineWidget />
-        </div>
+        </section>
       </div>
     </div>
   )

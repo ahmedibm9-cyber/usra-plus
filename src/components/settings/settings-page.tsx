@@ -102,6 +102,7 @@ import { PlanBadge } from '@/components/shared/plan-badge'
 import { AvatarGenerator } from '@/components/shared/avatar-generator'
 import { useI18n } from '@/i18n/use-translation'
 import { createClient } from '@/lib/supabase/client'
+import { announce } from '@/lib/live-announcer'
 import { FamilyQRCode } from '@/components/shared/family-qr-code'
 import type { FamilyMember, FamilyRole, Notification, SubscriptionPlan, Theme, Language } from '@/types'
 
@@ -1085,6 +1086,7 @@ function PreferencesTab() {
   const handleThemeChange = useCallback(
     (newTheme: Theme) => {
       setTheme(newTheme)
+      announce(`Switched to ${newTheme} mode`)
       if (user) {
         try {
           const supabase = createClient()
@@ -1101,6 +1103,7 @@ function PreferencesTab() {
   const handleLanguageChange = useCallback(
     async (lang: Language) => {
       setLanguage(lang)
+      announce(`Switched to ${lang === 'ar' ? 'Arabic' : 'English'}`)
       if (user) {
         try {
           const supabase = createClient()
@@ -3066,11 +3069,13 @@ export default function SettingsPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Navigation - Desktop */}
           <div className="hidden lg:block w-64 shrink-0">
-            <nav className="bg-[--bg-surface] border border-[--border-medium] rounded-2xl p-2 sticky top-6">
+            <nav role="tablist" aria-label="Settings tabs" className="bg-[--bg-surface] border border-[--border-medium] rounded-2xl p-2 sticky top-6">
               {settingsTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     activeTab === tab.id
                       ? 'bg-[--accent-primary]/15 text-[--accent-secondary]'
@@ -3087,11 +3092,13 @@ export default function SettingsPage() {
           {/* Mobile Tabs - Horizontal Scroll */}
           <div className="lg:hidden w-full">
             <ScrollArea className="w-full">
-              <div className="flex gap-1 pb-2 mb-4">
+              <div role="tablist" aria-label="Settings tabs" className="flex gap-1 pb-2 mb-4">
                 {settingsTabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
                       activeTab === tab.id
                         ? 'bg-[--accent-primary]/15 text-[--accent-secondary] border border-[#6366F1]/30'
@@ -3107,7 +3114,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" role="tabpanel" aria-label={`${t.settings[settingsTabs.find(t => t.id === activeTab)?.labelKey || 'family']} settings`}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

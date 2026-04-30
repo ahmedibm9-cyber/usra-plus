@@ -24,6 +24,8 @@ import { GroceryPage } from '@/components/grocery/grocery-page'
 import { ChatPage } from '@/components/chat/chat-page'
 import { FilesPage } from '@/components/files/files-page'
 import SettingsPage from '@/components/settings/settings-page'
+import BudgetPage from '@/components/budget/budget-page'
+import MealPlanPage from '@/components/meal-plan/meal-plan-page'
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow'
 import { PageWrapper } from '@/components/shared/page-wrapper'
 import { CommandPalette } from '@/components/shared/command-palette'
@@ -32,6 +34,7 @@ import { GuidedTour } from '@/components/shared/guided-tour'
 
 import { Loader2 } from 'lucide-react'
 import type { AppPage } from '@/types'
+import { announce } from '@/lib/live-announcer'
 
 // Auth Screen Component
 function AuthScreen() {
@@ -71,7 +74,7 @@ function LoadingScreen() {
 }
 
 // Page order for swipe navigation
-const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'grocery', 'chat', 'files', 'settings']
+const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'grocery', 'meal-plan', 'budget', 'chat', 'files', 'settings']
 
 // Swipe threshold constants
 const SWIPE_MIN_DISTANCE = 80
@@ -228,6 +231,33 @@ function MainApp() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Focus management: move focus to main heading when page changes
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const prevPageRef = useRef<AppPage>(currentPage)
+
+  useEffect(() => {
+    if (prevPageRef.current !== currentPage) {
+      prevPageRef.current = currentPage
+      // Announce page change to screen readers
+      const pageNames: Record<AppPage, string> = {
+        dashboard: 'Dashboard',
+        tasks: 'Tasks',
+        calendar: 'Calendar',
+        grocery: 'Grocery',
+        'meal-plan': 'Meal Plan',
+        chat: 'Chat',
+        files: 'Files',
+        budget: 'Budget',
+        settings: 'Settings',
+      }
+      announce(`Navigated to ${pageNames[currentPage]} page`)
+      // Move focus to the main heading
+      setTimeout(() => {
+        headingRef.current?.focus()
+      }, 100)
+    }
+  }, [currentPage])
+
   // Show onboarding if no family
   if (showOnboarding && !currentFamily) {
     return <OnboardingFlow />
@@ -244,6 +274,10 @@ function MainApp() {
         return <PageWrapper><CalendarPage /></PageWrapper>
       case 'grocery':
         return <PageWrapper><GroceryPage /></PageWrapper>
+      case 'meal-plan':
+        return <PageWrapper><MealPlanPage /></PageWrapper>
+      case 'budget':
+        return <PageWrapper><BudgetPage /></PageWrapper>
       case 'chat':
         return <PageWrapper><ChatPage /></PageWrapper>
       case 'files':
@@ -257,6 +291,11 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-[--bg-primary] flex">
+      {/* Skip to Content Link */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[--accent-primary] focus:text-white" tabIndex={0}>
+        Skip to main content
+      </a>
+
       {/* Sidebar - Desktop */}
       <div className="hidden md:block">
         <AppSidebar />
@@ -278,7 +317,9 @@ function MainApp() {
 
         {/* Page Content */}
         <main
+          id="main-content"
           ref={mainRef}
+          role="main"
           className="flex-1 overflow-y-auto relative"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -313,6 +354,13 @@ function MainApp() {
               transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined,
             }}
           >
+            {/* Visually hidden heading for focus management */}
+            <h1 ref={headingRef} tabIndex={-1} className="sr-only">
+              {(() => {
+                const names: Record<AppPage, string> = { dashboard: 'Dashboard', tasks: 'Tasks', calendar: 'Calendar', grocery: 'Grocery', chat: 'Chat', files: 'Files', settings: 'Settings' }
+                return names[currentPage]
+              })()}
+            </h1>
             {renderPage()}
           </div>
         </main>

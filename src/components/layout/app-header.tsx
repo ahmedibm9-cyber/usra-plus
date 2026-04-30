@@ -37,6 +37,7 @@ import { useNotificationStore } from '@/stores/notification-store'
 import { useI18n } from '@/i18n/use-translation'
 import type { AppPage } from '@/types'
 import { NotificationPanel } from './notification-panel'
+import { announce } from '@/lib/live-announcer'
 
 const pageTitles: Record<AppPage, keyof import('@/i18n/en').en.nav> = {
   dashboard: 'dashboard',
@@ -76,13 +77,16 @@ export function AppHeader() {
   }, [user])
 
   const toggleLanguage = useCallback(() => {
-    setLanguage(language === 'en' ? 'ar' : 'en')
+    const newLang = language === 'en' ? 'ar' : 'en'
+    setLanguage(newLang)
+    announce(`Switched to ${newLang === 'ar' ? 'Arabic' : 'English'}`)
   }, [language, setLanguage])
 
   const kbdSymbol = isMac ? '⌘' : 'Ctrl'
 
   return (
     <header
+      role="banner"
       className="
         sticky top-0 z-40
         flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3
@@ -135,6 +139,7 @@ export function AppHeader() {
           type="button"
           onClick={() => setCommandPaletteOpen(true)}
           className="hidden md:flex items-center relative w-56 lg:w-64 h-9 bg-[--bg-surface-2]/50 border border-[--border-subtle] rounded-xl hover:border-[--border-medium] transition-colors"
+          aria-label="Open search"
         >
           <Search className="absolute left-3 size-4 text-[--text-muted] pointer-events-none" />
           <span className="pl-9 pr-14 text-sm text-[--text-muted] truncate">{t.nav.search}</span>
@@ -152,14 +157,11 @@ export function AppHeader() {
               size="icon"
               className="md:hidden shrink-0 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
               onClick={() => setCommandPaletteOpen(true)}
-              aria-label="Search"
+              aria-label="Open search"
             >
               <Search className="size-5" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="bg-[--bg-surface-2] border-[--border-subtle] text-[--text-secondary] text-xs">
-            {kbdSymbol}K
-          </TooltipContent>
         </Tooltip>
       </div>
 
@@ -193,7 +195,7 @@ export function AppHeader() {
       {/* User Avatar Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="shrink-0 rounded-full ring-2 ring-[--border-subtle] hover:ring-[--border-medium] transition-all">
+          <button className="shrink-0 rounded-full ring-2 ring-[--border-subtle] hover:ring-[--border-medium] transition-all" aria-label="User menu">
             <Avatar className="size-8">
               <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
               <AvatarFallback className="bg-violet-500/20 text-violet-400 text-xs font-semibold">

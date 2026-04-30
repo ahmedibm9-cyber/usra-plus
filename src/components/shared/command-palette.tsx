@@ -27,6 +27,8 @@ import {
   CalendarClock,
   MessageCircle,
   Sparkles,
+  Wallet,
+  UtensilsCrossed,
 } from 'lucide-react'
 import { useAppStore } from '@/stores/app-store'
 import { useTaskStore } from '@/stores/task-store'
@@ -128,8 +130,10 @@ const pages: PageItem[] = [
   { id: 'tasks', labelKey: 'tasks', icon: CheckSquare, keywords: ['todo', 'checklist', 'مهمة', 'مهام'] },
   { id: 'calendar', labelKey: 'calendar', icon: CalendarDays, keywords: ['events', 'schedule', 'تقويم', 'أحداث'] },
   { id: 'grocery', labelKey: 'grocery', icon: ShoppingCart, keywords: ['shopping', 'list', 'بقالة', 'تسوق'] },
+  { id: 'meal-plan', labelKey: 'mealPlan', icon: UtensilsCrossed, keywords: ['meal', 'plan', 'food', 'recipe', 'وجبة', 'خطة', 'طعام', 'وصفة'] },
   { id: 'chat', labelKey: 'chat', icon: MessageSquare, keywords: ['messages', 'talk', 'محادثة', 'رسائل'] },
   { id: 'files', labelKey: 'files', icon: FolderOpen, keywords: ['documents', 'uploads', 'ملفات', 'مستندات'] },
+  { id: 'budget', labelKey: 'budget', icon: Wallet, keywords: ['finance', 'money', 'expenses', 'budget', 'ميزانية', 'مصروفات', 'مال'] },
   { id: 'settings', labelKey: 'settings', icon: Settings, keywords: ['preferences', 'config', 'إعدادات', 'تفضيلات'] },
 ]
 
@@ -624,6 +628,7 @@ export function CommandPalette() {
               loop
               className="rounded-2xl border border-[--border-subtle] bg-[--bg-surface]/95 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden"
               shouldFilter={false}
+              aria-label="Command palette"
             >
               {/* Search Input */}
               <div className="flex items-center border-b border-[--border-subtle] px-4">
@@ -661,7 +666,7 @@ export function CommandPalette() {
               )}
 
               {/* Results */}
-              <Command.List className="max-h-80 overflow-y-auto p-2 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[--border-subtle]">
+              <Command.List role="listbox" className="max-h-80 overflow-y-auto p-2 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[--border-subtle]">
 
                 {/* ─── No query state: Recent + Pages + Quick Actions ─── */}
                 {!showContentSearch && (
@@ -690,6 +695,7 @@ export function CommandPalette() {
                             key={`recent-search-${idx}`}
                             value={`recent-search-${searchQuery}`}
                             onSelect={() => handleRecentSearchClick(searchQuery)}
+                            role="option"
                             className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg px-3 py-2.5 text-sm cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                           >
                             <Clock className="size-3.5 shrink-0 text-[--text-muted]" />
@@ -729,6 +735,7 @@ export function CommandPalette() {
                                   navigateToPage(pageId as AppPage)
                                 }
                               }}
+                              role="option"
                               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                             >
                               <Icon className="size-4 shrink-0 text-[--text-muted] data-[selected=true]:text-[#6366F1]" />
@@ -755,6 +762,7 @@ export function CommandPalette() {
                             key={page.id}
                             value={`page-${page.id} ${label} ${page.keywords.join(' ')}`}
                             onSelect={() => navigateToPage(page.id)}
+                            role="option"
                             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                           >
                             <Icon className="size-4 shrink-0 text-[--text-muted] group-data-[selected=true]:text-[#6366F1]" />
@@ -780,6 +788,7 @@ export function CommandPalette() {
                             key={action.id}
                             value={`${action.id} ${label} ${action.keywords.join(' ')}`}
                             onSelect={action.action}
+                            role="option"
                             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                           >
                             <Icon className="size-4 shrink-0 text-[--text-muted]" />
@@ -802,6 +811,7 @@ export function CommandPalette() {
                           <Command.Item
                             key={task.id}
                             value={`task-${task.id} ${task.title} ${task.description || ''} ${task.priority} ${task.status}`}
+                            role="option"
                             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                             onSelect={() => editTask(task)}
                           >
@@ -879,6 +889,7 @@ export function CommandPalette() {
                                   key={result.id}
                                   value={`${result.id} ${result.title} ${result.snippet}`}
                                   onSelect={() => handleContentResultClick(result)}
+                                  role="option"
                                   className="px-3 py-2.5 rounded-lg hover:bg-[--border-subtle] cursor-pointer transition-colors flex items-center gap-3 data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white"
                                 >
                                   {/* Type icon */}

@@ -12,6 +12,8 @@ import {
   Settings,
   MoreHorizontal,
   ChevronUp,
+  Wallet,
+  UtensilsCrossed,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { useAppStore } from '@/stores/app-store'
@@ -21,7 +23,7 @@ import type { AppPage } from '@/types'
 interface BottomNavItem {
   page: AppPage
   icon: React.ElementType
-  labelKey: 'dashboard' | 'tasks' | 'calendar' | 'grocery' | 'chat'
+  labelKey: 'dashboard' | 'tasks' | 'calendar' | 'grocery' | 'budget'
 }
 
 const mainNavItems: BottomNavItem[] = [
@@ -29,16 +31,18 @@ const mainNavItems: BottomNavItem[] = [
   { page: 'tasks', icon: CheckSquare, labelKey: 'tasks' },
   { page: 'calendar', icon: CalendarDays, labelKey: 'calendar' },
   { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery' },
-  { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
+  { page: 'budget', icon: Wallet, labelKey: 'budget' },
 ]
 
 interface MoreNavItem {
   page: AppPage
   icon: React.ElementType
-  labelKey: 'files' | 'settings'
+  labelKey: 'chat' | 'files' | 'settings' | 'mealPlan'
 }
 
 const moreNavItems: MoreNavItem[] = [
+  { page: 'meal-plan', icon: UtensilsCrossed, labelKey: 'mealPlan' },
+  { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
   { page: 'files', icon: FolderOpen, labelKey: 'files' },
   { page: 'settings', icon: Settings, labelKey: 'settings' },
 ]
@@ -118,6 +122,7 @@ export function BottomNav() {
 
   return (
     <nav
+      aria-label="Mobile navigation"
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
         border-t border-[--border-subtle]
@@ -149,6 +154,8 @@ export function BottomNav() {
               onClick={(e) => handleTap(item.page, item.page, e)}
               whileTap={{ scale: 0.85 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              aria-label={label}
+              aria-current={isActive ? 'page' : undefined}
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
@@ -206,6 +213,8 @@ export function BottomNav() {
               onClick={(e) => handleTap('files', 'more', e)}
               whileTap={{ scale: 0.85 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              aria-label={isRTL ? 'المزيد' : 'More'}
+              aria-current={isMoreItemActive ? 'page' : undefined}
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
@@ -284,12 +293,12 @@ export function BottomNav() {
             {/* Divider */}
             <div className="h-px mx-5 bg-[--border-subtle]" />
 
-            {/* Navigation items */}
-            <div className="flex flex-col gap-1 px-3 py-2">
+            {/* Navigation items - 2 column grid */}
+            <div className="grid grid-cols-2 gap-2 px-4 py-3">
               {moreNavItems.map((item) => {
                 const isActive = currentPage === item.page
                 const Icon = item.icon
-                const label = t.nav[item.labelKey]
+                const label = t.nav[item.labelKey as keyof typeof t.nav] || item.labelKey
 
                 return (
                   <motion.button
@@ -298,10 +307,10 @@ export function BottomNav() {
                       handleNavClick(item.page)
                       setMoreSheetOpen(false)
                     }}
-                    whileTap={{ scale: 0.97 }}
+                    whileTap={{ scale: 0.95 }}
                     className={`
-                      flex items-center gap-3 rounded-xl px-4 py-3.5
-                      text-sm font-medium transition-all duration-200
+                      flex flex-col items-center gap-1.5 rounded-xl px-3 py-3
+                      text-xs font-medium transition-all duration-200
                       ${
                         isActive
                           ? 'bg-[--accent-primary]/10 text-[--text-primary] border border-[--accent-primary]/20'
@@ -310,19 +319,16 @@ export function BottomNav() {
                     `}
                   >
                     <div className={`
-                      flex items-center justify-center size-9 rounded-lg transition-colors duration-200
-                      ${isActive ? 'bg-[--accent-primary]/15' : 'bg-[--bg-surface-2]/50'}
+                      flex items-center justify-center size-10 rounded-xl transition-colors duration-200
+                      ${isActive ? 'bg-[--accent-primary]/15' : 'bg-[--bg-surface-2]'}
                     `}>
                       <Icon
                         className={`size-5 transition-colors duration-200 ${
-                          isActive ? 'text-indigo-400' : ''
+                          isActive ? 'text-[--accent-primary]' : ''
                         }`}
                       />
                     </div>
-                    <span className="flex-1 text-left">{label}</span>
-                    {isActive && (
-                      <div className="size-2 rounded-full bg-[--accent-primary]" style={{ boxShadow: '0 0 6px var(--accent-primary)' }} />
-                    )}
+                    <span>{label}</span>
                   </motion.button>
                 )
               })}

@@ -399,7 +399,7 @@ export function NotificationPanel() {
           variant="ghost"
           size="icon"
           className="shrink-0 relative text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
-          aria-label="Notifications"
+          aria-label={`Notifications, ${unreadCount} unread`}
           onClick={() => initAudioContext()}
         >
           <motion.div

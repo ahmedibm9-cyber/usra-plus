@@ -286,7 +286,7 @@ export function GuidedTour() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100]">
+      <div className="fixed inset-0 z-[100]" role="dialog" aria-label="Guided tour">
         {/* Dark overlay with spotlight cutout */}
         {spotlightRect && !showWelcome && (
           <motion.div
@@ -438,7 +438,7 @@ export function GuidedTour() {
               {/* Ambient glow */}
               <div className="absolute -top-16 -left-16 w-32 h-32 bg-[#6366F1]/8 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="relative p-5">
+              <div className="relative p-5" aria-live="assertive">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
