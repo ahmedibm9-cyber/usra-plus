@@ -78,21 +78,26 @@ function NavItemButton({
       className={`
         group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5
         text-sm font-medium transition-all duration-200
-        hover:bg-[--bg-surface-2]
+        hover:bg-[--bg-surface-2] btn-bounce
         ${isActive
-          ? 'bg-[--bg-surface-2] text-[--text-primary]'
+          ? 'sidebar-active-item bg-[--bg-surface-2] text-[--text-primary]'
           : 'text-[--text-muted] hover:text-[--text-secondary]'
         }
         ${collapsed ? 'justify-center px-2' : ''}
       `}
     >
-      {/* Active left border indicator */}
+      {/* Active left border indicator with glow pulse */}
       {isActive && (
         <motion.div
           layoutId="sidebar-active-indicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-indigo-500"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-indigo-500 sidebar-active-glow"
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
+      )}
+
+      {/* Hover left border at 50% opacity */}
+      {!isActive && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full bg-indigo-500/0 group-hover:bg-indigo-500/50 transition-colors duration-200" />
       )}
 
       <Icon
@@ -232,7 +237,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-2 py-3">
-        <nav className="flex flex-col gap-1">
+        <nav data-tour="sidebar" className="flex flex-col gap-1">
           {/* Active nav background styling */}
           {navItems.map((item) => (
             <NavItemButton

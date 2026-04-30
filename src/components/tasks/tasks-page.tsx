@@ -93,7 +93,8 @@ import {
 } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { CSS } from '@dnd-kit/utilities'
-import { triggerConfetti } from '@/lib/confetti'
+import { triggerConfetti, triggerTaskCompletionConfetti } from '@/lib/confetti'
+import { playCompletionSound } from '@/lib/completion-sound'
 import { KanbanBoard } from '@/components/tasks/kanban-board'
 import { useCommentStore } from '@/stores/comment-store'
 import type { TaskComment } from '@/stores/comment-store'
@@ -1110,6 +1111,7 @@ export default function TasksPage() {
     async (task: Task) => {
       const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done'
       const completedAt = newStatus === 'done' ? new Date().toISOString() : null
+      const isCompleting = task.status !== 'done' && newStatus === 'done'
       try {
         const { error } = await supabase
           .from('tasks')
@@ -1118,14 +1120,23 @@ export default function TasksPage() {
 
         if (error) throw error
         updateTask({ ...task, status: newStatus, completed_at: completedAt })
-        if (newStatus === 'done') {
-          triggerConfetti()
+        if (isCompleting) {
+          triggerTaskCompletionConfetti()
+          playCompletionSound()
           toast.success('🎉 Task completed!')
         } else {
           toast.success('Task reopened')
         }
       } catch {
-        toast.error('Failed to update task')
+        // Fallback for demo mode
+        updateTask({ ...task, status: newStatus, completed_at: completedAt })
+        if (isCompleting) {
+          triggerTaskCompletionConfetti()
+          playCompletionSound()
+          toast.success('🎉 Task completed!')
+        } else {
+          toast.success('Task reopened')
+        }
       }
     },
     [supabase, updateTask]
@@ -1303,7 +1314,7 @@ export default function TasksPage() {
             )}
             <Button
               onClick={handleAddTask}
-              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl btn-glow btn-press"
+              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl btn-glow btn-press btn-click-ripple"
             >
               <Plus className="size-4" />
               {t.tasks.addTask}

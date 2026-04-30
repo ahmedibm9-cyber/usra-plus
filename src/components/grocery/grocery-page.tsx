@@ -211,6 +211,7 @@ function GroceryItemCard({
         'group bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-3 sm:p-4 transition-all duration-300',
         hovered && !isDragOverlay && 'border-[--border-medium] -translate-y-px shadow-lg shadow-black/20',
         flashItemId === item.id && 'bg-green-500/10',
+        isChecked && !isDragOverlay && 'grocery-item-checked',
         isChecked && !isDragOverlay && 'bg-[--bg-surface]/50 border-[--border-subtle]',
         isDragOverlay && 'shadow-2xl ring-1 ring-white/10 scale-[1.02]'
       )}
@@ -241,14 +242,18 @@ function GroceryItemCard({
         <div className="flex-1 min-w-0">
           <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
             <CategoryIconRender category={item.category} />
-            <span
-              className={cn(
-                'text-sm font-medium truncate',
-                isChecked ? 'text-[--text-muted] line-through' : 'text-[--text-primary]'
-              )}
-            >
-              {item.name}
-            </span>
+            {isChecked ? (
+              <span className="text-sm font-medium truncate text-[--text-muted] grocery-strikethrough-text">
+                {item.name}
+              </span>
+            ) : (
+              <span className="text-sm font-medium truncate text-[--text-primary]">
+                {item.name}
+              </span>
+            )}
+            {isChecked && (
+              <span className="grocery-checkmark text-sm">✓</span>
+            )}
           </div>
           {item.adder && !isChecked && (
             <p className="text-xs text-[--text-muted] mt-0.5">
@@ -999,7 +1004,7 @@ export function GroceryPage() {
 
             <Button
               onClick={() => setShowAddItem(true)}
-              className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4 btn-ripple"
+              className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4 btn-click-ripple"
             >
               <Plus className="w-4 h-4" />
               {t.grocery.addItem}

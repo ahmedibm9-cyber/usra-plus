@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, isToday, isTomorrow, isThisWeek, parseISO } from 'date-fns'
 import {
@@ -50,7 +50,8 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { StatCardSkeleton, TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
 import { AISummaryWidget } from '@/components/dashboard/ai-summary-widget'
 import { WeatherWidget } from '@/components/dashboard/weather-widget'
-import { ActivityFeedWidget } from '@/components/dashboard/activity-feed-widget'
+import { ActivityTimelineWidget } from '@/components/dashboard/activity-timeline-widget'
+import { FamilyAnalyticsWidget } from '@/components/dashboard/family-analytics-widget'
 
 // ─── Sub-components ─────────────────────────────────────────────
 
@@ -113,7 +114,7 @@ function GlassCard({
       transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div
-        className={`glass-card glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-[inset_0_1px_0_var(--border-subtle)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
+        className={`glass-card glass card-hover rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-[inset_0_1px_0_var(--border-subtle)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
       >
         {children}
       </div>
@@ -144,6 +145,84 @@ function StatCard({
   trend?: 'up' | 'down' | 'neutral'
   trendLabel?: string
 }) {
+  const [displayValue, setDisplayValue] = useState<string | number>(0)
+  const [bounceScale, setBounceScale] = useState(1)
+  const hasAnimated = useRef(false)
+
+  // Parse numeric value for animation
+  const numericValue = useMemo(() => {
+    if (typeof value === 'number') return value
+    const parsed = parseInt(String(value), 10)
+    return isNaN(parsed) ? 0 : parsed
+  }, [value])
+
+  // Determine if this is a fraction like "1/5"
+  const isFraction = typeof value === 'string' && value.includes('/')
+
+  // Count up animation
+  useEffect(() => {
+    if (isLoading || hasAnimated.current) return
+    if (isFraction) {
+      // For fraction values like "1/5", animate numerator and denominator separately
+      const parts = String(value).split('/')
+      const num = parseInt(parts[0], 10) || 0
+      const den = parseInt(parts[1], 10) || 0
+
+      const duration = 800
+      const startTime = Date.now()
+
+      function animate() {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        // Ease-out curve
+        const eased = 1 - Math.pow(1 - progress, 3)
+
+        const currentNum = Math.round(eased * num)
+        const currentDen = Math.round(eased * den)
+        setDisplayValue(`${currentNum}/${currentDen}`)
+
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          setDisplayValue(value)
+          setBounceScale(1.05)
+          setTimeout(() => setBounceScale(1.0), 150)
+        }
+      }
+
+      hasAnimated.current = true
+      requestAnimationFrame(animate)
+    } else {
+      const duration = 800
+      const startTime = Date.now()
+
+      function animate() {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        // Ease-out curve
+        const eased = 1 - Math.pow(1 - progress, 3)
+
+        setDisplayValue(Math.round(eased * numericValue))
+
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          setDisplayValue(numericValue)
+          setBounceScale(1.05)
+          setTimeout(() => setBounceScale(1.0), 150)
+        }
+      }
+
+      hasAnimated.current = true
+      requestAnimationFrame(animate)
+    }
+  }, [isLoading, numericValue, value, isFraction])
+
+  // Reset animation when value changes significantly
+  useEffect(() => {
+    hasAnimated.current = false
+  }, [value])
+
   return (
     <GlassCard delay={delay} className="stat-card-wrapper p-5">
       {isLoading ? (
@@ -171,7 +250,13 @@ function StatCard({
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold tracking-tight text-[--text-primary]">{value}</p>
+              <motion.p
+                className="text-2xl font-bold tracking-tight text-[--text-primary]"
+                animate={{ scale: bounceScale }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+              >
+                {isLoading ? value : displayValue}
+              </motion.p>
               {trend && trend !== 'neutral' && (
                 <span className={`flex items-center text-[10px] font-medium ${trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
                   {trend === 'up' ? (
@@ -600,7 +685,7 @@ export default function DashboardPage() {
         />
 
         {/* ─── Stats Cards Row ────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div data-tour="dashboard-stats" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard
             icon={CheckCircle2}
             value={isLoading ? '' : `${stats.completedTasks}/${stats.totalTasks}`}
@@ -655,6 +740,9 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* ─── Family Analytics (Full Width) ────────────────── */}
+        <FamilyAnalyticsWidget />
+
         {/* ─── Weekly Activity + Prayer Times + Weather Row ──── */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {/* Weekly Activity Bar Chart */}
@@ -694,7 +782,7 @@ export default function DashboardPage() {
           </GlassCard>
 
           {/* Prayer Times Widget */}
-          <GlassCard delay={0.24} className="p-5 sm:col-span-1">
+          <GlassCard delay={0.24} className="p-5 sm:col-span-1" data-tour="dashboard-prayer">
             <div className="mb-4 flex items-center gap-2">
               <Moon className="size-4 text-[#A78BFA]" />
               <h3 className="text-sm font-semibold text-[--text-primary]">
@@ -810,7 +898,7 @@ export default function DashboardPage() {
           </GlassCard>
 
           {/* Quick Actions */}
-          <GlassCard delay={0.3} className="p-6 lg:col-span-2">
+          <GlassCard delay={0.3} className="p-6 lg:col-span-2" data-tour="quick-actions">
             <h3 className="mb-4 text-sm font-semibold text-[--text-primary]">
               {t.dashboard.quickActions}
             </h3>
@@ -866,7 +954,7 @@ export default function DashboardPage() {
           </GlassCard>
         </div>
 
-        {/* ─── Bottom Row: Tasks, Events, Grocery, Activity ──── */}
+        {/* ─── Bottom Row: Activity Timeline + Quick Actions + Upcoming ──── */}
         <div className="grid gap-4 lg:grid-cols-3">
           {/* Upcoming Tasks */}
           <GlassCard delay={0.35} className="p-5 lg:col-span-1">
@@ -1091,7 +1179,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Activity Feed Timeline */}
-          <ActivityFeedWidget />
+          <ActivityTimelineWidget />
         </div>
       </div>
     </div>

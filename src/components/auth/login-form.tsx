@@ -498,6 +498,78 @@ export function LoginForm() {
                 },
               ])
 
+              // Seed demo timeline items for Activity Timeline Widget
+              const { useActivityStore: useActivityStoreNew } = await import('@/stores/activity-store')
+              const tlNow = Date.now()
+              const tlHour = 3600000
+              const tlDay = 86400000
+              useActivityStoreNew.getState().setTimelineItems([
+                {
+                  id: 'tl-1',
+                  type: 'task_completed',
+                  actor: { id: 'demo-user-001', name: isRTL ? 'أحمد' : 'Ahmed', avatar_url: null },
+                  title: isRTL ? 'تنظيف المنزل' : 'Clean the house',
+                  description: isRTL ? 'أكمل مهمة' : 'completed a task',
+                  created_at: new Date(tlNow - 5 * 60000).toISOString(),
+                },
+                {
+                  id: 'tl-2',
+                  type: 'event_added',
+                  actor: { id: 'demo-user-002', name: isRTL ? 'نورة' : 'Noura', avatar_url: null },
+                  title: isRTL ? 'موعد الطبيب' : 'Doctor Appointment',
+                  description: isRTL ? 'أضاف حدثًا' : 'added an event',
+                  created_at: new Date(tlNow - 1 * tlHour).toISOString(),
+                },
+                {
+                  id: 'tl-3',
+                  type: 'grocery_checked',
+                  actor: { id: 'demo-user-003', name: isRTL ? 'خالد' : 'Khalid', avatar_url: null },
+                  title: isRTL ? 'حليب طازج' : 'Fresh Milk',
+                  description: isRTL ? 'ألغى عنصرًا' : 'checked off an item',
+                  created_at: new Date(tlNow - 2 * tlHour).toISOString(),
+                },
+                {
+                  id: 'tl-4',
+                  type: 'message_sent',
+                  actor: { id: 'demo-user-001', name: isRTL ? 'أحمد' : 'Ahmed', avatar_url: null },
+                  title: isRTL ? 'في المحادثة' : 'In family chat',
+                  description: isRTL ? 'أرسل رسالة' : 'sent a message',
+                  created_at: new Date(tlNow - 3 * tlHour).toISOString(),
+                },
+                {
+                  id: 'tl-5',
+                  type: 'task_completed',
+                  actor: { id: 'demo-user-002', name: isRTL ? 'نورة' : 'Noura', avatar_url: null },
+                  title: isRTL ? 'تحضير واجبات المدرسة' : 'Help with homework',
+                  description: isRTL ? 'أكمل مهمة' : 'completed a task',
+                  created_at: new Date(tlNow - tlDay - 2 * tlHour).toISOString(),
+                },
+                {
+                  id: 'tl-6',
+                  type: 'task_created',
+                  actor: { id: 'demo-user-001', name: isRTL ? 'أحمد' : 'Ahmed', avatar_url: null },
+                  title: isRTL ? 'شراء الهدايا لعيد الفطر' : 'Buy Eid gifts',
+                  description: isRTL ? 'أنشأ مهمة' : 'created a task',
+                  created_at: new Date(tlNow - tlDay - 5 * tlHour).toISOString(),
+                },
+                {
+                  id: 'tl-7',
+                  type: 'member_joined',
+                  actor: { id: 'demo-user-003', name: isRTL ? 'خالد' : 'Khalid', avatar_url: null },
+                  title: '',
+                  description: isRTL ? 'انضم إلى العائلة' : 'joined the family',
+                  created_at: new Date(tlNow - 2 * tlDay).toISOString(),
+                },
+                {
+                  id: 'tl-8',
+                  type: 'grocery_checked',
+                  actor: { id: 'demo-user-002', name: isRTL ? 'نورة' : 'Noura', avatar_url: null },
+                  title: isRTL ? 'خبز تمر' : 'Date Bread',
+                  description: isRTL ? 'ألغى عنصرًا' : 'checked off an item',
+                  created_at: new Date(tlNow - 3 * tlDay).toISOString(),
+                },
+              ])
+
               // Seed demo calendar events
               const calNow = new Date()
               const today = new Date(calNow.getFullYear(), calNow.getMonth(), calNow.getDate())
@@ -672,8 +744,18 @@ export function LoginForm() {
               ])
 
               toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')
+
+              // Auto-start tour on first demo mode entry
+              const { useTourStore } = await import('@/stores/tour-store')
+              const tourStore = useTourStore.getState()
+              if (!tourStore.completedTour) {
+                // Small delay to let the UI render before starting the tour
+                setTimeout(() => {
+                  useTourStore.getState().startTour()
+                }, 1500)
+              }
             }}
-            className="w-full border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200 hover:border-violet-500/40 rounded-2xl h-11 font-medium transition-all duration-200 gap-2 demo-btn-pulse mt-3"
+            className="w-full border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200 hover:border-violet-500/40 rounded-2xl h-11 font-medium transition-all duration-200 gap-2 demo-btn-pulse btn-cta-glow mt-3"
           >
             <Rocket className="w-4 h-4" />
             {isRTL ? 'جرّب النسخة التجريبية' : 'Try Demo Mode'}

@@ -3,7 +3,8 @@
  * No external dependencies required.
  */
 
-const CONFETTI_COLORS = ['#6366F1', '#A78BFA', '#22C55E', '#F59E0B', '#EC4899']
+const DEFAULT_COLORS = ['#6366F1', '#A78BFA', '#22C55E', '#F59E0B', '#EC4899']
+const TASK_COMPLETION_COLORS = ['#6366F1', '#A78BFA', '#F59E0B', '#10B981']
 
 interface Particle {
   x: number
@@ -18,8 +19,25 @@ interface Particle {
   opacity: number
 }
 
-export function triggerConfetti(): void {
+interface ConfettiOptions {
+  colors?: string[]
+  particleCount?: number
+  duration?: number
+  originX?: number
+  originY?: number
+}
+
+export function triggerConfetti(options?: ConfettiOptions): void {
   if (typeof window === 'undefined') return
+
+  // Respect reduced motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+  const colors = options?.colors ?? DEFAULT_COLORS
+  const particleCount = options?.particleCount ?? (50 + Math.floor(Math.random() * 30))
+  const duration = options?.duration ?? 2000
+  const originX = options?.originX ?? undefined
+  const originY = options?.originY ?? undefined
 
   // Create canvas overlay
   const canvas = document.createElement('canvas')
@@ -41,17 +59,16 @@ export function triggerConfetti(): void {
   }
 
   // Generate particles
-  const particleCount = 50 + Math.floor(Math.random() * 30) // 50-80
   const particles: Particle[] = []
 
   for (let i = 0; i < particleCount; i++) {
     particles.push({
-      x: Math.random() * canvas.width,
-      y: -20 - Math.random() * canvas.height * 0.3,
-      vx: (Math.random() - 0.5) * 4, // horizontal drift
-      vy: Math.random() * 2 + 1, // initial downward velocity
-      size: 4 + Math.random() * 4, // 4-8px
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      x: originX !== undefined ? originX + (Math.random() - 0.5) * 200 : Math.random() * canvas.width,
+      y: originY !== undefined ? originY - Math.random() * 50 : -20 - Math.random() * canvas.height * 0.3,
+      vx: (Math.random() - 0.5) * 4,
+      vy: originY !== undefined ? -(Math.random() * 4 + 2) : Math.random() * 2 + 1,
+      size: 4 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
       rotation: Math.random() * Math.PI * 2,
       rotationSpeed: (Math.random() - 0.5) * 0.2,
       shape: Math.random() > 0.5 ? 'rect' : 'circle',
@@ -62,19 +79,17 @@ export function triggerConfetti(): void {
   const GRAVITY = 0.15
   const DRIFT = 0.02
   const startTime = Date.now()
-  const DURATION = 2000 // ~2 seconds
 
   function animate() {
     const elapsed = Date.now() - startTime
-    if (elapsed > DURATION) {
+    if (elapsed > duration) {
       canvas.remove()
       return
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Fade out in the last 500ms
-    const fadeStart = DURATION - 500
+    const fadeStart = duration - 500
     const globalOpacity = elapsed > fadeStart ? 1 - (elapsed - fadeStart) / 500 : 1
 
     for (const p of particles) {
@@ -106,4 +121,18 @@ export function triggerConfetti(): void {
   }
 
   requestAnimationFrame(animate)
+}
+
+/**
+ * Trigger a short, themed confetti burst for task completion.
+ * Uses indigo, violet, amber, emerald colors with 30 particles and 800ms duration.
+ */
+export function triggerTaskCompletionConfetti(originX?: number, originY?: number): void {
+  triggerConfetti({
+    colors: TASK_COMPLETION_COLORS,
+    particleCount: 30,
+    duration: 800,
+    originX,
+    originY,
+  })
 }

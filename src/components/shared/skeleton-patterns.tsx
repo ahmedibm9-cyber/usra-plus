@@ -289,3 +289,110 @@ export function PageSkeleton({ type = 'tasks' }: { type?: 'tasks' | 'grocery' | 
     </div>
   )
 }
+
+// ─── Content Skeleton for Full-Page Loading ─────────────────────────
+export function ContentSkeleton({ type = 'dashboard' }: { type?: 'dashboard' | 'tasks' | 'calendar' | 'grocery' | 'chat' | 'files' }) {
+  return (
+    <div className="min-h-screen bg-[--bg-primary] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* Header bar skeleton */}
+        <ShimmerWrapper>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-36" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-9 w-24 rounded-lg" />
+              <Skeleton className="h-9 w-24 rounded-lg" />
+            </div>
+          </div>
+        </ShimmerWrapper>
+
+        {/* Content blocks */}
+        {type === 'dashboard' && (
+          <>
+            {/* Stats row */}
+            <StatCardSkeleton count={4} />
+            {/* Chart + Prayer row */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <ChartSkeleton />
+              <PrayerTimesSkeleton />
+            </div>
+            {/* Bottom row */}
+            <div className="grid gap-4 lg:grid-cols-3">
+              <ProductivityScoreSkeleton />
+              <QuickActionsSkeleton />
+            </div>
+            <TaskCardSkeleton count={3} />
+          </>
+        )}
+
+        {type === 'tasks' && (
+          <>
+            {/* Filter tabs */}
+            <ShimmerWrapper>
+              <div className="flex items-center gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-20 rounded-lg" />
+                ))}
+              </div>
+            </ShimmerWrapper>
+            <TaskCardSkeleton count={5} />
+          </>
+        )}
+
+        {type === 'calendar' && (
+          <>
+            <ShimmerWrapper>
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton className="h-6 w-32" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                </div>
+              </div>
+            </ShimmerWrapper>
+            <EventCardSkeleton count={5} />
+          </>
+        )}
+
+        {type === 'grocery' && (
+          <>
+            {/* Progress bar skeleton */}
+            <ShimmerWrapper>
+              <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-10" />
+                </div>
+                <Skeleton className="h-2.5 w-full rounded-full" />
+              </div>
+            </ShimmerWrapper>
+            <GroceryItemSkeleton count={5} />
+          </>
+        )}
+
+        {type === 'chat' && <MessageSkeleton count={6} />}
+
+        {type === 'files' && (
+          <>
+            <ShimmerWrapper>
+              <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+                <Skeleton className="h-2.5 w-full rounded-full" />
+              </div>
+            </ShimmerWrapper>
+            <FileCardSkeleton count={6} />
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -1167,7 +1167,7 @@ function PreferencesTab() {
       </SectionCard>
 
       {/* Theme */}
-      <SectionCard>
+      <SectionCard data-tour="theme-toggle">
         <SectionTitle>
           <span className="flex items-center gap-2">
             {theme === 'dark' ? <Moon className="size-4 text-[--accent-primary]" /> : <Sun className="size-4 text-[--accent-primary]" />}
@@ -1216,6 +1216,28 @@ function PreferencesTab() {
             </SettingRow>
           ))}
         </div>
+      </SectionCard>
+
+      {/* Guided Tour */}
+      <SectionCard>
+        <SectionTitle>
+          <span className="flex items-center gap-2">
+            <Sparkles className="size-4 text-[--accent-primary]" />
+            {isRTL ? 'جولة تطبيق' : 'App Tour'}
+          </span>
+        </SectionTitle>
+        <SectionDescription>{isRTL ? 'أخذ جولة حول ميزات التطبيق' : 'Take a guided tour of the app features'}</SectionDescription>
+
+        <Button
+          onClick={async () => {
+            const { useTourStore } = await import('@/stores/tour-store')
+            useTourStore.getState().startTour()
+          }}
+          className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white rounded-xl"
+        >
+          <Sparkles className="size-4 mr-2" />
+          {isRTL ? t.tour.restartTour : t.tour.startTour}
+        </Button>
       </SectionCard>
     </div>
   )

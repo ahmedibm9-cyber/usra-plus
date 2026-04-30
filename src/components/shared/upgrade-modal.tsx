@@ -219,7 +219,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
                       <Button
                         onClick={() => handleUpgrade('pro')}
-                        className="w-full mt-3 h-8 text-xs bg-[#6366F1] hover:bg-[#6366F1]/90 text-white shadow-lg shadow-[#6366F1]/20 btn-glow btn-press"
+                        className="w-full mt-3 h-8 text-xs bg-[#6366F1] hover:bg-[#6366F1]/90 text-white shadow-lg shadow-[#6366F1]/20 btn-glow btn-press btn-cta-glow"
                         disabled={plan === 'pro'}
                       >
                         {plan === 'pro'
@@ -263,7 +263,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                     <Button
                       onClick={() => handleUpgrade('family_plus')}
                       variant="outline"
-                      className="w-full mt-3 h-8 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300"
+                      className="w-full mt-3 h-8 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 btn-cta-glow"
                       disabled={plan === 'family_plus'}
                     >
                       {plan === 'family_plus'

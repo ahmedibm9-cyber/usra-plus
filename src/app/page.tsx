@@ -28,6 +28,7 @@ import { OnboardingFlow } from '@/components/onboarding/onboarding-flow'
 import { PageWrapper } from '@/components/shared/page-wrapper'
 import { CommandPalette } from '@/components/shared/command-palette'
 import { ShortcutsModal } from '@/components/shared/shortcuts-modal'
+import { GuidedTour } from '@/components/shared/guided-tour'
 
 import { Loader2 } from 'lucide-react'
 import type { AppPage } from '@/types'
@@ -325,6 +326,9 @@ function MainApp() {
 
       {/* Keyboard Shortcuts Modal */}
       <ShortcutsModal />
+
+      {/* Guided Tour */}
+      <GuidedTour />
     </div>
   )
 }

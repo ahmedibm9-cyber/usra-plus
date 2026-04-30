@@ -129,7 +129,7 @@ export function AppHeader() {
       <div className="flex-1" />
 
       {/* Search - Opens Command Palette */}
-      <div className="relative flex items-center">
+      <div data-tour="header-search" className="relative flex items-center">
         {/* Desktop Search Bar (clickable trigger for command palette) */}
         <button
           type="button"
@@ -167,6 +167,7 @@ export function AppHeader() {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            data-tour="language-switch"
             variant="ghost"
             size="icon"
             className="shrink-0 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
@@ -185,7 +186,9 @@ export function AppHeader() {
       </Tooltip>
 
       {/* Notification Bell with Count Badge */}
-      <NotificationPanel />
+      <div data-tour="header-notifications">
+        <NotificationPanel />
+      </div>
 
       {/* User Avatar Dropdown */}
       <DropdownMenu>

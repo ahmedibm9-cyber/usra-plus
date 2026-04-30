@@ -185,10 +185,36 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Tajawal', sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease;
   }
   html[dir="rtl"] body {
     font-family: 'Tajawal', 'Inter', sans-serif;
+  }
+  /* Smooth theme transitions for all elements using CSS variables */
+  *, *::before, *::after {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+  }
+  /* Exclude elements that need their own transition control */
+  [style*="transition"], input, textarea, select, button, a, video, canvas, svg {
+    transition-property: none;
+  }
+  /* Restore specific transitions for interactive elements */
+  input, textarea, select {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.2s ease;
+  }
+  button, a {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -705,6 +731,153 @@ html[dir="rtl"] .sidebar-collapse-icon {
 }
 .light [data-sonner-toaster] [data-description] {
   color: #6B7280 !important;
+}
+
+/* ─── Button Micro-interactions ──────────────────────────────────── */
+
+/* Magnetic hover - button subtly follows cursor */
+.btn-magnetic {
+  transition: transform 0.2s ease;
+}
+
+/* Ripple effect on click */
+.btn-click-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-click-ripple::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--accent-primary) 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 1s;
+}
+.btn-click-ripple:active::after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Scale bounce on click */
+.btn-bounce {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-bounce:active {
+  transform: scale(0.95);
+}
+
+/* Glow pulse for important CTAs */
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-primary) 30%, transparent); }
+  50% { box-shadow: 0 0 16px 4px color-mix(in srgb, var(--accent-primary) 10%, transparent); }
+}
+.btn-cta-glow {
+  animation: cta-glow 3s ease-in-out infinite;
+}
+
+/* ─── Premium Card Hover Elevation ─────────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px color-mix(in srgb, var(--accent-primary) 8%, transparent),
+              0 4px 10px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Sidebar Active Item Shimmer & Glow ────────────────────────────── */
+@keyframes shimmer-gradient {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.sidebar-active-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-active-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent-primary) 8%, transparent) 25%,
+    color-mix(in srgb, var(--accent-primary) 4%, transparent) 50%,
+    color-mix(in srgb, var(--accent-primary) 8%, transparent) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-gradient 4s ease-in-out infinite;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@keyframes active-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.sidebar-active-glow {
+  box-shadow: 0 0 6px 1px color-mix(in srgb, #6366F1 40%, transparent);
+  animation: active-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ─── Grocery Strikethrough Animation ──────────────────────────────── */
+@keyframes strikethrough {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes checkmark-scale {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@keyframes flash-green {
+  0% { background-color: color-mix(in srgb, #22C55E 10%, transparent); }
+  100% { background-color: transparent; }
+}
+
+.grocery-item-checked {
+  animation: flash-green 0.4s ease-out;
+}
+
+.grocery-strikethrough-text {
+  position: relative;
+  display: inline-block;
+}
+
+.grocery-strikethrough-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 1.5px;
+  background: var(--text-muted);
+  animation: strikethrough 0.3s ease-out forwards;
+  transform-origin: left;
+}
+
+html[dir="rtl"] .grocery-strikethrough-text::after {
+  left: auto;
+  right: 0;
+  transform-origin: right;
+}
+
+.grocery-checkmark {
+  display: inline-flex;
+  animation: checkmark-scale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  color: #22C55E;
 }
 
 /* ─── Focus Ring Enhancement ─────────────────────────────────────── */

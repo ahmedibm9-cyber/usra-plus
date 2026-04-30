@@ -1375,9 +1375,14 @@ export function ChatPage() {
                       return (
                         <motion.div
                           key={msg.id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0, x: isOwn ? 20 : -20, y: 4 }}
+                          animate={{ opacity: 1, x: 0, y: 0 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 24,
+                            delay: index * 0.05,
+                          }}
                           className={`group relative flex gap-2.5 mb-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${
                             isConsecutive ? 'mt-0.5' : 'mt-3'
                           }`}

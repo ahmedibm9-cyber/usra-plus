@@ -26,6 +26,7 @@ import {
   ShoppingBag,
   CalendarClock,
   MessageCircle,
+  Sparkles,
 } from 'lucide-react'
 import { useAppStore } from '@/stores/app-store'
 import { useTaskStore } from '@/stores/task-store'
@@ -351,6 +352,21 @@ export function CommandPalette() {
       icon: Globe,
       action: switchLanguage,
       keywords: ['language', 'arabic', 'english', 'لغة', 'عربي', 'إنجليزي'],
+    },
+    {
+      id: 'start-tour',
+      labelEn: 'Start Tour',
+      labelAr: 'بدء الجولة',
+      icon: Sparkles,
+      action: async () => {
+        const { useTourStore } = await import('@/stores/tour-store')
+        closePalette()
+        setTimeout(() => {
+          useTourStore.getState().startTour()
+        }, 300)
+        addRecentItem({ value: 'action-start-tour', label: isRTL ? 'بدء الجولة' : 'Start Tour', type: 'action' })
+      },
+      keywords: ['tour', 'guide', 'onboarding', 'help', 'جولة', 'دليل', 'مساعدة'],
     },
   ]
 

@@ -152,7 +152,7 @@ export function BottomNav() {
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
-                transition-colors duration-200 overflow-hidden
+                transition-colors duration-200 overflow-hidden btn-bounce
                 ${isActive ? 'text-[--text-primary]' : 'text-[--text-muted] active:text-[--text-secondary]'}
               `}
             >
@@ -209,7 +209,7 @@ export function BottomNav() {
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
-                transition-colors duration-200 overflow-hidden
+                transition-colors duration-200 overflow-hidden btn-bounce
                 ${isMoreItemActive ? 'text-[--text-primary]' : 'text-[--text-muted] active:text-[--text-secondary]'}
               `}
             >
