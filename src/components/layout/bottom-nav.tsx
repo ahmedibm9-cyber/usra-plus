@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { useCallback, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
   CheckSquare,
@@ -11,10 +11,9 @@ import {
   FolderOpen,
   Settings,
   MoreHorizontal,
+  ChevronUp,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
 import type { AppPage } from '@/types'
@@ -44,15 +43,74 @@ const moreNavItems: MoreNavItem[] = [
   { page: 'settings', icon: Settings, labelKey: 'settings' },
 ]
 
+// Ripple component for tap feedback
+function Ripple({ x, y }: { x: number; y: number }) {
+  return (
+    <motion.span
+      className="pointer-events-none absolute rounded-full bg-white/20"
+      initial={{
+        width: 0,
+        height: 0,
+        x: x,
+        y: y,
+        opacity: 0.5,
+      }}
+      animate={{
+        width: 80,
+        height: 80,
+        x: x - 40,
+        y: y - 40,
+        opacity: 0,
+      }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    />
+  )
+}
+
 export function BottomNav() {
   const { currentPage, setCurrentPage } = useAppStore()
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
+  const [ripples, setRipples] = useState<Record<string, { x: number; y: number; id: number }>>({})
+  const rippleIdRef = useRef(0)
+  const [moreSheetOpen, setMoreSheetOpen] = useState(false)
 
   const handleNavClick = useCallback(
     (page: AppPage) => {
       setCurrentPage(page)
     },
     [setCurrentPage]
+  )
+
+  const handleTap = useCallback(
+    (page: AppPage, key: string, e: React.MouseEvent | React.TouchEvent) => {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      let clientX: number, clientY: number
+
+      if ('touches' in e) {
+        clientX = e.touches[0]?.clientX ?? rect.left + rect.width / 2
+        clientY = e.touches[0]?.clientY ?? rect.top + rect.height / 2
+      } else {
+        clientX = e.clientX
+        clientY = e.clientY
+      }
+
+      const x = clientX - rect.left
+      const y = clientY - rect.top
+      const id = ++rippleIdRef.current
+
+      setRipples((prev) => ({ ...prev, [key]: { x, y, id } }))
+      setTimeout(() => {
+        setRipples((prev) => {
+          const next = { ...prev }
+          delete next[key]
+          return next
+        })
+      }, 500)
+
+      handleNavClick(page)
+    },
+    [handleNavClick]
   )
 
   const isMainItemActive = mainNavItems.some((item) => item.page === currentPage)
@@ -62,33 +120,62 @@ export function BottomNav() {
     <nav
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
-        border-t border-white/[0.08]
-        backdrop-blur-xl bg-[#0B0B0F]/80
-        pb-[env(safe-area-inset-bottom)]
+        border-t border-white/[0.05]
+        bg-[#0B0B0F]/90
+        pb-[max(env(safe-area-inset-bottom),8px)]
       "
+      style={{
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      }}
     >
-      <div className="flex items-center justify-around px-2 pt-1 pb-1">
+      {/* Top border gradient */}
+      <div
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
+        }}
+      />
+
+      <div className="flex items-center justify-around px-1 pt-1.5 pb-1">
         {mainNavItems.map((item) => {
           const isActive = currentPage === item.page
           const Icon = item.icon
           const label = t.nav[item.labelKey]
 
           return (
-            <button
+            <motion.button
               key={item.page}
-              onClick={() => handleNavClick(item.page)}
+              onClick={(e) => handleTap(item.page, item.page, e)}
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
-                transition-colors duration-200
+                transition-colors duration-200 overflow-hidden
                 ${isActive ? 'text-white' : 'text-gray-500 active:text-gray-300'}
               `}
             >
+              {/* Ripple effect */}
+              <AnimatePresence>
+                {ripples[item.page] && <Ripple x={ripples[item.page].x} y={ripples[item.page].y} />}
+              </AnimatePresence>
+
               {/* Active background glow */}
               {isActive && (
                 <motion.div
                   layoutId="bottom-nav-active"
                   className="absolute inset-0 rounded-xl bg-white/[0.08]"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+
+              {/* Active glowing dot indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="bottom-nav-dot"
+                  className="absolute -top-0.5 size-1.5 rounded-full bg-indigo-400"
+                  style={{ boxShadow: '0 0 6px rgba(99,102,241,0.5)' }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -108,25 +195,43 @@ export function BottomNav() {
               >
                 {label}
               </span>
-            </button>
+            </motion.button>
           )
         })}
 
         {/* More Button */}
-        <Sheet>
+        <Sheet open={moreSheetOpen} onOpenChange={setMoreSheetOpen}>
           <SheetTrigger asChild>
-            <button
+            <motion.button
+              onClick={(e) => handleTap('files', 'more', e)}
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
                 min-w-[48px] min-h-[44px] rounded-xl px-2 py-1.5
-                transition-colors duration-200
+                transition-colors duration-200 overflow-hidden
                 ${isMoreItemActive ? 'text-white' : 'text-gray-500 active:text-gray-300'}
               `}
             >
+              {/* Ripple effect */}
+              <AnimatePresence>
+                {ripples['more'] && <Ripple x={ripples['more'].x} y={ripples['more'].y} />}
+              </AnimatePresence>
+
               {isMoreItemActive && (
                 <motion.div
                   layoutId="bottom-nav-active"
                   className="absolute inset-0 rounded-xl bg-white/[0.08]"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+
+              {/* Active glowing dot indicator for More */}
+              {isMoreItemActive && (
+                <motion.div
+                  layoutId="bottom-nav-dot"
+                  className="absolute -top-0.5 size-1.5 rounded-full bg-indigo-400"
+                  style={{ boxShadow: '0 0 6px rgba(99,102,241,0.5)' }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -137,46 +242,88 @@ export function BottomNav() {
                 }`}
               />
               <span
-                className={`text-[10px] font-medium relative z-10 transition-colors duration-200 ${
+                className={`text-[10px] font-medium relative z-10 transition-colors duration-200 flex items-center gap-0.5 ${
                   isMoreItemActive ? 'text-indigo-400' : ''
                 }`}
               >
-                More
+                {isRTL ? 'المزيد' : 'More'}
+                {/* Chevron indicator when a sub-item is active */}
+                {isMoreItemActive && (
+                  <ChevronUp className="size-2.5 text-indigo-400" />
+                )}
               </span>
-            </button>
+            </motion.button>
           </SheetTrigger>
           <SheetContent
             side="bottom"
-            className="bg-[#111117] border-t border-white/[0.08] rounded-t-2xl"
+            className="bg-[#111117]/95 border-t border-white/[0.08] rounded-t-2xl px-0 pt-0 pb-[max(env(safe-area-inset-bottom),16px)]"
+            style={{
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            }}
           >
-            <SheetTitle className="sr-only">More options</SheetTitle>
-            <div className="flex flex-col gap-1 py-2">
+            <SheetTitle className="sr-only">
+              {isRTL ? 'المزيد من الخيارات' : 'More options'}
+            </SheetTitle>
+
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-white/20" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center gap-2 px-5 pt-2 pb-3">
+              <div className="flex items-center justify-center size-7 rounded-lg bg-white/[0.06]">
+                <MoreHorizontal className="size-4 text-indigo-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-white">
+                {isRTL ? 'المزيد' : 'More'}
+              </h3>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px mx-5 bg-white/[0.06]" />
+
+            {/* Navigation items */}
+            <div className="flex flex-col gap-1 px-3 py-2">
               {moreNavItems.map((item) => {
                 const isActive = currentPage === item.page
                 const Icon = item.icon
                 const label = t.nav[item.labelKey]
 
                 return (
-                  <button
+                  <motion.button
                     key={item.page}
-                    onClick={() => handleNavClick(item.page)}
+                    onClick={() => {
+                      handleNavClick(item.page)
+                      setMoreSheetOpen(false)
+                    }}
+                    whileTap={{ scale: 0.97 }}
                     className={`
-                      flex items-center gap-3 rounded-xl px-4 py-3
-                      text-sm font-medium transition-colors duration-200
+                      flex items-center gap-3 rounded-xl px-4 py-3.5
+                      text-sm font-medium transition-all duration-200
                       ${
                         isActive
-                          ? 'bg-white/[0.08] text-white'
-                          : 'text-gray-400 hover:bg-white/[0.05] hover:text-gray-200'
+                          ? 'bg-indigo-500/10 text-white border border-indigo-500/20'
+                          : 'text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 active:bg-white/[0.08] border border-transparent'
                       }
                     `}
                   >
-                    <Icon
-                      className={`size-5 ${
-                        isActive ? 'text-indigo-400' : ''
-                      }`}
-                    />
-                    {label}
-                  </button>
+                    <div className={`
+                      flex items-center justify-center size-9 rounded-lg transition-colors duration-200
+                      ${isActive ? 'bg-indigo-500/15' : 'bg-white/[0.04]'}
+                    `}>
+                      <Icon
+                        className={`size-5 transition-colors duration-200 ${
+                          isActive ? 'text-indigo-400' : ''
+                        }`}
+                      />
+                    </div>
+                    <span className="flex-1 text-left">{label}</span>
+                    {isActive && (
+                      <div className="size-2 rounded-full bg-indigo-400" style={{ boxShadow: '0 0 6px rgba(99,102,241,0.5)' }} />
+                    )}
+                  </motion.button>
                 )
               })}
             </div>

@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useTaskStore } from '@/stores/task-store'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useSubscriptionStore } from '@/stores/subscription-store'
+import { UpgradeModal } from '@/components/shared/upgrade-modal'
+import { UpgradePrompt } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
 import type { Task, TaskPriority, TaskStatus, FamilyMember, UserProfile } from '@/types'
 import { format, isToday, isTomorrow, isPast, isThisWeek, formatDistanceToNow, parseISO } from 'date-fns'
@@ -637,6 +640,19 @@ export default function TasksPage() {
 
   const [viewMode, setViewMode] = useState<'status' | 'date'>('status')
   const [members, setMembers] = useState<FamilyMember[]>(familyMembers)
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+
+  const { canCreateTask, plan, getFeatureLimit } = useSubscriptionStore()
+  const taskLimit = getFeatureLimit('tasks')
+
+  const handleAddTask = useCallback(() => {
+    if (!canCreateTask(tasks.length)) {
+      setUpgradeModalOpen(true)
+      return
+    }
+    setEditingTask(null)
+    setShowAddTask(true)
+  }, [canCreateTask, tasks.length, setEditingTask, setShowAddTask])
 
   // Fetch tasks from Supabase
   const fetchTasks = useCallback(async () => {
@@ -829,16 +845,22 @@ export default function TasksPage() {
               {tasks.length} task{tasks.length !== 1 ? 's' : ''} &middot; {taskCounts.done} completed
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setEditingTask(null)
-              setShowAddTask(true)
-            }}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl"
-          >
-            <Plus className="size-4" />
-            {t.tasks.addTask}
-          </Button>
+          <div className="flex items-center gap-2">
+            {plan === 'free' && taskLimit !== null && (
+              <UpgradePrompt
+                feature="tasks"
+                currentCount={tasks.length}
+                limit={taskLimit}
+              />
+            )}
+            <Button
+              onClick={handleAddTask}
+              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl"
+            >
+              <Plus className="size-4" />
+              {t.tasks.addTask}
+            </Button>
+          </div>
         </div>
 
         {/* Search bar */}
@@ -969,10 +991,7 @@ export default function TasksPage() {
         ) : filteredTasks.length === 0 ? (
           // Empty state
           <EmptyState
-            onCreateTask={() => {
-              setEditingTask(null)
-              setShowAddTask(true)
-            }}
+            onCreateTask={handleAddTask}
           />
         ) : (
           <ScrollArea className="h-full">
@@ -1026,6 +1045,15 @@ export default function TasksPage() {
           </ScrollArea>
         )}
       </div>
+
+      {/* ─── Upgrade Modal ─────────────────────────────────────── */}
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+        feature="tasks"
+        currentCount={tasks.length}
+        limit={taskLimit ?? 10}
+      />
 
       {/* ─── Add/Edit Task Modal ────────────────────────────────── */}
       <TaskModal

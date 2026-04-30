@@ -10,6 +10,7 @@ interface SubscriptionState {
   isFamilyPlus: () => boolean
   canCreateTask: (currentTaskCount: number) => boolean
   canCreateFamily: (currentFamilyCount: number) => boolean
+  canUploadFile: (currentStorageBytes: number) => boolean
   getFeatureLimit: (feature: string) => number | null
 }
 
@@ -31,6 +32,10 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   canCreateFamily: (currentFamilyCount) => {
     const limit = PLAN_LIMITS[get().plan].families
     return limit === null || currentFamilyCount < limit
+  },
+  canUploadFile: (currentStorageBytes) => {
+    const limit = PLAN_LIMITS[get().plan].storage
+    return limit === null || currentStorageBytes < limit
   },
   getFeatureLimit: (feature) => PLAN_LIMITS[get().plan][feature] ?? null,
 }))

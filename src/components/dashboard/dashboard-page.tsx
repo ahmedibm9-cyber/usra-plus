@@ -20,8 +20,11 @@ import {
   Activity,
   Home,
   UserPlus,
+  Moon,
+  TrendingUp,
+  TrendingDown,
 } from 'lucide-react'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
 import { createClient } from '@/lib/supabase/client'
 import { useAppStore } from '@/stores/app-store'
@@ -38,7 +41,6 @@ import type {
   TaskPriority,
 } from '@/types'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -124,6 +126,8 @@ function StatCard({
   progressColor = '#6366F1',
   delay = 0,
   isLoading,
+  trend,
+  trendLabel,
 }: {
   icon: React.ElementType
   value: string | number
@@ -133,9 +137,11 @@ function StatCard({
   progressColor?: string
   delay?: number
   isLoading?: boolean
+  trend?: 'up' | 'down' | 'neutral'
+  trendLabel?: string
 }) {
   return (
-    <GlassCard delay={delay} className="p-5">
+    <GlassCard delay={delay} className="stat-card-wrapper p-5">
       {isLoading ? (
         <div className="flex items-center gap-4">
           <Skeleton className="h-12 w-12 rounded-xl" />
@@ -160,7 +166,19 @@ function StatCard({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-2xl font-bold tracking-tight text-[#E5E7EB]">{value}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-bold tracking-tight text-[#E5E7EB]">{value}</p>
+              {trend && trend !== 'neutral' && (
+                <span className={`flex items-center text-[10px] font-medium ${trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {trend === 'up' ? (
+                    <TrendingUp className="size-3 mr-0.5" />
+                  ) : (
+                    <TrendingDown className="size-3 mr-0.5" />
+                  )}
+                  {trendLabel}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-[#6B7280] truncate">{label}</p>
             {subValue && (
               <p className="mt-0.5 text-xs text-[#6B7280]/70 truncate">{subValue}</p>
@@ -252,10 +270,32 @@ interface ActivityItem {
   color: string
 }
 
+// ─── Prayer Times Data (Static - Riyadh) ───────────────────────
+
+const PRAYER_TIMES = [
+  { name: 'Fajr', nameAr: 'الفجر', time: '4:30', hour: 4, minute: 30 },
+  { name: 'Dhuhr', nameAr: 'الظهر', time: '12:00', hour: 12, minute: 0 },
+  { name: 'Asr', nameAr: 'العصر', time: '3:30', hour: 15, minute: 30 },
+  { name: 'Maghrib', nameAr: 'المغرب', time: '6:15', hour: 18, minute: 15 },
+  { name: 'Isha', nameAr: 'العشاء', time: '8:00', hour: 20, minute: 0 },
+]
+
+// ─── Weekly Activity Data (Mock) ────────────────────────────────
+
+const WEEKLY_ACTIVITY_DATA = [
+  { day: 'Mon', dayAr: 'إثنين', tasks: 2 },
+  { day: 'Tue', dayAr: 'ثلاثاء', tasks: 3 },
+  { day: 'Wed', dayAr: 'أربعاء', tasks: 1 },
+  { day: 'Thu', dayAr: 'خميس', tasks: 4 },
+  { day: 'Fri', dayAr: 'جمعة', tasks: 2 },
+  { day: 'Sat', dayAr: 'سبت', tasks: 5 },
+  { day: 'Sun', dayAr: 'أحد', tasks: 3 },
+]
+
 // ─── Main Dashboard Component ───────────────────────────────────
 
 export default function DashboardPage() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const { user } = useAuthStore()
   const { currentFamily, setCurrentPage, setShowOnboarding, familyMembers, setFamilyMembers } =
     useAppStore()
@@ -500,6 +540,28 @@ export default function DashboardPage() {
     return ''
   }, [user])
 
+  // ─── Prayer Times Logic ─────────────────────────────────────
+
+  const nextPrayers = useMemo(() => {
+    const now = new Date()
+    const currentMinutes = now.getHours() * 60 + now.getMinutes()
+
+    // Find next upcoming prayer
+    let nextIndex = PRAYER_TIMES.findIndex(p => p.hour * 60 + p.minute > currentMinutes)
+    if (nextIndex === -1) nextIndex = 0 // wrap to next day (Fajr)
+
+    // Return next 3 prayers
+    const result = []
+    for (let i = 0; i < 3; i++) {
+      const idx = (nextIndex + i) % PRAYER_TIMES.length
+      result.push({
+        ...PRAYER_TIMES[idx],
+        isNext: i === 0,
+      })
+    }
+    return result
+  }, [])
+
   // ─── Quick Actions ──────────────────────────────────────────
 
   const quickActions = [
@@ -604,32 +666,41 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#0B0B0F] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
-        {/* ─── Welcome Section ────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"
-        >
-          <div>
-            <h1 className="text-2xl font-bold text-[#E5E7EB] sm:text-3xl">
-              {greeting}
-              {userName ? `, ${userName}` : ''} 👋
-            </h1>
-            <p className="mt-1 text-sm text-[#6B7280]">
-              {currentDate} &middot; {currentFamily.name}
-            </p>
+        {/* ─── Welcome Section with Animated Background ───────── */}
+        <div className="relative overflow-hidden rounded-2xl">
+          {/* Animated gradient mesh blobs */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="animate-float-blob-1 absolute -left-20 -top-10 h-60 w-60 rounded-full bg-indigo-500/[0.04] blur-3xl" />
+            <div className="animate-float-blob-2 absolute -right-16 top-5 h-48 w-48 rounded-full bg-violet-500/[0.05] blur-3xl" />
+            <div className="animate-float-blob-3 absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-indigo-400/[0.03] blur-3xl" />
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-2 self-start text-[#6B7280] hover:text-[#E5E7EB] sm:mt-0"
-            onClick={() => setCurrentPage('settings')}
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between px-2 py-3"
           >
-            <Sparkles className="mr-1.5 size-4 text-[#6366F1]" />
-            {currentFamily.name}
-          </Button>
-        </motion.div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#E5E7EB] sm:text-3xl">
+                {greeting}
+                {userName ? `, ${userName}` : ''} 👋
+              </h1>
+              <p className="mt-1 text-sm text-[#6B7280]">
+                {currentDate} &middot; ١٤٤٦ هـ &middot; {currentFamily.name}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2 self-start text-[#6B7280] hover:text-[#E5E7EB] sm:mt-0"
+              onClick={() => setCurrentPage('settings')}
+            >
+              <Sparkles className="mr-1.5 size-4 text-[#6366F1]" />
+              {currentFamily.name}
+            </Button>
+          </motion.div>
+        </div>
 
         {/* ─── Stats Cards Row ────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -646,6 +717,8 @@ export default function DashboardPage() {
             progressColor="#6366F1"
             delay={0.05}
             isLoading={isLoading}
+            trend="up"
+            trendLabel="+12%"
           />
           <StatCard
             icon={CalendarDays}
@@ -654,6 +727,7 @@ export default function DashboardPage() {
             progressColor="#A78BFA"
             delay={0.1}
             isLoading={isLoading}
+            trend="neutral"
           />
           <StatCard
             icon={Users}
@@ -662,6 +736,8 @@ export default function DashboardPage() {
             progressColor="#22C55E"
             delay={0.15}
             isLoading={isLoading}
+            trend="up"
+            trendLabel="+1"
           />
           <StatCard
             icon={ShoppingCart}
@@ -677,7 +753,110 @@ export default function DashboardPage() {
             progressColor="#F59E0B"
             delay={0.2}
             isLoading={isLoading}
+            trend="up"
+            trendLabel="+3"
           />
+        </div>
+
+        {/* ─── Weekly Activity + Prayer Times Row ────────────── */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Weekly Activity Bar Chart */}
+          <GlassCard delay={0.22} className="p-5 sm:col-span-1 lg:col-span-2">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-[#E5E7EB]">
+                {isRTL ? 'هذا الأسبوع' : 'This Week'}
+              </h3>
+              <span className="text-xs text-[#6B7280]">
+                {isRTL ? 'المهام المنجزة' : 'Tasks completed'}
+              </span>
+            </div>
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={WEEKLY_ACTIVITY_DATA}
+                  margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
+                >
+                  <Bar
+                    dataKey="tasks"
+                    fill="#6366F1"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={32}
+                    animationBegin={200}
+                    animationDuration={600}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-2 flex justify-between px-1">
+              {WEEKLY_ACTIVITY_DATA.map((d) => (
+                <span key={d.day} className="text-[10px] text-[#6B7280]">
+                  {isRTL ? d.dayAr : d.day}
+                </span>
+              ))}
+            </div>
+          </GlassCard>
+
+          {/* Prayer Times Widget */}
+          <GlassCard delay={0.24} className="p-5 sm:col-span-1">
+            <div className="mb-4 flex items-center gap-2">
+              <Moon className="size-4 text-[#A78BFA]" />
+              <h3 className="text-sm font-semibold text-[#E5E7EB]">
+                {isRTL ? 'أوقات الصلاة' : 'Prayer Times'}
+              </h3>
+            </div>
+            <div className="space-y-2.5">
+              {nextPrayers.map((prayer) => (
+                <div
+                  key={prayer.name}
+                  className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
+                    prayer.isNext
+                      ? 'border-[#6366F1]/30 bg-[#6366F1]/10'
+                      : 'border-white/[0.04] bg-white/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`flex size-7 items-center justify-center rounded-md ${
+                        prayer.isNext
+                          ? 'bg-[#6366F1]/20'
+                          : 'bg-white/[0.04]'
+                      }`}
+                    >
+                      <Moon
+                        className={`size-3.5 ${
+                          prayer.isNext ? 'text-[#6366F1]' : 'text-[#6B7280]'
+                        }`}
+                      />
+                    </div>
+                    <span
+                      className={`text-sm font-medium ${
+                        prayer.isNext ? 'text-[#E5E7EB]' : 'text-[#6B7280]'
+                      }`}
+                    >
+                      {isRTL ? prayer.nameAr : prayer.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-sm font-semibold ${
+                        prayer.isNext ? 'text-[#6366F1]' : 'text-[#E5E7EB]'
+                      }`}
+                    >
+                      {prayer.time}
+                    </span>
+                    {prayer.isNext && (
+                      <span className="rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-[9px] font-medium text-[#6366F1]">
+                        {isRTL ? 'التالي' : 'Next'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[10px] text-[#6B7280]/60 text-center">
+              {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
+            </p>
+          </GlassCard>
         </div>
 
         {/* ─── Middle Row: Productivity + Quick Actions ───────── */}
@@ -693,26 +872,24 @@ export default function DashboardPage() {
             ) : (
               <div className="flex flex-col items-center">
                 <div className="relative">
-                  <ResponsiveContainer width={160} height={160}>
-                    <PieChart>
-                      <Pie
-                        data={productivityChartData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={72}
-                        startAngle={90}
-                        endAngle={-270}
-                        dataKey="value"
-                        stroke="none"
-                        animationBegin={200}
-                        animationDuration={800}
-                      >
-                        <Cell fill="#6366F1" />
-                        <Cell fill="rgba(255,255,255,0.04)" />
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <PieChart width={160} height={160}>
+                    <Pie
+                      data={productivityChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={72}
+                      startAngle={90}
+                      endAngle={-270}
+                      dataKey="value"
+                      stroke="none"
+                      animationBegin={200}
+                      animationDuration={800}
+                    >
+                      <Cell fill="#6366F1" />
+                      <Cell fill="rgba(255,255,255,0.04)" />
+                    </Pie>
+                  </PieChart>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold text-[#E5E7EB]">
                       {stats.productivityScore}
@@ -1065,14 +1242,8 @@ export default function DashboardPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm text-[#E5E7EB]">{item.message}</p>
-                          <p className="mt-0.5 text-[10px] text-[#6B7280]">
-                            {(() => {
-                              try {
-                                return format(parseISO(item.timestamp), 'MMM d, h:mm a')
-                              } catch {
-                                return ''
-                              }
-                            })()}
+                          <p className="mt-0.5 text-[10px] text-[#6B7280]/60">
+                            {format(parseISO(item.timestamp), 'MMM d, h:mm a')}
                           </p>
                         </div>
                       </motion.div>

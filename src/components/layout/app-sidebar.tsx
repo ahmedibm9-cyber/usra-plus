@@ -36,6 +36,8 @@ import {
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useSubscriptionStore } from '@/stores/subscription-store'
+import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
 import type { AppPage } from '@/types'
 
@@ -132,6 +134,7 @@ function NavItemButton({
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const { currentPage, setCurrentPage, currentFamily, families, setCurrentFamily } = useAppStore()
   const { user, logout } = useAuthStore()
+  const { plan } = useSubscriptionStore()
   const { t } = useI18n()
 
   const handleNavClick = useCallback(
@@ -270,7 +273,10 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                     transition={{ duration: 0.15 }}
                     className="flex-1 overflow-hidden text-left"
                   >
-                    <p className="truncate text-sm font-medium text-gray-200">{displayName}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate text-sm font-medium text-gray-200">{displayName}</p>
+                      <PlanBadge />
+                    </div>
                     <p className="truncate text-xs text-gray-500">{user?.email}</p>
                   </motion.div>
                 )}

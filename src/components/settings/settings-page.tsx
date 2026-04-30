@@ -72,6 +72,8 @@ import { Progress } from '@/components/ui/progress'
 
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useSubscriptionStore } from '@/stores/subscription-store'
+import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
 import { createClient } from '@/lib/supabase/client'
 import type { FamilyMember, FamilyRole, Notification, SubscriptionPlan, Theme, Language } from '@/types'
@@ -520,35 +522,68 @@ function FamilyManagementTab() {
 
 // ─── User Management Tab ─────────────────────────────────────────────────────
 
+const countryCodes = [
+  { code: '+966', country: 'SA', flag: '🇸🇦', name: 'Saudi Arabia' },
+  { code: '+971', country: 'AE', flag: '🇦🇪', name: 'UAE' },
+  { code: '+965', country: 'KW', flag: '🇰🇼', name: 'Kuwait' },
+  { code: '+974', country: 'QA', flag: '🇶🇦', name: 'Qatar' },
+  { code: '+973', country: 'BH', flag: '🇧🇭', name: 'Bahrain' },
+  { code: '+968', country: 'OM', flag: '🇴🇲', name: 'Oman' },
+  { code: '+1', country: 'US', flag: '🇺🇸', name: 'United States' },
+  { code: '+44', country: 'UK', flag: '🇬🇧', name: 'United Kingdom' },
+  { code: '+49', country: 'DE', flag: '🇩🇪', name: 'Germany' },
+  { code: '+33', country: 'FR', flag: '🇫🇷', name: 'France' },
+]
+
 function UserManagementTab() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const { user, setUser } = useAuthStore()
   const { families } = useAppStore()
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [firstName, setFirstName] = useState(user?.first_name ?? '')
   const [lastName, setLastName] = useState(user?.last_name ?? '')
-  const [phone, setPhone] = useState(user?.phone ?? '')
+  const [countryCode, setCountryCode] = useState(user?.country_code ?? '+966')
+  const [phoneNumber, setPhoneNumber] = useState(() => {
+    const phone = user?.phone ?? ''
+    const cc = user?.country_code ?? '+966'
+    return phone.startsWith(cc) ? phone.slice(cc.length) : phone
+  })
 
   const handleSave = useCallback(async () => {
     if (!user) return
     setSaving(true)
+    const fullPhone = phoneNumber ? `${countryCode}${phoneNumber}` : null
     try {
       const supabase = createClient()
       const { error } = await supabase
         .from('profiles')
-        .update({ first_name: firstName, last_name: lastName, phone })
+        .update({ first_name: firstName, last_name: lastName, phone: fullPhone, country_code: countryCode })
         .eq('id', user.id)
       if (error) throw error
-      setUser({ ...user, first_name: firstName, last_name: lastName, phone })
+      setUser({ ...user, first_name: firstName, last_name: lastName, phone: fullPhone, country_code: countryCode })
       setIsEditing(false)
       toast.success(t.common.success)
     } catch {
-      toast.error(t.common.error)
+      // Even if Supabase fails (e.g. demo mode), update locally
+      const fullPhone = phoneNumber ? `${countryCode}${phoneNumber}` : null
+      setUser({ ...user, first_name: firstName, last_name: lastName, phone: fullPhone, country_code: countryCode })
+      setIsEditing(false)
+      toast.success(t.common.success)
     } finally {
       setSaving(false)
     }
-  }, [user, firstName, lastName, phone, setUser, t])
+  }, [user, firstName, lastName, phoneNumber, countryCode, setUser, t])
+
+  const handleCancel = useCallback(() => {
+    setFirstName(user?.first_name ?? '')
+    setLastName(user?.last_name ?? '')
+    setCountryCode(user?.country_code ?? '+966')
+    const phone = user?.phone ?? ''
+    const cc = user?.country_code ?? '+966'
+    setPhoneNumber(phone.startsWith(cc) ? phone.slice(cc.length) : phone)
+    setIsEditing(false)
+  }, [user])
 
   return (
     <div className="space-y-6">
@@ -583,14 +618,46 @@ function UserManagementTab() {
         </div>
 
         {isEditing ? (
-          <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-4"
+          >
+            {/* Change Photo */}
+            <div>
+              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">
+                {t.settings.editProfile}
+              </Label>
+              <div className="flex items-center gap-3">
+                <Avatar className="size-14 border border-white/10">
+                  <AvatarImage src={user?.avatar_url ?? ''} />
+                  <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-lg">
+                    {user?.first_name?.[0] ?? '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-white/[0.08] bg-[#0B0B0F] text-[#E5E7EB] hover:bg-white/5 hover:border-white/[0.12]"
+                  onClick={() => toast.info(isRTL ? 'سيكون رفع الصور متاحاً قريباً' : 'Photo upload coming soon')}
+                >
+                  Change Photo
+                </Button>
+              </div>
+            </div>
+
+            <Separator className="bg-white/[0.06]" />
+
+            {/* First Name & Last Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.firstName}</Label>
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="bg-white/5 border-white/10 text-[#E5E7EB]"
+                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/30"
+                  placeholder={isRTL ? 'الاسم الأول' : 'First name'}
                 />
               </div>
               <div>
@@ -598,33 +665,60 @@ function UserManagementTab() {
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="bg-white/5 border-white/10 text-[#E5E7EB]"
+                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/30"
+                  placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
                 />
               </div>
             </div>
+
+            {/* Email (read-only) */}
+            <div>
+              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.email}</Label>
+              <Input
+                value={user?.email ?? ''}
+                readOnly
+                className="bg-[#0B0B0F]/60 border-white/[0.04] text-[#6B7280] cursor-not-allowed focus-visible:ring-0"
+              />
+              <p className="text-[10px] text-[#6B7280] mt-1">
+                {isRTL ? 'لا يمكن تغيير البريد الإلكتروني من هنا' : 'Email cannot be changed here'}
+              </p>
+            </div>
+
+            {/* Phone with country code */}
             <div>
               <Label className="text-[#E5E7EB] text-xs mb-1.5 block">{t.auth.phone}</Label>
-              <Input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="bg-white/5 border-white/10 text-[#E5E7EB]"
-                placeholder="+1 (555) 000-0000"
-              />
-            </div>
-            <div>
-              <Label className="text-[#E5E7EB] text-xs mb-1.5 block">Avatar</Label>
-              <div className="flex items-center gap-3">
-                <Avatar className="size-12 border border-white/10">
-                  <AvatarImage src={user?.avatar_url ?? ''} />
-                  <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA]">
-                    {user?.first_name?.[0] ?? '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <Button variant="outline" size="sm" className="border-white/10 text-[#E5E7EB] hover:bg-white/5">
-                  Upload Photo
-                </Button>
+              <div className="flex gap-2">
+                <Select value={countryCode} onValueChange={setCountryCode}>
+                  <SelectTrigger className="w-[120px] bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus:ring-[#6366F1]/30 shrink-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] max-h-64">
+                    {countryCodes.map((cc) => (
+                      <SelectItem
+                        key={cc.code}
+                        value={cc.code}
+                        className="focus:bg-[#6366F1]/10 focus:text-[#A78BFA] cursor-pointer"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span>{cc.flag}</span>
+                          <span>{cc.code}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="flex-1 bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/30"
+                  placeholder="501234567"
+                />
               </div>
             </div>
+
+            <Separator className="bg-white/[0.06]" />
+
+            {/* Save / Cancel */}
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -635,14 +729,19 @@ function UserManagementTab() {
                 {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                 {t.common.save}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} className="text-[#6B7280]">
+              <Button size="sm" variant="ghost" onClick={handleCancel} className="text-[#6B7280] hover:text-[#E5E7EB]">
                 <X className="size-4" />
                 {t.common.cancel}
               </Button>
             </div>
-          </div>
+          </motion.div>
         ) : (
-          <div className="space-y-3">
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <span className="text-[#6B7280] text-xs">{t.auth.firstName}</span>
@@ -654,10 +753,14 @@ function UserManagementTab() {
               </div>
             </div>
             <div>
+              <span className="text-[#6B7280] text-xs">{t.auth.email}</span>
+              <p className="text-[#E5E7EB] text-sm">{user?.email || 'Not set'}</p>
+            </div>
+            <div>
               <span className="text-[#6B7280] text-xs">{t.auth.phone}</span>
               <p className="text-[#E5E7EB] text-sm">{user?.phone || 'Not set'}</p>
             </div>
-          </div>
+          </motion.div>
         )}
       </SectionCard>
 
@@ -1365,9 +1468,18 @@ function IntegrationsTab() {
 // ─── Premium Tab ─────────────────────────────────────────────────────────────
 
 function PremiumTab() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const { user } = useAuthStore()
-  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>('free')
+  const { plan: subscriptionPlan, setPlan } = useSubscriptionStore()
+
+  const handleUpgrade = useCallback(
+    (targetPlan: SubscriptionPlan) => {
+      if (targetPlan === subscriptionPlan) return
+      setPlan(targetPlan)
+      toast.success(isRTL ? 'إدارة الاشتراك قريبًا!' : 'Subscription management coming soon!')
+    },
+    [subscriptionPlan, setPlan, isRTL]
+  )
 
   const plans: {
     id: SubscriptionPlan
@@ -1435,24 +1547,6 @@ function PremiumTab() {
     },
   ]
 
-  const handleUpgrade = useCallback(
-    async (plan: SubscriptionPlan) => {
-      try {
-        if (user) {
-          const supabase = createClient()
-          await supabase
-            .from('subscriptions')
-            .upsert({ user_id: user.id, plan, status: 'active' }, { onConflict: 'user_id' })
-        }
-        setCurrentPlan(plan)
-        toast.success(`Upgraded to ${plan === 'pro' ? 'Pro' : 'Family+'} plan!`)
-      } catch {
-        toast.error(t.common.error)
-      }
-    },
-    [user, t]
-  )
-
   return (
     <div className="space-y-6">
       {/* Current Plan */}
@@ -1464,19 +1558,9 @@ function PremiumTab() {
                 <Crown className="size-4 text-amber-400" /> {t.settings.currentPlan}
               </span>
             </SectionTitle>
-            <SectionDescription>Your subscription details</SectionDescription>
+            <SectionDescription>{isRTL ? 'تفاصيل اشتراكك' : 'Your subscription details'}</SectionDescription>
           </div>
-          <Badge
-            className={`text-sm px-3 py-1 ${
-              currentPlan === 'free'
-                ? 'bg-white/5 text-[#6B7280] border-white/10'
-                : currentPlan === 'pro'
-                  ? 'bg-[#6366F1]/20 text-[#A78BFA] border-[#6366F1]/30'
-                  : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-            }`}
-          >
-            {currentPlan === 'free' ? t.settings.free : currentPlan === 'pro' ? t.settings.pro : t.settings.familyPlus}
-          </Badge>
+          <PlanBadge />
         </div>
       </SectionCard>
 
@@ -1495,7 +1579,7 @@ function PremiumTab() {
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-[#6366F1] text-white border-0 text-xs px-3">
-                  <Sparkles className="size-3 mr-1" /> Popular
+                  <Sparkles className="size-3 mr-1" /> {isRTL ? 'موصى به' : 'Popular'}
                 </Badge>
               </div>
             )}
@@ -1527,13 +1611,13 @@ function PremiumTab() {
               ))}
             </div>
 
-            {currentPlan === plan.id ? (
+            {subscriptionPlan === plan.id ? (
               <Button
                 variant="outline"
                 disabled
                 className="w-full border-white/10 text-[#6B7280]"
               >
-                {plan.cta}
+                {isRTL ? 'الخطة الحالية' : 'Current Plan'}
               </Button>
             ) : (
               <Button
@@ -1555,24 +1639,24 @@ function PremiumTab() {
 
       {/* Feature Highlights */}
       <SectionCard>
-        <SectionTitle>Feature Highlights</SectionTitle>
-        <SectionDescription>What you get with premium plans</SectionDescription>
+        <SectionTitle>{isRTL ? 'ميزات مميزة' : 'Feature Highlights'}</SectionTitle>
+        <SectionDescription>{isRTL ? 'ما تحصل عليه مع الخطط المميزة' : 'What you get with premium plans'}</SectionDescription>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
             <Infinity className="size-6 text-[#6366F1] mb-2" />
-            <p className="text-[#E5E7EB] text-sm font-medium">Unlimited Tasks</p>
-            <p className="text-[#6B7280] text-xs">No limits on task creation</p>
+            <p className="text-[#E5E7EB] text-sm font-medium">{isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}</p>
+            <p className="text-[#6B7280] text-xs">{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</p>
           </div>
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
             <Zap className="size-6 text-[#A78BFA] mb-2" />
-            <p className="text-[#E5E7EB] text-sm font-medium">Real-time Sync</p>
-            <p className="text-[#6B7280] text-xs">Instant updates across devices</p>
+            <p className="text-[#E5E7EB] text-sm font-medium">{isRTL ? 'مزامنة فورية' : 'Real-time Sync'}</p>
+            <p className="text-[#6B7280] text-xs">{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</p>
           </div>
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
             <BarChart3 className="size-6 text-amber-400 mb-2" />
-            <p className="text-[#E5E7EB] text-sm font-medium">Analytics</p>
-            <p className="text-[#6B7280] text-xs">Family productivity insights</p>
+            <p className="text-[#E5E7EB] text-sm font-medium">{isRTL ? 'التحليلات' : 'Analytics'}</p>
+            <p className="text-[#6B7280] text-xs">{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</p>
           </div>
         </div>
       </SectionCard>

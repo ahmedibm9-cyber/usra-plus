@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAppStore } from '@/stores/app-store'
@@ -25,15 +25,22 @@ import { ChatPage } from '@/components/chat/chat-page'
 import { FilesPage } from '@/components/files/files-page'
 import SettingsPage from '@/components/settings/settings-page'
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow'
+import { PageWrapper } from '@/components/shared/page-wrapper'
+import { CommandPalette } from '@/components/shared/command-palette'
 
 import { Loader2 } from 'lucide-react'
+import type { AppPage } from '@/types'
 
 // Auth Screen Component
 function AuthScreen() {
   const { authView } = useAuthStore()
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0B0B0F] flex items-center justify-center p-4 auth-bg">
+      {/* Animated gradient blobs */}
+      <div className="auth-blob-1" />
+      <div className="auth-blob-2" />
+      <div className="auth-blob-3" />
       {authView === 'login' && <LoginForm />}
       {authView === 'signup' && <SignupForm />}
       {authView === 'forgot-password' && <ForgotPasswordForm />}
@@ -61,11 +68,83 @@ function LoadingScreen() {
   )
 }
 
+// Page order for swipe navigation
+const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'grocery', 'chat', 'files', 'settings']
+
+// Swipe threshold constants
+const SWIPE_MIN_DISTANCE = 80
+const SWIPE_MIN_VELOCITY = 0.3
+
 // Main App Layout
 function MainApp() {
-  const { currentPage, currentFamily, showOnboarding, sidebarCollapsed } = useAppStore()
+  const { currentPage, currentFamily, showOnboarding, sidebarCollapsed, setCurrentPage } = useAppStore()
   const { user, setUser } = useAuthStore()
   const supabase = createClient()
+
+  // Swipe gesture state
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
+  const [swipeOffset, setSwipeOffset] = useState(0)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    }
+    setSwipeOffset(0)
+  }, [])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return
+    const touch = e.touches[0]
+    const deltaX = touch.clientX - touchStartRef.current.x
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y)
+
+    // Only track horizontal swipes (not vertical scrolls)
+    if (deltaY > Math.abs(deltaX)) {
+      touchStartRef.current = null
+      setSwipeOffset(0)
+      return
+    }
+
+    // Clamp the offset for visual feedback
+    const clampedOffset = Math.max(-60, Math.min(60, deltaX * 0.3))
+    setSwipeOffset(clampedOffset)
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStartRef.current) return
+
+    const endTime = Date.now()
+    const elapsed = endTime - touchStartRef.current.time
+
+    // We need current touch position, but since touch ended, use swipeOffset as proxy
+    const currentIdx = PAGE_ORDER.indexOf(currentPage)
+
+    if (currentIdx === -1) {
+      touchStartRef.current = null
+      setSwipeOffset(0)
+      return
+    }
+
+    const absOffset = Math.abs(swipeOffset)
+    const velocity = elapsed > 0 ? absOffset / elapsed : 0
+
+    // Check if swipe meets threshold
+    if (absOffset > SWIPE_MIN_DISTANCE * 0.3 || velocity > SWIPE_MIN_VELOCITY) {
+      if (swipeOffset < -15 && currentIdx < PAGE_ORDER.length - 1) {
+        // Swipe left → next page
+        setCurrentPage(PAGE_ORDER[currentIdx + 1])
+      } else if (swipeOffset > 15 && currentIdx > 0) {
+        // Swipe right → previous page
+        setCurrentPage(PAGE_ORDER[currentIdx - 1])
+      }
+    }
+
+    touchStartRef.current = null
+    setSwipeOffset(0)
+  }, [currentPage, swipeOffset, setCurrentPage])
 
   // Fetch user's families and set current family
   useEffect(() => {
@@ -139,21 +218,21 @@ function MainApp() {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardPage />
+        return <PageWrapper><DashboardPage /></PageWrapper>
       case 'tasks':
-        return <TasksPage />
+        return <PageWrapper><TasksPage /></PageWrapper>
       case 'calendar':
-        return <CalendarPage />
+        return <PageWrapper><CalendarPage /></PageWrapper>
       case 'grocery':
-        return <GroceryPage />
+        return <PageWrapper><GroceryPage /></PageWrapper>
       case 'chat':
-        return <ChatPage />
+        return <PageWrapper><ChatPage /></PageWrapper>
       case 'files':
-        return <FilesPage />
+        return <PageWrapper><FilesPage /></PageWrapper>
       case 'settings':
-        return <SettingsPage />
+        return <PageWrapper><SettingsPage /></PageWrapper>
       default:
-        return <DashboardPage />
+        return <PageWrapper><DashboardPage /></PageWrapper>
     }
   }
 
@@ -170,8 +249,40 @@ function MainApp() {
         <AppHeader />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-6 pb-20 md:pb-6">
+        <main
+          className="flex-1 overflow-y-auto relative"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Swipe edge peek indicators */}
+          {swipeOffset !== 0 && (
+            <>
+              {/* Left edge peek */}
+              <div
+                className="fixed top-0 left-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150"
+                style={{
+                  background: 'linear-gradient(to right, rgba(99,102,241,0.4), transparent)',
+                  opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0,
+                }}
+              />
+              {/* Right edge peek */}
+              <div
+                className="fixed top-0 right-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150"
+                style={{
+                  background: 'linear-gradient(to left, rgba(99,102,241,0.4), transparent)',
+                  opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0,
+                }}
+              />
+            </>
+          )}
+
+          <div
+            className="p-4 md:p-6 pb-20 md:pb-6 transition-transform duration-100 ease-out"
+            style={{
+              transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined,
+            }}
+          >
             {renderPage()}
           </div>
         </main>
@@ -179,6 +290,9 @@ function MainApp() {
 
       {/* Bottom Navigation - Mobile */}
       <BottomNav />
+
+      {/* Command Palette */}
+      <CommandPalette />
     </div>
   )
 }

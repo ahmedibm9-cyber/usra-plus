@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAppStore } from '@/stores/app-store'
@@ -109,17 +110,27 @@ export function LoginForm() {
 
   return (
     <>
-      <div className="w-full max-w-md mx-auto space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="w-full max-w-md mx-auto glass-strong rounded-3xl p-8 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Language selector */}
-        <div className="flex justify-end">
+        <motion.div
+          className="flex justify-end"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0 }}
+        >
           <LanguageSelector />
-        </div>
+        </motion.div>
 
         {/* Header */}
-        <div className="space-y-2 text-center">
+        <motion.div
+          className="space-y-2 text-center mt-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.05 }}
+        >
           <div className="flex justify-center mb-3">
             <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 animate-pulse-glow">
                 <Sparkles className="w-7 h-7 text-white" />
               </div>
               <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 blur-sm" />
@@ -131,17 +142,22 @@ export function LoginForm() {
           <p className="text-gray-400 text-sm">
             {t.app.tagline}
           </p>
-        </div>
+        </motion.div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           {/* Email */}
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
             <Label htmlFor="login-email" className="text-gray-300 text-sm font-medium">
               {t.auth.email}
             </Label>
-            <div className="relative">
-              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 ${isRTL ? 'right-3' : 'left-3'}`} />
+            <div className="auth-input-wrapper">
+              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
               <Input
                 id="login-email"
                 type="email"
@@ -162,10 +178,15 @@ export function LoginForm() {
                 {errors.email}
               </p>
             )}
-          </div>
+          </motion.div>
 
           {/* Password */}
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+          >
             <div className="flex items-center justify-between">
               <Label htmlFor="login-password" className="text-gray-300 text-sm font-medium">
                 {t.auth.password}
@@ -178,8 +199,8 @@ export function LoginForm() {
                 {t.auth.forgotPassword}
               </button>
             </div>
-            <div className="relative">
-              <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 ${isRTL ? 'right-3' : 'left-3'}`} />
+            <div className="auth-input-wrapper">
+              <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
               <Input
                 id="login-password"
                 type={showPassword ? 'text' : 'password'}
@@ -196,7 +217,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className={`absolute top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors ${isRTL ? 'left-3' : 'right-3'}`}
+                className={`absolute top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -208,168 +229,231 @@ export function LoginForm() {
                 {errors.password}
               </p>
             )}
-          </div>
+          </motion.div>
 
           {/* Login Button */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl h-11 font-medium transition-all duration-200 disabled:opacity-50 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30"
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
           >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              t.auth.login
-            )}
-          </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl h-11 font-medium transition-all duration-200 disabled:opacity-50 shadow-lg shadow-indigo-500/20 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-indigo-500/30"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                t.auth.login
+              )}
+            </Button>
+          </motion.div>
         </form>
 
         {/* Divider */}
-        <div className="relative">
+        <motion.div
+          className="relative mt-6"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+        >
           <Separator className="bg-white/[0.06]" />
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0B0B0F] px-3 text-xs text-gray-500">
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#111117]/80 backdrop-blur-sm px-3 text-xs text-gray-500">
             {t.auth.orContinueWith}
           </span>
-        </div>
+        </motion.div>
 
         {/* Google OAuth */}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleGoogleLogin}
-          disabled={isGoogleLoading}
-          className="w-full border-white/[0.08] bg-[#111117] text-gray-300 hover:bg-[#1a1a22] hover:text-gray-200 hover:border-white/[0.12] rounded-2xl h-11 font-medium transition-all duration-200"
+        <motion.div
+          className="mt-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
         >
-          {isGoogleLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-          )}
-          {t.auth.googleLogin}
-        </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleLogin}
+            disabled={isGoogleLoading}
+            className="w-full border-white/[0.08] bg-[#111117] text-gray-300 hover:bg-[#1a1a22] hover:text-gray-200 hover:border-white/[0.12] hover:scale-[1.01] rounded-2xl h-11 font-medium transition-all duration-200"
+          >
+            {isGoogleLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
+              </svg>
+            )}
+            {t.auth.googleLogin}
+          </Button>
+        </motion.div>
 
         {/* Terms */}
-        <p className="text-center text-xs text-gray-500 leading-relaxed">
-          {t.auth.termsAgreement}{' '}
-          <button
-            type="button"
-            onClick={() => setShowTermsModal(true)}
-            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors duration-200"
-          >
-            {t.auth.termsOfService}
-          </button>{' '}
-          {t.auth.and}{' '}
-          <button
-            type="button"
-            onClick={() => setShowTermsModal(true)}
-            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors duration-200"
-          >
-            {t.auth.privacyPolicy}
-          </button>
-        </p>
+        <motion.div
+          className="mt-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+        >
+          <p className="text-center text-xs text-gray-500 leading-relaxed">
+            {t.auth.termsAgreement}{' '}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors duration-200"
+            >
+              {t.auth.termsOfService}
+            </button>{' '}
+            {t.auth.and}{' '}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors duration-200"
+            >
+              {t.auth.privacyPolicy}
+            </button>
+          </p>
+        </motion.div>
 
         {/* Demo Mode */}
-        <div className="relative">
-          <Separator className="bg-white/[0.06]" />
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0B0B0F] px-3 text-xs text-gray-500">
-            {isRTL ? 'أو' : 'or'}
-          </span>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          onClick={async () => {
-            const demoUser = {
-              id: 'demo-user-001',
-              email: 'demo@usraplus.app',
-              first_name: isRTL ? 'أحمد' : 'Ahmed',
-              last_name: isRTL ? 'العائلي' : 'AlFamily',
-              phone: '+966501234567',
-              country_code: '+966',
-              avatar_url: null,
-              language: isRTL ? 'ar' as const : 'en' as const,
-              theme: 'dark' as const,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            }
-            setUser(demoUser)
-            setIsAuthenticated(true)
-            // Set demo family
-            const demoFamily = {
-              id: 'demo-family-001',
-              name: isRTL ? 'عائلة الأحمد' : 'The Ahmed Family',
-              description: isRTL ? 'عائلتنا الرائعة' : 'Our wonderful family',
-              invite_code: 'DEMO2025',
-              avatar_url: null,
-              created_by: 'demo-user-001',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            }
-            appStore.setCurrentFamily(demoFamily)
-            appStore.setFamilies([demoFamily])
-            appStore.setFamilyMembers([
-              { id: 'fm-1', family_id: 'demo-family-001', user_id: 'demo-user-001', role: 'owner' as const, nickname: null, joined_at: new Date().toISOString(), profiles: demoUser },
-              { id: 'fm-2', family_id: 'demo-family-001', user_id: 'demo-user-002', role: 'member' as const, nickname: isRTL ? 'نورة' : 'Noura', joined_at: new Date().toISOString(), profiles: { id: 'demo-user-002', email: 'noura@usraplus.app', first_name: isRTL ? 'نورة' : 'Noura', last_name: isRTL ? 'الأحمد' : 'AlAhmed', phone: null, country_code: '+966', avatar_url: null, language: 'en' as const, theme: 'dark' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } },
-              { id: 'fm-3', family_id: 'demo-family-001', user_id: 'demo-user-003', role: 'admin' as const, nickname: isRTL ? 'خالد' : 'Khalid', joined_at: new Date().toISOString(), profiles: { id: 'demo-user-003', email: 'khalid@usraplus.app', first_name: isRTL ? 'خالد' : 'Khalid', last_name: isRTL ? 'الأحمد' : 'AlAhmed', phone: null, country_code: '+966', avatar_url: null, language: 'en' as const, theme: 'dark' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } },
-            ])
-
-            // Seed demo tasks into task store
-            const { useTaskStore } = await import('@/stores/task-store')
-            useTaskStore.getState().setTasks([
-              { id: 'task-1', family_id: 'demo-family-001', title: isRTL ? 'شراء الهدايا لعيد الفطر' : 'Buy Eid gifts', description: isRTL ? 'شراء هدايا لأفراد العائلة' : 'Gifts for family members', status: 'todo', priority: 'high', assigned_to: 'demo-user-002', created_by: 'demo-user-001', due_date: new Date(Date.now() + 3*86400000).toISOString(), completed_at: null, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'task-2', family_id: 'demo-family-001', title: isRTL ? 'تنظيف المنزل' : 'Clean the house', description: null, status: 'in_progress', priority: 'medium', assigned_to: 'demo-user-001', created_by: 'demo-user-001', due_date: new Date(Date.now() + 86400000).toISOString(), completed_at: null, created_at: new Date(Date.now() - 2*86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'task-3', family_id: 'demo-family-001', title: isRTL ? 'حجز طاولة العشاء' : 'Book dinner table', description: isRTL ? 'في المطعم الإيطالي' : 'At the Italian restaurant', status: 'done', priority: 'low', assigned_to: 'demo-user-003', created_by: 'demo-user-003', due_date: new Date(Date.now() - 86400000).toISOString(), completed_at: new Date(Date.now() - 86400000).toISOString(), created_at: new Date(Date.now() - 5*86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'task-4', family_id: 'demo-family-001', title: isRTL ? 'تحضير واجبات المدرسة' : 'Help with homework', description: null, status: 'todo', priority: 'urgent', assigned_to: 'demo-user-001', created_by: 'demo-user-002', due_date: new Date().toISOString(), completed_at: null, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'task-5', family_id: 'demo-family-001', title: isRTL ? 'شراء مستلزمات المطبخ' : 'Buy kitchen supplies', description: null, status: 'todo', priority: 'medium', assigned_to: null, created_by: 'demo-user-001', due_date: new Date(Date.now() + 7*86400000).toISOString(), completed_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            ])
-
-            // Seed demo grocery items
-            const { useGroceryStore } = await import('@/stores/grocery-store')
-            useGroceryStore.getState().setItems([
-              { id: 'grocery-1', family_id: 'demo-family-001', name: isRTL ? 'حليب طازج' : 'Fresh Milk', category: 'dairy', quantity: 2, checked: true, added_by: 'demo-user-001', created_at: new Date(Date.now() - 2*86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'grocery-2', family_id: 'demo-family-001', name: isRTL ? 'خبز تمر' : 'Date Bread', category: 'bakery', quantity: 1, checked: false, added_by: 'demo-user-002', created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'grocery-3', family_id: 'demo-family-001', name: isRTL ? 'تمر المدينة' : 'Medina Dates', category: 'fruits', quantity: 3, checked: true, added_by: 'demo-user-003', created_at: new Date(Date.now() - 3*86400000).toISOString(), updated_at: new Date().toISOString() },
-              { id: 'grocery-4', family_id: 'demo-family-001', name: isRTL ? 'أرز بسمتي' : 'Basmati Rice', category: 'other', quantity: 2, checked: false, added_by: 'demo-user-001', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-              { id: 'grocery-5', family_id: 'demo-family-001', name: isRTL ? 'دجاج طازج' : 'Fresh Chicken', category: 'meat', quantity: 1, checked: false, added_by: 'demo-user-002', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-              { id: 'grocery-6', family_id: 'demo-family-001', name: isRTL ? 'عصير برتقال' : 'Orange Juice', category: 'beverages', quantity: 2, checked: true, added_by: 'demo-user-003', created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
-            ])
-
-            // Seed demo notifications
-            const { useNotificationStore } = await import('@/stores/notification-store')
-            useNotificationStore.getState().setNotifications([
-              { id: 'notif-1', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'مهمة جديدة' : 'New Task Assigned', message: isRTL ? 'تم تعيين مهمة "شراء الهدايا" لك' : 'You were assigned "Buy Eid gifts"', type: 'task', read: false, action_url: null, created_at: new Date(Date.now() - 3600000).toISOString() },
-              { id: 'notif-2', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'انضمام عضو جديد' : 'New Member Joined', message: isRTL ? 'انضم خالد إلى العائلة' : 'Khalid joined the family', type: 'family', read: false, action_url: null, created_at: new Date(Date.now() - 7200000).toISOString() },
-              { id: 'notif-3', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'تذكير بالبقالة' : 'Grocery Reminder', message: isRTL ? '5 عناصر لم يتم شراؤها بعد' : '5 items still unchecked', type: 'grocery', read: true, action_url: null, created_at: new Date(Date.now() - 86400000).toISOString() },
-            ])
-
-            toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')
-          }}
-          className="w-full border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200 hover:border-violet-500/40 rounded-2xl h-11 font-medium transition-all duration-200 gap-2"
+        <motion.div
+          className="mt-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
         >
-          <Rocket className="w-4 h-4" />
-          {isRTL ? 'جرّب النسخة التجريبية' : 'Try Demo Mode'}
-        </Button>
+          <div className="relative">
+            <Separator className="bg-white/[0.06]" />
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#111117]/80 backdrop-blur-sm px-3 text-xs text-gray-500">
+              {isRTL ? 'أو' : 'or'}
+            </span>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={async () => {
+              const demoUser = {
+                id: 'demo-user-001',
+                email: 'demo@usraplus.app',
+                first_name: isRTL ? 'أحمد' : 'Ahmed',
+                last_name: isRTL ? 'العائلي' : 'AlFamily',
+                phone: '+966501234567',
+                country_code: '+966',
+                avatar_url: null,
+                language: isRTL ? 'ar' as const : 'en' as const,
+                theme: 'dark' as const,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              }
+              setUser(demoUser)
+              setIsAuthenticated(true)
+              // Set demo family
+              const demoFamily = {
+                id: 'demo-family-001',
+                name: isRTL ? 'عائلة الأحمد' : 'The Ahmed Family',
+                description: isRTL ? 'عائلتنا الرائعة' : 'Our wonderful family',
+                invite_code: 'DEMO2025',
+                avatar_url: null,
+                created_by: 'demo-user-001',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              }
+              appStore.setCurrentFamily(demoFamily)
+              appStore.setFamilies([demoFamily])
+              appStore.setFamilyMembers([
+                { id: 'fm-1', family_id: 'demo-family-001', user_id: 'demo-user-001', role: 'owner' as const, nickname: null, joined_at: new Date().toISOString(), profiles: demoUser },
+                { id: 'fm-2', family_id: 'demo-family-001', user_id: 'demo-user-002', role: 'member' as const, nickname: isRTL ? 'نورة' : 'Noura', joined_at: new Date().toISOString(), profiles: { id: 'demo-user-002', email: 'noura@usraplus.app', first_name: isRTL ? 'نورة' : 'Noura', last_name: isRTL ? 'الأحمد' : 'AlAhmed', phone: null, country_code: '+966', avatar_url: null, language: 'en' as const, theme: 'dark' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } },
+                { id: 'fm-3', family_id: 'demo-family-001', user_id: 'demo-user-003', role: 'admin' as const, nickname: isRTL ? 'خالد' : 'Khalid', joined_at: new Date().toISOString(), profiles: { id: 'demo-user-003', email: 'khalid@usraplus.app', first_name: isRTL ? 'خالد' : 'Khalid', last_name: isRTL ? 'الأحمد' : 'AlAhmed', phone: null, country_code: '+966', avatar_url: null, language: 'en' as const, theme: 'dark' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } },
+              ])
+
+              // Seed demo tasks into task store
+              const { useTaskStore } = await import('@/stores/task-store')
+              useTaskStore.getState().setTasks([
+                { id: 'task-1', family_id: 'demo-family-001', title: isRTL ? 'شراء الهدايا لعيد الفطر' : 'Buy Eid gifts', description: isRTL ? 'شراء هدايا لأفراد العائلة' : 'Gifts for family members', status: 'todo', priority: 'high', assigned_to: 'demo-user-002', created_by: 'demo-user-001', due_date: new Date(Date.now() + 3*86400000).toISOString(), completed_at: null, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'task-2', family_id: 'demo-family-001', title: isRTL ? 'تنظيف المنزل' : 'Clean the house', description: null, status: 'in_progress', priority: 'medium', assigned_to: 'demo-user-001', created_by: 'demo-user-001', due_date: new Date(Date.now() + 86400000).toISOString(), completed_at: null, created_at: new Date(Date.now() - 2*86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'task-3', family_id: 'demo-family-001', title: isRTL ? 'حجز طاولة العشاء' : 'Book dinner table', description: isRTL ? 'في المطعم الإيطالي' : 'At the Italian restaurant', status: 'done', priority: 'low', assigned_to: 'demo-user-003', created_by: 'demo-user-003', due_date: new Date(Date.now() - 86400000).toISOString(), completed_at: new Date(Date.now() - 86400000).toISOString(), created_at: new Date(Date.now() - 5*86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'task-4', family_id: 'demo-family-001', title: isRTL ? 'تحضير واجبات المدرسة' : 'Help with homework', description: null, status: 'todo', priority: 'urgent', assigned_to: 'demo-user-001', created_by: 'demo-user-002', due_date: new Date().toISOString(), completed_at: null, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'task-5', family_id: 'demo-family-001', title: isRTL ? 'شراء مستلزمات المطبخ' : 'Buy kitchen supplies', description: null, status: 'todo', priority: 'medium', assigned_to: null, created_by: 'demo-user-001', due_date: new Date(Date.now() + 7*86400000).toISOString(), completed_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+              ])
+
+              // Seed demo grocery items
+              const { useGroceryStore } = await import('@/stores/grocery-store')
+              useGroceryStore.getState().setItems([
+                { id: 'grocery-1', family_id: 'demo-family-001', name: isRTL ? 'حليب طازج' : 'Fresh Milk', category: 'dairy', quantity: 2, checked: true, added_by: 'demo-user-001', created_at: new Date(Date.now() - 2*86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'grocery-2', family_id: 'demo-family-001', name: isRTL ? 'خبز تمر' : 'Date Bread', category: 'bakery', quantity: 1, checked: false, added_by: 'demo-user-002', created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'grocery-3', family_id: 'demo-family-001', name: isRTL ? 'تمر المدينة' : 'Medina Dates', category: 'fruits', quantity: 3, checked: true, added_by: 'demo-user-003', created_at: new Date(Date.now() - 3*86400000).toISOString(), updated_at: new Date().toISOString() },
+                { id: 'grocery-4', family_id: 'demo-family-001', name: isRTL ? 'أرز بسمتي' : 'Basmati Rice', category: 'other', quantity: 2, checked: false, added_by: 'demo-user-001', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: 'grocery-5', family_id: 'demo-family-001', name: isRTL ? 'دجاج طازج' : 'Fresh Chicken', category: 'meat', quantity: 1, checked: false, added_by: 'demo-user-002', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: 'grocery-6', family_id: 'demo-family-001', name: isRTL ? 'عصير برتقال' : 'Orange Juice', category: 'beverages', quantity: 2, checked: true, added_by: 'demo-user-003', created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+              ])
+
+              // Seed demo notifications
+              const { useNotificationStore } = await import('@/stores/notification-store')
+              useNotificationStore.getState().setNotifications([
+                { id: 'notif-1', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'مهمة جديدة' : 'New Task Assigned', message: isRTL ? 'تم تعيين مهمة "شراء الهدايا" لك' : 'You were assigned "Buy Eid gifts"', type: 'task', read: false, action_url: null, created_at: new Date(Date.now() - 3600000).toISOString() },
+                { id: 'notif-2', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'انضمام عضو جديد' : 'New Member Joined', message: isRTL ? 'انضم خالد إلى العائلة' : 'Khalid joined the family', type: 'family', read: false, action_url: null, created_at: new Date(Date.now() - 7200000).toISOString() },
+                { id: 'notif-3', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'تذكير بالبقالة' : 'Grocery Reminder', message: isRTL ? '5 عناصر لم يتم شراؤها بعد' : '5 items still unchecked', type: 'grocery', read: true, action_url: null, created_at: new Date(Date.now() - 86400000).toISOString() },
+              ])
+
+              // Seed demo presence - mark current user and some family members as online
+              const { usePresenceStore } = await import('@/stores/presence-store')
+              const presenceStore = usePresenceStore.getState()
+              presenceStore.setOnline('demo-user-001') // Ahmed (current user)
+              presenceStore.setOnline('demo-user-002') // Noura
+              presenceStore.setOnline('demo-user-003') // Khalid
+
+              // Seed demo calendar events
+              const now = new Date()
+              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+              const tomorrow = new Date(today.getTime() + 86400000)
+              // Find next Saturday (day 6)
+              const daysUntilSat = (6 - today.getDay() + 7) % 7 || 7
+              const nextSat = new Date(today.getTime() + daysUntilSat * 86400000)
+              // Find next Monday (day 1)
+              const daysUntilMon = (1 - today.getDay() + 7) % 7 || 7
+              const nextMon = new Date(today.getTime() + daysUntilMon * 86400000)
+
+              const { useCalendarStore } = await import('@/stores/calendar-store')
+              useCalendarStore.getState().setEvents([
+                { id: 'event-1', family_id: 'demo-family-001', title: isRTL ? 'عشاء العائلة' : 'Family Dinner', description: isRTL ? 'في المنزل' : 'At home', start_time: new Date(today.getTime() + 19 * 3600000).toISOString(), end_time: new Date(today.getTime() + 21 * 3600000).toISOString(), all_day: false, color: '#6366F1', created_by: 'demo-user-001', created_at: now.toISOString(), updated_at: now.toISOString() },
+                { id: 'event-2', family_id: 'demo-family-001', title: isRTL ? 'موعد الطبيب' : 'Doctor Appointment', description: isRTL ? 'فحص سنوي' : 'Annual checkup', start_time: new Date(tomorrow.getTime() + 10 * 3600000).toISOString(), end_time: new Date(tomorrow.getTime() + 11 * 3600000).toISOString(), all_day: false, color: '#22C55E', created_by: 'demo-user-002', created_at: now.toISOString(), updated_at: now.toISOString() },
+                { id: 'event-3', family_id: 'demo-family-001', title: isRTL ? 'يوم عائلي' : 'Family Day Out', description: null, start_time: nextSat.toISOString(), end_time: null, all_day: true, color: '#F59E0B', created_by: 'demo-user-001', created_at: now.toISOString(), updated_at: now.toISOString() },
+                { id: 'event-4', family_id: 'demo-family-001', title: isRTL ? 'اجتماع المدرسة' : 'School Meeting', description: null, start_time: new Date(nextMon.getTime() + 15 * 3600000).toISOString(), end_time: new Date(nextMon.getTime() + 16 * 3600000).toISOString(), all_day: false, color: '#A78BFA', created_by: 'demo-user-003', created_at: now.toISOString(), updated_at: now.toISOString() },
+              ])
+
+              toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')
+            }}
+            className="w-full border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200 hover:border-violet-500/40 rounded-2xl h-11 font-medium transition-all duration-200 gap-2 demo-btn-pulse mt-3"
+          >
+            <Rocket className="w-4 h-4" />
+            {isRTL ? 'جرّب النسخة التجريبية' : 'Try Demo Mode'}
+          </Button>
+        </motion.div>
 
         {/* Sign up link */}
-        <div className="text-center">
+        <motion.div
+          className="text-center mt-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.45 }}
+        >
           <p className="text-sm text-gray-400">
             {t.auth.noAccount}{' '}
             <button
@@ -380,7 +464,7 @@ export function LoginForm() {
               {t.auth.signUpInstead}
             </button>
           </p>
-        </div>
+        </motion.div>
       </div>
 
       <TermsModal />

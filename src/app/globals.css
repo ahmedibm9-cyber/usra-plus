@@ -215,3 +215,242 @@ html[dir="rtl"] .sidebar-collapse-icon {
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
 }
+
+/* Animated Mesh Gradient Background for Auth Screens */
+.auth-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-bg .auth-blob-1,
+.auth-bg .auth-blob-2,
+.auth-bg .auth-blob-3 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.auth-bg .auth-blob-1 {
+  width: 600px;
+  height: 600px;
+  background: rgba(99, 102, 241, 0.10);
+  top: -10%;
+  right: -10%;
+  animation: float-1 25s ease-in-out infinite;
+}
+
+.auth-bg .auth-blob-2 {
+  width: 500px;
+  height: 500px;
+  background: rgba(139, 92, 246, 0.08);
+  bottom: -15%;
+  left: -10%;
+  animation: float-2 20s ease-in-out infinite;
+}
+
+.auth-bg .auth-blob-3 {
+  width: 400px;
+  height: 400px;
+  background: rgba(168, 85, 247, 0.06);
+  top: 40%;
+  left: 30%;
+  animation: float-3 30s ease-in-out infinite;
+}
+
+@keyframes float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(-60px, 40px) scale(1.1);
+  }
+  50% {
+    transform: translate(-30px, 80px) scale(0.95);
+  }
+  75% {
+    transform: translate(40px, 20px) scale(1.05);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(50px, -30px) scale(1.05);
+  }
+  50% {
+    transform: translate(80px, -60px) scale(1.1);
+  }
+  75% {
+    transform: translate(20px, -20px) scale(0.95);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 50px) scale(1.08);
+  }
+  66% {
+    transform: translate(60px, -30px) scale(0.92);
+  }
+}
+
+/* Auth input gradient border on focus */
+.auth-input-wrapper {
+  position: relative;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.auth-input-wrapper:focus-within {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3), 0 0 12px -2px rgba(99, 102, 241, 0.15);
+}
+
+/* Demo mode button pulse on hover */
+@keyframes demo-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
+  }
+}
+
+.demo-btn-pulse:hover {
+  animation: demo-pulse 1.5s ease-in-out infinite;
+}
+
+/* Animated gradient mesh blobs for welcome section */
+@keyframes float-blob-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, 15px) scale(0.95); }
+  75% { transform: translate(-25px, -10px) scale(1.02); }
+}
+
+@keyframes float-blob-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-20px, 25px) scale(1.03); }
+  50% { transform: translate(15px, -15px) scale(0.97); }
+  75% { transform: translate(20px, 10px) scale(1.04); }
+}
+
+@keyframes float-blob-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, 20px) scale(1.06); }
+  66% { transform: translate(-20px, -10px) scale(0.94); }
+}
+
+.animate-float-blob-1 {
+  animation: float-blob-1 12s ease-in-out infinite;
+}
+
+.animate-float-blob-2 {
+  animation: float-blob-2 15s ease-in-out infinite;
+}
+
+.animate-float-blob-3 {
+  animation: float-blob-3 18s ease-in-out infinite;
+}
+
+/* Stat card hover gradient effect */
+.stat-card-wrapper {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.stat-card-wrapper:hover {
+  transform: scale(1.02);
+}
+
+.stat-card-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.stat-card-wrapper:hover::before {
+  opacity: 1;
+}
+
+/* Typing indicator bouncing dots */
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.typing-dot-1 {
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+
+.typing-dot-2 {
+  animation: typing-bounce 1.4s ease-in-out 0.2s infinite;
+}
+
+.typing-dot-3 {
+  animation: typing-bounce 1.4s ease-in-out 0.4s infinite;
+}
+
+/* Online presence pulse */
+@keyframes online-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.online-dot-pulse {
+  animation: online-pulse 2s ease-in-out infinite;
+}
+
+/* Bottom nav ripple effect (CSS fallback) */
+@keyframes ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.bottom-nav-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  animation: ripple-expand 0.5s ease-out forwards;
+}
+
+/* Bottom nav active dot glow */
+@keyframes dot-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.7);
+  }
+}
+
+.bottom-nav-dot-glow {
+  animation: dot-glow 2s ease-in-out infinite;
+}

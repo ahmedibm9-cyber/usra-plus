@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { format, isToday, isYesterday, isSameDay } from 'date-fns'
+import { format, isToday, isYesterday } from 'date-fns'
 import {
   Send,
   Search,
@@ -11,19 +11,21 @@ import {
   Smile,
   Paperclip,
   ArrowDown,
+  Check,
+  CheckCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAppStore } from '@/stores/app-store'
 import { useChatStore } from '@/stores/chat-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { usePresenceStore } from '@/stores/presence-store'
 import { useI18n } from '@/i18n/use-translation'
 import type { ChatMessage } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Badge } from '@/components/ui/badge'
 
 interface MessageGroup {
   label: string
@@ -69,10 +71,23 @@ function formatMessageTime(dateStr: string): string {
   return format(new Date(dateStr), 'h:mm a')
 }
 
+// Read receipt type for demo purposes
+type ReadStatus = 'sent' | 'delivered' | 'read'
+
+// Demo read receipts: assign random read statuses to own messages
+function getDemoReadStatus(messageId: string): ReadStatus {
+  // Use a simple hash to deterministically assign status
+  const hash = messageId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  const mod = hash % 3
+  if (mod === 0) return 'read'
+  if (mod === 1) return 'delivered'
+  return 'sent'
+}
+
 export function ChatPage() {
   const { currentFamily, familyMembers } = useAppStore()
   const { user } = useAuthStore()
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const {
     messages,
     isLoading,
@@ -86,9 +101,22 @@ export function ChatPage() {
     getFilteredMessages,
   } = useChatStore()
 
+  const {
+    onlineUsers,
+    setOnline,
+    setOffline,
+    setTyping,
+    clearTyping,
+    isUserOnline,
+    getOnlineCount,
+    getOnlineUserIds,
+    getTypingUsers,
+  } = usePresenceStore()
+
   const [isSending, setIsSending] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [showScrollBottom, setShowScrollBottom] = useState(false)
+  const [showDemoTyping, setShowDemoTyping] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -96,6 +124,67 @@ export function ChatPage() {
 
   const familyId = currentFamily?.id
   const userId = user?.id
+
+  // Demo typing indicator: show "Noura is typing..." for 3 seconds on load
+  useEffect(() => {
+    if (familyMembers.length > 0 && !showDemoTyping) {
+      const timer1 = setTimeout(() => {
+        const nouraMember = familyMembers.find((m) => m.user_id === 'demo-user-002')
+        if (nouraMember) {
+          const name = nouraMember.profiles?.first_name ?? (isRTL ? 'نورة' : 'Noura')
+          setTyping('demo-user-002', name)
+          setShowDemoTyping(true)
+
+          setTimeout(() => {
+            clearTyping('demo-user-002')
+            setShowDemoTyping(false)
+          }, 3000)
+        }
+      }, 1500)
+
+      return () => clearTimeout(timer1)
+    }
+  }, [familyMembers, isRTL, setTyping, clearTyping, showDemoTyping])
+
+  // Demo presence: randomly toggle online status for other users
+  useEffect(() => {
+    if (familyMembers.length === 0) return
+
+    // Mark current user as online
+    if (userId) {
+      setOnline(userId)
+    }
+
+    // Mark demo users as online initially (randomly)
+    familyMembers.forEach((member) => {
+      if (member.user_id !== userId) {
+        // Randomly set some as online
+        const isOnline = Math.random() > 0.3 // 70% chance online
+        if (isOnline) {
+          setOnline(member.user_id)
+        }
+      }
+    })
+
+    // Randomly toggle other users' presence for demo
+    const interval = setInterval(() => {
+      familyMembers.forEach((member) => {
+        if (member.user_id !== userId) {
+          const currentlyOnline = isUserOnline(member.user_id)
+          // 10% chance to toggle status
+          if (Math.random() < 0.1) {
+            if (currentlyOnline) {
+              setOffline(member.user_id)
+            } else {
+              setOnline(member.user_id)
+            }
+          }
+        }
+      })
+    }, 8000)
+
+    return () => clearInterval(interval)
+  }, [familyMembers, userId, setOnline, setOffline, isUserOnline])
 
   // Fetch messages
   const fetchMessages = useCallback(async () => {
@@ -234,6 +323,14 @@ export function ChatPage() {
     return member?.nickname ?? 'Unknown'
   }
 
+  // Get online members for avatars bar
+  const onlineUserIds = getOnlineUserIds()
+  const onlineCount = getOnlineCount()
+  const onlineMembers = familyMembers.filter((m) => onlineUserIds.includes(m.user_id))
+
+  // Get typing users (excluding current user)
+  const typingUsers = getTypingUsers().filter((u) => u.userId !== userId)
+
   return (
     <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
       {/* Header */}
@@ -248,7 +345,7 @@ export function ChatPage() {
                 {t.chat.title}
               </h1>
               <p className="text-sm text-[#6B7280]">
-                {familyMembers.length} members
+                {familyMembers.length} {isRTL ? 'أعضاء' : 'members'} · {onlineCount} {t.chat.membersOnline}
               </p>
             </div>
           </div>
@@ -261,6 +358,42 @@ export function ChatPage() {
             {showSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
           </Button>
         </div>
+
+        {/* Online Members Avatars Bar */}
+        {onlineMembers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 mt-3"
+          >
+            <div className="flex -space-x-2 rtl:space-x-reverse">
+              {onlineMembers.slice(0, 5).map((member) => (
+                <div key={member.user_id} className="relative">
+                  <Avatar className="h-7 w-7 border-2 border-[#0B0B0F]">
+                    <AvatarImage
+                      src={member.profiles?.avatar_url ?? undefined}
+                      alt={member.profiles?.first_name ?? ''}
+                    />
+                    <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-[10px] font-medium">
+                      {getInitials(member.profiles?.first_name ?? null, member.profiles?.last_name ?? null)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
+                </div>
+              ))}
+              {onlineMembers.length > 5 && (
+                <div className="h-7 w-7 rounded-full bg-[#111117] border-2 border-[#0B0B0F] flex items-center justify-center">
+                  <span className="text-[10px] text-[#6B7280] font-medium">
+                    +{onlineMembers.length - 5}
+                  </span>
+                </div>
+              )}
+            </div>
+            <span className="text-xs text-[#6B7280] ml-1 rtl:mr-1 rtl:ml-0">
+              {onlineCount} {t.chat.membersOnline}
+            </span>
+          </motion.div>
+        )}
 
         {/* Search bar */}
         <AnimatePresence>
@@ -350,6 +483,9 @@ export function ChatPage() {
                         )
                       }
 
+                      // Read receipt status for own messages
+                      const readStatus = isOwn ? getDemoReadStatus(msg.id) : null
+
                       return (
                         <motion.div
                           key={msg.id}
@@ -364,18 +500,24 @@ export function ChatPage() {
                           {!isOwn && (
                             <div className="flex-shrink-0 w-8">
                               {!isConsecutive ? (
-                                <Avatar className="h-8 w-8 border border-white/[0.08]">
-                                  <AvatarImage
-                                    src={getSenderAvatar(msg.sender_id) ?? undefined}
-                                  />
-                                  <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-xs font-medium">
-                                    {getSenderName(msg.sender_id)
-                                      .split(' ')
-                                      .map((n) => n[0])
-                                      .join('')
-                                      .slice(0, 2)}
-                                  </AvatarFallback>
-                                </Avatar>
+                                <div className="relative">
+                                  <Avatar className="h-8 w-8 border border-white/[0.08]">
+                                    <AvatarImage
+                                      src={getSenderAvatar(msg.sender_id) ?? undefined}
+                                    />
+                                    <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-xs font-medium">
+                                      {getSenderName(msg.sender_id)
+                                        .split(' ')
+                                        .map((n) => n[0])
+                                        .join('')
+                                        .slice(0, 2)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  {/* Online dot on avatar */}
+                                  {isUserOnline(msg.sender_id) && (
+                                    <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
+                                  )}
+                                </div>
                               ) : (
                                 <div className="w-8" />
                               )}
@@ -388,9 +530,14 @@ export function ChatPage() {
                           >
                             {/* Sender name (show for first message in group) */}
                             {!isOwn && !isConsecutive && (
-                              <p className="text-xs font-medium text-[#A78BFA] mb-1 ml-1">
-                                {getSenderName(msg.sender_id)}
-                              </p>
+                              <div className="flex items-center gap-1.5 mb-1 ml-1">
+                                <p className="text-xs font-medium text-[#A78BFA]">
+                                  {getSenderName(msg.sender_id)}
+                                </p>
+                                {isUserOnline(msg.sender_id) && (
+                                  <span className="size-1.5 rounded-full bg-green-400 online-dot-pulse" />
+                                )}
+                              </div>
                             )}
 
                             <div
@@ -408,13 +555,36 @@ export function ChatPage() {
                               </p>
                             </div>
 
-                            {/* Timestamp */}
+                            {/* Timestamp + Read Receipts */}
                             {!isConsecutive && (
-                              <p
-                                className={`text-[10px] text-[#6B7280] mt-1 ${isOwn ? 'text-right mr-1' : 'ml-1'}`}
+                              <div
+                                className={`flex items-center gap-1 mt-1 ${isOwn ? 'justify-end mr-1' : 'justify-start ml-1'}`}
                               >
-                                {formatMessageTime(msg.created_at)}
-                              </p>
+                                <p className="text-[10px] text-[#6B7280]">
+                                  {formatMessageTime(msg.created_at)}
+                                </p>
+                                {isOwn && readStatus && (
+                                  <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[#6B7280]'}`}>
+                                    {readStatus === 'sent' ? (
+                                      <Check className="w-3 h-3" />
+                                    ) : (
+                                      <CheckCheck className="w-3 h-3" />
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {/* Show read receipt on consecutive own messages too (subtle) */}
+                            {isConsecutive && isOwn && readStatus && (
+                              <div className="flex justify-end mr-1 -mt-0.5">
+                                <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[#6B7280]'}`}>
+                                  {readStatus === 'sent' ? (
+                                    <Check className="w-2.5 h-2.5" />
+                                  ) : (
+                                    <CheckCheck className="w-2.5 h-2.5" />
+                                  )}
+                                </span>
+                              </div>
                             )}
                           </div>
                         </motion.div>
@@ -422,6 +592,45 @@ export function ChatPage() {
                     })}
                   </div>
                 ))}
+
+                {/* Typing indicator */}
+                <AnimatePresence>
+                  {typingUsers.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex items-center gap-2.5 mt-3 px-1"
+                    >
+                      <div className="flex-shrink-0 w-8">
+                        <div className="relative">
+                          <Avatar className="h-8 w-8 border border-white/[0.08]">
+                            <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-xs font-medium">
+                              {typingUsers[0].userName
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
+                        </div>
+                      </div>
+                      <div className="bg-[#111117] border border-white/[0.08] rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-2">
+                        <div className="flex items-center gap-0.5">
+                          <span className="typing-dot-1 size-1.5 rounded-full bg-[#6B7280]" />
+                          <span className="typing-dot-2 size-1.5 rounded-full bg-[#6B7280]" />
+                          <span className="typing-dot-3 size-1.5 rounded-full bg-[#6B7280]" />
+                        </div>
+                        <span className="text-xs text-[#6B7280]">
+                          {typingUsers[0].userName} {t.chat.isTyping}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div ref={bottomRef} />
               </div>
             </ScrollArea>

@@ -7,6 +7,7 @@ interface AppState {
   currentPage: AppPage
   sidebarOpen: boolean
   sidebarCollapsed: boolean
+  commandPaletteOpen: boolean
   currentFamily: Family | null
   familyMembers: FamilyMember[]
   families: Family[]
@@ -16,6 +17,7 @@ interface AppState {
   setCurrentPage: (page: AppPage) => void
   setSidebarOpen: (open: boolean) => void
   setSidebarCollapsed: (collapsed: boolean) => void
+  setCommandPaletteOpen: (open: boolean) => void
   setCurrentFamily: (family: Family | null) => void
   setFamilyMembers: (members: FamilyMember[]) => void
   setFamilies: (families: Family[]) => void
@@ -29,6 +31,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentPage: 'dashboard',
   sidebarOpen: false,
   sidebarCollapsed: false,
+  commandPaletteOpen: false,
   currentFamily: null,
   familyMembers: [],
   families: [],
@@ -38,6 +41,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setCurrentPage: (page) => set({ currentPage: page }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+  setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
   setCurrentFamily: (family) => set({ currentFamily: family }),
   setFamilyMembers: (members) => set({ familyMembers: members }),
   setFamilies: (families) => set({ families }),

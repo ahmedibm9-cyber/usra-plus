@@ -22,11 +22,14 @@ import {
   HardDrive,
   MoreVertical,
   FolderOpen,
+  AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useSubscriptionStore } from '@/stores/subscription-store'
+import { UpgradeModal } from '@/components/shared/upgrade-modal'
 import { useI18n } from '@/i18n/use-translation'
 import type { FamilyFile } from '@/types'
 import { Button } from '@/components/ui/button'
@@ -120,7 +123,9 @@ function formatFileType(mimeType: string): string {
 export function FilesPage() {
   const { currentFamily, familyMembers } = useAppStore()
   const { user } = useAuthStore()
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
+  const { canUploadFile, plan, getFeatureLimit } = useSubscriptionStore()
+  const storageLimit = getFeatureLimit('storage')
 
   const [files, setFiles] = useState<FamilyFile[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -132,6 +137,7 @@ export function FilesPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const familyId = currentFamily?.id
@@ -258,6 +264,10 @@ export function FilesPage() {
     e.preventDefault()
     setIsDragOver(false)
     if (e.dataTransfer.files.length > 0) {
+      if (isStorageFull) {
+        setUpgradeModalOpen(true)
+        return
+      }
       handleUploadFiles(e.dataTransfer.files)
     }
   }
@@ -283,10 +293,22 @@ export function FilesPage() {
       }
     })
 
-  // Storage calculation (simulated)
-  const totalStorage = 1024 * 1024 * 1024 // 1 GB in bytes
+  // Storage calculation (simulated) - use plan-based limit
   const usedStorage = files.reduce((acc, f) => acc + f.file_size, 0)
-  const storagePercentage = Math.min(Math.round((usedStorage / totalStorage) * 100), 100)
+  // For demo: simulate 72MB used storage for free plan users to show gating works
+  const demoUsedStorage = plan === 'free' ? 72 * 1024 * 1024 : usedStorage
+  const effectiveUsedStorage = usedStorage > 0 ? usedStorage : demoUsedStorage
+  const totalStorage = storageLimit ?? 1024 * 1024 * 1024
+  const storagePercentage = Math.min(Math.round((effectiveUsedStorage / totalStorage) * 100), 100)
+  const isStorageFull = !canUploadFile(effectiveUsedStorage)
+
+  const handleUploadClick = useCallback(() => {
+    if (isStorageFull) {
+      setUpgradeModalOpen(true)
+      return
+    }
+    setShowUpload(true)
+  }, [isStorageFull])
 
   const getUploaderName = (uploaderId: string) => {
     const member = familyMembers.find((m) => m.user_id === uploaderId)
@@ -359,7 +381,7 @@ export function FilesPage() {
 
             {/* Upload button */}
             <Button
-              onClick={() => setShowUpload(true)}
+              onClick={handleUploadClick}
               className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-9 px-4"
             >
               <Upload className="w-4 h-4" />
@@ -376,13 +398,23 @@ export function FilesPage() {
               <span className="text-sm font-medium text-[#E5E7EB]">{t.files.storageUsed}</span>
             </div>
             <span className="text-xs text-[#6B7280]">
-              {formatFileSize(usedStorage)} of 1 GB
+              {formatFileSize(effectiveUsedStorage)} of {formatFileSize(totalStorage)}
             </span>
           </div>
           <Progress
             value={storagePercentage}
-            className="h-2 bg-white/[0.06] [&>[data-slot=indicator]]:bg-gradient-to-r [&>[data-slot=indicator]]:from-[#6366F1] [&>[data-slot=indicator]]:to-[#A78BFA]"
+            className={`h-2 bg-white/[0.06] [&>[data-slot=indicator]]:bg-gradient-to-r [&>[data-slot=indicator]]:from-[#6366F1] [&>[data-slot=indicator]]:to-[#A78BFA] ${
+              isStorageFull ? '[&>[data-slot=indicator]]:from-red-500 [&>[data-slot=indicator]]:to-red-400' : ''
+            }`}
           />
+          {isStorageFull && (
+            <div className="mt-2 flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+              <span className="text-[11px] text-red-300">
+                {isRTL ? 'مساحة التخزين ممتلئة! قم بالترقية لمزيد من المساحة.' : 'Storage full! Upgrade for more space.'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Search */}
@@ -630,6 +662,15 @@ export function FilesPage() {
           </ScrollArea>
         )}
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+        feature="storage"
+        currentCount={Math.round(effectiveUsedStorage / (1024 * 1024))}
+        limit={Math.round(totalStorage / (1024 * 1024))}
+      />
 
       {/* Upload Dialog */}
       <Dialog open={showUpload} onOpenChange={setShowUpload}>

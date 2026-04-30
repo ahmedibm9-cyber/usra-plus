@@ -1,18 +1,15 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useMemo, useCallback } from 'react'
 import {
   Menu,
   Search,
-  X,
   LogOut,
   Settings,
   User,
   ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Breadcrumb,
@@ -52,34 +49,16 @@ const pageTitles: Record<AppPage, keyof import('@/i18n/en').en.nav> = {
 }
 
 export function AppHeader() {
-  const { currentPage, setSidebarOpen } = useAppStore()
+  const { currentPage, setSidebarOpen, setCommandPaletteOpen } = useAppStore()
   const { user, logout } = useAuthStore()
   const { unreadCount } = useNotificationStore()
   const { t, language, setLanguage, isRTL } = useI18n()
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const [isMac] = useState(() => {
     if (typeof navigator !== 'undefined') {
       return navigator.platform.toUpperCase().indexOf('MAC') >= 0
     }
     return false
   })
-
-  // Keyboard shortcut: ⌘K / Ctrl+K to open search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setSearchOpen((prev) => !prev)
-      }
-      if (e.key === 'Escape') {
-        setSearchOpen(false)
-        setSearchQuery('')
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
 
   const pageTitle = t.nav[pageTitles[currentPage]]
 
@@ -149,73 +128,39 @@ export function AppHeader() {
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Search */}
+      {/* Search - Opens Command Palette */}
       <div className="relative flex items-center">
-        {/* Desktop Search with Keyboard Shortcut */}
-        <div className="hidden md:flex items-center relative">
+        {/* Desktop Search Bar (clickable trigger for command palette) */}
+        <button
+          type="button"
+          onClick={() => setCommandPaletteOpen(true)}
+          className="hidden md:flex items-center relative w-56 lg:w-64 h-9 bg-white/[0.05] border border-white/[0.08] rounded-xl hover:border-white/20 transition-colors"
+        >
           <Search className="absolute left-3 size-4 text-gray-500 pointer-events-none" />
-          <Input
-            placeholder={t.nav.search}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-56 lg:w-64 pl-9 pr-14 h-9 bg-white/[0.05] border-white/[0.08] text-gray-200 placeholder:text-gray-500 rounded-xl focus-visible:border-white/20 focus-visible:ring-white/10"
-          />
+          <span className="pl-9 pr-14 text-sm text-gray-500 truncate">{t.nav.search}</span>
           <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 bg-white/[0.06] border border-white/[0.08] rounded-md pointer-events-none">
             <span className="text-[10px]">{kbdSymbol}</span>
             <span>K</span>
           </kbd>
-        </div>
+        </button>
 
-        {/* Mobile Search Overlay */}
-        <AnimatePresence>
-          {searchOpen && (
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute right-0 md:hidden flex items-center z-50"
+        {/* Mobile Search Button (opens command palette) */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden shrink-0 text-gray-400 hover:text-white hover:bg-white/[0.05]"
+              onClick={() => setCommandPaletteOpen(true)}
+              aria-label="Search"
             >
-              <Input
-                autoFocus
-                placeholder={t.nav.search}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-44 sm:w-56 h-9 bg-white/[0.05] border-white/[0.08] text-gray-200 placeholder:text-gray-500 rounded-xl focus-visible:border-white/20 focus-visible:ring-white/10"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 ml-1 text-gray-400 hover:text-white"
-                onClick={() => {
-                  setSearchOpen(false)
-                  setSearchQuery('')
-                }}
-              >
-                <X className="size-4" />
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {!searchOpen && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden shrink-0 text-gray-400 hover:text-white hover:bg-white/[0.05]"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Search"
-              >
-                <Search className="size-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-[#1a1a22] border-white/[0.08] text-gray-300 text-xs">
-              {kbdSymbol}K
-            </TooltipContent>
-          </Tooltip>
-        )}
+              <Search className="size-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="bg-[#1a1a22] border-white/[0.08] text-gray-300 text-xs">
+            {kbdSymbol}K
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Language Switcher - Flag on mobile, full on desktop */}
