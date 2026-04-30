@@ -14,6 +14,8 @@ import {
   ChevronUp,
   Wallet,
   UtensilsCrossed,
+  Cake,
+  Brush,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { useAppStore } from '@/stores/app-store'
@@ -37,10 +39,12 @@ const mainNavItems: BottomNavItem[] = [
 interface MoreNavItem {
   page: AppPage
   icon: React.ElementType
-  labelKey: 'chat' | 'files' | 'settings' | 'mealPlan'
+  labelKey: 'chat' | 'files' | 'settings' | 'mealPlan' | 'milestones' | 'chores'
 }
 
 const moreNavItems: MoreNavItem[] = [
+  { page: 'milestones', icon: Cake, labelKey: 'milestones' },
+  { page: 'chores', icon: Brush, labelKey: 'chores' },
   { page: 'meal-plan', icon: UtensilsCrossed, labelKey: 'mealPlan' },
   { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
   { page: 'files', icon: FolderOpen, labelKey: 'files' },

@@ -252,7 +252,7 @@ export function SignupForm() {
                   placeholder={isRTL ? 'الاسم الأول' : 'First name'}
                   value={firstName}
                   onChange={(e) => { setFirstName(e.target.value); clearError('firstName') }}
-                  className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.firstName ? 'border-red-500/50' : ''}`}
+                  className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.firstName ? 'border-red-500/50' : ''}`}
                   disabled={isLoading}
                   autoComplete="given-name"
                 />
@@ -276,7 +276,7 @@ export function SignupForm() {
                   placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
                   value={lastName}
                   onChange={(e) => { setLastName(e.target.value); clearError('lastName') }}
-                  className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.lastName ? 'border-red-500/50' : ''}`}
+                  className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.lastName ? 'border-red-500/50' : ''}`}
                   disabled={isLoading}
                   autoComplete="family-name"
                 />
@@ -308,7 +308,7 @@ export function SignupForm() {
                 placeholder={isRTL ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); clearError('email') }}
-                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-red-500/50' : ''}`}
+                className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-red-500/50' : ''}`}
                 disabled={isLoading}
                 autoComplete="email"
               />
@@ -359,7 +359,7 @@ export function SignupForm() {
                   placeholder={isRTL ? '5XXXXXXXX' : '5XXXXXXXX'}
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); clearError('phone') }}
-                  className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.phone ? 'border-red-500/50' : ''}`}
+                  className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.phone ? 'border-red-500/50' : ''}`}
                   disabled={isLoading}
                   autoComplete="tel"
                 />
@@ -391,7 +391,7 @@ export function SignupForm() {
                 placeholder={isRTL ? '٨ أحرف على الأقل' : 'At least 8 characters'}
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); clearError('password') }}
-                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-red-500/50' : ''}`}
+                className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-red-500/50' : ''}`}
                 disabled={isLoading}
                 autoComplete="new-password"
               />
@@ -447,7 +447,7 @@ export function SignupForm() {
                 placeholder={isRTL ? 'أعد إدخال كلمة المرور' : 'Re-enter your password'}
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword') }}
-                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.confirmPassword ? 'border-red-500/50' : ''}`}
+                className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.confirmPassword ? 'border-red-500/50' : ''}`}
                 disabled={isLoading}
                 autoComplete="new-password"
               />

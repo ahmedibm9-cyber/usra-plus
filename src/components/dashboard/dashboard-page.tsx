@@ -634,7 +634,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[--bg-primary] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
       <div className="mx-auto max-w-7xl space-y-4 lg:space-y-6">
         {/* ─── Welcome Section (Full Width, Gradient BG) ──────── */}
-        <section className="scroll-mt-20 relative overflow-hidden rounded-xl">
+        <section className="scroll-mt-20 relative overflow-hidden rounded-xl page-header-mesh">
           {/* Animated gradient mesh blobs */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="animate-float-blob-1 absolute -left-20 -top-10 h-60 w-60 rounded-full bg-indigo-500/[0.04] blur-3xl" />
@@ -651,10 +651,10 @@ export default function DashboardPage() {
             <div>
               <h1 className="text-heading-1 text-[--text-primary]">
                 {greeting}
-                {userName ? `, ${userName}` : ''} 👋
+                {userName ? `, ` : ''}{userName && <span className="gradient-text">{userName}</span>} 👋
               </h1>
               <p className="mt-1 text-body text-[--text-muted]">
-                {currentDate} &middot; ١٤٤٦ هـ &middot; {currentFamily.name}
+                {currentDate} &middot; ١٤٤٦ هـ &middot; <span className="gradient-text font-medium">{currentFamily.name}</span>
               </p>
             </div>
             <Button

@@ -1,6 +1,6 @@
 // USRA PLUS - Core Types
 
-export type AppPage = 'dashboard' | 'tasks' | 'calendar' | 'grocery' | 'meal-plan' | 'chat' | 'files' | 'budget' | 'settings';
+export type AppPage = 'dashboard' | 'tasks' | 'calendar' | 'milestones' | 'chores' | 'grocery' | 'meal-plan' | 'chat' | 'files' | 'budget' | 'settings';
 export type AuthView = 'login' | 'signup' | 'forgot-password' | 'verify-email';
 export type Language = 'en' | 'ar';
 export type Theme = 'light' | 'dark';

@@ -17,6 +17,8 @@ import {
   ChevronsUpDown,
   Wallet,
   UtensilsCrossed,
+  Cake,
+  Brush,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -53,6 +55,8 @@ const navItems: NavItem[] = [
   { page: 'dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
   { page: 'tasks', icon: CheckSquare, labelKey: 'tasks' },
   { page: 'calendar', icon: CalendarDays, labelKey: 'calendar' },
+  { page: 'milestones', icon: Cake, labelKey: 'milestones' },
+  { page: 'chores', icon: Brush, labelKey: 'chores' },
   { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery' },
   { page: 'meal-plan', icon: UtensilsCrossed, labelKey: 'mealPlan' },
   { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
@@ -95,14 +99,14 @@ function NavItemButton({
       {isActive && (
         <motion.div
           layoutId="sidebar-active-indicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-indigo-500 sidebar-active-glow"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-[--accent-primary] sidebar-active-glow badge-pulse-premium"
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       )}
 
       {/* Hover left border at 50% opacity */}
       {!isActive && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full bg-indigo-500/0 group-hover:bg-indigo-500/50 transition-colors duration-200" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full bg-[--accent-primary]/0 group-hover:bg-[--accent-primary]/50 transition-colors duration-200" />
       )}
 
       <Icon

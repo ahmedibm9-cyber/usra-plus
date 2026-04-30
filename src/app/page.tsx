@@ -26,6 +26,8 @@ import { FilesPage } from '@/components/files/files-page'
 import SettingsPage from '@/components/settings/settings-page'
 import BudgetPage from '@/components/budget/budget-page'
 import MealPlanPage from '@/components/meal-plan/meal-plan-page'
+import MilestonesPage from '@/components/milestones/milestones-page'
+import ChoresPage from '@/components/chores/chores-page'
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow'
 import { PageWrapper } from '@/components/shared/page-wrapper'
 import { CommandPalette } from '@/components/shared/command-palette'
@@ -74,7 +76,7 @@ function LoadingScreen() {
 }
 
 // Page order for swipe navigation
-const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'grocery', 'meal-plan', 'budget', 'chat', 'files', 'settings']
+const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'milestones', 'chores', 'grocery', 'meal-plan', 'budget', 'chat', 'files', 'settings']
 
 // Swipe threshold constants
 const SWIPE_MIN_DISTANCE = 80
@@ -243,6 +245,8 @@ function MainApp() {
         dashboard: 'Dashboard',
         tasks: 'Tasks',
         calendar: 'Calendar',
+        milestones: 'Milestones',
+        chores: 'Chores',
         grocery: 'Grocery',
         'meal-plan': 'Meal Plan',
         chat: 'Chat',
@@ -272,6 +276,10 @@ function MainApp() {
         return <PageWrapper><TasksPage /></PageWrapper>
       case 'calendar':
         return <PageWrapper><CalendarPage /></PageWrapper>
+      case 'milestones':
+        return <PageWrapper><MilestonesPage /></PageWrapper>
+      case 'chores':
+        return <PageWrapper><ChoresPage /></PageWrapper>
       case 'grocery':
         return <PageWrapper><GroceryPage /></PageWrapper>
       case 'meal-plan':
@@ -357,7 +365,7 @@ function MainApp() {
             {/* Visually hidden heading for focus management */}
             <h1 ref={headingRef} tabIndex={-1} className="sr-only">
               {(() => {
-                const names: Record<AppPage, string> = { dashboard: 'Dashboard', tasks: 'Tasks', calendar: 'Calendar', grocery: 'Grocery', chat: 'Chat', files: 'Files', settings: 'Settings' }
+                const names: Record<AppPage, string> = { dashboard: 'Dashboard', tasks: 'Tasks', calendar: 'Calendar', milestones: 'Milestones', chores: 'Chores', grocery: 'Grocery', chat: 'Chat', files: 'Files', settings: 'Settings' }
                 return names[currentPage]
               })()}
             </h1>

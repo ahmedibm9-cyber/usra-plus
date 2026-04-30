@@ -155,7 +155,7 @@ export function ForgotPasswordForm() {
                 setEmail(e.target.value)
                 if (error) setError('')
               }}
-              className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
+              className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
               disabled={isLoading}
             />
           </div>

@@ -167,7 +167,7 @@ export function LoginForm() {
                   setEmail(e.target.value)
                   if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
                 }}
-                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
+                className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
                 disabled={isLoading}
                 autoComplete="email"
               />
@@ -210,7 +210,7 @@ export function LoginForm() {
                   setPassword(e.target.value)
                   if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
                 }}
-                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
+                className={`h-11 premium-input bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
                 disabled={isLoading}
                 autoComplete="current-password"
               />
@@ -599,6 +599,30 @@ export function LoginForm() {
 
               // Seed demo comments
               const { useCommentStore } = await import('@/stores/comment-store')
+
+              // Seed demo chores
+              const { useChoreStore } = await import('@/stores/chore-store')
+              useChoreStore.getState().setChores([
+                // Daily chores
+                { id: 'chore-1', title: isRTL ? 'غسل الأطباق' : 'Wash Dishes', description: isRTL ? 'غسل وتجفيف الأطباق يوميًا' : 'Wash and dry dishes daily', icon: '🧽', frequency: 'daily', assignedTo: ['demo-user-001', 'demo-user-002', 'demo-user-003'], rotationOrder: ['demo-user-001', 'demo-user-002', 'demo-user-003'], currentAssigneeIndex: 0, lastRotatedAt: new Date(Date.now() - 4 * 3600000).toISOString(), difficulty: 'easy', estimatedMinutes: 20, isPaused: false, createdAt: new Date(Date.now() - 7 * 86400000).toISOString() },
+                { id: 'chore-2', title: isRTL ? 'ترتيب الأسرّة' : 'Make Beds', description: isRTL ? 'ترتيب الأسرّة كل صباح' : 'Make beds every morning', icon: '🧹', frequency: 'daily', assignedTo: ['demo-user-001', 'demo-user-002', 'demo-user-003'], rotationOrder: ['demo-user-001', 'demo-user-002', 'demo-user-003'], currentAssigneeIndex: 1, lastRotatedAt: new Date(Date.now() - 8 * 3600000).toISOString(), difficulty: 'easy', estimatedMinutes: 10, isPaused: false, createdAt: new Date(Date.now() - 7 * 86400000).toISOString() },
+                // Weekly chores
+                { id: 'chore-3', title: isRTL ? 'تنظيف الصالة بالمكنسة' : 'Vacuum Living Room', description: isRTL ? 'تنظيف السجاد والأرضيات' : 'Vacuum carpets and floors', icon: '🧹', frequency: 'weekly', assignedTo: ['demo-user-001', 'demo-user-003'], rotationOrder: ['demo-user-001', 'demo-user-003'], currentAssigneeIndex: 0, lastRotatedAt: new Date(Date.now() - 2 * 86400000).toISOString(), difficulty: 'medium', estimatedMinutes: 30, isPaused: false, createdAt: new Date(Date.now() - 14 * 86400000).toISOString() },
+                { id: 'chore-4', title: isRTL ? 'الغسيل' : 'Laundry', description: isRTL ? 'غسل وتنظيف الملابس' : 'Wash and fold clothes', icon: '🧺', frequency: 'weekly', assignedTo: ['demo-user-002'], rotationOrder: ['demo-user-002'], currentAssigneeIndex: 0, lastRotatedAt: new Date(Date.now() - 3 * 86400000).toISOString(), difficulty: 'medium', estimatedMinutes: 60, isPaused: false, createdAt: new Date(Date.now() - 14 * 86400000).toISOString() },
+                { id: 'chore-5', title: isRTL ? 'تنظيف الحمّام' : 'Clean Bathroom', description: isRTL ? 'تنظيف وتطهير الحمامات' : 'Scrub and sanitize bathrooms', icon: '🚿', frequency: 'weekly', assignedTo: ['demo-user-001', 'demo-user-002', 'demo-user-003'], rotationOrder: ['demo-user-001', 'demo-user-002', 'demo-user-003'], currentAssigneeIndex: 2, lastRotatedAt: new Date(Date.now() - 5 * 86400000).toISOString(), difficulty: 'hard', estimatedMinutes: 45, isPaused: false, createdAt: new Date(Date.now() - 14 * 86400000).toISOString() },
+                { id: 'chore-6', title: isRTL ? 'تسوق البقالة' : 'Grocery Shopping', description: isRTL ? 'شراء المستلزمات الأسبوعية' : 'Buy weekly essentials', icon: '🍳', frequency: 'weekly', assignedTo: ['demo-user-001', 'demo-user-002'], rotationOrder: ['demo-user-001', 'demo-user-002'], currentAssigneeIndex: 1, lastRotatedAt: new Date(Date.now() - 1 * 86400000).toISOString(), difficulty: 'medium', estimatedMinutes: 90, isPaused: false, createdAt: new Date(Date.now() - 14 * 86400000).toISOString() },
+                // Monthly chores
+                { id: 'chore-7', title: isRTL ? 'تنظيف المطبخ العميق' : 'Deep Clean Kitchen', description: isRTL ? 'تنظيف شامل للمطبخ والأجهزة' : 'Thorough cleaning of kitchen and appliances', icon: '🧽', frequency: 'monthly', assignedTo: ['demo-user-001', 'demo-user-002', 'demo-user-003'], rotationOrder: ['demo-user-001', 'demo-user-002', 'demo-user-003'], currentAssigneeIndex: 0, lastRotatedAt: new Date(Date.now() - 10 * 86400000).toISOString(), difficulty: 'hard', estimatedMinutes: 120, isPaused: false, createdAt: new Date(Date.now() - 30 * 86400000).toISOString() },
+                { id: 'chore-8', title: isRTL ? 'ترتيب المرآب' : 'Organize Garage', description: isRTL ? 'ترتيب وتنظيم المرآب' : 'Sort and organize garage space', icon: '📦', frequency: 'monthly', assignedTo: ['demo-user-001', 'demo-user-003'], rotationOrder: ['demo-user-001', 'demo-user-003'], currentAssigneeIndex: 1, lastRotatedAt: new Date(Date.now() - 15 * 86400000).toISOString(), difficulty: 'hard', estimatedMinutes: 90, isPaused: true, createdAt: new Date(Date.now() - 30 * 86400000).toISOString() },
+              ])
+
+              // Seed a few demo chore completion logs
+              useChoreStore.getState().logCompletion({ id: 'clog-1', choreId: 'chore-1', completedBy: 'demo-user-001', completedAt: new Date(Date.now() - 2 * 3600000).toISOString() })
+              useChoreStore.getState().logCompletion({ id: 'clog-2', choreId: 'chore-2', completedBy: 'demo-user-002', completedAt: new Date(Date.now() - 4 * 3600000).toISOString() })
+              useChoreStore.getState().logCompletion({ id: 'clog-3', choreId: 'chore-3', completedBy: 'demo-user-003', completedAt: new Date(Date.now() - 1 * 86400000).toISOString() })
+              useChoreStore.getState().logCompletion({ id: 'clog-4', choreId: 'chore-5', completedBy: 'demo-user-001', completedAt: new Date(Date.now() - 3 * 86400000).toISOString() })
+              useChoreStore.getState().logCompletion({ id: 'clog-5', choreId: 'chore-6', completedBy: 'demo-user-002', completedAt: new Date(Date.now() - 1 * 86400000).toISOString() })
+
               useCommentStore.getState().setComments([
                 // Comments on task-1 (Buy Eid gifts)
                 { id: 'comment-1', task_id: 'task-1', parent_id: null, author_id: 'demo-user-001', author_name: isRTL ? 'أحمد' : 'Ahmed', author_avatar: null, content: isRTL ? 'يجب أن نبدأ بالتسوق قريبًا' : 'We should start shopping soon', created_at: new Date(Date.now() - 3600000).toISOString(), updated_at: new Date(Date.now() - 3600000).toISOString() },
@@ -794,6 +818,25 @@ export function LoginForm() {
                 { id: 'meal-4', title: isRTL ? 'مندي' : 'Mandi Rice', description: isRTL ? 'مندي لحم تقليدي' : 'Traditional lamb mandi', mealType: 'lunch', date: mealDay(2), assignedTo: ['demo-user-001', 'demo-user-003'], ingredients: [isRTL ? 'أرز بسمتي' : 'Basmati Rice', isRTL ? 'لحم' : 'Lamb', isRTL ? 'توابل مندي' : 'Mandi Spices', isRTL ? 'بصل' : 'Onion'], prepTime: 90, calories: 720, createdBy: 'demo-user-003', createdAt: new Date().toISOString() },
                 { id: 'meal-5', title: isRTL ? 'فول مدمس' : 'Foul Medames', description: isRTL ? 'فول مدمس مع زيت الزيتون والليمون' : 'Foul medames with olive oil and lemon', mealType: 'breakfast', date: mealDay(3), assignedTo: ['demo-user-001', 'demo-user-002'], ingredients: [isRTL ? 'فول' : 'Fava Beans', isRTL ? 'زيت زيتون' : 'Olive Oil', isRTL ? 'ليمون' : 'Lemon', isRTL ? 'ثوم' : 'Garlic'], prepTime: 15, calories: 280, createdBy: 'demo-user-002', createdAt: new Date().toISOString() },
                 { id: 'meal-6', title: isRTL ? 'مندي لحم' : 'Lamb Mandi', description: isRTL ? 'مندي لحم مع رز بسمتي' : 'Lamb mandi with basmati rice', mealType: 'dinner', date: mealDay(4), assignedTo: ['demo-user-001'], ingredients: [isRTL ? 'لحم' : 'Lamb', isRTL ? 'أرز' : 'Rice', isRTL ? 'توابل' : 'Spices', isRTL ? 'زبيب' : 'Raisins'], prepTime: 120, calories: 800, recipeUrl: 'https://example.com/lamb-mandi', createdBy: 'demo-user-001', createdAt: new Date().toISOString() },
+              ])
+
+              // Seed demo milestones
+              const msNow = new Date()
+              const msToday = new Date(msNow.getFullYear(), msNow.getMonth(), msNow.getDate())
+              const { useMilestoneStore } = await import('@/stores/milestone-store')
+              useMilestoneStore.getState().setMilestones([
+                // Ahmed's Birthday - coming in 5 days
+                { id: 'ms-1', title: isRTL ? 'عيد ميلاد أحمد' : "Ahmed's Birthday", date: new Date(msToday.getTime() + 5 * 86400000).toISOString(), type: 'birthday', description: isRTL ? 'عيد ميلاد أحمد الـ35' : "Ahmed's 35th birthday celebration", personId: 'demo-user-001', personName: isRTL ? 'أحمد' : 'Ahmed', emoji: '🎂', isRecurring: true, notifyDaysBefore: 7, createdAt: msNow.toISOString() },
+                // Ahmed & Noura's Wedding Anniversary - coming in 12 days
+                { id: 'ms-2', title: isRTL ? 'ذكرى زواج أحمد ونورة' : "Ahmed & Noura's Anniversary", date: new Date(msToday.getTime() + 12 * 86400000).toISOString(), type: 'anniversary', description: isRTL ? 'الذكرى السنوية الخامسة' : '5th wedding anniversary', personId: 'demo-user-001', personName: isRTL ? 'أحمد ونورة' : 'Ahmed & Noura', emoji: '💍', isRecurring: true, notifyDaysBefore: 7, createdAt: msNow.toISOString() },
+                // Khalid's Graduation - coming in 20 days
+                { id: 'ms-3', title: isRTL ? 'تخرج خالد' : "Khalid's Graduation", date: new Date(msToday.getTime() + 20 * 86400000).toISOString(), type: 'graduation', description: isRTL ? 'تخرج خالد من الجامعة' : "Khalid's university graduation", personId: 'demo-user-003', personName: isRTL ? 'خالد' : 'Khalid', emoji: '🎓', isRecurring: false, notifyDaysBefore: 3, createdAt: msNow.toISOString() },
+                // Family Foundation Day - coming in 3 days
+                { id: 'ms-4', title: isRTL ? 'يوم تأسيس العائلة' : 'Family Foundation Day', date: new Date(msToday.getTime() + 3 * 86400000).toISOString(), type: 'custom', description: isRTL ? 'الاحتفال بتأسيس عائلة الأحمد' : 'Celebrating the Ahmed family founding', personId: undefined, personName: undefined, emoji: '⭐', isRecurring: true, notifyDaysBefore: 3, createdAt: msNow.toISOString() },
+                // Noura's Birthday - coming in 25 days
+                { id: 'ms-5', title: isRTL ? 'عيد ميلاد نورة' : "Noura's Birthday", date: new Date(msToday.getTime() + 25 * 86400000).toISOString(), type: 'birthday', description: isRTL ? 'عيد ميلاد نورة الـ30' : "Noura's 30th birthday", personId: 'demo-user-002', personName: isRTL ? 'نورة' : 'Noura', emoji: '🎂', isRecurring: true, notifyDaysBefore: 7, createdAt: msNow.toISOString() },
+                // First Day of School - coming in 45 days (beyond 30, to show later category)
+                { id: 'ms-6', title: isRTL ? 'أول يوم دراسي' : 'First Day of School', date: new Date(msToday.getTime() + 45 * 86400000).toISOString(), type: 'achievement', description: isRTL ? 'بداية العام الدراسي الجديد' : 'Start of the new school year', personId: 'demo-user-003', personName: isRTL ? 'خالد' : 'Khalid', emoji: '🏆', isRecurring: true, notifyDaysBefore: 7, createdAt: msNow.toISOString() },
               ])
 
               toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')

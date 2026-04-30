@@ -29,6 +29,8 @@ import {
   Sparkles,
   Wallet,
   UtensilsCrossed,
+  Cake,
+  Brush,
 } from 'lucide-react'
 import { useAppStore } from '@/stores/app-store'
 import { useTaskStore } from '@/stores/task-store'
@@ -129,6 +131,8 @@ const pages: PageItem[] = [
   { id: 'dashboard', labelKey: 'dashboard', icon: LayoutDashboard, keywords: ['home', 'main', 'overview', 'لوحة'] },
   { id: 'tasks', labelKey: 'tasks', icon: CheckSquare, keywords: ['todo', 'checklist', 'مهمة', 'مهام'] },
   { id: 'calendar', labelKey: 'calendar', icon: CalendarDays, keywords: ['events', 'schedule', 'تقويم', 'أحداث'] },
+  { id: 'milestones', labelKey: 'milestones', icon: Cake, keywords: ['birthday', 'anniversary', 'milestone', 'مناسبة', 'عيد ميلاد', 'ذكرى'] },
+  { id: 'chores', labelKey: 'chores', icon: Brush, keywords: ['household', 'rotation', 'chore', 'منزلية', 'تناوب', 'مهمة منزلية'] },
   { id: 'grocery', labelKey: 'grocery', icon: ShoppingCart, keywords: ['shopping', 'list', 'بقالة', 'تسوق'] },
   { id: 'meal-plan', labelKey: 'mealPlan', icon: UtensilsCrossed, keywords: ['meal', 'plan', 'food', 'recipe', 'وجبة', 'خطة', 'طعام', 'وصفة'] },
   { id: 'chat', labelKey: 'chat', icon: MessageSquare, keywords: ['messages', 'talk', 'محادثة', 'رسائل'] },
