@@ -38,20 +38,30 @@ import { Loader2 } from 'lucide-react'
 import type { AppPage } from '@/types'
 import { announce } from '@/lib/live-announcer'
 
+// Admin Components
+import { useAdminAuthStore } from '@/stores/admin-auth-store'
+import { AdminLogin } from '@/components/admin/admin-login'
+import { AdminLayout } from '@/components/admin/admin-layout'
+
 // Auth Screen Component
 function AuthScreen() {
   const { authView } = useAuthStore()
+  const { showAdminLogin } = useAdminAuthStore()
 
   return (
-    <div className="min-h-screen bg-[--bg-primary] flex items-center justify-center p-4 auth-bg">
-      {/* Animated gradient blobs */}
-      <div className="auth-blob-1" />
-      <div className="auth-blob-2" />
-      <div className="auth-blob-3" />
-      {authView === 'login' && <LoginForm />}
-      {authView === 'signup' && <SignupForm />}
-      {authView === 'forgot-password' && <ForgotPasswordForm />}
-    </div>
+    <>
+      <div className="min-h-screen bg-[--bg-primary] flex items-center justify-center p-4 auth-bg">
+        {/* Animated gradient blobs */}
+        <div className="auth-blob-1" />
+        <div className="auth-blob-2" />
+        <div className="auth-blob-3" />
+        {authView === 'login' && <LoginForm />}
+        {authView === 'signup' && <SignupForm />}
+        {authView === 'forgot-password' && <ForgotPasswordForm />}
+      </div>
+      {/* Admin Login Overlay - triggered by 7-click on logo */}
+      {showAdminLogin && <AdminLogin />}
+    </>
   )
 }
 
@@ -393,6 +403,7 @@ function MainApp() {
 export default function RootPage() {
   const { isAuthenticated, isLoading, setIsLoading, setIsAuthenticated, setUser } = useAuthStore()
   const { language } = useI18n()
+  const { isAdminAuthenticated, isSessionValid, showAdminLogin } = useAdminAuthStore()
   const supabase = createClient()
   const [mounted, setMounted] = useState(false)
 
@@ -413,12 +424,10 @@ export default function RootPage() {
           
           if (profile) {
             setUser(profile)
-            // Set language from profile
             if (profile.language) {
               useI18n.getState().setLanguage(profile.language)
             }
           } else {
-            // Profile doesn't exist yet, create basic one from auth metadata
             const basicProfile = {
               id: session.user.id,
               email: session.user.email || '',
@@ -446,6 +455,22 @@ export default function RootPage() {
     checkSession()
   }, [])
 
+  // Listen for hash-based admin route (#internal-control-center)
+  useEffect(() => {
+    const checkHash = () => {
+      const hash = window.location.hash
+      if (hash === '#internal-control-center' || hash === '#system-ops' || hash === '#founder-access') {
+        useAdminAuthStore.getState().setShowAdminLogin(true)
+        useAdminAuthStore.getState().addAuditLog('hash_route_access', 'admin_auth', null, { hash })
+        // Clear the hash for security
+        window.history.replaceState(null, '', window.location.pathname)
+      }
+    }
+    checkHash()
+    window.addEventListener('hashchange', checkHash)
+    return () => window.removeEventListener('hashchange', checkHash)
+  }, [])
+
   // Apply RTL direction
   useEffect(() => {
     if (mounted) {
@@ -458,6 +483,16 @@ export default function RootPage() {
   // Prevent flash of wrong content
   if (!mounted || isLoading) {
     return <LoadingScreen />
+  }
+
+  // Show admin dashboard if admin is authenticated with valid session
+  if (isAdminAuthenticated && isSessionValid()) {
+    return <AdminLayout />
+  }
+
+  // Show admin login overlay if triggered
+  if (showAdminLogin) {
+    return <AuthScreen />
   }
 
   // Show auth screen or main app

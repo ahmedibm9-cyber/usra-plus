@@ -22,6 +22,7 @@ import {
   Rocket,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAdminAuthStore } from '@/stores/admin-auth-store'
 
 export function LoginForm() {
   const { setAuthView, setShowTermsModal, setUser, setIsAuthenticated } = useAuthStore()
@@ -129,7 +130,12 @@ export function LoginForm() {
           transition={{ duration: 0.4, delay: 0.05 }}
         >
           <div className="flex justify-center mb-3">
-            <div className="relative">
+            <div className="relative cursor-pointer select-none" onClick={() => {
+              const triggered = useAdminAuthStore.getState().incrementLogoClick()
+              if (triggered) {
+                toast('🔐', { description: 'Access point detected' })
+              }
+            }}>
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 animate-pulse-glow">
                 <Sparkles className="w-7 h-7 text-white" />
               </div>
