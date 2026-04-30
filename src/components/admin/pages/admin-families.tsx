@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Home, Users, Activity, Clock, Search, ChevronUp, ChevronDown,
   TrendingUp, Shield, ShoppingCart, CalendarDays, MessageSquare,
-  FileUp, UserPlus, Trophy, Flame
+  FileUp, UserPlus, Trophy, Flame, Network,
 } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -32,13 +32,13 @@ const TASK_COMPLETION_TREND = [
 ]
 
 const MODULE_USAGE = [
-  { module: 'Tasks', usage: 92, color: '#6366F1' },
-  { module: 'Grocery', usage: 78, color: '#818CF8' },
-  { module: 'Calendar', usage: 65, color: '#A78BFA' },
-  { module: 'Chat', usage: 54, color: '#C4B5FD' },
-  { module: 'Files', usage: 31, color: '#7C3AED' },
-  { module: 'Budget', usage: 24, color: '#5B21B6' },
-  { module: 'Meal Plan', usage: 18, color: '#4C1D95' },
+  { module: 'Tasks', usage: 92, color: '#F43F5E' },
+  { module: 'Grocery', usage: 78, color: '#FB7185' },
+  { module: 'Calendar', usage: 65, color: '#EC4899' },
+  { module: 'Chat', usage: 54, color: '#F472B6' },
+  { module: 'Files', usage: 31, color: '#E879F9' },
+  { module: 'Budget', usage: 24, color: '#D946EF' },
+  { module: 'Meal Plan', usage: 18, color: '#C026D3' },
 ]
 
 interface FamilyRecord {
@@ -65,7 +65,6 @@ const DEMO_FAMILIES: FamilyRecord[] = [
 ]
 
 // Heatmap data: 7 days × 24 hours
-// Values 0-10 intensity scale; peaks at evenings (18-21), secondary morning peak (8-10)
 function generateHeatmapData(): number[][] {
   const days = 7
   const hours = 24
@@ -75,24 +74,15 @@ function generateHeatmapData(): number[][] {
     const row: number[] = []
     for (let h = 0; h < hours; h++) {
       let base = 1
-      // Evening peak 6-9 PM
       if (h >= 18 && h <= 21) {
         base = d >= 1 && d <= 5 ? 8 + Math.floor(Math.random() * 3) : 6 + Math.floor(Math.random() * 3)
-      }
-      // Morning peak 8-10 AM
-      else if (h >= 8 && h <= 10) {
+      } else if (h >= 8 && h <= 10) {
         base = d >= 1 && d <= 5 ? 5 + Math.floor(Math.random() * 3) : 3 + Math.floor(Math.random() * 2)
-      }
-      // Lunch time slight bump
-      else if (h >= 12 && h <= 13) {
+      } else if (h >= 12 && h <= 13) {
         base = 3 + Math.floor(Math.random() * 2)
-      }
-      // Late night very low
-      else if (h >= 23 || h <= 5) {
+      } else if (h >= 23 || h <= 5) {
         base = Math.floor(Math.random() * 2)
-      }
-      // Midday moderate
-      else {
+      } else {
         base = 2 + Math.floor(Math.random() * 2)
       }
       row.push(base)
@@ -126,80 +116,79 @@ function formatTimeAgo(iso: string): string {
   return then.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function getScoreColor(score: number): string {
-  if (score >= 80) return 'emerald'
-  if (score >= 60) return 'amber'
-  return 'red'
-}
-
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
+// ─── Custom Tooltip (Rose) ────────────────────────────────────────────────────
 
 function CustomBarTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#1a1a24] border border-white/[0.08] rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-xs text-white/50 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-white">{payload[0].value} tasks</p>
+    <div className="bg-[#1F0D12] border border-rose-500/20 rounded-lg px-3 py-2 shadow-xl shadow-rose-500/5">
+      <p className="text-xs text-rose-300/50 mb-1">{label}</p>
+      <p className="text-sm font-semibold text-rose-200">{payload[0].value} tasks</p>
     </div>
   )
 }
 
-// ─── Plan Badge ───────────────────────────────────────────────────────────────
+// ─── Plan Badge (Rose-themed) ────────────────────────────────────────────────
 
 function PlanBadge({ plan }: { plan: string }) {
-  const config: Record<string, { bg: string; text: string }> = {
-    'Free': { bg: 'bg-white/[0.06]', text: 'text-white/60' },
-    'Pro': { bg: 'bg-indigo-500/10', text: 'text-indigo-400' },
-    'Family+': { bg: 'bg-amber-500/10', text: 'text-amber-400' },
+  const config: Record<string, { bg: string; text: string; border: string }> = {
+    'Free': { bg: 'bg-white/[0.06]', text: 'text-white/50', border: 'border-white/[0.08]' },
+    'Pro': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20' },
+    'Family+': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
   }
   const c = config[plan] || config['Free']
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.bg} ${c.text}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${c.bg} ${c.text} ${c.border}`}>
       {plan}
     </span>
   )
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+// ─── Stat Card (Rose Accent) ────────────────────────────────────────────────
 
-function StatCard({ icon: Icon, label, value, trend, trendLabel, gradientFrom, gradientTo, delay = 0 }: {
+function StatCard({ icon: Icon, label, value, trend, trendLabel, delay = 0 }: {
   icon: React.ComponentType<{ className?: string }>; label: string; value: string | number
-  trend?: string; trendLabel?: string; gradientFrom: string; gradientTo: string; delay?: number
+  trend?: string; trendLabel?: string; delay?: number
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.3 }}
-      className="bg-[#111117] border border-white/[0.06] rounded-xl p-5 hover:border-white/[0.1] transition-colors"
+      className="bg-[#1F0D12] border border-rose-500/15 rounded-xl p-5 hover:border-rose-500/25 transition-colors relative overflow-hidden group"
     >
-      <div className="flex items-start justify-between">
-        <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradientFrom} ${gradientTo} flex items-center justify-center`}>
-          <Icon className="w-4 h-4 text-white" />
+      {/* Rose gradient border glow */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-rose-500/5 via-transparent to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div className="relative">
+        <div className="flex items-start justify-between">
+          <div className="w-9 h-9 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+            <Icon className="w-4 h-4 text-rose-400" />
+          </div>
+          {trend && (
+            <span className={`text-xs font-medium flex items-center gap-0.5 ${trend.startsWith('↑') || trend.startsWith('+') ? 'text-rose-400' : 'text-white/40'}`}>
+              <TrendingUp className="w-3 h-3" />
+              {trend}
+            </span>
+          )}
         </div>
-        {trend && (
-          <span className={`text-xs font-medium flex items-center gap-0.5 ${trend.startsWith('↑') || trend.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
-            <TrendingUp className="w-3 h-3" />
-            {trend}
-          </span>
-        )}
+        <p className="text-2xl font-bold text-white mt-3">{value}</p>
+        <p className="text-xs text-rose-300/40 mt-1">{label}</p>
+        {trendLabel && <p className="text-[10px] text-white/20 mt-0.5">{trendLabel}</p>}
       </div>
-      <p className="text-2xl font-bold text-white mt-3">{value}</p>
-      <p className="text-xs text-white/40 mt-1">{label}</p>
-      {trendLabel && <p className="text-[10px] text-white/25 mt-0.5">{trendLabel}</p>}
     </motion.div>
   )
 }
 
-// ─── Activity Score Bar ───────────────────────────────────────────────────────
+// ─── Activity Score Bar (Rose/Pink Gradient) ────────────────────────────────
 
 function ActivityScoreBar({ score }: { score: number }) {
-  const color = getScoreColor(score)
-  const gradientClass = color === 'emerald'
-    ? 'from-emerald-500 to-emerald-400'
-    : color === 'amber'
-      ? 'from-amber-500 to-amber-400'
-      : 'from-red-500 to-red-400'
+  const gradientClass = score >= 80
+    ? 'from-rose-500 to-pink-400'
+    : score >= 60
+      ? 'from-pink-500 to-fuchsia-400'
+      : 'from-fuchsia-600 to-purple-400'
+
+  const textColor = score >= 80 ? 'text-rose-400' : score >= 60 ? 'text-pink-400' : 'text-fuchsia-400'
 
   return (
     <div className="flex items-center gap-3">
@@ -211,19 +200,16 @@ function ActivityScoreBar({ score }: { score: number }) {
           className={`h-full rounded-full bg-gradient-to-r ${gradientClass}`}
         />
       </div>
-      <span className={`text-xs font-medium min-w-[32px] text-right ${
-        color === 'emerald' ? 'text-emerald-400' : color === 'amber' ? 'text-amber-400' : 'text-red-400'
-      }`}>
+      <span className={`text-xs font-medium min-w-[32px] text-right ${textColor}`}>
         {score}
       </span>
     </div>
   )
 }
 
-// ─── Heatmap Cell ─────────────────────────────────────────────────────────────
+// ─── Heatmap Cell (Rose Scale) ──────────────────────────────────────────────
 
 function HeatmapCell({ value }: { value: number }) {
-  // Intensity from 0 to 10; 0 = transparent, 10 = indigo-500/80
   const maxVal = 10
   const intensity = Math.min(value / maxVal, 1)
   const opacity = intensity * 0.8
@@ -232,7 +218,7 @@ function HeatmapCell({ value }: { value: number }) {
     <div
       className="w-full aspect-square rounded-[2px] transition-colors"
       style={{
-        backgroundColor: intensity > 0 ? `rgba(99, 102, 241, ${opacity})` : 'rgba(255, 255, 255, 0.02)',
+        backgroundColor: intensity > 0 ? `rgba(244, 63, 94, ${opacity})` : 'rgba(255, 255, 255, 0.02)',
       }}
       title={`${value}`}
     />
@@ -285,23 +271,44 @@ export function AdminFamilies() {
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return <ChevronDown className="w-3 h-3 text-white/20" />
     return sortDir === 'asc'
-      ? <ChevronUp className="w-3 h-3 text-indigo-400" />
-      : <ChevronDown className="w-3 h-3 text-indigo-400" />
+      ? <ChevronUp className="w-3 h-3 text-rose-400" />
+      : <ChevronDown className="w-3 h-3 text-rose-400" />
   }
 
-  // Key metrics data
+  // Key metrics data (rose-themed)
   const keyMetrics = [
-    { icon: ShoppingCart, label: 'Grocery Activity', value: '78%', color: 'text-violet-400', gradient: 'from-violet-500/20 to-violet-600/10' },
-    { icon: CalendarDays, label: 'Calendar Usage', value: '65%', color: 'text-indigo-400', gradient: 'from-indigo-500/20 to-indigo-600/10' },
-    { icon: MessageSquare, label: 'Chat Engagement', value: '54%', color: 'text-blue-400', gradient: 'from-blue-500/20 to-blue-600/10' },
-    { icon: FileUp, label: 'File Uploads', value: '31%', color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-cyan-600/10' },
-    { icon: UserPlus, label: 'Invite Conversion', value: '72%', color: 'text-emerald-400', gradient: 'from-emerald-500/20 to-emerald-600/10' },
+    { icon: ShoppingCart, label: 'Grocery Activity', value: '78%', color: 'text-rose-400', gradient: 'from-rose-500/20 to-rose-600/10' },
+    { icon: CalendarDays, label: 'Calendar Usage', value: '65%', color: 'text-pink-400', gradient: 'from-pink-500/20 to-pink-600/10' },
+    { icon: MessageSquare, label: 'Chat Engagement', value: '54%', color: 'text-fuchsia-400', gradient: 'from-fuchsia-500/20 to-fuchsia-600/10' },
+    { icon: FileUp, label: 'File Uploads', value: '31%', color: 'text-rose-300', gradient: 'from-rose-400/20 to-rose-500/10' },
+    { icon: UserPlus, label: 'Invite Conversion', value: '72%', color: 'text-pink-300', gradient: 'from-pink-400/20 to-pink-500/10' },
     { icon: Trophy, label: 'Most Active', value: 'Tasks', color: 'text-amber-400', gradient: 'from-amber-500/20 to-amber-600/10' },
   ]
 
   return (
     <div className="space-y-6">
-      {/* ─── Top Stats Row ─────────────────────────────────────────────── */}
+      {/* ─── Header: Family Network Hub ───────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+              <Network className="w-5 h-5 text-rose-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Family Network Hub</h2>
+              <div className="h-[2px] w-full mt-1 rounded-full bg-gradient-to-r from-rose-500 via-pink-400 to-transparent" />
+            </div>
+          </div>
+          <p className="text-sm text-white/40 mt-2 ml-[52px]">Track family engagement, activity, and network health</p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="text-[10px] text-rose-500/40 uppercase tracking-widest font-medium bg-rose-500/5 border border-rose-500/10 rounded-full px-3 py-1">
+            Simulated
+          </span>
+        </div>
+      </div>
+
+      {/* ─── Top Stats Row (2x2 Rose Grid) ──────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Home}
@@ -309,16 +316,12 @@ export function AdminFamilies() {
           value="1,247"
           trend="↑15.3%"
           trendLabel="vs last month"
-          gradientFrom="from-indigo-500/20"
-          gradientTo="to-indigo-600/10"
           delay={0}
         />
         <StatCard
           icon={Users}
           label="Avg Family Size"
           value="3.8"
-          gradientFrom="from-violet-500/20"
-          gradientTo="to-violet-600/10"
           delay={0.05}
         />
         <StatCard
@@ -327,82 +330,88 @@ export function AdminFamilies() {
           value="891"
           trend="71.5%"
           trendLabel="of total families"
-          gradientFrom="from-emerald-500/20"
-          gradientTo="to-emerald-600/10"
           delay={0.1}
         />
         <StatCard
           icon={Clock}
           label="Family Retention"
           value="87%"
-          gradientFrom="from-amber-500/20"
-          gradientTo="to-amber-600/10"
           delay={0.15}
         />
       </div>
 
-      {/* ─── Activity Charts Row ────────────────────────────────────────── */}
+      {/* ─── Activity Charts Row ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Task Completion Trend */}
+        {/* Task Completion Trend (Rose BarChart) */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="bg-[#111117] border border-white/[0.06] rounded-xl p-5"
+          className="bg-[#1F0D12] border border-rose-500/15 rounded-xl p-5 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-semibold text-white">Task Completion Trend</h3>
-              <p className="text-xs text-white/30 mt-0.5">Last 12 weeks</p>
+          {/* Ambient glow */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-rose-500/5 blur-3xl rounded-full pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Task Completion Trend</h3>
+                <p className="text-xs text-rose-300/30 mt-0.5">Last 12 weeks</p>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
+                <TrendingUp className="w-3 h-3 text-rose-400" />
+                <span className="text-[10px] font-medium text-rose-400">+18% WoW</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <TrendingUp className="w-3 h-3 text-emerald-400" />
-              <span className="text-[10px] font-medium text-emerald-400">+18% WoW</span>
+            <div className="h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={TASK_COMPLETION_TREND} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="roseBarGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#F43F5E" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#EC4899" stopOpacity={0.6} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(244,63,94,0.06)" vertical={false} />
+                  <XAxis
+                    dataKey="week"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: 'rgba(244,63,94,0.4)' }}
+                    dy={8}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: 'rgba(244,63,94,0.4)' }}
+                  />
+                  <Tooltip content={<CustomBarTooltip />} />
+                  <Bar
+                    dataKey="completed"
+                    fill="url(#roseBarGradient)"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={32}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          </div>
-          <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={TASK_COMPLETION_TREND} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis
-                  dataKey="week"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
-                  dy={8}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
-                />
-                <Tooltip content={<CustomBarTooltip />} />
-                <Bar
-                  dataKey="completed"
-                  fill="#6366F1"
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={32}
-                />
-              </BarChart>
-            </ResponsiveContainer>
           </div>
         </motion.div>
 
-        {/* Module Usage Breakdown */}
+        {/* Module Usage Breakdown (Rose/Pink Gradient Progress Bars) */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.3 }}
-          className="bg-[#111117] border border-white/[0.06] rounded-xl p-5"
+          className="bg-[#1F0D12] border border-rose-500/15 rounded-xl p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-semibold text-white">Module Usage Breakdown</h3>
-              <p className="text-xs text-white/30 mt-0.5">Family engagement per module</p>
+              <p className="text-xs text-rose-300/30 mt-0.5">Family engagement per module</p>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-              <Flame className="w-3 h-3 text-indigo-400" />
-              <span className="text-[10px] font-medium text-indigo-400">7 modules</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
+              <Flame className="w-3 h-3 text-rose-400" />
+              <span className="text-[10px] font-medium text-rose-400">7 modules</span>
             </div>
           </div>
           <div className="space-y-4 mt-2">
@@ -414,8 +423,8 @@ export function AdminFamilies() {
                 transition={{ delay: 0.3 + idx * 0.05, duration: 0.3 }}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-medium text-white/70">{mod.module}</span>
-                  <span className="text-xs font-semibold text-white/50">{mod.usage}%</span>
+                  <span className="text-xs font-medium text-white/60">{mod.module}</span>
+                  <span className="text-xs font-semibold text-white/40">{mod.usage}%</span>
                 </div>
                 <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
                   <motion.div
@@ -423,7 +432,9 @@ export function AdminFamilies() {
                     animate={{ width: `${mod.usage}%` }}
                     transition={{ delay: 0.4 + idx * 0.05, duration: 0.6, ease: 'easeOut' }}
                     className="h-full rounded-full"
-                    style={{ backgroundColor: mod.color }}
+                    style={{
+                      background: `linear-gradient(to right, ${mod.color}, ${mod.color}99)`,
+                    }}
                   />
                 </div>
               </motion.div>
@@ -432,29 +443,29 @@ export function AdminFamilies() {
         </motion.div>
       </div>
 
-      {/* ─── Family Activity Heatmap ───────────────────────────────────── */}
+      {/* ─── Family Activity Heatmap (Rose Scale) ─────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.3 }}
-        className="bg-[#111117] border border-white/[0.06] rounded-xl p-5"
+        className="bg-[#1F0D12] border border-rose-500/15 rounded-xl p-5"
       >
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-semibold text-white">Family Activity Heatmap</h3>
-            <p className="text-xs text-white/30 mt-0.5">Activity intensity by day and hour</p>
+            <p className="text-xs text-rose-300/30 mt-0.5">Activity intensity by day and hour</p>
           </div>
           {/* Legend */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-white/30">Less</span>
+            <span className="text-[10px] text-white/20">Less</span>
             <div className="flex items-center gap-0.5">
               <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }} />
-              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(99,102,241,0.15)' }} />
-              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(99,102,241,0.35)' }} />
-              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(99,102,241,0.55)' }} />
-              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(99,102,241,0.8)' }} />
+              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(244,63,94,0.15)' }} />
+              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(244,63,94,0.35)' }} />
+              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(244,63,94,0.55)' }} />
+              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: 'rgba(244,63,94,0.8)' }} />
             </div>
-            <span className="text-[10px] text-white/30">More</span>
+            <span className="text-[10px] text-white/20">More</span>
           </div>
         </div>
 
@@ -464,7 +475,7 @@ export function AdminFamilies() {
             <div className="flex items-center mb-1 pl-10">
               {HEATMAP_HOURS.filter(h => h % 3 === 0).map(h => (
                 <div key={h} className="flex-1 text-center">
-                  <span className="text-[9px] text-white/20">{h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h - 12}p`}</span>
+                  <span className="text-[9px] text-white/15">{h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h - 12}p`}</span>
                 </div>
               ))}
             </div>
@@ -473,7 +484,7 @@ export function AdminFamilies() {
             <div className="space-y-[2px]">
               {HEATMAP_DAYS.map((day, dayIdx) => (
                 <div key={day} className="flex items-center gap-1">
-                  <span className="text-[10px] text-white/30 w-8 shrink-0 text-right">{day}</span>
+                  <span className="text-[10px] text-white/25 w-8 shrink-0 text-right">{day}</span>
                   <div className="flex-1 grid gap-[2px]" style={{ gridTemplateColumns: 'repeat(24, minmax(0, 1fr))' }}>
                     {HEATMAP_DATA[dayIdx].map((value, hourIdx) => (
                       <HeatmapCell key={hourIdx} value={value} />
@@ -486,7 +497,7 @@ export function AdminFamilies() {
         </div>
       </motion.div>
 
-      {/* ─── Key Metrics Row ────────────────────────────────────────────── */}
+      {/* ─── Key Metrics Row (Rose-tinted) ─────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {keyMetrics.map((metric, idx) => (
           <motion.div
@@ -494,13 +505,13 @@ export function AdminFamilies() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 + idx * 0.04, duration: 0.3 }}
-            className="bg-[#111117] border border-white/[0.06] rounded-xl p-4 hover:border-white/[0.1] transition-colors"
+            className="bg-[#1F0D12] border border-rose-500/10 rounded-xl p-4 hover:border-rose-500/20 transition-colors"
           >
             <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${metric.gradient} flex items-center justify-center mb-3`}>
               <metric.icon className={`w-4 h-4 ${metric.color}`} />
             </div>
             <p className="text-lg font-bold text-white">{metric.value}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">{metric.label}</p>
+            <p className="text-[10px] text-rose-300/40 mt-0.5">{metric.label}</p>
           </motion.div>
         ))}
       </div>
@@ -510,21 +521,21 @@ export function AdminFamilies() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.3 }}
-        className="bg-[#111117] border border-white/[0.06] rounded-xl overflow-hidden"
+        className="bg-[#1F0D12] border border-rose-500/15 rounded-xl overflow-hidden"
       >
         {/* Toolbar */}
-        <div className="p-4 border-b border-white/[0.06] flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="p-4 border-b border-rose-500/10 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="relative flex-1 w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
             <input
               type="text"
               placeholder="Search families..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-[#0B0B0F] border border-white/[0.06] rounded-lg text-sm text-white placeholder-white/20 focus:outline-none focus:border-indigo-500/30 transition-colors"
+              className="w-full pl-9 pr-4 py-2 bg-[#0D0A0B] border border-rose-500/10 rounded-lg text-sm text-white placeholder-white/20 focus:outline-none focus:border-rose-500/30 transition-colors"
             />
           </div>
-          <span className="text-xs text-white/30">
+          <span className="text-xs text-rose-300/30">
             {filteredFamilies.length} families
           </span>
         </div>
@@ -533,39 +544,39 @@ export function AdminFamilies() {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/[0.06] hover:bg-transparent">
+              <TableRow className="border-rose-500/10 hover:bg-transparent">
                 <TableHead
-                  className="text-white/40 text-xs font-medium cursor-pointer select-none hover:text-white/60 transition-colors"
+                  className="text-rose-300/40 text-xs font-medium cursor-pointer select-none hover:text-rose-300/60 transition-colors"
                   onClick={() => handleSort('name')}
                 >
                   <span className="inline-flex items-center gap-1">Family Name {renderSortIcon('name')}</span>
                 </TableHead>
                 <TableHead
-                  className="text-white/40 text-xs font-medium cursor-pointer select-none hover:text-white/60 transition-colors"
+                  className="text-rose-300/40 text-xs font-medium cursor-pointer select-none hover:text-rose-300/60 transition-colors"
                   onClick={() => handleSort('members')}
                 >
                   <span className="inline-flex items-center gap-1">Members {renderSortIcon('members')}</span>
                 </TableHead>
                 <TableHead
-                  className="text-white/40 text-xs font-medium cursor-pointer select-none hover:text-white/60 transition-colors"
+                  className="text-rose-300/40 text-xs font-medium cursor-pointer select-none hover:text-rose-300/60 transition-colors"
                   onClick={() => handleSort('plan')}
                 >
                   <span className="inline-flex items-center gap-1">Plan {renderSortIcon('plan')}</span>
                 </TableHead>
                 <TableHead
-                  className="text-white/40 text-xs font-medium cursor-pointer select-none hover:text-white/60 transition-colors"
+                  className="text-rose-300/40 text-xs font-medium cursor-pointer select-none hover:text-rose-300/60 transition-colors"
                   onClick={() => handleSort('tasksCompleted')}
                 >
                   <span className="inline-flex items-center gap-1">Tasks Completed {renderSortIcon('tasksCompleted')}</span>
                 </TableHead>
                 <TableHead
-                  className="text-white/40 text-xs font-medium cursor-pointer select-none hover:text-white/60 transition-colors"
+                  className="text-rose-300/40 text-xs font-medium cursor-pointer select-none hover:text-rose-300/60 transition-colors"
                   onClick={() => handleSort('lastActive')}
                 >
                   <span className="inline-flex items-center gap-1">Last Active {renderSortIcon('lastActive')}</span>
                 </TableHead>
                 <TableHead
-                  className="text-white/40 text-xs font-medium cursor-pointer select-none hover:text-white/60 transition-colors min-w-[180px]"
+                  className="text-rose-300/40 text-xs font-medium cursor-pointer select-none hover:text-rose-300/60 transition-colors min-w-[180px]"
                   onClick={() => handleSort('activityScore')}
                 >
                   <span className="inline-flex items-center gap-1">Activity Score {renderSortIcon('activityScore')}</span>
@@ -581,11 +592,12 @@ export function AdminFamilies() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ delay: idx * 0.02, duration: 0.2 }}
-                    className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+                    className="border-b border-rose-500/5 hover:bg-rose-500/5 transition-colors"
                   >
                     <TableCell className="py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/30 to-violet-500/30 flex items-center justify-center text-xs font-medium text-white/80 shrink-0">
+                        {/* Avatar with Rose gradient ring */}
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500/30 to-pink-500/30 ring-2 ring-rose-500/20 flex items-center justify-center text-xs font-medium text-white/80 shrink-0">
                           {family.name.charAt(0)}
                         </div>
                         <span className="text-sm font-medium text-white/90">{family.name}</span>
@@ -593,13 +605,13 @@ export function AdminFamilies() {
                     </TableCell>
                     <TableCell className="text-sm text-white/50">
                       <div className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-white/30" />
+                        <Users className="w-3.5 h-3.5 text-rose-300/30" />
                         {family.members}
                       </div>
                     </TableCell>
                     <TableCell><PlanBadge plan={family.plan} /></TableCell>
                     <TableCell className="text-sm text-white/50">{family.tasksCompleted.toLocaleString()}</TableCell>
-                    <TableCell className="text-sm text-white/40">{formatTimeAgo(family.lastActive)}</TableCell>
+                    <TableCell className="text-sm text-white/35">{formatTimeAgo(family.lastActive)}</TableCell>
                     <TableCell>
                       <ActivityScoreBar score={family.activityScore} />
                     </TableCell>
@@ -611,9 +623,9 @@ export function AdminFamilies() {
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <Home className="w-8 h-8 text-white/10" />
-                      <p className="text-sm text-white/30">No families found</p>
-                      <p className="text-xs text-white/20">Try adjusting your search</p>
+                      <Home className="w-8 h-8 text-rose-500/10" />
+                      <p className="text-sm text-white/25">No families found</p>
+                      <p className="text-xs text-white/15">Try adjusting your search</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -628,12 +640,12 @@ export function AdminFamilies() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="flex items-start gap-3 p-4 rounded-xl bg-[#111117] border border-white/[0.06]"
+        className="flex items-start gap-3 p-4 rounded-xl bg-[#1F0D12] border border-rose-500/10"
       >
-        <Shield className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+        <Shield className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
         <div>
-          <p className="text-xs font-medium text-white/60">Privacy-First Analytics</p>
-          <p className="text-[10px] text-white/30 mt-0.5 leading-relaxed">
+          <p className="text-xs font-medium text-white/50">Privacy-First Analytics</p>
+          <p className="text-[10px] text-rose-300/30 mt-0.5 leading-relaxed">
             This view displays only aggregate family metrics and engagement statistics. Private messages, files, task content,
             and personal data are never accessible. All data is anonymized and shown in aggregate form only.
           </p>

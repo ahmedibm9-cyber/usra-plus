@@ -4,6 +4,7 @@ import { useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAdminStore } from '@/stores/admin-store'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
+import { useAnalyticsData } from '@/hooks/use-admin-data'
 import {
   LayoutDashboard, Users, Home, BarChart3, CreditCard,
   Server, LifeBuoy, Settings, LogOut, ChevronLeft, ChevronRight,
@@ -18,6 +19,7 @@ import { AdminSubscriptions } from './pages/admin-subscriptions'
 import { AdminInfrastructure } from './pages/admin-infrastructure'
 import { AdminSupport } from './pages/admin-support'
 import { AdminSettings } from './pages/admin-settings'
+import { DemoModeBanner } from './demo-mode-banner'
 
 const NAV_ITEMS: { id: AdminPage; label: string; icon: React.ReactNode; group: string }[] = [
   { id: 'overview', label: 'Platform Overview', icon: <LayoutDashboard className="w-4 h-4" />, group: 'Analytics' },
@@ -32,7 +34,8 @@ const NAV_ITEMS: { id: AdminPage; label: string; icon: React.ReactNode; group: s
 
 export function AdminLayout() {
   const { currentPage, setCurrentPage, sidebarCollapsed, setSidebarCollapsed } = useAdminStore()
-  const { adminUser, adminRole, logoutAdmin, checkAndExtendSession, hasPermission } = useAdminAuthStore()
+  const { adminUser, adminRole, logoutAdmin, checkAndExtendSession } = useAdminAuthStore()
+  const { source: analyticsSource } = useAnalyticsData()
 
   // Session check interval
   useEffect(() => {
@@ -157,9 +160,29 @@ export function AdminLayout() {
             <h2 className="text-lg font-semibold text-white">
               {NAV_ITEMS.find(i => i.id === currentPage)?.label || 'Dashboard'}
             </h2>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <Activity className="w-3 h-3 text-emerald-400" />
-              <span className="text-xs text-emerald-400">Live</span>
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
+              analyticsSource === 'live'
+                ? 'bg-emerald-500/10 border-emerald-500/20'
+                : analyticsSource === 'demo'
+                  ? 'bg-amber-500/10 border-amber-500/20'
+                  : 'bg-white/[0.04] border-white/[0.06]'
+            }`}>
+              <Activity className={`w-3 h-3 ${
+                analyticsSource === 'live'
+                  ? 'text-emerald-400'
+                  : analyticsSource === 'demo'
+                    ? 'text-amber-400'
+                    : 'text-white/30'
+              }`} />
+              <span className={`text-xs ${
+                analyticsSource === 'live'
+                  ? 'text-emerald-400'
+                  : analyticsSource === 'demo'
+                    ? 'text-amber-400'
+                    : 'text-white/30'
+              }`}>
+                {analyticsSource === 'live' ? 'Live' : analyticsSource === 'demo' ? 'Demo' : 'Loading'}
+              </span>
             </div>
           </div>
 
@@ -218,6 +241,11 @@ export function AdminLayout() {
               transition={{ duration: 0.2 }}
               className="p-6"
             >
+              {/* Demo Mode Banner — sticky at top of content */}
+              <div className="mb-4">
+                <DemoModeBanner isDemo={analyticsSource === 'demo'} />
+              </div>
+
               {renderPage()}
             </motion.div>
           </AnimatePresence>
