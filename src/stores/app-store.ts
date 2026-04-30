@@ -27,7 +27,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set, get) => ({
   currentPage: 'dashboard',
-  sidebarOpen: true,
+  sidebarOpen: false,
   sidebarCollapsed: false,
   currentFamily: null,
   familyMembers: [],

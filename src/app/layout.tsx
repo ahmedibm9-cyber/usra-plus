@@ -19,8 +19,10 @@ export const metadata: Metadata = {
   description: "Premium family coordination and household management platform. Manage tasks, calendars, groceries, and more — together.",
   keywords: ["USRA PLUS", "family", "coordination", "management", "tasks", "calendar", "grocery", "SaaS"],
   authors: [{ name: "USRA PLUS" }],
+  manifest: "/manifest.json",
   icons: {
     icon: "/logo.svg",
+    apple: "/logo.svg",
   },
   openGraph: {
     title: "USRA PLUS - Your Family Operating System",
@@ -34,7 +36,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0B0B0F",
+  themeColor: "#6366F1",
 };
 
 export default function RootLayout({
@@ -44,6 +46,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/logo.svg" />
+      </head>
       <body className={`${inter.variable} ${tajawal.variable} antialiased bg-background text-foreground`}>
         {children}
         <Toaster

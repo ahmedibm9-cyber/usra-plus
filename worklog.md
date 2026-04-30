@@ -213,3 +213,133 @@ Unresolved / Next Phase Priorities:
 6. Implement subscription gating logic
 7. Add PWA manifest and service worker
 8. Performance optimization (code splitting, lazy loading pages)
+
+---
+Task ID: R8-R9
+Agent: Header & Notification Polish Agent
+Task: Polish header component and add notification store system
+
+Work Log:
+- Created `/src/stores/notification-store.ts` - Zustand store with full notification state management (setNotifications, addNotification, markAsRead, markAllAsRead, removeNotification, unreadCount)
+- Polished `/src/components/layout/app-header.tsx`:
+  1. Added breadcrumb-style page title (USRA > Dashboard) using shadcn/ui Breadcrumb component on desktop, simple title on mobile
+  2. Integrated notification store's unreadCount for live badge (shows "2" from demo data)
+  3. Added keyboard shortcut hint (⌘K / Ctrl+K) to desktop search bar with <kbd> styling
+  4. Improved mobile search toggle with tooltip showing shortcut
+  5. Added global ⌘K/Ctrl+K keyboard listener and Escape to close
+  6. Replaced Globe icon language switcher with flag emoji (🇬🇧/🇸🇦) + tooltip showing target language
+  7. Improved avatar fallback color from indigo to violet (consistent with brand)
+  8. Added Settings menu item that navigates to settings page
+  9. Cleaned up unused imports (Bell, Badge)
+- Updated `/src/components/layout/notification-panel.tsx`:
+  1. Replaced local useState mock data with Zustand notification store
+  2. All notification actions (markAsRead, markAllAsRead, removeNotification) now use store methods
+  3. Badge color changed from indigo to violet for brand consistency
+- Added demo notification seeding in `/src/components/auth/login-form.tsx`:
+  1. After grocery items seeding, added 3 demo notifications (2 unread, 1 read)
+  2. Full bilingual support (Arabic/English) for all notification titles and messages
+  3. Types: task, family, grocery
+
+Stage Summary:
+- Notification store created with complete CRUD operations
+- Header polished with breadcrumb nav, keyboard shortcuts, responsive design
+- Notification panel integrated with Zustand store (no more local state)
+- Demo mode seeds 3 notifications (2 unread showing badge "2")
+- Lint passes clean, dev server compiles successfully
+
+---
+Task ID: R5
+Agent: PWA Support Agent
+Task: Add PWA support and polish the app shell
+
+Work Log:
+- Created /public/manifest.json with name "USRA PLUS", short_name "USRA+", standalone display, dark background (#0B0B0F), indigo theme (#6366F1), 2 SVG icons (192x192 and 512x512), lang "en", categories ["productivity", "lifestyle"]
+- Created /public/sw.js service worker with cache version "usra-plus-v1", network-first strategy, static asset caching, offline fallback
+- Updated /src/app/layout.tsx: added manifest link via metadata.manifest, apple-touch-icon in metadata.icons and explicit <link> in head, updated viewport themeColor to #6366F1 to match manifest theme_color, preserved Tajawal + Inter fonts and Toaster
+- Lint check passes clean
+- Dev server compiles successfully
+
+Stage Summary:
+- PWA manifest installed at /manifest.json
+- Service worker installed at /sw.js with offline caching
+- Layout metadata includes manifest, apple-touch-icon, theme-color meta
+- All existing functionality preserved (fonts, Toaster, viewport)
+- Lint: PASS
+
+---
+Task ID: R6-R7
+Agent: Subscription & Demo Data Agent
+Task: Add demo data seeding and subscription plan gating
+
+Work Log:
+- Modified /src/components/auth/login-form.tsx: Added demo data seeding after setFamilyMembers call
+  - Seeds 5 demo tasks into task store (Buy Eid gifts, Clean the house, Book dinner table, Help with homework, Buy kitchen supplies)
+  - Seeds 6 demo grocery items into grocery store (Fresh Milk, Date Bread, Medina Dates, Basmati Rice, Fresh Chicken, Orange Juice)
+  - All demo data supports RTL/Arabic translations via isRTL flag
+  - Changed onClick handler to async to support dynamic imports
+  - Uses dynamic imports (await import) for task-store and grocery-store
+- Created /src/stores/subscription-store.ts: Zustand store for subscription plan management
+  - Plan states: free, pro, family_plus
+  - PLAN_LIMITS config: free (10 tasks, 1 family, 100MB, 5 members), pro (unlimited tasks, 1 family, 1GB, 15 members), family_plus (all unlimited, 10GB storage)
+  - Methods: setPlan, isPro, isFamilyPlus, canCreateTask, canCreateFamily, getFeatureLimit
+- Created /src/components/shared/plan-badge.tsx: Plan badge and upgrade prompt components
+  - PlanBadge: Displays current plan with color-coded badge (Free=gray, Pro=indigo+Zap icon, Family+=amber+Crown icon)
+  - UpgradePrompt: Shows upgrade nudge with current count/limit and "Upgrade to Pro" link
+- Lint check passes clean
+
+Stage Summary:
+- Demo mode now populates full task and grocery data when activated
+- Subscription plan gating infrastructure ready (store + UI components)
+- Three-tier plan system: Free (limited), Pro (unlimited tasks), Family+ (unlimited everything)
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: Review-Round-2
+Agent: Main Architect
+Task: QA testing, bug fixes, and feature enhancements (cron review round 2)
+
+Work Log:
+- Comprehensive QA testing using agent-browser across all auth screens and app pages
+- Fixed critical bug: sidebarOpen defaulting to true caused mobile Sheet to always be open, blocking content on desktop (changed to false in app-store.ts)
+- Fixed critical bug: Dashboard was only reading from Supabase (which fails if tables don't exist) - now reads from both Zustand stores and Supabase, using store data as fallback
+- Added "Try Demo Mode" button on login page - allows full app exploration without Supabase backend
+- Demo mode seeds: demo user, demo family (3 members), 5 demo tasks, 6 demo grocery items, 3 demo notifications
+- Added PWA manifest.json, service worker (sw.js), and meta tags in layout.tsx
+- Added subscription store with 3-tier plan system (Free/Pro/Family+) and plan badge component
+- Added notification store with full CRUD operations and demo notification seeding
+- Polished header with breadcrumb navigation, ⌘K search shortcut, flag-based language switcher, live notification badge
+- Verified all 7 main pages render correctly with demo data in both English and Arabic
+- Dashboard now shows populated stats (1/5 tasks, 3 members, 3/6 grocery, productivity score)
+- Tasks page shows 5 tasks with "All 5" and "To Do 3" filters
+- Grocery page shows 6 items with 50% progress
+- Settings page shows Family Management with 3 members and role management
+- All lint checks pass, HTTP 200 verified
+
+Stage Summary:
+- Critical bugs fixed (sidebar open state, dashboard data source)
+- Major features added (Demo Mode, PWA, notifications, subscription gating)
+- All pages verified working with demo data
+- App is fully functional without Supabase backend (demo mode)
+- Lint: PASS, Server: HTTP 200
+
+Current Project Status:
+- App serves HTTP 200 with zero console errors (except Supabase table-not-found when not migrated)
+- Lint passes clean
+- Demo Mode works end-to-end with populated data across all pages
+- Arabic localization with full RTL verified working
+- PWA manifest and service worker ready
+- 7 main pages + auth flow + onboarding all functional
+- Subscription gating infrastructure ready for feature limiting
+- Notification system with live badge count
+
+Unresolved / Next Phase Priorities:
+1. Run SQL migration on Supabase (supabase/migration.sql) to enable real backend
+2. Test full auth flow with real Supabase user registration
+3. Add drag-and-drop for tasks and grocery items using @dnd-kit
+4. Implement actual subscription gating in task/file creation flows
+5. Add Calendar event seeding to demo mode
+6. Mobile responsiveness testing and bottom-nav polish
+7. Add image generation for family avatars
+8. Performance: lazy load page components, optimize bundle size
+9. Add error boundaries around each page component
+10. Implement real-time chat with Supabase Realtime

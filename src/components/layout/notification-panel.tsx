@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bell,
@@ -22,66 +22,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useNotificationStore } from '@/stores/notification-store'
 import type { Notification } from '@/types'
-
-// Temporary mock data - will be replaced with real data from API
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    user_id: '1',
-    family_id: '1',
-    title: 'Task assigned to you',
-    message: 'You have been assigned "Buy groceries" by Sarah',
-    type: 'task',
-    read: false,
-    action_url: null,
-    created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '2',
-    user_id: '1',
-    family_id: '1',
-    title: 'Upcoming event',
-    message: 'Family dinner tomorrow at 7:00 PM',
-    type: 'calendar',
-    read: false,
-    action_url: null,
-    created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '3',
-    user_id: '1',
-    family_id: '1',
-    title: 'New message',
-    message: 'Ahmed: Can someone pick up milk?',
-    type: 'chat',
-    read: true,
-    action_url: null,
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '4',
-    user_id: '1',
-    family_id: '1',
-    title: 'Grocery list updated',
-    message: '3 items were added to the weekly list',
-    type: 'grocery',
-    read: true,
-    action_url: null,
-    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '5',
-    user_id: '1',
-    family_id: '1',
-    title: 'New family member',
-    message: 'Fatima joined your family',
-    type: 'family',
-    read: true,
-    action_url: null,
-    created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-  },
-]
 
 const typeIcons: Record<Notification['type'], React.ElementType> = {
   task: CheckSquare,
@@ -117,22 +59,11 @@ function formatTimeAgo(dateStr: string): string {
 }
 
 export function NotificationPanel() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
-  const unreadCount = notifications.filter((n) => !n.read).length
-
-  const markAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    )
-  }, [])
-
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }, [])
-
-  const deleteNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
-  }, [])
+  const notifications = useNotificationStore((s) => s.notifications)
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
+  const markAsRead = useNotificationStore((s) => s.markAsRead)
+  const markAllAsRead = useNotificationStore((s) => s.markAllAsRead)
+  const removeNotification = useNotificationStore((s) => s.removeNotification)
 
   return (
     <Popover>
@@ -146,7 +77,7 @@ export function NotificationPanel() {
           <Bell className="size-5" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-0.5 -right-0.5 size-4 p-0 flex items-center justify-center bg-indigo-500 text-white text-[9px] font-bold border-0 rounded-full"
+              className="absolute -top-0.5 -right-0.5 min-w-4 size-4 p-0 flex items-center justify-center bg-violet-500 text-white text-[9px] font-bold border-0 rounded-full"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
@@ -164,7 +95,7 @@ export function NotificationPanel() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 h-7 px-2"
+              className="text-xs text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 h-7 px-2"
               onClick={markAllAsRead}
             >
               <Check className="size-3 mr-1" />
@@ -200,7 +131,7 @@ export function NotificationPanel() {
                     >
                       <div
                         className={`
-                          flex gap-3 px-4 py-3 transition-colors cursor-pointer
+                          group flex gap-3 px-4 py-3 transition-colors cursor-pointer
                           hover:bg-white/[0.03]
                           ${!notification.read ? 'bg-white/[0.02]' : ''}
                         `}
@@ -226,7 +157,7 @@ export function NotificationPanel() {
                               {notification.title}
                             </p>
                             {!notification.read && (
-                              <div className="shrink-0 size-2 rounded-full bg-indigo-500 mt-1.5" />
+                              <div className="shrink-0 size-2 rounded-full bg-violet-500 mt-1.5" />
                             )}
                           </div>
                           <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
@@ -244,7 +175,7 @@ export function NotificationPanel() {
                           className="shrink-0 size-6 text-gray-600 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => {
                             e.stopPropagation()
-                            deleteNotification(notification.id)
+                            removeNotification(notification.id)
                           }}
                         >
                           <Trash2 className="size-3" />

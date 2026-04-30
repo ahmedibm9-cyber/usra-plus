@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,11 +18,13 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  Rocket,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
 export function LoginForm() {
-  const { setAuthView, setShowTermsModal } = useAuthStore()
+  const { setAuthView, setShowTermsModal, setUser, setIsAuthenticated } = useAuthStore()
+  const appStore = useAppStore()
   const { t, isRTL } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -281,6 +284,89 @@ export function LoginForm() {
             {t.auth.privacyPolicy}
           </button>
         </p>
+
+        {/* Demo Mode */}
+        <div className="relative">
+          <Separator className="bg-white/[0.06]" />
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0B0B0F] px-3 text-xs text-gray-500">
+            {isRTL ? 'أو' : 'or'}
+          </span>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={async () => {
+            const demoUser = {
+              id: 'demo-user-001',
+              email: 'demo@usraplus.app',
+              first_name: isRTL ? 'أحمد' : 'Ahmed',
+              last_name: isRTL ? 'العائلي' : 'AlFamily',
+              phone: '+966501234567',
+              country_code: '+966',
+              avatar_url: null,
+              language: isRTL ? 'ar' as const : 'en' as const,
+              theme: 'dark' as const,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+            setUser(demoUser)
+            setIsAuthenticated(true)
+            // Set demo family
+            const demoFamily = {
+              id: 'demo-family-001',
+              name: isRTL ? 'عائلة الأحمد' : 'The Ahmed Family',
+              description: isRTL ? 'عائلتنا الرائعة' : 'Our wonderful family',
+              invite_code: 'DEMO2025',
+              avatar_url: null,
+              created_by: 'demo-user-001',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+            appStore.setCurrentFamily(demoFamily)
+            appStore.setFamilies([demoFamily])
+            appStore.setFamilyMembers([
+              { id: 'fm-1', family_id: 'demo-family-001', user_id: 'demo-user-001', role: 'owner' as const, nickname: null, joined_at: new Date().toISOString(), profiles: demoUser },
+              { id: 'fm-2', family_id: 'demo-family-001', user_id: 'demo-user-002', role: 'member' as const, nickname: isRTL ? 'نورة' : 'Noura', joined_at: new Date().toISOString(), profiles: { id: 'demo-user-002', email: 'noura@usraplus.app', first_name: isRTL ? 'نورة' : 'Noura', last_name: isRTL ? 'الأحمد' : 'AlAhmed', phone: null, country_code: '+966', avatar_url: null, language: 'en' as const, theme: 'dark' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } },
+              { id: 'fm-3', family_id: 'demo-family-001', user_id: 'demo-user-003', role: 'admin' as const, nickname: isRTL ? 'خالد' : 'Khalid', joined_at: new Date().toISOString(), profiles: { id: 'demo-user-003', email: 'khalid@usraplus.app', first_name: isRTL ? 'خالد' : 'Khalid', last_name: isRTL ? 'الأحمد' : 'AlAhmed', phone: null, country_code: '+966', avatar_url: null, language: 'en' as const, theme: 'dark' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } },
+            ])
+
+            // Seed demo tasks into task store
+            const { useTaskStore } = await import('@/stores/task-store')
+            useTaskStore.getState().setTasks([
+              { id: 'task-1', family_id: 'demo-family-001', title: isRTL ? 'شراء الهدايا لعيد الفطر' : 'Buy Eid gifts', description: isRTL ? 'شراء هدايا لأفراد العائلة' : 'Gifts for family members', status: 'todo', priority: 'high', assigned_to: 'demo-user-002', created_by: 'demo-user-001', due_date: new Date(Date.now() + 3*86400000).toISOString(), completed_at: null, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'task-2', family_id: 'demo-family-001', title: isRTL ? 'تنظيف المنزل' : 'Clean the house', description: null, status: 'in_progress', priority: 'medium', assigned_to: 'demo-user-001', created_by: 'demo-user-001', due_date: new Date(Date.now() + 86400000).toISOString(), completed_at: null, created_at: new Date(Date.now() - 2*86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'task-3', family_id: 'demo-family-001', title: isRTL ? 'حجز طاولة العشاء' : 'Book dinner table', description: isRTL ? 'في المطعم الإيطالي' : 'At the Italian restaurant', status: 'done', priority: 'low', assigned_to: 'demo-user-003', created_by: 'demo-user-003', due_date: new Date(Date.now() - 86400000).toISOString(), completed_at: new Date(Date.now() - 86400000).toISOString(), created_at: new Date(Date.now() - 5*86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'task-4', family_id: 'demo-family-001', title: isRTL ? 'تحضير واجبات المدرسة' : 'Help with homework', description: null, status: 'todo', priority: 'urgent', assigned_to: 'demo-user-001', created_by: 'demo-user-002', due_date: new Date().toISOString(), completed_at: null, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'task-5', family_id: 'demo-family-001', title: isRTL ? 'شراء مستلزمات المطبخ' : 'Buy kitchen supplies', description: null, status: 'todo', priority: 'medium', assigned_to: null, created_by: 'demo-user-001', due_date: new Date(Date.now() + 7*86400000).toISOString(), completed_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            ])
+
+            // Seed demo grocery items
+            const { useGroceryStore } = await import('@/stores/grocery-store')
+            useGroceryStore.getState().setItems([
+              { id: 'grocery-1', family_id: 'demo-family-001', name: isRTL ? 'حليب طازج' : 'Fresh Milk', category: 'dairy', quantity: 2, checked: true, added_by: 'demo-user-001', created_at: new Date(Date.now() - 2*86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'grocery-2', family_id: 'demo-family-001', name: isRTL ? 'خبز تمر' : 'Date Bread', category: 'bakery', quantity: 1, checked: false, added_by: 'demo-user-002', created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'grocery-3', family_id: 'demo-family-001', name: isRTL ? 'تمر المدينة' : 'Medina Dates', category: 'fruits', quantity: 3, checked: true, added_by: 'demo-user-003', created_at: new Date(Date.now() - 3*86400000).toISOString(), updated_at: new Date().toISOString() },
+              { id: 'grocery-4', family_id: 'demo-family-001', name: isRTL ? 'أرز بسمتي' : 'Basmati Rice', category: 'other', quantity: 2, checked: false, added_by: 'demo-user-001', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+              { id: 'grocery-5', family_id: 'demo-family-001', name: isRTL ? 'دجاج طازج' : 'Fresh Chicken', category: 'meat', quantity: 1, checked: false, added_by: 'demo-user-002', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+              { id: 'grocery-6', family_id: 'demo-family-001', name: isRTL ? 'عصير برتقال' : 'Orange Juice', category: 'beverages', quantity: 2, checked: true, added_by: 'demo-user-003', created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString() },
+            ])
+
+            // Seed demo notifications
+            const { useNotificationStore } = await import('@/stores/notification-store')
+            useNotificationStore.getState().setNotifications([
+              { id: 'notif-1', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'مهمة جديدة' : 'New Task Assigned', message: isRTL ? 'تم تعيين مهمة "شراء الهدايا" لك' : 'You were assigned "Buy Eid gifts"', type: 'task', read: false, action_url: null, created_at: new Date(Date.now() - 3600000).toISOString() },
+              { id: 'notif-2', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'انضمام عضو جديد' : 'New Member Joined', message: isRTL ? 'انضم خالد إلى العائلة' : 'Khalid joined the family', type: 'family', read: false, action_url: null, created_at: new Date(Date.now() - 7200000).toISOString() },
+              { id: 'notif-3', user_id: 'demo-user-001', family_id: 'demo-family-001', title: isRTL ? 'تذكير بالبقالة' : 'Grocery Reminder', message: isRTL ? '5 عناصر لم يتم شراؤها بعد' : '5 items still unchecked', type: 'grocery', read: true, action_url: null, created_at: new Date(Date.now() - 86400000).toISOString() },
+            ])
+
+            toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')
+          }}
+          className="w-full border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200 hover:border-violet-500/40 rounded-2xl h-11 font-medium transition-all duration-200 gap-2"
+        >
+          <Rocket className="w-4 h-4" />
+          {isRTL ? 'جرّب النسخة التجريبية' : 'Try Demo Mode'}
+        </Button>
 
         {/* Sign up link */}
         <div className="text-center">
