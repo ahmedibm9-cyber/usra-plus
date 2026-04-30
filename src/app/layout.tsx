@@ -54,7 +54,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${tajawal.variable} antialiased bg-background text-foreground`}>
+      <body className={`${inter.variable} ${tajawal.variable} antialiased bg-background text-foreground`} suppressHydrationWarning>
         {children}
         <Toaster
           position="bottom-right"
