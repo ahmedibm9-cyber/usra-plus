@@ -925,7 +925,7 @@ function TaskModal({
           <Button
             onClick={handleSave}
             disabled={saving || !form.title.trim()}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white"
+            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white btn-glow btn-press"
           >
             {saving ? t.common.loading : t.common.save}
           </Button>
@@ -1303,7 +1303,7 @@ export default function TasksPage() {
             )}
             <Button
               onClick={handleAddTask}
-              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl btn-ripple"
+              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-2 rounded-xl btn-glow btn-press"
             >
               <Plus className="size-4" />
               {t.tasks.addTask}

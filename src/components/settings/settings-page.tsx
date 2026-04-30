@@ -56,6 +56,7 @@ import {
   Heart,
   Share2,
   MessageSquare,
+  Wand2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -93,6 +94,7 @@ import { useGroceryStore } from '@/stores/grocery-store'
 import { useCalendarStore } from '@/stores/calendar-store'
 import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
 import { PlanBadge } from '@/components/shared/plan-badge'
+import { AvatarGenerator } from '@/components/shared/avatar-generator'
 import { useI18n } from '@/i18n/use-translation'
 import { createClient } from '@/lib/supabase/client'
 import { FamilyQRCode } from '@/components/shared/family-qr-code'
@@ -562,6 +564,7 @@ function UserManagementTab() {
   const { families } = useAppStore()
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [avatarGenOpen, setAvatarGenOpen] = useState(false)
   const [firstName, setFirstName] = useState(user?.first_name ?? '')
   const [lastName, setLastName] = useState(user?.last_name ?? '')
   const [countryCode, setCountryCode] = useState(user?.country_code ?? '+966')
@@ -570,6 +573,17 @@ function UserManagementTab() {
     const cc = user?.country_code ?? '+966'
     return phone.startsWith(cc) ? phone.slice(cc.length) : phone
   })
+
+  const handleAvatarApply = useCallback((imageUrl: string) => {
+    if (!user) return
+    setUser({ ...user, avatar_url: imageUrl })
+  }, [user, setUser])
+
+  const handleRemovePhoto = useCallback(() => {
+    if (!user) return
+    setUser({ ...user, avatar_url: null })
+    toast.success(isRTL ? 'تم إزالة الصورة' : 'Photo removed')
+  }, [user, setUser, isRTL])
 
   const handleSave = useCallback(async () => {
     if (!user) return
@@ -648,7 +662,7 @@ function UserManagementTab() {
             {/* Change Photo */}
             <div>
               <Label className="text-[--text-primary] text-xs mb-1.5 block">
-                {t.settings.editProfile}
+                {t.avatarGen.changePhoto}
               </Label>
               <div className="flex items-center gap-3">
                 <Avatar className="size-14 border border-white/10">
@@ -657,16 +671,37 @@ function UserManagementTab() {
                     {user?.first_name?.[0] ?? '?'}
                   </AvatarFallback>
                 </Avatar>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-[--border-medium] bg-[--bg-primary] text-[--text-primary] hover:bg-[--bg-surface-2] hover:border-[--border-medium]"
-                  onClick={() => toast.info(isRTL ? 'سيكون رفع الصور متاحاً قريباً' : 'Photo upload coming soon')}
-                >
-                  Change Photo
-                </Button>
+                <div className="flex flex-col gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-[--border-medium] bg-[--bg-primary] text-[--text-primary] hover:bg-[--bg-surface-2] hover:border-[--border-medium]"
+                    onClick={() => setAvatarGenOpen(true)}
+                  >
+                    <Wand2 className="size-3.5 mr-1.5" />
+                    {t.avatarGen.changePhoto}
+                  </Button>
+                  {user?.avatar_url && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[#EF4444]/70 hover:text-[#EF4444] hover:bg-[#EF4444]/10 h-7 text-xs"
+                      onClick={handleRemovePhoto}
+                    >
+                      {t.avatarGen.removePhoto}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
+
+            <AvatarGenerator
+              open={avatarGenOpen}
+              onOpenChange={setAvatarGenOpen}
+              onApply={handleAvatarApply}
+              mode="full"
+              context="user"
+            />
 
             <Separator className="bg-[--border-subtle]" />
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { Command } from 'cmdk'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -20,9 +20,19 @@ import {
   ArrowRight,
   Pencil,
   Check,
+  Clock,
+  X,
+  FileText,
+  ShoppingBag,
+  CalendarClock,
+  MessageCircle,
 } from 'lucide-react'
 import { useAppStore } from '@/stores/app-store'
 import { useTaskStore } from '@/stores/task-store'
+import { useCalendarStore } from '@/stores/calendar-store'
+import { useGroceryStore } from '@/stores/grocery-store'
+import { useChatStore } from '@/stores/chat-store'
+import { useFilesStore } from '@/stores/files-store'
 import { useI18n } from '@/i18n/use-translation'
 import { useAuthStore } from '@/stores/auth-store'
 import type { AppPage, Task, TaskStatus } from '@/types'
@@ -59,6 +69,51 @@ function addRecentItem(item: Omit<RecentItem, 'timestamp'>) {
   }
 }
 
+// ─── Recent search history ────────────────────────────────────────
+const SEARCH_HISTORY_KEY = 'usra-recent-searches'
+const MAX_SEARCH_HISTORY = 5
+
+function getSearchHistory(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function addSearchHistory(query: string) {
+  if (typeof window === 'undefined' || !query.trim()) return
+  try {
+    const existing = getSearchHistory().filter((q) => q !== query.trim())
+    existing.unshift(query.trim())
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(existing.slice(0, MAX_SEARCH_HISTORY)))
+  } catch {
+    // ignore
+  }
+}
+
+function clearSearchHistory() {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(SEARCH_HISTORY_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+function removeSearchHistoryItem(index: number) {
+  if (typeof window === 'undefined') return
+  try {
+    const current = getSearchHistory()
+    const updated = current.filter((_, i) => i !== index)
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated))
+  } catch {
+    // ignore
+  }
+}
+
 // ─── Page definitions ─────────────────────────────────────────────
 interface PageItem {
   id: AppPage
@@ -87,35 +142,109 @@ interface QuickAction {
   keywords: string[]
 }
 
+// ─── Content search result types ──────────────────────────────────
+type ContentType = 'tasks' | 'events' | 'grocery' | 'chat' | 'files' | 'settings'
+
+interface ContentSearchResult {
+  id: string
+  type: ContentType
+  title: string
+  subtitle: string
+  snippet: string
+  page: AppPage
+  data?: unknown
+}
+
+// ─── Highlight matching text ──────────────────────────────────────
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query.trim()) return <>{text}</>
+
+  const lowerText = text.toLowerCase()
+  const lowerQuery = query.toLowerCase()
+  const index = lowerText.indexOf(lowerQuery)
+
+  if (index === -1) return <>{text}</>
+
+  const before = text.slice(0, index)
+  const match = text.slice(index, index + query.length)
+  const after = text.slice(index + query.length)
+
+  return (
+    <>
+      {before}
+      <span className="text-[#6366F1] font-medium">{match}</span>
+      {after}
+    </>
+  )
+}
+
+// ─── Type icon and color config ───────────────────────────────────
+const typeConfig: Record<ContentType, { icon: React.ElementType; color: string; bgColor: string }> = {
+  tasks: { icon: CheckSquare, color: 'text-[#6366F1]', bgColor: 'bg-[#6366F1]/15' },
+  events: { icon: CalendarClock, color: 'text-[#22C55E]', bgColor: 'bg-[#22C55E]/15' },
+  grocery: { icon: ShoppingBag, color: 'text-[#F59E0B]', bgColor: 'bg-[#F59E0B]/15' },
+  chat: { icon: MessageCircle, color: 'text-[#A78BFA]', bgColor: 'bg-[#A78BFA]/15' },
+  files: { icon: FileText, color: 'text-[#EC4899]', bgColor: 'bg-[#EC4899]/15' },
+  settings: { icon: Settings, color: 'text-[#6B7280]', bgColor: 'bg-[#6B7280]/15' },
+}
+
 // ─── Component ────────────────────────────────────────────────────
 export function CommandPalette() {
   const { commandPaletteOpen, setCommandPaletteOpen, setCurrentPage } = useAppStore()
   const { tasks, setShowAddTask, setEditingTask, updateTask } = useTaskStore()
+  const { events } = useCalendarStore()
+  const { items: groceryItems } = useGroceryStore()
+  const { messages } = useChatStore()
+  const { files } = useFilesStore()
   const { t, language, isRTL, setLanguage } = useI18n()
   const { user } = useAuthStore()
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Close on Escape
+  const [query, setQuery] = useState('')
+  const [activeFilter, setActiveFilter] = useState<ContentType | 'all'>('all')
+  // Use a version counter to re-derive search history from localStorage
+  const [historyVersion, setHistoryVersion] = useState(0)
+
+  // Derive search history from localStorage (cheap read, avoids setState in effects)
+  const searchHistory = useMemo(() => getSearchHistory(), [historyVersion, commandPaletteOpen])
+
+  // Custom close handler that also resets state
   const closePalette = useCallback(() => {
     setCommandPaletteOpen(false)
+    setQuery('')
+    setActiveFilter('all')
   }, [setCommandPaletteOpen])
 
-  // Global keyboard shortcut: ⌘K / Ctrl+K
+  // Refresh search history (bumps version counter to trigger re-derivation)
+  const refreshSearchHistory = useCallback(() => {
+    setHistoryVersion((v) => v + 1)
+  }, [])
+
+  // Open palette and refresh history
+  const openPalette = useCallback(() => {
+    setCommandPaletteOpen(true)
+    refreshSearchHistory()
+  }, [setCommandPaletteOpen, refreshSearchHistory])
+
+  // Global keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        setCommandPaletteOpen(!commandPaletteOpen)
+        if (commandPaletteOpen) {
+          closePalette()
+        } else {
+          openPalette()
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [commandPaletteOpen, setCommandPaletteOpen])
+  }, [commandPaletteOpen, closePalette, openPalette])
 
   // Focus input when opened
   useEffect(() => {
     if (commandPaletteOpen) {
-      // Small delay so cmdk can mount first
       requestAnimationFrame(() => {
         inputRef.current?.focus()
       })
@@ -225,8 +354,230 @@ export function CommandPalette() {
     },
   ]
 
+  // ─── Multi-content search ──────────────────────────────────────
+  const contentResults = useMemo<ContentSearchResult[]>(() => {
+    if (!query.trim()) return []
+
+    const q = query.toLowerCase()
+    const results: ContentSearchResult[] = []
+
+    // Search tasks
+    if (activeFilter === 'all' || activeFilter === 'tasks') {
+      tasks.forEach((task) => {
+        const titleMatch = task.title.toLowerCase().includes(q)
+        const descMatch = task.description?.toLowerCase().includes(q) ?? false
+        const assigneeMatch = task.assignee?.first_name?.toLowerCase().includes(q) ?? false
+
+        if (titleMatch || descMatch || assigneeMatch) {
+          results.push({
+            id: `task-${task.id}`,
+            type: 'tasks',
+            title: task.title,
+            subtitle: t.search.inTasks,
+            snippet: task.description
+              ? task.description.slice(0, 80) + (task.description.length > 80 ? '...' : '')
+              : task.priority + ' · ' + task.status,
+            page: 'tasks',
+            data: task,
+          })
+        }
+      })
+    }
+
+    // Search events
+    if (activeFilter === 'all' || activeFilter === 'events') {
+      events.forEach((event) => {
+        const titleMatch = event.title.toLowerCase().includes(q)
+        const descMatch = event.description?.toLowerCase().includes(q) ?? false
+
+        if (titleMatch || descMatch) {
+          results.push({
+            id: `event-${event.id}`,
+            type: 'events',
+            title: event.title,
+            subtitle: t.search.inCalendar,
+            snippet: event.description
+              ? event.description.slice(0, 80) + (event.description.length > 80 ? '...' : '')
+              : (event.all_day ? (isRTL ? 'طوال اليوم' : 'All day') : new Date(event.start_time).toLocaleString()),
+            page: 'calendar',
+            data: event,
+          })
+        }
+      })
+    }
+
+    // Search grocery items
+    if (activeFilter === 'all' || activeFilter === 'grocery') {
+      groceryItems.forEach((item) => {
+        const nameMatch = item.name.toLowerCase().includes(q)
+
+        if (nameMatch) {
+          results.push({
+            id: `grocery-${item.id}`,
+            type: 'grocery',
+            title: item.name,
+            subtitle: t.search.inGrocery,
+            snippet: item.category
+              ? (isRTL ? `الفئة: ${item.category}` : `Category: ${item.category}`) + (item.checked ? (isRTL ? ' · مكتمل' : ' · Checked') : '')
+              : (item.checked ? (isRTL ? 'مكتمل' : 'Checked') : (isRTL ? 'قيد الانتظار' : 'Pending')),
+            page: 'grocery',
+            data: item,
+          })
+        }
+      })
+    }
+
+    // Search chat messages
+    if (activeFilter === 'all' || activeFilter === 'chat') {
+      messages.forEach((msg) => {
+        const contentMatch = msg.content.toLowerCase().includes(q)
+
+        if (contentMatch) {
+          const senderName = msg.sender?.first_name || (isRTL ? 'مستخدم' : 'User')
+          results.push({
+            id: `chat-${msg.id}`,
+            type: 'chat',
+            title: senderName,
+            subtitle: t.search.inChat,
+            snippet: msg.content.slice(0, 80) + (msg.content.length > 80 ? '...' : ''),
+            page: 'chat',
+            data: msg,
+          })
+        }
+      })
+    }
+
+    // Search files
+    if (activeFilter === 'all' || activeFilter === 'files') {
+      files.forEach((file) => {
+        const nameMatch = file.name.toLowerCase().includes(q)
+
+        if (nameMatch) {
+          results.push({
+            id: `file-${file.id}`,
+            type: 'files',
+            title: file.name,
+            subtitle: t.search.inFiles,
+            snippet: file.file_type + ' · ' + (file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : ''),
+            page: 'files',
+            data: file,
+          })
+        }
+      })
+    }
+
+    // Search settings tabs
+    if (activeFilter === 'all' || activeFilter === 'settings') {
+      const settingsTabs = [
+        { id: 'family', label: t.settings.family },
+        { id: 'user', label: t.settings.user },
+        { id: 'account', label: t.settings.account },
+        { id: 'preferences', label: t.settings.preferences },
+        { id: 'security', label: t.settings.security },
+        { id: 'data', label: t.settings.data },
+        { id: 'integrations', label: t.settings.integrations },
+        { id: 'premium', label: t.settings.premium },
+      ]
+
+      settingsTabs.forEach((tab) => {
+        if (tab.label.toLowerCase().includes(q)) {
+          results.push({
+            id: `settings-${tab.id}`,
+            type: 'settings',
+            title: tab.label,
+            subtitle: t.search.inSettings,
+            snippet: isRTL ? `الانتقال إلى ${tab.label}` : `Go to ${tab.label}`,
+            page: 'settings',
+          })
+        }
+      })
+    }
+
+    return results
+  }, [query, activeFilter, tasks, events, groceryItems, messages, files, isRTL, t])
+
+  // Group results by type
+  const groupedResults = useMemo(() => {
+    const groups: Record<ContentType, ContentSearchResult[]> = {
+      tasks: [],
+      events: [],
+      grocery: [],
+      chat: [],
+      files: [],
+      settings: [],
+    }
+
+    contentResults.forEach((result) => {
+      groups[result.type].push(result)
+    })
+
+    return groups
+  }, [contentResults])
+
+  // Type group labels
+  const typeLabels: Record<ContentType, string> = {
+    tasks: t.search.filterTasks,
+    events: t.search.filterEvents,
+    grocery: t.search.filterGrocery,
+    chat: t.search.filterChat,
+    files: t.search.filterFiles,
+    settings: isRTL ? 'الإعدادات' : 'Settings',
+  }
+
+  // Handle content result click
+  const handleContentResultClick = useCallback(
+    (result: ContentSearchResult) => {
+      addSearchHistory(query)
+
+      if (result.type === 'tasks' && result.data) {
+        setEditingTask(result.data as Task)
+      }
+
+      setCurrentPage(result.page)
+      closePalette()
+    },
+    [query, setEditingTask, setCurrentPage, closePalette]
+  )
+
+  // Handle recent search click
+  const handleRecentSearchClick = useCallback(
+    (searchQuery: string) => {
+      setQuery(searchQuery)
+      inputRef.current?.focus()
+    },
+    []
+  )
+
+  // Handle clear search history
+  const handleClearHistory = useCallback(() => {
+    clearSearchHistory()
+    refreshSearchHistory()
+  }, [refreshSearchHistory])
+
+  // Handle remove single search history item
+  const handleRemoveSearchItem = useCallback(
+    (index: number) => {
+      removeSearchHistoryItem(index)
+      refreshSearchHistory()
+    },
+    [refreshSearchHistory]
+  )
+
   // Recent items
   const recentItems = getRecentItems()
+
+  // Filter pills config
+  const filterPills: { key: ContentType | 'all'; label: string }[] = [
+    { key: 'all', label: t.search.filterAll },
+    { key: 'tasks', label: t.search.filterTasks },
+    { key: 'events', label: t.search.filterEvents },
+    { key: 'grocery', label: t.search.filterGrocery },
+    { key: 'chat', label: t.search.filterChat },
+    { key: 'files', label: t.search.filterFiles },
+  ]
+
+  const hasContentResults = contentResults.length > 0
+  const showContentSearch = query.trim().length > 0
 
   const dir = isRTL ? 'rtl' : 'ltr'
 
@@ -256,164 +607,289 @@ export function CommandPalette() {
             <Command
               loop
               className="rounded-2xl border border-white/[0.08] bg-[#111117]/95 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden"
-              shouldFilter
+              shouldFilter={false}
             >
               {/* Search Input */}
               <div className="flex items-center border-b border-white/[0.08] px-4">
                 <Search className="size-4 shrink-0 text-[#6B7280]" />
                 <Command.Input
                   ref={inputRef}
-                  placeholder={isRTL ? 'ابحث عن صفحة، إجراء، أو مهمة...' : 'Search pages, actions, or tasks...'}
+                  value={query}
+                  onValueChange={setQuery}
+                  placeholder={t.search.searchAll}
                   className="flex-1 bg-transparent px-3 py-3.5 text-sm text-[#E5E7EB] placeholder:text-[#6B7280] outline-none"
-
                 />
                 <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium text-[#6B7280] shrink-0">
                   ESC
                 </kbd>
               </div>
 
+              {/* Filter Pills (show when there's a query) */}
+              {showContentSearch && (
+                <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/[0.06] overflow-x-auto">
+                  {filterPills.map((pill) => (
+                    <button
+                      key={pill.key}
+                      type="button"
+                      onClick={() => setActiveFilter(pill.key)}
+                      className={`text-xs px-3 py-1 rounded-full cursor-pointer transition-all whitespace-nowrap ${
+                        activeFilter === pill.key
+                          ? 'bg-[#6366F1]/20 text-[#6366F1] border border-[#6366F1]/30'
+                          : 'bg-white/[0.04] text-[var(--text-muted)] hover:bg-white/[0.08] border border-transparent'
+                      }`}
+                    >
+                      {pill.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Results */}
               <Command.List className="max-h-80 overflow-y-auto p-2 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10">
-                {/* Empty state */}
-                <Command.Empty className="py-8 text-center text-sm text-[#6B7280]">
-                  {isRTL ? 'لا توجد نتائج' : 'No results found'}
-                </Command.Empty>
 
-                {/* Recent Group */}
-                {recentItems.length > 0 && (
-                  <Command.Group
-                    heading={isRTL ? 'الأخيرة' : 'Recent'}
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
-                  >
-                    {recentItems.map((item) => {
-                      const isPage = item.type === 'page'
-                      const pageId = item.value.replace('page-', '')
-                      const pageDef = pages.find((p) => p.id === pageId)
-                      const Icon = pageDef?.icon || (isPage ? ArrowRight : ArrowRight)
-                      return (
-                        <Command.Item
-                          key={item.value}
-                          value={item.value + ' ' + item.label}
-                          onSelect={() => {
-                            if (isPage && pageDef) {
-                              navigateToPage(pageId as AppPage)
-                            }
-                          }}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
-                        >
-                          <Icon className="size-4 shrink-0 text-[#6B7280] data-[selected=true]:text-[#6366F1]" />
-                          <span className="flex-1 truncate">{item.label}</span>
-                          <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">
-                            {isRTL ? (isPage ? 'صفحة' : 'إجراء') : (isPage ? 'Page' : 'Action')}
-                          </span>
-                        </Command.Item>
-                      )
-                    })}
-                  </Command.Group>
+                {/* ─── No query state: Recent + Pages + Quick Actions ─── */}
+                {!showContentSearch && (
+                  <>
+                    {/* Recent Search History */}
+                    {searchHistory.length > 0 && (
+                      <Command.Group
+                        heading={t.search.recentSearches}
+                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                      >
+                        <div className="flex items-center justify-between px-2 py-1">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6B7280]">{t.search.recentSearches}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleClearHistory()
+                            }}
+                            className="text-[10px] text-[#6B7280] hover:text-[#6366F1] transition-colors cursor-pointer"
+                          >
+                            {t.search.clearHistory}
+                          </button>
+                        </div>
+                        {searchHistory.map((searchQuery, idx) => (
+                          <Command.Item
+                            key={`recent-search-${idx}`}
+                            value={`recent-search-${searchQuery}`}
+                            onSelect={() => handleRecentSearchClick(searchQuery)}
+                            className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg px-3 py-2.5 text-sm cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                          >
+                            <Clock className="size-3.5 shrink-0 text-[#6B7280]" />
+                            <span className="flex-1 truncate text-[#9CA3AF]">{searchQuery}</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRemoveSearchItem(idx)
+                              }}
+                              className="p-0.5 rounded hover:bg-white/[0.08] transition-colors"
+                            >
+                              <X className="size-3 text-[#6B7280]" />
+                            </button>
+                          </Command.Item>
+                        ))}
+                      </Command.Group>
+                    )}
+
+                    {/* Recent Group */}
+                    {recentItems.length > 0 && (
+                      <Command.Group
+                        heading={isRTL ? 'الأخيرة' : 'Recent'}
+                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                      >
+                        {recentItems.map((item) => {
+                          const isPage = item.type === 'page'
+                          const pageId = item.value.replace('page-', '')
+                          const pageDef = pages.find((p) => p.id === pageId)
+                          const Icon = pageDef?.icon || ArrowRight
+                          return (
+                            <Command.Item
+                              key={item.value}
+                              value={item.value + ' ' + item.label}
+                              onSelect={() => {
+                                if (isPage && pageDef) {
+                                  navigateToPage(pageId as AppPage)
+                                }
+                              }}
+                              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                            >
+                              <Icon className="size-4 shrink-0 text-[#6B7280] data-[selected=true]:text-[#6366F1]" />
+                              <span className="flex-1 truncate">{item.label}</span>
+                              <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">
+                                {isRTL ? (isPage ? 'صفحة' : 'إجراء') : (isPage ? 'Page' : 'Action')}
+                              </span>
+                            </Command.Item>
+                          )
+                        })}
+                      </Command.Group>
+                    )}
+
+                    {/* Pages Group */}
+                    <Command.Group
+                      heading={isRTL ? 'الصفحات' : 'Pages'}
+                      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                    >
+                      {pages.map((page) => {
+                        const Icon = page.icon
+                        const label = t.nav[page.labelKey]
+                        return (
+                          <Command.Item
+                            key={page.id}
+                            value={`page-${page.id} ${label} ${page.keywords.join(' ')}`}
+                            onSelect={() => navigateToPage(page.id)}
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                          >
+                            <Icon className="size-4 shrink-0 text-[#6B7280] group-data-[selected=true]:text-[#6366F1]" />
+                            <span className="flex-1 truncate">{label}</span>
+                            <span className="text-[10px] text-[#6B7280]">
+                              {page.id === 'dashboard' ? '⌘1' : page.id === 'tasks' ? '⌘2' : page.id === 'calendar' ? '⌘3' : page.id === 'grocery' ? '⌘4' : page.id === 'chat' ? '⌘5' : page.id === 'files' ? '⌘6' : '⌘7'}
+                            </span>
+                          </Command.Item>
+                        )
+                      })}
+                    </Command.Group>
+
+                    {/* Quick Actions Group */}
+                    <Command.Group
+                      heading={isRTL ? 'إجراءات سريعة' : 'Quick Actions'}
+                      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                    >
+                      {quickActions.map((action) => {
+                        const Icon = action.icon
+                        const label = isRTL ? action.labelAr : action.labelEn
+                        return (
+                          <Command.Item
+                            key={action.id}
+                            value={`${action.id} ${label} ${action.keywords.join(' ')}`}
+                            onSelect={action.action}
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                          >
+                            <Icon className="size-4 shrink-0 text-[#6B7280]" />
+                            <span className="flex-1 truncate">{label}</span>
+                            <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">
+                              {isRTL ? 'إجراء' : 'Action'}
+                            </span>
+                          </Command.Item>
+                        )
+                      })}
+                    </Command.Group>
+
+                    {/* Tasks Group */}
+                    {tasks.length > 0 && (
+                      <Command.Group
+                        heading={isRTL ? 'المهام' : 'Tasks'}
+                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                      >
+                        {tasks.slice(0, 8).map((task) => (
+                          <Command.Item
+                            key={task.id}
+                            value={`task-${task.id} ${task.title} ${task.description || ''} ${task.priority} ${task.status}`}
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                            onSelect={() => editTask(task)}
+                          >
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                markTaskComplete(task)
+                              }}
+                              className={`size-4 shrink-0 rounded border transition-colors flex items-center justify-center ${
+                                task.status === 'done'
+                                  ? 'bg-[#6366F1] border-[#6366F1] text-white'
+                                  : 'border-white/20 hover:border-[#6366F1]'
+                              }`}
+                              aria-label={task.status === 'done' ? 'Mark as incomplete' : 'Mark as complete'}
+                            >
+                              {task.status === 'done' && <Check className="size-2.5" />}
+                            </button>
+                            <span className={`flex-1 truncate ${task.status === 'done' ? 'line-through text-[#6B7280]' : ''}`}>
+                              {task.title}
+                            </span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span
+                                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                                  task.priority === 'urgent'
+                                    ? 'bg-red-500/15 text-red-400'
+                                    : task.priority === 'high'
+                                      ? 'bg-orange-500/15 text-orange-400'
+                                      : task.priority === 'medium'
+                                        ? 'bg-yellow-500/15 text-yellow-400'
+                                        : 'bg-green-500/15 text-green-400'
+                                }`}
+                              >
+                                {isRTL
+                                  ? t.tasks[task.priority as keyof typeof t.tasks] || task.priority
+                                  : task.priority}
+                              </span>
+                              <Pencil className="size-3 text-[#6B7280] opacity-0 group-data-[selected=true]:opacity-100" />
+                            </div>
+                          </Command.Item>
+                        ))}
+                      </Command.Group>
+                    )}
+                  </>
                 )}
 
-                {/* Pages Group */}
-                <Command.Group
-                  heading={isRTL ? 'الصفحات' : 'Pages'}
-                  className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
-                >
-                  {pages.map((page) => {
-                    const Icon = page.icon
-                    const label = t.nav[page.labelKey]
-                    return (
-                      <Command.Item
-                        key={page.id}
-                        value={`page-${page.id} ${label} ${page.keywords.join(' ')}`}
-                        onSelect={() => navigateToPage(page.id)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
-                      >
-                        <Icon className="size-4 shrink-0 text-[#6B7280] group-data-[selected=true]:text-[#6366F1]" />
-                        <span className="flex-1 truncate">{label}</span>
-                        <span className="text-[10px] text-[#6B7280]">
-                          {page.id === 'dashboard' ? '⌘1' : page.id === 'tasks' ? '⌘2' : page.id === 'calendar' ? '⌘3' : page.id === 'grocery' ? '⌘4' : page.id === 'chat' ? '⌘5' : page.id === 'files' ? '⌘6' : '⌘7'}
-                        </span>
-                      </Command.Item>
-                    )
-                  })}
-                </Command.Group>
-
-                {/* Quick Actions Group */}
-                <Command.Group
-                  heading={isRTL ? 'إجراءات سريعة' : 'Quick Actions'}
-                  className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
-                >
-                  {quickActions.map((action) => {
-                    const Icon = action.icon
-                    const label = isRTL ? action.labelAr : action.labelEn
-                    return (
-                      <Command.Item
-                        key={action.id}
-                        value={`${action.id} ${label} ${action.keywords.join(' ')}`}
-                        onSelect={action.action}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
-                      >
-                        <Icon className="size-4 shrink-0 text-[#6B7280]" />
-                        <span className="flex-1 truncate">{label}</span>
-                        <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">
-                          {isRTL ? 'إجراء' : 'Action'}
-                        </span>
-                      </Command.Item>
-                    )
-                  })}
-                </Command.Group>
-
-                {/* Tasks Group */}
-                {tasks.length > 0 && (
-                  <Command.Group
-                    heading={isRTL ? 'المهام' : 'Tasks'}
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
-                  >
-                    {tasks.slice(0, 8).map((task) => (
-                      <Command.Item
-                        key={task.id}
-                        value={`task-${task.id} ${task.title} ${task.description || ''} ${task.priority} ${task.status}`}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
-                        onSelect={() => editTask(task)}
-                      >
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            markTaskComplete(task)
-                          }}
-                          className={`size-4 shrink-0 rounded border transition-colors flex items-center justify-center ${
-                            task.status === 'done'
-                              ? 'bg-[#6366F1] border-[#6366F1] text-white'
-                              : 'border-white/20 hover:border-[#6366F1]'
-                          }`}
-                          aria-label={task.status === 'done' ? 'Mark as incomplete' : 'Mark as complete'}
-                        >
-                          {task.status === 'done' && <Check className="size-2.5" />}
-                        </button>
-                        <span className={`flex-1 truncate ${task.status === 'done' ? 'line-through text-[#6B7280]' : ''}`}>
-                          {task.title}
-                        </span>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span
-                            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-                              task.priority === 'urgent'
-                                ? 'bg-red-500/15 text-red-400'
-                                : task.priority === 'high'
-                                  ? 'bg-orange-500/15 text-orange-400'
-                                  : task.priority === 'medium'
-                                    ? 'bg-yellow-500/15 text-yellow-400'
-                                    : 'bg-green-500/15 text-green-400'
-                            }`}
-                          >
-                            {isRTL
-                              ? t.tasks[task.priority as keyof typeof t.tasks] || task.priority
-                              : task.priority}
-                          </span>
-                          <Pencil className="size-3 text-[#6B7280] opacity-0 group-data-[selected=true]:opacity-100" />
+                {/* ─── Content search results (when query is typed) ─── */}
+                {showContentSearch && (
+                  <>
+                    {/* No results */}
+                    {!hasContentResults && (
+                      <div className="py-8 text-center">
+                        <div className="mx-auto mb-2 p-2.5 rounded-xl bg-white/[0.04] w-fit">
+                          <Search className="size-5 text-[#6B7280]" />
                         </div>
-                      </Command.Item>
-                    ))}
-                  </Command.Group>
+                        <p className="text-sm text-[#6B7280]">{t.search.noResults}</p>
+                        <p className="text-xs text-[#4B5563] mt-1">{t.search.tryDifferentSearch}</p>
+                      </div>
+                    )}
+
+                    {/* Grouped results by type */}
+                    {(Object.entries(groupedResults) as [ContentType, ContentSearchResult[]][])
+                      .filter(([, items]) => items.length > 0)
+                      .map(([type, items]) => {
+                        return (
+                          <Command.Group
+                            key={type}
+                            heading={typeLabels[type]}
+                            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                          >
+                            {items.map((result) => {
+                              const ItemIcon = typeConfig[result.type].icon
+                              return (
+                                <Command.Item
+                                  key={result.id}
+                                  value={`${result.id} ${result.title} ${result.snippet}`}
+                                  onSelect={() => handleContentResultClick(result)}
+                                  className="px-3 py-2.5 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors flex items-center gap-3 data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white"
+                                >
+                                  {/* Type icon */}
+                                  <div className={`w-5 h-5 rounded-md flex items-center justify-center ${typeConfig[result.type].bgColor}`}>
+                                    <ItemIcon className={`size-3 ${typeConfig[result.type].color}`} />
+                                  </div>
+                                  {/* Content */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm text-[#E5E7EB] truncate">
+                                        <HighlightMatch text={result.title} query={query} />
+                                      </span>
+                                      <span className="text-[10px] text-[#6B7280] shrink-0">{result.subtitle}</span>
+                                    </div>
+                                    <p className="text-xs text-[#4B5563] truncate mt-0.5">
+                                      <HighlightMatch text={result.snippet} query={query} />
+                                    </p>
+                                  </div>
+                                  {/* Arrow */}
+                                  <ArrowRight className="size-3.5 text-[#4B5563] shrink-0 opacity-0 group-data-[selected=true]:opacity-100" />
+                                </Command.Item>
+                              )
+                            })}
+                          </Command.Group>
+                        )
+                      })}
+                  </>
                 )}
 
                 {/* Footer hint */}

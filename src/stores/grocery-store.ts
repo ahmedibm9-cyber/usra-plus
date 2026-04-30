@@ -20,6 +20,7 @@ interface GroceryState {
   addItem: (item: GroceryItem) => void
   updateItem: (item: GroceryItem) => void
   removeItem: (id: string) => void
+  removeItems: (ids: string[]) => void
   toggleChecked: (id: string) => void
   reorderItems: (fromIndex: number, toIndex: number) => void
   setIsLoading: (loading: boolean) => void
@@ -45,6 +46,7 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
   addItem: (item) => set((s) => ({ items: [item, ...s.items] })),
   updateItem: (item) => set((s) => ({ items: s.items.map((i) => (i.id === item.id ? item : i)) })),
   removeItem: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
+  removeItems: (ids) => set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) })),
   toggleChecked: (id) =>
     set((s) => ({
       items: s.items.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)),

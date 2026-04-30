@@ -113,7 +113,7 @@ function GlassCard({
       transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div
-        className={`glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] ${className}`}
+        className={`glass-card glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
       >
         {children}
       </div>
@@ -505,7 +505,7 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button
               onClick={() => setShowOnboarding(true)}
-              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white rounded-xl h-11 px-6"
+              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white rounded-xl h-11 px-6 btn-glow btn-press"
             >
               <Plus className="size-4 mr-2" />
               {t.onboarding.createFamily}
@@ -540,7 +540,7 @@ export default function DashboardPage() {
           <p className="text-sm text-[--text-muted] mb-6">{error}</p>
           <Button
             onClick={fetchData}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white rounded-xl"
+            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white rounded-xl btn-glow btn-press"
           >
             {t.common.retry}
           </Button>

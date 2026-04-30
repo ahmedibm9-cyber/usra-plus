@@ -21,6 +21,15 @@ import {
   Sparkles,
   GripVertical,
   ArrowUpDown,
+  ChefHat,
+  Clock,
+  Users,
+  RefreshCw,
+  Download,
+  Copy,
+  Share2,
+  FileText,
+  Trash,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -35,12 +44,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -49,6 +60,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Separator } from '@/components/ui/separator'
 import { triggerConfetti } from '@/lib/confetti'
 import { EmptyState } from '@/components/shared/empty-state'
@@ -78,6 +105,16 @@ import {
 } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { CSS } from '@dnd-kit/utilities'
+
+// ─── Recipe Suggestion Type ─────────────────────────────────────────────
+interface RecipeSuggestion {
+  title: string
+  cookTime: string
+  servings: number
+  difficulty: 'easy' | 'medium' | 'hard'
+  ingredients: string[]
+  steps: string[]
+}
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },
@@ -316,6 +353,130 @@ function SortableGroceryItem({
   )
 }
 
+// ─── Recipe Skeleton Card ──────────────────────────────────────────────
+function RecipeSkeletonCard() {
+  return (
+    <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-4">
+      <Skeleton className="h-5 w-3/5 mb-3" />
+      <div className="flex items-center gap-3 mb-3">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-4 w-14" />
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </div>
+      <div className="space-y-1.5">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-4/5" />
+        <Skeleton className="h-3 w-3/5" />
+      </div>
+    </div>
+  )
+}
+
+// ─── Recipe Card ────────────────────────────────────────────────────────
+function RecipeCard({
+  recipe,
+  groceryItemNames,
+  isRTL,
+  t,
+}: {
+  recipe: RecipeSuggestion
+  groceryItemNames: string[]
+  isRTL: boolean
+  t: ReturnType<typeof useI18n>['t']
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  const difficultyColors: Record<string, string> = {
+    easy: 'bg-green-500/20 text-green-400 border-green-500/30',
+    medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    hard: 'bg-red-500/20 text-red-400 border-red-500/30',
+  }
+
+  const difficultyLabels: Record<string, string> = {
+    easy: t.grocery.easy,
+    medium: t.grocery.medium,
+    hard: t.grocery.hard,
+  }
+
+  const isMatch = (ingredient: string) => {
+    const lower = ingredient.toLowerCase()
+    return groceryItemNames.some((name) => lower.includes(name.toLowerCase()) || name.toLowerCase().includes(lower))
+  }
+
+  return (
+    <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-4 hover:bg-white/[0.06] transition-colors">
+      {/* Title */}
+      <h4 className="text-sm font-bold text-[#E5E7EB] mb-2">{recipe.title}</h4>
+
+      {/* Meta */}
+      <div className={cn('flex items-center gap-3 mb-3 flex-wrap', isRTL && 'flex-row-reverse')}>
+        <span className="flex items-center gap-1 text-xs text-[#6B7280]">
+          <Clock className="w-3 h-3" />
+          {recipe.cookTime}
+        </span>
+        <span className="flex items-center gap-1 text-xs text-[#6B7280]">
+          <Users className="w-3 h-3" />
+          {recipe.servings} {t.grocery.servings}
+        </span>
+        <span className={cn('text-xs px-2 py-0.5 rounded-full border', difficultyColors[recipe.difficulty])}>
+          {difficultyLabels[recipe.difficulty]}
+        </span>
+      </div>
+
+      {/* Key Ingredients */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {recipe.ingredients.slice(0, 4).map((ing, idx) => (
+          <span
+            key={idx}
+            className={cn(
+              'text-xs px-2 py-0.5 rounded-md border',
+              isMatch(ing)
+                ? 'text-[#6366F1] font-medium bg-[#6366F1]/10 border-[#6366F1]/20'
+                : 'text-[#6B7280] bg-white/[0.03] border-white/[0.06]'
+            )}
+          >
+            {ing}
+          </span>
+        ))}
+      </div>
+
+      {/* View Recipe Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setExpanded(!expanded)}
+        className="text-xs text-[#6366F1] hover:text-[#818CF8] p-0 h-auto"
+      >
+        {expanded ? '−' : '+'} {t.grocery.viewRecipe}
+      </Button>
+
+      {/* Expanded Steps */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
+              {recipe.steps.map((step, idx) => (
+                <div key={idx} className={cn('flex gap-2 text-xs', isRTL && 'flex-row-reverse')}>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#6366F1]/10 text-[#6366F1] flex items-center justify-center font-medium text-[10px]">
+                    {idx + 1}
+                  </span>
+                  <span className="text-[#9CA3AF] leading-relaxed">{step}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 // ─── Main Grocery Page ──────────────────────────────────────────────────
 export function GroceryPage() {
   const { currentFamily } = useAppStore()
@@ -333,6 +494,7 @@ export function GroceryPage() {
     setItems,
     addItem,
     removeItem,
+    removeItems,
     toggleChecked,
     reorderItems,
     setIsLoading,
@@ -354,6 +516,15 @@ export function GroceryPage() {
   const [flashItemId, setFlashItemId] = useState<string | null>(null)
   const [autoDetectedCategory, setAutoDetectedCategory] = useState<string | null>(null)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+
+  // ─── Recipe Suggestions State ────────────────────────────────────────
+  const [recipes, setRecipes] = useState<RecipeSuggestion[]>([])
+  const [recipesLoading, setRecipesLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'list' | 'recipes'>('list')
+
+  // ─── Clear Checked State ─────────────────────────────────────────────
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const undoItemsRef = useRef<GroceryItem[]>([])
 
   // ─── DnD State & Handlers ────────────────────────────────────────────
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -502,6 +673,39 @@ export function GroceryPage() {
     }
   }, [familyId, fetchItems, addItem, removeItem, setItems])
 
+  // ─── Recipe Suggestions ─────────────────────────────────────────────
+  const fetchRecipes = useCallback(async (showLoading = true) => {
+    if (items.length === 0) {
+      setRecipes([])
+      return
+    }
+    if (showLoading) setRecipesLoading(true)
+    try {
+      const itemNames = items.map((i) => i.name)
+      const lang = isRTL ? 'ar' : 'en'
+      const res = await fetch('/api/ai/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: itemNames, language: lang }),
+      })
+      const data = await res.json()
+      if (data.recipes) {
+        setRecipes(data.recipes)
+      }
+    } catch {
+      // Fallback recipes will come from the API itself
+    } finally {
+      setRecipesLoading(false)
+    }
+  }, [items, isRTL])
+
+  // Fetch recipes when items change
+  useEffect(() => {
+    if (items.length > 0 && activeTab === 'recipes') {
+      fetchRecipes()
+    }
+  }, [items.length, activeTab, fetchRecipes])
+
   // Add item
   const handleAddItem = async () => {
     if (!familyId || !userId || !newItemName.trim()) return
@@ -628,6 +832,90 @@ export function GroceryPage() {
     }
   }
 
+  // ─── Clear Checked ──────────────────────────────────────────────────
+  const checkedItemsList = items.filter((i) => i.checked)
+  const checkedCount = checkedItemsList.length
+
+  const handleClearChecked = () => {
+    if (checkedCount === 0) return
+    setShowClearConfirm(true)
+  }
+
+  const confirmClearChecked = () => {
+    undoItemsRef.current = [...checkedItemsList]
+    const checkedIds = checkedItemsList.map((i) => i.id)
+    removeItems(checkedIds)
+    setShowClearConfirm(false)
+    toast.success(t.grocery.itemsCleared, {
+      action: {
+        label: t.grocery.undo,
+        onClick: () => {
+          // Restore items
+          const restored = [...useGroceryStore.getState().items, ...undoItemsRef.current]
+          setItems(restored)
+          undoItemsRef.current = []
+        },
+      },
+      duration: 5000,
+    })
+  }
+
+  // ─── Export Functions ───────────────────────────────────────────────
+  const familyName = currentFamily?.name ?? 'Family'
+
+  const getFormattedList = useCallback(() => {
+    const checkedList = items.filter((i) => i.checked)
+    const uncheckedList = items.filter((i) => !i.checked)
+    const progress = getProgress()
+
+    let text = `🛒 ${t.grocery.groceryListFor} ${familyName}\n`
+    text += `═════════════════════════════════\n`
+
+    if (checkedList.length > 0) {
+      for (const item of checkedList) {
+        text += `✓ ${item.name} (${item.quantity})\n`
+      }
+    }
+    if (uncheckedList.length > 0) {
+      for (const item of uncheckedList) {
+        text += `✗ ${item.name} (${item.quantity})\n`
+      }
+    }
+
+    text += `═════════════════════════════════\n`
+    text += `${t.grocery.progressItems}: ${progress.checked}/${progress.total} ${t.grocery.itemsLabel} ${t.grocery.checkedLabel}`
+
+    return text
+  }, [items, familyName, t, getProgress])
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(getFormattedList())
+      toast.success(t.common.copied)
+    } catch {
+      toast.error(t.common.error)
+    }
+  }
+
+  const handleShareWhatsApp = () => {
+    const text = encodeURIComponent(getFormattedList())
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
+
+  const handleDownloadText = () => {
+    const text = getFormattedList()
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `grocery-list-${new Date().toISOString().slice(0, 10)}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success(t.common.success)
+  }
+
   const filteredItems = getFilteredItems()
   const progress = getProgress()
 
@@ -636,6 +924,9 @@ export function GroceryPage() {
 
   // Sortable IDs for unchecked items (only these participate in DnD)
   const uncheckedIds = useMemo(() => uncheckedItems.map((i) => i.id), [uncheckedItems])
+
+  // Grocery item names for recipe ingredient matching
+  const groceryItemNames = useMemo(() => items.map((i) => i.name), [items])
 
   return (
     <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
@@ -669,6 +960,43 @@ export function GroceryPage() {
                 <SelectItem value="manual" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Manual Order</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-9 gap-2 bg-[#111117] border-white/[0.06] text-[#E5E7EB] hover:bg-white/[0.06] rounded-lg text-xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  {t.grocery.exportList}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-[#111117] border-white/[0.08] rounded-xl" align="end">
+                <DropdownMenuItem
+                  onClick={handleCopyToClipboard}
+                  className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB] cursor-pointer gap-2"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  {t.grocery.copyToClipboard}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleShareWhatsApp}
+                  className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB] cursor-pointer gap-2"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  {t.grocery.shareWhatsApp}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDownloadText}
+                  className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB] cursor-pointer gap-2"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  {t.grocery.downloadPDF}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button
               onClick={() => setShowAddItem(true)}
               className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-10 px-4 btn-ripple"
@@ -761,121 +1089,258 @@ export function GroceryPage() {
         </div>
       </div>
 
-      {/* Items List */}
-      <div className="flex-1 overflow-hidden px-4 sm:px-6 pb-6">
-        {isLoading ? (
-          <div className="space-y-2">
-            <GroceryItemSkeleton count={4} />
-          </div>
-        ) : filteredItems.length === 0 ? (
-          <EmptyState
-            icon={ShoppingBag}
-            title="Your list is empty"
-            description="Add items to your grocery list"
-            action={{ label: 'Add Item', onClick: () => setShowAddItem(true) }}
-          />
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            modifiers={[restrictToVerticalAxis]}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragCancel={handleDragCancel}
+      {/* Tab switcher: List / Recipes */}
+      <div className="flex-shrink-0 px-4 sm:px-6">
+        <div className="flex gap-1 bg-[#111117] border border-white/[0.06] rounded-lg p-1">
+          <button
+            onClick={() => setActiveTab('list')}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
+              activeTab === 'list'
+                ? 'bg-[#6366F1] text-white shadow-sm'
+                : 'text-[#6B7280] hover:text-[#E5E7EB]'
+            )}
           >
-            <ScrollArea className="h-full">
-              <div className="space-y-2">
-                {/* Unchecked items - sortable */}
-                <SortableContext
-                  items={uncheckedIds}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <AnimatePresence mode="popLayout">
-                    {uncheckedItems.map((item) => (
-                      <SortableGroceryItem
-                        key={item.id}
-                        item={item}
-                        onToggleChecked={handleToggleChecked}
-                        onDelete={handleDeleteItem}
-                        deletingId={deletingId}
-                        flashItemId={flashItemId}
-                        isRTL={isRTL}
-                        t={t}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </SortableContext>
+            <ShoppingBag className="w-3.5 h-3.5" />
+            {isRTL ? 'القائمة' : 'List'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('recipes')
+              if (recipes.length === 0 && items.length > 0) {
+                fetchRecipes()
+              }
+            }}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
+              activeTab === 'recipes'
+                ? 'bg-[#6366F1] text-white shadow-sm'
+                : 'text-[#6B7280] hover:text-[#E5E7EB]'
+            )}
+          >
+            <ChefHat className="w-3.5 h-3.5" />
+            {t.grocery.recipeIdeas}
+          </button>
+        </div>
+      </div>
 
-                {/* Separator between checked and unchecked */}
-                {checkedItems.length > 0 && uncheckedItems.length > 0 && (
-                  <Separator className="bg-white/[0.06] my-3" />
-                )}
-
-                {/* Checked items (not sortable, display-only) */}
-                <AnimatePresence mode="popLayout">
-                  {checkedItems.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.5 }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="group bg-[#111117]/50 border border-white/[0.04] rounded-xl p-3 sm:p-4"
-                    >
-                      <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
-                        <Checkbox
-                          checked={item.checked}
-                          onCheckedChange={() => handleToggleChecked(item)}
-                          className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden px-4 sm:px-6 py-4 pb-6">
+        {activeTab === 'list' ? (
+          isLoading ? (
+            <div className="space-y-2">
+              <GroceryItemSkeleton count={4} />
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <EmptyState
+              icon={ShoppingBag}
+              title="Your list is empty"
+              description="Add items to your grocery list"
+              action={{ label: 'Add Item', onClick: () => setShowAddItem(true) }}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+            >
+              <ScrollArea className="h-full">
+                <div className="space-y-2">
+                  {/* Unchecked items - sortable */}
+                  <SortableContext
+                    items={uncheckedIds}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {uncheckedItems.map((item) => (
+                        <SortableGroceryItem
+                          key={item.id}
+                          item={item}
+                          onToggleChecked={handleToggleChecked}
+                          onDelete={handleDeleteItem}
+                          deletingId={deletingId}
+                          flashItemId={flashItemId}
+                          isRTL={isRTL}
+                          t={t}
                         />
-                        <div className="flex-1 min-w-0">
-                          <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
-                            <CategoryIconRender category={item.category} />
-                            <span className="text-sm font-medium text-[#6B7280] line-through truncate">
-                              {item.name}
+                      ))}
+                    </AnimatePresence>
+                  </SortableContext>
+
+                  {/* Separator between checked and unchecked */}
+                  {checkedItems.length > 0 && uncheckedItems.length > 0 && (
+                    <Separator className="bg-white/[0.06] my-3" />
+                  )}
+
+                  {/* Checked items (not sortable, display-only) */}
+                  <AnimatePresence mode="popLayout">
+                    {checkedItems.map((item) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.5 }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="group bg-[#111117]/50 border border-white/[0.04] rounded-xl p-3 sm:p-4"
+                      >
+                        <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
+                          <Checkbox
+                            checked={item.checked}
+                            onCheckedChange={() => handleToggleChecked(item)}
+                            className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
+                              <CategoryIconRender category={item.category} />
+                              <span className="text-sm font-medium text-[#6B7280] line-through truncate">
+                                {item.name}
+                              </span>
+                            </div>
+                          </div>
+                          <div className={cn('flex items-center gap-2 flex-shrink-0', isRTL && 'flex-row-reverse')}>
+                            <span className="text-xs text-[#6B7280]/60 font-medium line-through">
+                              x{item.quantity}
                             </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteItem(item.id)}
+                              disabled={deletingId === item.id}
+                              className="h-8 w-8 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
                           </div>
                         </div>
-                        <div className={cn('flex items-center gap-2 flex-shrink-0', isRTL && 'flex-row-reverse')}>
-                          <span className="text-xs text-[#6B7280]/60 font-medium line-through">
-                            x{item.quantity}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteItem(item.id)}
-                            disabled={deletingId === item.id}
-                            className="h-8 w-8 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </ScrollArea>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
 
-            {/* Drag Overlay */}
-            <DragOverlay adjustScale={false} dropAnimation={null}>
-              {activeItem ? (
-                <div className="w-full">
-                  <GroceryItemCard
-                    item={activeItem}
-                    onToggleChecked={handleToggleChecked}
-                    onDelete={handleDeleteItem}
-                    deletingId={deletingId}
-                    flashItemId={flashItemId}
-                    isDragOverlay
-                    isRTL={isRTL}
-                    t={t}
-                  />
+                  {/* Clear Checked Button */}
+                  {checkedCount > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="pt-3"
+                    >
+                      <button
+                        onClick={handleClearChecked}
+                        className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                      >
+                        <Trash className="w-3.5 h-3.5" />
+                        {t.grocery.clearChecked} ({checkedCount})
+                      </button>
+                    </motion.div>
+                  )}
                 </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+              </ScrollArea>
+
+              {/* Drag Overlay */}
+              <DragOverlay adjustScale={false} dropAnimation={null}>
+                {activeItem ? (
+                  <div className="w-full">
+                    <GroceryItemCard
+                      item={activeItem}
+                      onToggleChecked={handleToggleChecked}
+                      onDelete={handleDeleteItem}
+                      deletingId={deletingId}
+                      flashItemId={flashItemId}
+                      isDragOverlay
+                      isRTL={isRTL}
+                      t={t}
+                    />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          )
+        ) : (
+          /* ─── Recipe Suggestions Tab ────────────────────────────────── */
+          <ScrollArea className="h-full">
+            <div className="space-y-4">
+              {/* Header with Refresh */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ChefHat className="w-4 h-4 text-[#6366F1]" />
+                  <span className="text-sm font-medium text-[#E5E7EB]">{t.grocery.recipeIdeas}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fetchRecipes()}
+                  disabled={recipesLoading}
+                  className="text-xs text-[#6366F1] hover:text-[#818CF8] gap-1.5"
+                >
+                  <RefreshCw className={cn('w-3.5 h-3.5', recipesLoading && 'animate-spin')} />
+                  {t.grocery.refreshSuggestions}
+                </Button>
+              </div>
+
+              {/* Recipe Cards */}
+              {recipesLoading ? (
+                <div className="space-y-3">
+                  <RecipeSkeletonCard />
+                  <RecipeSkeletonCard />
+                  <RecipeSkeletonCard />
+                </div>
+              ) : recipes.length > 0 ? (
+                <div className="space-y-3">
+                  {recipes.map((recipe, idx) => (
+                    <RecipeCard
+                      key={idx}
+                      recipe={recipe}
+                      groceryItemNames={groceryItemNames}
+                      isRTL={isRTL}
+                      t={t}
+                    />
+                  ))}
+                </div>
+              ) : items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <ChefHat className="w-10 h-10 text-[#6B7280]/40 mb-3" />
+                  <p className="text-sm text-[#6B7280]">
+                    {isRTL ? 'أضف عناصر إلى قائمة البقالة للحصول على اقتراحات وصفات' : 'Add items to your grocery list to get recipe suggestions'}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <ChefHat className="w-10 h-10 text-[#6B7280]/40 mb-3" />
+                  <p className="text-sm text-[#6B7280]">
+                    {isRTL ? 'اضغط على تحديث للحصول على اقتراحات' : 'Click refresh to get suggestions'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
         )}
       </div>
+
+      {/* Clear Checked Confirmation Dialog */}
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#E5E7EB]">
+              {t.grocery.clearChecked}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#6B7280]">
+              {t.grocery.removeItems.replace('{n}', String(checkedCount))}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-white/[0.08] text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04] rounded-xl">
+              {t.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClearChecked}
+              className="bg-red-500/90 hover:bg-red-600 text-white rounded-xl"
+            >
+              {t.grocery.clearChecked}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Add Item Dialog */}
       <Dialog open={showAddItem} onOpenChange={(open) => {

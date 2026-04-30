@@ -604,3 +604,110 @@ html[dir="rtl"] .sidebar-collapse-icon {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.15);
 }
+
+/* ─── Button Micro-interactions ──────────────────────────────────── */
+.btn-glow {
+  transition: all 0.2s ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
+}
+.btn-glow:active {
+  transform: translateY(0);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.1);
+}
+
+.btn-press {
+  transition: all 0.1s ease;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* ─── Glass Card Hover Gradient Top Border ───────────────────────── */
+.glass-card {
+  position: relative;
+}
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1rem 1rem 0 0;
+  background: linear-gradient(90deg, #6366F1, #A78BFA);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.glass-card:hover::before {
+  opacity: 1;
+}
+
+/* ─── Scroll Progress Indicator ──────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: #6366F1;
+  transition: width 0.1s ease-out, opacity 0.2s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* ─── Toast Polish (Sonner) ──────────────────────────────────────── */
+[data-sonner-toaster] [data-styled="true"] {
+  background: #111117 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #E5E7EB !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-sonner-toaster] [data-styled="true"][data-type="success"] {
+  border-left-color: #22C55E !important;
+}
+
+[data-sonner-toaster] [data-styled="true"][data-type="error"] {
+  border-left-color: #EF4444 !important;
+}
+
+[data-sonner-toaster] [data-styled="true"][data-type="info"] {
+  border-left-color: #6366F1 !important;
+}
+
+[data-sonner-toaster] [data-styled="true"][data-type="warning"] {
+  border-left-color: #F59E0B !important;
+}
+
+[data-sonner-toaster] [data-title] {
+  color: #E5E7EB !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toaster] [data-description] {
+  color: #9CA3AF !important;
+}
+
+/* ─── Focus Ring Enhancement ─────────────────────────────────────── */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+  border-radius: inherit;
+  transition: box-shadow 0.15s ease;
+}
+
+/* Preserve default focus for inputs that already handle it */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+}
+
+/* Remove browser default focus outlines */
+*:focus {
+  outline: none;
+}

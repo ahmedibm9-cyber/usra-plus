@@ -17,6 +17,12 @@ import {
   Play,
   Pause,
   Plus,
+  ImageIcon,
+  FileText,
+  File,
+  Download,
+  Upload,
+  XCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -34,6 +40,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '🎉', '😢', '🙏']
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ACCEPTED_TYPES = 'image/*,.pdf,.doc,.docx'
+
+interface PendingFile {
+  file: File
+  preview: string | null
+  caption: string
+}
 
 interface MessageGroup {
   label: string
@@ -85,12 +99,30 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
+}
+
+function getFileIconAndColor(fileName: string) {
+  const ext = fileName.split('.').pop()?.toLowerCase() ?? ''
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext))
+    return { Icon: ImageIcon, color: 'bg-pink-500/15 text-pink-400' }
+  if (['pdf'].includes(ext))
+    return { Icon: FileText, color: 'bg-red-500/15 text-red-400' }
+  if (['doc', 'docx'].includes(ext))
+    return { Icon: FileText, color: 'bg-blue-500/15 text-blue-400' }
+  return { Icon: File, color: 'bg-gray-500/15 text-gray-400' }
+}
+
 // Read receipt type for demo purposes
 type ReadStatus = 'sent' | 'delivered' | 'read'
 
 // Demo read receipts: assign random read statuses to own messages
 function getDemoReadStatus(messageId: string): ReadStatus {
-  // Use a simple hash to deterministically assign status
   const hash = messageId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   const mod = hash % 3
   if (mod === 0) return 'read'
@@ -104,7 +136,6 @@ function VoiceMessageBubble({
   isOwn,
   isRTL,
   voiceMessageLabel,
-  durationLabel,
 }: {
   msg: ChatMessage
   isOwn: boolean
@@ -117,12 +148,11 @@ function VoiceMessageBubble({
   const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const duration = msg.voice_duration ?? 0
 
-  // Generate deterministic waveform bar heights based on message id
   const barHeights = useMemo(() => {
     const seed = msg.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
     const heights: number[] = []
     for (let i = 0; i < 7; i++) {
-      const h = ((seed * (i + 1) * 7) % 14) + 2 // range 2-16px
+      const h = ((seed * (i + 1) * 7) % 14) + 2
       heights.push(h)
     }
     return heights
@@ -138,7 +168,7 @@ function VoiceMessageBubble({
     } else {
       setIsPlaying(true)
       setPlayProgress(0)
-      const totalSteps = duration > 0 ? duration * 10 : 30 // 100ms steps
+      const totalSteps = duration > 0 ? duration * 10 : 30
       let step = 0
       playIntervalRef.current = setInterval(() => {
         step++
@@ -166,7 +196,6 @@ function VoiceMessageBubble({
   return (
     <div className="bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-2xl p-3 min-w-[200px]">
       <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-        {/* Play button */}
         <button
           onClick={handlePlayPause}
           className="w-8 h-8 bg-[#6366F1] rounded-full flex items-center justify-center text-white flex-shrink-0 hover:bg-[#5558E6] transition-colors"
@@ -179,7 +208,6 @@ function VoiceMessageBubble({
           )}
         </button>
 
-        {/* Waveform */}
         <div className={`flex-1 flex items-center gap-[1px] h-8 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
           {barHeights.map((h, i) => {
             const progressIndex = playProgress * barHeights.length
@@ -199,13 +227,11 @@ function VoiceMessageBubble({
           })}
         </div>
 
-        {/* Duration */}
         <span className="text-xs text-[#6B7280] flex-shrink-0 min-w-[32px] text-center">
           {formatDuration(duration)}
         </span>
       </div>
 
-      {/* Voice message label */}
       <div className={`flex items-center gap-1 mt-1.5 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
         <Mic className="w-3 h-3 text-[#6366F1]/60" />
         <span className="text-[10px] text-[#6366F1]/60">
@@ -240,6 +266,61 @@ function RecordingWaveform() {
         />
       ))}
     </div>
+  )
+}
+
+// Image Lightbox Component
+function ImageLightbox({
+  imageUrl,
+  altText,
+  onClose,
+}: {
+  imageUrl: string
+  altText: string
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center"
+      onClick={onClose}
+    >
+      <button
+        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+        onClick={(e) => {
+          e.stopPropagation()
+          onClose()
+        }}
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={imageUrl}
+          alt={altText}
+          className="max-w-full max-h-[80vh] object-contain rounded-lg"
+        />
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -283,10 +364,17 @@ export function ChatPage() {
   const [recordingTime, setRecordingTime] = useState(0)
   const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // File upload state
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; alt: string } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+  const dragCounterRef = useRef(0)
 
   const familyId = currentFamily?.id
   const userId = user?.id
@@ -316,7 +404,6 @@ export function ChatPage() {
     if (!familyId || !userId) return
     const duration = recordingTime
 
-    // Stop recording timer
     setIsRecording(false)
     setRecordingTime(0)
     if (recordingIntervalRef.current) {
@@ -324,11 +411,10 @@ export function ChatPage() {
       recordingIntervalRef.current = null
     }
 
-    // Create mock voice message
     const voiceMessage: ChatMessage = {
       id: `voice-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       family_id: familyId,
-      content: isRTL ? t.chat.voiceMessage : t.chat.voiceMessage,
+      content: t.chat.voiceMessage,
       sender_id: userId,
       message_type: 'voice',
       voice_duration: duration,
@@ -349,12 +435,10 @@ export function ChatPage() {
 
     addMessage(voiceMessage)
 
-    // Auto-scroll to bottom
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, 100)
 
-    // Try to send to Supabase (will fail gracefully if tables don't exist)
     try {
       const supabase = createClient()
       await supabase.from('chat_messages').insert({
@@ -366,7 +450,7 @@ export function ChatPage() {
     } catch {
       // Silent fail in demo mode
     }
-  }, [familyId, userId, recordingTime, addMessage, user, isRTL, t])
+  }, [familyId, userId, recordingTime, addMessage, user, t])
 
   // Cleanup recording on unmount
   useEffect(() => {
@@ -377,7 +461,151 @@ export function ChatPage() {
     }
   }, [])
 
-  // Demo typing indicator: show "Noura is typing..." for 3 seconds on load
+  // Handle file selection
+  const handleFileSelect = useCallback((fileList: FileList | File[]) => {
+    const files = Array.from(fileList)
+    const newPending: PendingFile[] = []
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(t.chat.fileTooLarge)
+        continue
+      }
+
+      const isImage = file.type.startsWith('image/')
+      const preview = isImage ? URL.createObjectURL(file) : null
+      newPending.push({ file, preview, caption: '' })
+    }
+
+    if (newPending.length > 0) {
+      setPendingFiles((prev) => [...prev, ...newPending])
+    }
+  }, [t])
+
+  // Remove a pending file
+  const removePendingFile = useCallback((index: number) => {
+    setPendingFiles((prev) => {
+      const item = prev[index]
+      if (item.preview) URL.revokeObjectURL(item.preview)
+      return prev.filter((_, i) => i !== index)
+    })
+  }, [])
+
+  // Send file/image messages
+  const handleSendFiles = useCallback(async () => {
+    if (!familyId || !userId || pendingFiles.length === 0) return
+
+    for (const pending of pendingFiles) {
+      const isImage = pending.file.type.startsWith('image/')
+      const messageType: 'image' | 'file' = isImage ? 'image' : 'file'
+      const content = pending.caption || (isImage ? t.chat.imageSent : t.chat.fileSent)
+
+      // For demo mode, use the object URL as the file_url
+      const fileUrl = pending.preview || URL.createObjectURL(pending.file)
+
+      const fileMessage: ChatMessage = {
+        id: `${messageType}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        family_id: familyId,
+        content,
+        sender_id: userId,
+        message_type: messageType,
+        file_url: fileUrl,
+        file_name: pending.file.name,
+        file_size: pending.file.size,
+        thumbnail_url: isImage ? fileUrl : undefined,
+        reply_to: null,
+        created_at: new Date().toISOString(),
+        sender: user ? {
+          id: user.id,
+          email: user.email ?? '',
+          first_name: user.user_metadata?.first_name ?? null,
+          last_name: user.user_metadata?.last_name ?? null,
+          avatar_url: user.user_metadata?.avatar_url ?? null,
+          phone: null,
+          country_code: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } : undefined,
+      }
+
+      addMessage(fileMessage)
+
+      // Try to send to Supabase (will fail gracefully if tables don't exist)
+      try {
+        const supabase = createClient()
+        await supabase.from('chat_messages').insert({
+          family_id: familyId,
+          content,
+          sender_id: userId,
+          message_type: messageType,
+          file_url: fileUrl,
+          file_name: pending.file.name,
+          file_size: pending.file.size,
+        })
+      } catch {
+        // Silent fail in demo mode
+      }
+    }
+
+    // Clear pending files
+    setPendingFiles((prev) => {
+      prev.forEach((p) => {
+        if (p.preview) URL.revokeObjectURL(p.preview)
+      })
+      return []
+    })
+
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+  }, [familyId, userId, pendingFiles, addMessage, user, t])
+
+  // Cancel all pending files
+  const cancelPendingFiles = useCallback(() => {
+    setPendingFiles((prev) => {
+      prev.forEach((p) => {
+        if (p.preview) URL.revokeObjectURL(p.preview)
+      })
+      return []
+    })
+  }, [])
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounterRef.current++
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragOver(true)
+    }
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounterRef.current--
+    if (dragCounterRef.current === 0) {
+      setIsDragOver(false)
+    }
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+    dragCounterRef.current = 0
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files)
+    }
+  }, [handleFileSelect])
+
+  // Demo typing indicator
   useEffect(() => {
     if (familyMembers.length > 0 && !showDemoTyping) {
       const timer1 = setTimeout(() => {
@@ -398,32 +626,27 @@ export function ChatPage() {
     }
   }, [familyMembers, isRTL, setTyping, clearTyping, showDemoTyping])
 
-  // Demo presence: randomly toggle online status for other users
+  // Demo presence
   useEffect(() => {
     if (familyMembers.length === 0) return
 
-    // Mark current user as online
     if (userId) {
       setOnline(userId)
     }
 
-    // Mark demo users as online initially (randomly)
     familyMembers.forEach((member) => {
       if (member.user_id !== userId) {
-        // Randomly set some as online
-        const isOnline = Math.random() > 0.3 // 70% chance online
+        const isOnline = Math.random() > 0.3
         if (isOnline) {
           setOnline(member.user_id)
         }
       }
     })
 
-    // Randomly toggle other users' presence for demo
     const interval = setInterval(() => {
       familyMembers.forEach((member) => {
         if (member.user_id !== userId) {
           const currentlyOnline = isUserOnline(member.user_id)
-          // 10% chance to toggle status
           if (Math.random() < 0.1) {
             if (currentlyOnline) {
               setOffline(member.user_id)
@@ -478,7 +701,6 @@ export function ChatPage() {
         },
         async (payload) => {
           const newMsg = payload.new as ChatMessage
-          // Fetch sender profile
           const { data: senderData } = await supabase
             .from('profiles')
             .select('*')
@@ -490,7 +712,6 @@ export function ChatPage() {
             sender: senderData ?? undefined,
           })
 
-          // Auto-scroll to bottom if near bottom
           if (scrollRef.current) {
             const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
             if (scrollHeight - scrollTop - clientHeight < 200) {
@@ -522,13 +743,13 @@ export function ChatPage() {
     }
   }, [isLoading, messages.length])
 
-  // Track scroll position for "scroll to bottom" button
+  // Track scroll position
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
     setShowScrollBottom(scrollHeight - scrollTop - clientHeight > 300)
   }, [])
 
-  // Send message
+  // Send text message
   const handleSendMessage = async () => {
     if (!familyId || !userId || !newMessage.trim()) return
     const content = newMessage.trim()
@@ -561,7 +782,6 @@ export function ChatPage() {
   const filteredMessages = getFilteredMessages()
   const messageGroups = groupMessagesByDate(filteredMessages)
 
-  // Find sender member details
   const getSenderAvatar = (senderId: string) => {
     const member = familyMembers.find((m) => m.user_id === senderId)
     return member?.profiles?.avatar_url ?? null
@@ -575,18 +795,13 @@ export function ChatPage() {
     return member?.nickname ?? 'Unknown'
   }
 
-  // Get online members for avatars bar
   const onlineUserIds = getOnlineUserIds()
   const onlineCount = getOnlineCount()
   const onlineMembers = familyMembers.filter((m) => onlineUserIds.includes(m.user_id))
-
-  // Get typing users (excluding current user)
   const typingUsers = getTypingUsers().filter((u) => u.userId !== userId)
 
-  // Determine if send button or mic button should show
-  const showSendButton = newMessage.trim().length > 0
+  const showSendButton = newMessage.trim().length > 0 || pendingFiles.length > 0
 
-  // Handle emoji reaction
   const handleReaction = useCallback((messageId: string, emoji: string) => {
     if (!userId) return
     toggleReaction(messageId, emoji, userId)
@@ -606,8 +821,157 @@ export function ChatPage() {
     }
   }, [activePickerMsgId])
 
+  // Cleanup pending files on unmount
+  useEffect(() => {
+    return () => {
+      setPendingFiles((prev) => {
+        prev.forEach((p) => {
+          if (p.preview) URL.revokeObjectURL(p.preview)
+        })
+        return prev
+      })
+    }
+  }, [])
+
+  // Render message bubble content based on type
+  const renderMessageContent = (msg: ChatMessage, isOwn: boolean) => {
+    const isImage = msg.message_type === 'image'
+    const isFile = msg.message_type === 'file'
+    const isVoice = msg.message_type === 'voice'
+
+    if (isImage && msg.file_url) {
+      return (
+        <div className={`
+          rounded-2xl overflow-hidden max-w-[300px] cursor-pointer hover:opacity-95 transition-opacity
+          ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
+        `}>
+          <img
+            src={msg.thumbnail_url || msg.file_url}
+            alt={msg.file_name || 'Image'}
+            className="w-full object-cover"
+            onClick={() => setLightboxImage({ url: msg.file_url!, alt: msg.file_name || 'Image' })}
+          />
+          {msg.content && msg.content !== t.chat.imageSent && (
+            <div className={`px-3 py-2 ${isOwn ? 'bg-[#6366F1]' : 'bg-[#111117] border-t border-white/[0.08]'}`}>
+              <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-[#E5E7EB]">
+                {msg.content}
+              </p>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (isFile && msg.file_name) {
+      const { Icon, color } = getFileIconAndColor(msg.file_name)
+      return (
+        <div className={`
+          rounded-2xl inline-block
+          ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
+        `}>
+          <div className={`bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 flex items-center gap-3 min-w-[200px]`}>
+            <div className={`p-2 rounded-lg flex-shrink-0 ${color}`}>
+              <Icon className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[#E5E7EB] truncate">{msg.file_name}</p>
+              <p className="text-[10px] text-[#6B7280]">{msg.file_size ? formatFileSize(msg.file_size) : ''}</p>
+            </div>
+            {msg.file_url && (
+              <a
+                href={msg.file_url}
+                download={msg.file_name}
+                onClick={(e) => e.stopPropagation()}
+                className="p-1.5 rounded-lg hover:bg-white/[0.08] text-[#6B7280] hover:text-[#E5E7EB] transition-colors flex-shrink-0"
+                aria-label={t.chat.download}
+              >
+                <Download className="w-4 h-4" />
+              </a>
+            )}
+          </div>
+          {msg.content && msg.content !== t.chat.fileSent && (
+            <div className={`px-3 py-1.5 ${isOwn ? 'bg-[#6366F1]' : 'bg-[#111117] border-t border-white/[0.08] rounded-b-xl'}`}>
+              <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-[#E5E7EB]">
+                {msg.content}
+              </p>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (isVoice) {
+      return (
+        <VoiceMessageBubble
+          msg={msg}
+          isOwn={isOwn}
+          isRTL={isRTL}
+          voiceMessageLabel={t.chat.voiceMessage}
+          durationLabel={t.chat.duration}
+        />
+      )
+    }
+
+    // Text message
+    return (
+      <div
+        className={`
+          rounded-2xl px-4 py-2.5 inline-block
+          ${
+            isOwn
+              ? 'bg-[#6366F1] text-white rounded-br-md'
+              : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
+          }
+        `}
+      >
+        <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+          {msg.content}
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
+    <div
+      className="flex flex-col h-full w-full bg-[#0B0B0F] relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drop overlay */}
+      <AnimatePresence>
+        {isDragOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 z-50 bg-[#6366F1]/5 border-2 border-dashed border-[#6366F1]/30 rounded-xl flex items-center justify-center backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="p-4 rounded-2xl bg-[#6366F1]/10">
+                <Upload className="w-8 h-8 text-[#6366F1]" />
+              </div>
+              <p className="text-sm font-medium text-[#6366F1]">
+                {t.chat.dropFilesHere}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Image Lightbox */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <ImageLightbox
+            imageUrl={lightboxImage.url}
+            altText={lightboxImage.alt}
+            onClose={() => setLightboxImage(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex-shrink-0 px-4 sm:px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
@@ -730,7 +1094,8 @@ export function ChatPage() {
                     {group.messages.map((msg, index) => {
                       const isOwn = msg.sender_id === userId
                       const isSystem = msg.message_type === 'system'
-                      const isVoice = msg.message_type === 'voice'
+                      const isImage = msg.message_type === 'image'
+                      const isFile = msg.message_type === 'file'
                       const prevMsg = index > 0 ? group.messages[index - 1] : null
                       const isConsecutive =
                         prevMsg && prevMsg.sender_id === msg.sender_id && !isSystem
@@ -747,7 +1112,6 @@ export function ChatPage() {
                         )
                       }
 
-                      // Read receipt status for own messages
                       const readStatus = isOwn ? getDemoReadStatus(msg.id) : null
 
                       return (
@@ -777,7 +1141,6 @@ export function ChatPage() {
                                         .slice(0, 2)}
                                     </AvatarFallback>
                                   </Avatar>
-                                  {/* Online dot on avatar */}
                                   {isUserOnline(msg.sender_id) && (
                                     <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
                                   )}
@@ -792,7 +1155,7 @@ export function ChatPage() {
                           <div
                             className={`max-w-[75%] sm:max-w-[65%] ${isOwn ? 'items-end' : 'items-start'}`}
                           >
-                            {/* Sender name (show for first message in group) */}
+                            {/* Sender name */}
                             {!isOwn && !isConsecutive && (
                               <div className="flex items-center gap-1.5 mb-1 ml-1">
                                 <p className="text-xs font-medium text-[#A78BFA]">
@@ -806,55 +1169,25 @@ export function ChatPage() {
 
                             {/* Message content + add reaction button */}
                             <div className="relative">
-                              {/* Voice message bubble */}
-                              {isVoice ? (
-                                <div
-                                  className={`
-                                    rounded-2xl inline-block
-                                    ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
-                                  `}
-                                >
-                                  <VoiceMessageBubble
-                                    msg={msg}
-                                    isOwn={isOwn}
-                                    isRTL={isRTL}
-                                    voiceMessageLabel={t.chat.voiceMessage}
-                                    durationLabel={t.chat.duration}
-                                  />
-                                </div>
-                              ) : (
-                                /* Text message bubble */
-                                <div
-                                  className={`
-                                    rounded-2xl px-4 py-2.5 inline-block
-                                    ${
-                                      isOwn
-                                        ? 'bg-[#6366F1] text-white rounded-br-md'
-                                        : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
-                                    }
-                                  `}
-                                >
-                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                                    {msg.content}
-                                  </p>
-                                </div>
-                              )}
+                              {renderMessageContent(msg, isOwn)}
 
-                              {/* Add reaction button - appears on hover */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setActivePickerMsgId(
-                                    activePickerMsgId === msg.id ? null : msg.id
-                                  )
-                                }}
-                                className={`opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-[#6B7280] absolute top-1/2 -translate-y-1/2 z-10 ${
-                                  isOwn ? '-left-8 rtl:-right-8 rtl:left-auto' : '-right-8 rtl:-left-8 rtl:right-auto'
-                                }`}
-                                aria-label={t.chat.addReaction}
-                              >
-                                <Plus className="w-3 h-3" />
-                              </button>
+                              {/* Add reaction button */}
+                              {!(isImage || isFile) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setActivePickerMsgId(
+                                      activePickerMsgId === msg.id ? null : msg.id
+                                    )
+                                  }}
+                                  className={`opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-[#6B7280] absolute top-1/2 -translate-y-1/2 z-10 ${
+                                    isOwn ? '-left-8 rtl:-right-8 rtl:left-auto' : '-right-8 rtl:-left-8 rtl:right-auto'
+                                  }`}
+                                  aria-label={t.chat.addReaction}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </button>
+                              )}
 
                               {/* Emoji picker */}
                               <AnimatePresence>
@@ -933,7 +1266,6 @@ export function ChatPage() {
                                 )}
                               </div>
                             )}
-                            {/* Show read receipt on consecutive own messages too (subtle) */}
                             {isConsecutive && isOwn && readStatus && (
                               <div className="flex justify-end mr-1 -mt-0.5">
                                 <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[#6B7280]'}`}>
@@ -1018,6 +1350,94 @@ export function ChatPage() {
         )}
       </div>
 
+      {/* Pending Files Preview */}
+      <AnimatePresence>
+        {pendingFiles.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex-shrink-0 px-4 sm:px-6 border-t border-white/[0.06]"
+          >
+            <div className="py-3 space-y-2">
+              {pendingFiles.map((pending, index) => {
+                const isImage = pending.file.type.startsWith('image/')
+                return (
+                  <div key={index} className="flex items-start gap-2 bg-[#111117] border border-white/[0.08] rounded-xl p-2">
+                    {/* Preview */}
+                    {isImage && pending.preview ? (
+                      <img
+                        src={pending.preview}
+                        alt={pending.file.name}
+                        className="max-h-32 rounded-lg object-cover border border-white/[0.08]"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 p-2">
+                        {(() => {
+                          const { Icon, color } = getFileIconAndColor(pending.file.name)
+                          return (
+                            <div className={`p-2 rounded-lg ${color}`}>
+                              <Icon className="w-5 h-5" />
+                            </div>
+                          )
+                        })()}
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-[#E5E7EB] truncate max-w-[150px]">{pending.file.name}</p>
+                          <p className="text-[10px] text-[#6B7280]">{formatFileSize(pending.file.size)}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Caption input + actions */}
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      <Input
+                        value={pending.caption}
+                        onChange={(e) => {
+                          setPendingFiles((prev) =>
+                            prev.map((p, i) => i === index ? { ...p, caption: e.target.value } : p)
+                          )
+                        }}
+                        placeholder={t.chat.addCaption}
+                        className="flex-1 h-7 bg-transparent border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] text-xs rounded-lg focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+                      />
+                      <button
+                        onClick={() => removePendingFile(index)}
+                        className="p-1 rounded-lg hover:bg-white/[0.06] text-[#6B7280] hover:text-red-400 transition-colors flex-shrink-0"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Send/Cancel buttons */}
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={cancelPendingFiles}
+                  className="text-[#6B7280] hover:text-[#E5E7EB] rounded-lg text-xs h-8"
+                >
+                  {t.common.cancel}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSendFiles}
+                  className="bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg text-xs h-8 gap-1.5"
+                >
+                  <Send className="w-3 h-3" />
+                  {pendingFiles.some((p) => p.file.type.startsWith('image/'))
+                    ? t.chat.sendImage
+                    : t.chat.sendFile}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Message Input / Recording Panel */}
       <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-white/[0.06]">
         <AnimatePresence mode="wait">
@@ -1083,13 +1503,27 @@ export function ChatPage() {
               transition={{ duration: 0.2 }}
             >
               <div className="flex items-center gap-2 bg-[#111117] border border-white/[0.08] rounded-2xl px-4 py-2 focus-within:border-[#6366F1]/30 transition-colors">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-transparent rounded-lg flex-shrink-0"
+                {/* Paperclip button - opens file picker */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-8 h-8 rounded-full hover:bg-white/[0.06] flex items-center justify-center text-[var(--text-muted,#6B7280)] hover:text-[var(--text-primary,#E5E7EB)] transition-colors"
+                  aria-label={t.chat.attachFile}
                 >
                   <Paperclip className="w-4 h-4" />
-                </Button>
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_TYPES}
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleFileSelect(e.target.files)
+                      e.target.value = ''
+                    }
+                  }}
+                />
                 <Input
                   ref={inputRef}
                   value={newMessage}

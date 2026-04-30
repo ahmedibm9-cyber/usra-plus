@@ -27,6 +27,7 @@ import SettingsPage from '@/components/settings/settings-page'
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow'
 import { PageWrapper } from '@/components/shared/page-wrapper'
 import { CommandPalette } from '@/components/shared/command-palette'
+import { ShortcutsModal } from '@/components/shared/shortcuts-modal'
 
 import { Loader2 } from 'lucide-react'
 import type { AppPage } from '@/types'
@@ -84,6 +85,23 @@ function MainApp() {
   // Swipe gesture state
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
   const [swipeOffset, setSwipeOffset] = useState(0)
+
+  // Scroll progress state
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const mainRef = useRef<HTMLElement>(null)
+
+  // Track scroll progress
+  const handleScrollProgress = useCallback(() => {
+    if (!mainRef.current) return
+    const { scrollTop, scrollHeight, clientHeight } = mainRef.current
+    const scrollableHeight = scrollHeight - clientHeight
+    if (scrollableHeight <= 0) {
+      setScrollProgress(0)
+      return
+    }
+    const progress = (scrollTop / scrollableHeight) * 100
+    setScrollProgress(Math.min(100, Math.max(0, progress)))
+  }, [])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0]
@@ -248,12 +266,23 @@ function MainApp() {
         {/* Header */}
         <AppHeader />
 
+        {/* Scroll Progress Indicator */}
+        <div
+          className="scroll-progress"
+          style={{
+            width: scrollProgress > 0 ? `${scrollProgress}%` : '0%',
+            opacity: scrollProgress > 0 ? 1 : 0,
+          }}
+        />
+
         {/* Page Content */}
         <main
+          ref={mainRef}
           className="flex-1 overflow-y-auto relative"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onScroll={handleScrollProgress}
         >
           {/* Swipe edge peek indicators */}
           {swipeOffset !== 0 && (
@@ -293,6 +322,9 @@ function MainApp() {
 
       {/* Command Palette */}
       <CommandPalette />
+
+      {/* Keyboard Shortcuts Modal */}
+      <ShortcutsModal />
     </div>
   )
 }

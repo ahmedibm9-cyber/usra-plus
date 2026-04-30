@@ -428,7 +428,7 @@ export function FilesPage() {
             {/* Upload button */}
             <Button
               onClick={handleUploadClick}
-              className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-9 px-4"
+              className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl h-9 px-4 btn-glow btn-press"
             >
               <Upload className="w-4 h-4" />
               <span className="hidden sm:inline">{t.files.upload}</span>

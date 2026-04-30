@@ -219,7 +219,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
                       <Button
                         onClick={() => handleUpgrade('pro')}
-                        className="w-full mt-3 h-8 text-xs bg-[#6366F1] hover:bg-[#6366F1]/90 text-white shadow-lg shadow-[#6366F1]/20"
+                        className="w-full mt-3 h-8 text-xs bg-[#6366F1] hover:bg-[#6366F1]/90 text-white shadow-lg shadow-[#6366F1]/20 btn-glow btn-press"
                         disabled={plan === 'pro'}
                       >
                         {plan === 'pro'

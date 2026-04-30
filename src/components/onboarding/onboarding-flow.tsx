@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Users, UserPlus, Home, Copy, Check, ChevronRight, Sparkles } from 'lucide-react'
+import { Users, UserPlus, Home, Copy, Check, ChevronRight, Sparkles, Wand2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { AvatarGenerator } from '@/components/shared/avatar-generator'
 
 // ─── Avatar Options ──────────────────────────────────────────────
 const AVATAR_OPTIONS = ['🏠', '👨‍👩‍👧‍👦', '🕌', '🌙', '🏡', '💼', '❤️', '🌟']
@@ -520,9 +521,30 @@ function FamilyStep({
 
 // ─── Step 3: Personalize ────────────────────────────────────────
 function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
-  const { t } = useI18n()
-  const { familyAvatar, familyColor, setFamilyAvatar, setFamilyColor } = useAppStore()
+  const { t, isRTL } = useI18n()
+  const { user, setUser } = useAuthStore()
+  const { familyAvatar, familyColor, setFamilyAvatar, setFamilyColor, setCurrentFamily, currentFamily } = useAppStore()
+  const [avatarGenOpen, setAvatarGenOpen] = useState(false)
+  const [aiAvatarUrl, setAiAvatarUrl] = useState<string | null>(null)
   const selectedColorOption = COLOR_OPTIONS.find(c => c.name === familyColor) || COLOR_OPTIONS[0]
+
+  const handleAvatarApply = useCallback((imageUrl: string) => {
+    setAiAvatarUrl(imageUrl)
+    // Update family avatar_url
+    if (currentFamily) {
+      setCurrentFamily({ ...currentFamily, avatar_url: imageUrl })
+    }
+    // Update user avatar
+    if (user) {
+      setUser({ ...user, avatar_url: imageUrl })
+    }
+  }, [currentFamily, user, setCurrentFamily, setUser])
+
+  const displayAvatar = aiAvatarUrl ? (
+    <img src={aiAvatarUrl} alt="AI Generated Avatar" className="size-16 rounded-full object-cover" />
+  ) : (
+    <span className="text-5xl">{familyAvatar}</span>
+  )
 
   return (
     <div className="w-full max-w-lg mx-auto space-y-8">
@@ -532,26 +554,40 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-          className={`w-28 h-28 rounded-full ${selectedColorOption.light} flex items-center justify-center mb-3 transition-colors duration-300`}
+          className={`w-28 h-28 rounded-full ${selectedColorOption.light} flex items-center justify-center mb-3 transition-colors duration-300 overflow-hidden`}
           style={{ boxShadow: `0 0 30px ${selectedColorOption.hex}33` }}
         >
-          <span className="text-5xl">{familyAvatar}</span>
+          {displayAvatar}
         </motion.div>
         <p className="text-gray-500 text-sm">{t.onboarding.familyAvatar || 'Choose your family avatar'}</p>
       </div>
 
       {/* Avatar Grid */}
       <div>
-        <h3 className="text-gray-300 text-sm font-medium mb-3">{t.onboarding.pickAvatar || 'Pick an avatar'}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-gray-300 text-sm font-medium">{t.onboarding.pickAvatar || 'Pick an avatar'}</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAvatarGenOpen(true)}
+            className="border-[#6366F1]/30 text-[#6366F1] hover:bg-[#6366F1]/10 hover:text-[#818CF8] h-7 text-xs"
+          >
+            <Wand2 className="size-3 mr-1" />
+            {t.avatarGen.generateWithAI}
+          </Button>
+        </div>
         <div className="grid grid-cols-4 gap-3">
           {AVATAR_OPTIONS.map((emoji) => (
             <motion.button
               key={emoji}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setFamilyAvatar(emoji)}
+              onClick={() => {
+                setFamilyAvatar(emoji)
+                setAiAvatarUrl(null)
+              }}
               className={`w-full aspect-square rounded-xl flex items-center justify-center text-2xl transition-all duration-200 ${
-                familyAvatar === emoji
+                familyAvatar === emoji && !aiAvatarUrl
                   ? `${selectedColorOption.light} ${selectedColorOption.border} border-2 shadow-lg`
                   : 'bg-[#111117] border border-white/[0.08] hover:border-white/[0.15]'
               }`}
@@ -612,6 +648,15 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
           {t.onboarding.looksGreat || 'Looks Great!'}
         </Button>
       </motion.div>
+
+      {/* Avatar Generator Modal */}
+      <AvatarGenerator
+        open={avatarGenOpen}
+        onOpenChange={setAvatarGenOpen}
+        onApply={handleAvatarApply}
+        mode="simple"
+        context="family"
+      />
     </div>
   )
 }

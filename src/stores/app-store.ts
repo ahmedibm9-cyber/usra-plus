@@ -8,6 +8,7 @@ interface AppState {
   sidebarOpen: boolean
   sidebarCollapsed: boolean
   commandPaletteOpen: boolean
+  shortcutsModalOpen: boolean
   currentFamily: Family | null
   familyMembers: FamilyMember[]
   families: Family[]
@@ -21,6 +22,7 @@ interface AppState {
   setSidebarOpen: (open: boolean) => void
   setSidebarCollapsed: (collapsed: boolean) => void
   setCommandPaletteOpen: (open: boolean) => void
+  setShortcutsModalOpen: (open: boolean) => void
   setCurrentFamily: (family: Family | null) => void
   setFamilyMembers: (members: FamilyMember[]) => void
   setFamilies: (families: Family[]) => void
@@ -61,6 +63,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   sidebarOpen: false,
   sidebarCollapsed: false,
   commandPaletteOpen: false,
+  shortcutsModalOpen: false,
   currentFamily: null,
   familyMembers: [],
   families: [],
@@ -74,6 +77,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+  setShortcutsModalOpen: (open) => set({ shortcutsModalOpen: open }),
   setCurrentFamily: (family) => set({ currentFamily: family }),
   setFamilyMembers: (members) => set({ familyMembers: members }),
   setFamilies: (families) => set({ families }),

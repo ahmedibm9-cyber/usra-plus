@@ -517,6 +517,14 @@ export function LoginForm() {
                 { id: 'event-4', family_id: 'demo-family-001', title: isRTL ? 'اجتماع المدرسة' : 'School Meeting', description: null, start_time: new Date(nextMon.getTime() + 15 * 3600000).toISOString(), end_time: new Date(nextMon.getTime() + 16 * 3600000).toISOString(), all_day: false, color: '#A78BFA', created_by: 'demo-user-003', created_at: calNow.toISOString(), updated_at: calNow.toISOString() },
               ])
 
+              // Seed demo files
+              const { useFilesStore } = await import('@/stores/files-store')
+              useFilesStore.getState().setFiles([
+                { id: 'file-1', family_id: 'demo-family-001', name: isRTL ? 'خطة_العائلة.pdf' : 'Family_Plan.pdf', file_type: 'application/pdf', file_size: 1024000, storage_path: '', url: null, uploaded_by: 'demo-user-001', created_at: new Date(Date.now() - 3*86400000).toISOString(), uploader: undefined },
+                { id: 'file-2', family_id: 'demo-family-001', name: isRTL ? 'قائمة_التسوق.jpg' : 'Shopping_List.jpg', file_type: 'image/jpeg', file_size: 512000, storage_path: '', url: null, uploaded_by: 'demo-user-002', created_at: new Date(Date.now() - 2*86400000).toISOString(), uploader: undefined },
+                { id: 'file-3', family_id: 'demo-family-001', name: isRTL ? 'ميزانية_الشهر.xlsx' : 'Monthly_Budget.xlsx', file_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', file_size: 256000, storage_path: '', url: null, uploaded_by: 'demo-user-003', created_at: new Date(Date.now() - 86400000).toISOString(), uploader: undefined },
+              ])
+
               // Seed demo comments
               const { useCommentStore } = await import('@/stores/comment-store')
               useCommentStore.getState().setComments([
@@ -608,6 +616,23 @@ export function LoginForm() {
                 {
                   id: 'chat-7',
                   family_id: 'demo-family-001',
+                  content: isRTL ? 'صورة من نزهتنا الأسبوع الماضي 🏞️' : 'From our outing last week 🏞️',
+                  sender_id: 'demo-user-001',
+                  message_type: 'image' as const,
+                  file_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+                  file_name: 'family-outing.jpg',
+                  file_size: 245760,
+                  thumbnail_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=60',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 1.8 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '❤️', users: ['demo-user-002', 'demo-user-003'] },
+                    { emoji: '🎉', users: ['demo-user-002'] },
+                  ],
+                },
+                {
+                  id: 'chat-8',
+                  family_id: 'demo-family-001',
                   content: isRTL ? 'مستعدة! 😄' : "I'm ready! 😄",
                   sender_id: 'demo-user-002',
                   message_type: 'text',
@@ -616,7 +641,24 @@ export function LoginForm() {
                   reactions: [],
                 },
                 {
-                  id: 'chat-8',
+                  id: 'chat-9',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'وصفة الكبسة التي تحبوها! 🍚' : 'The kabsa recipe you all love! 🍚',
+                  sender_id: 'demo-user-002',
+                  message_type: 'image' as const,
+                  file_url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&q=80',
+                  file_name: 'kabsa-recipe.jpg',
+                  file_size: 189440,
+                  thumbnail_url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=60',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 1.2 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '❤️', users: ['demo-user-001', 'demo-user-003'] },
+                    { emoji: '🙏', users: ['demo-user-003'] },
+                  ],
+                },
+                {
+                  id: 'chat-10',
                   family_id: 'demo-family-001',
                   content: isRTL ? 'أنا أيضًا! هل نحتاج أن أحضر شيئًا؟' : 'Me too! Should I bring anything?',
                   sender_id: 'demo-user-003',

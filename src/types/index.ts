@@ -97,6 +97,10 @@ export interface ChatMessage {
   sender_id: string;
   message_type: 'text' | 'image' | 'file' | 'system' | 'voice';
   voice_duration?: number;
+  file_url?: string;
+  file_name?: string;
+  file_size?: number;
+  thumbnail_url?: string;
   reply_to: string | null;
   created_at: string;
   sender?: UserProfile;

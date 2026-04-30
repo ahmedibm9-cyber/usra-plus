@@ -1297,7 +1297,7 @@ function EventModal({
           <Button
             onClick={handleSave}
             disabled={saving || !form.title.trim()}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white disabled:opacity-50"
+            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white disabled:opacity-50 btn-glow btn-press"
           >
             {saving ? t.common.loading : t.common.save}
           </Button>
@@ -1396,7 +1396,7 @@ function EventDetailDialog({
           </Button>
           <Button
             onClick={onEdit}
-            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white"
+            className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white btn-glow btn-press"
           >
             {t.common.edit}
           </Button>
@@ -1723,7 +1723,7 @@ export default function CalendarPage() {
             <Button
               onClick={handleAddEvent}
               size="sm"
-              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-1.5"
+              className="bg-[#6366F1] hover:bg-[#6366F1]/90 text-white gap-1.5 btn-glow btn-press"
             >
               <Plus className="size-4" />
               <span className="hidden sm:inline">{t.calendar.addEvent}</span>
