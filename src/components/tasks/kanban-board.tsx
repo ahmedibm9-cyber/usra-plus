@@ -89,7 +89,7 @@ function KanbanTaskCard({
   return (
     <div
       className={cn(
-        'bg-white/[0.04] rounded-lg p-3 hover:bg-white/[0.06] transition-colors cursor-grab active:cursor-grabbing border border-white/[0.04]',
+        'bg-[--border-subtle] rounded-lg p-3 hover:bg-[--border-subtle] transition-colors cursor-grab active:cursor-grabbing border border-[--border-subtle]',
         isDragOverlay && 'shadow-2xl shadow-indigo-500/10 ring-1 ring-indigo-500/20 rotate-2',
         task.status === 'done' && 'opacity-60'
       )}
@@ -97,8 +97,8 @@ function KanbanTaskCard({
       {/* Title + Priority */}
       <div className="flex items-start gap-2">
         <h4 className={cn(
-          'text-sm font-medium text-[#E5E7EB] flex-1 min-w-0 leading-snug',
-          task.status === 'done' && 'line-through text-[#6B7280]'
+          'text-sm font-medium text-[--text-primary] flex-1 min-w-0 leading-snug',
+          task.status === 'done' && 'line-through text-[--text-muted]'
         )}>
           {task.title}
         </h4>
@@ -116,7 +116,7 @@ function KanbanTaskCard({
       <div className="mt-2 flex items-center gap-2 justify-between">
         {/* Due date */}
         {task.due_date ? (
-          <div className={cn('flex items-center gap-1', isOverdue ? 'text-red-400' : 'text-[#6B7280]')}>
+          <div className={cn('flex items-center gap-1', isOverdue ? 'text-red-400' : 'text-[--text-muted]')}>
             <CalendarIcon className="size-3 flex-shrink-0" />
             <span className="text-xs">{dueDateLabel}</span>
           </div>
@@ -126,7 +126,7 @@ function KanbanTaskCard({
 
         {/* Assignee avatar */}
         {task.assignee && assigneeInitials && (
-          <Avatar className="h-5 w-5 border border-white/[0.08] flex-shrink-0">
+          <Avatar className="h-5 w-5 border border-[--border-subtle] flex-shrink-0">
             {task.assignee.avatar_url && <AvatarImage src={task.assignee.avatar_url} alt="" />}
             <AvatarFallback className="text-[8px] bg-[#6366F1]/20 text-[#6366F1]">
               {assigneeInitials}
@@ -182,14 +182,14 @@ function KanbanColumn({
 
   return (
     <div className={cn(
-      'bg-white/[0.02] rounded-xl p-3 min-w-[280px] flex flex-col border-l-2',
+      'bg-[--border-subtle] rounded-xl p-3 min-w-[280px] flex flex-col border-l-2',
       column.borderColor
     )}>
       {/* Column Header */}
-      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/[0.06]">
+      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[--border-subtle]">
         <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', column.dotColor)} />
-        <h3 className="text-sm font-semibold text-[#E5E7EB]">{title}</h3>
-        <span className="ml-auto text-[10px] font-medium text-[#6B7280] bg-white/[0.06] rounded-full px-2 py-0.5">
+        <h3 className="text-sm font-semibold text-[--text-primary]">{title}</h3>
+        <span className="ml-auto text-[10px] font-medium text-[--text-muted] bg-[--border-subtle] rounded-full px-2 py-0.5">
           {tasks.length}
         </span>
       </div>
@@ -213,8 +213,8 @@ function KanbanColumn({
 
           {/* Drop placeholder when empty */}
           {tasks.length === 0 && (
-            <div className="border-2 border-dashed border-white/[0.06] rounded-lg p-4 text-center">
-              <p className="text-xs text-[#6B7280]">No tasks</p>
+            <div className="border-2 border-dashed border-[--border-subtle] rounded-lg p-4 text-center">
+              <p className="text-xs text-[--text-muted]">No tasks</p>
             </div>
           )}
         </div>
@@ -223,7 +223,7 @@ function KanbanColumn({
       {/* Add Task button */}
       <button
         onClick={() => onAddTask(column.status as TaskStatus)}
-        className="w-full border-dashed border border-white/[0.08] text-[#6B7280] hover:bg-white/[0.04] hover:text-[#E5E7EB] rounded-lg py-2 text-sm mt-2 transition-colors flex items-center justify-center gap-1.5"
+        className="w-full border-dashed border border-[--border-subtle] text-[--text-muted] hover:bg-[--border-subtle] hover:text-[--text-primary] rounded-lg py-2 text-sm mt-2 transition-colors flex items-center justify-center gap-1.5"
       >
         <Plus className="size-3.5" />
         {t.tasks.addTaskToColumn}

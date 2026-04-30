@@ -59,7 +59,7 @@ function CircularProgress({
   size = 80,
   strokeWidth = 6,
   color = '#6366F1',
-  trackColor = 'rgba(255,255,255,0.06)',
+  trackColor = 'var(--border-subtle)',
 }: {
   value: number
   size?: number
@@ -113,7 +113,7 @@ function GlassCard({
       transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div
-        className={`glass-card glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
+        className={`glass-card glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-[inset_0_1px_0_var(--border-subtle)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 ${className}`}
       >
         {children}
       </div>
@@ -787,7 +787,7 @@ export default function DashboardPage() {
                       animationDuration={800}
                     >
                       <Cell fill="#6366F1" />
-                      <Cell fill="rgba(255,255,255,0.04)" />
+                      <Cell fill="var(--border-subtle)" />
                     </Pie>
                   </PieChart>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -848,7 +848,7 @@ export default function DashboardPage() {
                 <span className="text-xs text-[--text-muted]">{t.dashboard.members}:</span>
                 <div className="flex -space-x-2">
                   {familyMembers.slice(0, 5).map((member) => (
-                    <Avatar key={member.id} className="size-7 border-2 border-[#111117]">
+                    <Avatar key={member.id} className="size-7 border-2 border-[--bg-surface]">
                       <AvatarImage src={member.profiles?.avatar_url || undefined} />
                       <AvatarFallback className="bg-[#6366F1]/20 text-[10px] text-[#A78BFA]">
                         {member.profiles?.first_name?.[0] || member.nickname?.[0] || '?'}
@@ -856,7 +856,7 @@ export default function DashboardPage() {
                     </Avatar>
                   ))}
                   {familyMembers.length > 5 && (
-                    <div className="flex size-7 items-center justify-center rounded-full border-2 border-[#111117] bg-[--bg-surface-2] text-[10px] text-[--text-muted]">
+                    <div className="flex size-7 items-center justify-center rounded-full border-2 border-[--bg-surface] bg-[--bg-surface-2] text-[10px] text-[--text-muted]">
                       +{familyMembers.length - 5}
                     </div>
                   )}

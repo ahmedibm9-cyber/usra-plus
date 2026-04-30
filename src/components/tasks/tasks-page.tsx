@@ -110,7 +110,7 @@ const STATUS_CONFIG: Record<TaskStatus, { dot: string; label: string; icon: Reac
   todo: {
     dot: 'bg-gray-400',
     label: 'To Do',
-    icon: <Circle className="size-3.5 text-gray-400" />,
+    icon: <Circle className="size-3.5 text-[--text-muted]" />,
   },
   in_progress: {
     dot: 'bg-blue-400',
@@ -144,8 +144,8 @@ const DATE_GROUP_LABELS: Record<DateGroup, { label: string; color: string }> = {
   today: { label: 'Today', color: 'text-blue-400' },
   tomorrow: { label: 'Tomorrow', color: 'text-purple-400' },
   this_week: { label: 'This Week', color: 'text-yellow-400' },
-  later: { label: 'Later', color: 'text-gray-400' },
-  no_date: { label: 'No Due Date', color: 'text-gray-500' },
+  later: { label: 'Later', color: 'text-[--text-muted]' },
+  no_date: { label: 'No Due Date', color: 'text-[--text-muted]' },
 }
 
 // ─── Task Form Type ─────────────────────────────────────────────────
@@ -250,20 +250,20 @@ function CommentsPanel({ taskId }: { taskId: string }) {
   }
 
   return (
-    <div className="mt-4 border-t border-white/[0.06] pt-4">
+    <div className="mt-4 border-t border-[--border-subtle] pt-4">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-2 w-full text-left mb-3"
       >
         <MessageCircle className="size-4 text-[#6366F1]" />
-        <span className="text-sm font-medium text-[#E5E7EB]">{t.comments.comments}</span>
+        <span className="text-sm font-medium text-[--text-primary]">{t.comments.comments}</span>
         {commentCount > 0 && (
-          <span className="text-xs text-[#6B7280] bg-white/[0.04] px-1.5 py-0.5 rounded-full">
+          <span className="text-xs text-[--text-muted] bg-[--border-subtle] px-1.5 py-0.5 rounded-full">
             {commentCount}
           </span>
         )}
-        <span className="ml-auto text-[#6B7280] text-xs">{expanded ? '▲' : '▼'}</span>
+        <span className="ml-auto text-[--text-muted] text-xs">{expanded ? '▲' : '▼'}</span>
       </button>
 
       {expanded && (
@@ -272,9 +272,9 @@ function CommentsPanel({ taskId }: { taskId: string }) {
           <div className="max-h-64 overflow-y-auto space-y-3 mb-3 custom-scrollbar">
             {topLevelComments.length === 0 ? (
               <div className="text-center py-4">
-                <MessageCircle className="size-8 text-[#6B7280]/40 mx-auto mb-2" />
-                <p className="text-sm text-[#6B7280]">{t.comments.noComments}</p>
-                <p className="text-xs text-[#6B7280]/60">{t.comments.startConversation}</p>
+                <MessageCircle className="size-8 text-[--text-muted]/40 mx-auto mb-2" />
+                <p className="text-sm text-[--text-muted]">{t.comments.noComments}</p>
+                <p className="text-xs text-[--text-muted]/60">{t.comments.startConversation}</p>
               </div>
             ) : (
               topLevelComments.map((comment) => {
@@ -283,7 +283,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                   <div key={comment.id}>
                     {/* Top-level comment */}
                     <div className="flex gap-2.5">
-                      <Avatar className="h-7 w-7 rounded-full border border-white/[0.08] flex-shrink-0">
+                      <Avatar className="h-7 w-7 rounded-full border border-[--border-subtle] flex-shrink-0">
                         {comment.author_avatar && <AvatarImage src={comment.author_avatar} alt="" />}
                         <AvatarFallback className="text-[10px] bg-[#6366F1]/20 text-[#6366F1]">
                           {comment.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -291,17 +291,17 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-[#E5E7EB]">{comment.author_name}</span>
-                          <span className="text-[11px] text-[#6B7280]">{getRelativeTime(comment.created_at, isRTL)}</span>
+                          <span className="text-sm font-medium text-[--text-primary]">{comment.author_name}</span>
+                          <span className="text-[11px] text-[--text-muted]">{getRelativeTime(comment.created_at, isRTL)}</span>
                         </div>
-                        <p className="text-sm text-[#9CA3AF] mt-0.5 break-words">{comment.content}</p>
+                        <p className="text-sm text-[--text-secondary] mt-0.5 break-words">{comment.content}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             onClick={() => {
                               setReplyingTo(replyingTo === comment.id ? null : comment.id)
                               setReplyContent('')
                             }}
-                            className="text-xs text-[#6B7280] hover:text-[#6366F1] transition-colors"
+                            className="text-xs text-[--text-muted] hover:text-[#6366F1] transition-colors"
                           >
                             <CornerDownRight className="size-3 inline mr-1" />
                             {t.comments.reply}
@@ -309,7 +309,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                           {comment.author_id === user?.id && (
                             <button
                               onClick={() => removeComment(comment.id)}
-                              className="text-xs text-[#6B7280] hover:text-red-400 transition-colors"
+                              className="text-xs text-[--text-muted] hover:text-red-400 transition-colors"
                             >
                               {t.comments.delete}
                             </button>
@@ -332,7 +332,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                               }}
                               placeholder={`${t.comments.replyTo} ${comment.author_name}...`}
                               rows={1}
-                              className="flex-1 bg-[#0B0B0F] border border-white/[0.08] rounded-lg px-3 py-1.5 text-sm text-[#E5E7EB] placeholder:text-[#6B7280] focus:outline-none focus:border-[#6366F1]/50 resize-none overflow-hidden min-h-[32px]"
+                              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-1.5 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[#6366F1]/50 resize-none overflow-hidden min-h-[32px]"
                             />
                             <div className="flex gap-1 flex-shrink-0">
                               <Button
@@ -347,7 +347,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => { setReplyingTo(null); setReplyContent('') }}
-                                className="h-7 px-2 text-[#6B7280] hover:text-[#E5E7EB] text-xs"
+                                className="h-7 px-2 text-[--text-muted] hover:text-[--text-primary] text-xs"
                               >
                                 {t.comments.cancel}
                               </Button>
@@ -360,7 +360,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                           <div className="ml-8 border-l-2 border-[#6366F1]/20 pl-3 mt-2 space-y-2">
                             {replies.map((reply) => (
                               <div key={reply.id} className="flex gap-2">
-                                <Avatar className="h-5 w-5 rounded-full border border-white/[0.08] flex-shrink-0">
+                                <Avatar className="h-5 w-5 rounded-full border border-[--border-subtle] flex-shrink-0">
                                   {reply.author_avatar && <AvatarImage src={reply.author_avatar} alt="" />}
                                   <AvatarFallback className="text-[8px] bg-[#6366F1]/20 text-[#6366F1]">
                                     {reply.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -368,14 +368,14 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-medium text-[#E5E7EB]">{reply.author_name}</span>
-                                    <span className="text-[10px] text-[#6B7280]">{getRelativeTime(reply.created_at, isRTL)}</span>
+                                    <span className="text-xs font-medium text-[--text-primary]">{reply.author_name}</span>
+                                    <span className="text-[10px] text-[--text-muted]">{getRelativeTime(reply.created_at, isRTL)}</span>
                                   </div>
-                                  <p className="text-xs text-[#9CA3AF] mt-0.5 break-words">{reply.content}</p>
+                                  <p className="text-xs text-[--text-secondary] mt-0.5 break-words">{reply.content}</p>
                                   {reply.author_id === user?.id && (
                                     <button
                                       onClick={() => removeComment(reply.id)}
-                                      className="text-[10px] text-[#6B7280] hover:text-red-400 transition-colors mt-0.5"
+                                      className="text-[10px] text-[--text-muted] hover:text-red-400 transition-colors mt-0.5"
                                     >
                                       {t.comments.delete}
                                     </button>
@@ -409,7 +409,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                   handleAddComment()
                 }
               }}
-              className="flex-1 bg-[#0B0B0F] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[#E5E7EB] placeholder:text-[#6B7280] focus:outline-none focus:border-[#6366F1]/50 resize-none overflow-hidden min-h-[36px]"
+              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[#6366F1]/50 resize-none overflow-hidden min-h-[36px]"
             />
             <Button
               size="sm"
@@ -473,8 +473,8 @@ function TaskCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        'group relative flex items-start gap-3 rounded-xl border border-white/[0.06] bg-[#111117] p-4 transition-all duration-200',
-        hovered && 'border-white/[0.12] bg-[#14141b] shadow-lg shadow-black/20 -translate-y-px',
+        'group relative flex items-start gap-3 rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4 transition-all duration-200',
+        hovered && 'border-[--border-medium] bg-[--bg-surface-2] shadow-lg shadow-black/20 -translate-y-px',
         task.status === 'done' && 'opacity-60',
         isDragOverlay && 'shadow-2xl shadow-indigo-500/10 ring-1 ring-indigo-500/20 scale-[1.03]'
       )}
@@ -483,7 +483,7 @@ function TaskCard({
       {dragHandleProps && (
         <button
           {...dragHandleProps}
-          className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[#6B7280] hover:text-[#E5E7EB]"
+          className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[--text-muted] hover:text-[--text-primary]"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-5" />
@@ -516,7 +516,7 @@ function TaskCard({
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 20 }}
             >
-              <Circle className="size-5 text-gray-500 transition-colors hover:text-[#6366F1]" />
+              <Circle className="size-5 text-[--text-muted] transition-colors hover:text-[#6366F1]" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -527,8 +527,8 @@ function TaskCard({
         <div className="flex items-start gap-2 flex-wrap">
           <h3
             className={cn(
-              'text-sm font-medium leading-snug text-[#E5E7EB]',
-              task.status === 'done' && 'line-through text-[#6B7280]'
+              'text-sm font-medium leading-snug text-[--text-primary]',
+              task.status === 'done' && 'line-through text-[--text-muted]'
             )}
           >
             {task.title}
@@ -545,7 +545,7 @@ function TaskCard({
           </Badge>
           {/* Comment count badge */}
           {commentCount > 0 && (
-            <span className="text-xs text-[var(--text-muted)] bg-white/[0.04] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+            <span className="text-xs text-[var(--text-muted)] bg-[--border-subtle] px-1.5 py-0.5 rounded-full flex items-center gap-1">
               <MessageCircle className="size-3" />
               {commentCount}
             </span>
@@ -553,7 +553,7 @@ function TaskCard({
         </div>
 
         {task.description && (
-          <p className="mt-1 text-xs text-[#6B7280] line-clamp-2 leading-relaxed">
+          <p className="mt-1 text-xs text-[--text-muted] line-clamp-2 leading-relaxed">
             {task.description}
           </p>
         )}
@@ -562,7 +562,7 @@ function TaskCard({
           {/* Status indicator */}
           <div className="flex items-center gap-1.5">
             {status.icon}
-            <span className="text-[11px] text-[#6B7280]">{status.label}</span>
+            <span className="text-[11px] text-[--text-muted]">{status.label}</span>
           </div>
 
           {/* Due date */}
@@ -581,13 +581,13 @@ function TaskCard({
           {/* Assignee */}
           {task.assignee && (
             <div className="flex items-center gap-1.5 ml-auto">
-              <Avatar className="size-5 border border-white/[0.08]">
+              <Avatar className="size-5 border border-[--border-subtle]">
                 {task.assignee.avatar_url && <AvatarImage src={task.assignee.avatar_url} alt="" />}
                 <AvatarFallback className="text-[9px] bg-[#6366F1]/20 text-[#6366F1]">
                   {assigneeInitials}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-[11px] text-[#6B7280]">
+              <span className="text-[11px] text-[--text-muted]">
                 {task.assignee.first_name || task.assignee.email?.split('@')[0]}
               </span>
             </div>
@@ -608,7 +608,7 @@ function TaskCard({
             <Button
               variant="ghost"
               size="icon"
-              className="size-7 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06]"
+              className="size-7 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
               onClick={() => onEdit(task)}
               aria-label="Edit task"
             >
@@ -617,7 +617,7 @@ function TaskCard({
             <Button
               variant="ghost"
               size="icon"
-              className="size-7 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10"
+              className="size-7 text-[--text-muted] hover:text-red-400 hover:bg-red-500/10"
               onClick={() => onDelete(task.id)}
               aria-label="Delete task"
             >
@@ -739,12 +739,12 @@ function TaskModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[520px] max-h-[85vh] flex flex-col">
+      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-[520px] max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-[#E5E7EB]">
+          <DialogTitle className="text-[--text-primary]">
             {editingTask ? t.tasks.editTask : t.tasks.addTask}
           </DialogTitle>
-          <DialogDescription className="text-[#6B7280]">
+          <DialogDescription className="text-[--text-muted]">
             {editingTask ? 'Update the task details below.' : 'Fill in the details to create a new task.'}
           </DialogDescription>
         </DialogHeader>
@@ -752,40 +752,40 @@ function TaskModal({
         <div className="grid gap-4 py-2 overflow-y-auto flex-1 min-h-0">
           {/* Title */}
           <div className="space-y-2">
-            <Label className="text-[#E5E7EB] text-sm">{t.tasks.taskTitle}</Label>
+            <Label className="text-[--text-primary] text-sm">{t.tasks.taskTitle}</Label>
             <Input
               placeholder="Enter task title..."
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#6366F1]/50"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label className="text-[#E5E7EB] text-sm">{t.tasks.description}</Label>
+            <Label className="text-[--text-primary] text-sm">{t.tasks.description}</Label>
             <Textarea
               placeholder="Add a description (optional)..."
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/50 min-h-[80px] resize-none"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#6366F1]/50 min-h-[80px] resize-none"
             />
           </div>
 
           {/* Priority & Status Row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-[#E5E7EB] text-sm">{t.tasks.priority}</Label>
+              <Label className="text-[--text-primary] text-sm">{t.tasks.priority}</Label>
               <Select
                 value={form.priority}
                 onValueChange={(v) => setForm((f) => ({ ...f, priority: v as TaskPriority }))}
               >
-                <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] w-full">
+                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111117] border-white/[0.08]">
+                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                   {(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => (
-                    <SelectItem key={p} value={p} className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">
+                    <SelectItem key={p} value={p} className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">
                       <span className="flex items-center gap-2">
                         <span className={cn('size-2 rounded-full', PRIORITY_CONFIG[p].bg.replace('/15', ''), {
                           'bg-red-500': p === 'urgent',
@@ -802,17 +802,17 @@ function TaskModal({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[#E5E7EB] text-sm">{t.tasks.status}</Label>
+              <Label className="text-[--text-primary] text-sm">{t.tasks.status}</Label>
               <Select
                 value={form.status}
                 onValueChange={(v) => setForm((f) => ({ ...f, status: v as TaskStatus }))}
               >
-                <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] w-full">
+                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111117] border-white/[0.08]">
+                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                   {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((s) => (
-                    <SelectItem key={s} value={s} className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">
+                    <SelectItem key={s} value={s} className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">
                       <span className="flex items-center gap-2">
                         {STATUS_CONFIG[s].icon}
                         {STATUS_CONFIG[s].label}
@@ -827,16 +827,16 @@ function TaskModal({
           {/* Assign To & Due Date Row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-[#E5E7EB] text-sm">{t.tasks.assignTo}</Label>
+              <Label className="text-[--text-primary] text-sm">{t.tasks.assignTo}</Label>
               <Select
                 value={form.assigned_to}
                 onValueChange={(v) => setForm((f) => ({ ...f, assigned_to: v }))}
               >
-                <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] w-full">
+                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] w-full">
                   <SelectValue placeholder="Unassigned" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111117] border-white/[0.08]">
-                  <SelectItem value="__none__" className="text-[#6B7280] focus:bg-white/[0.06]">
+                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
+                  <SelectItem value="__none__" className="text-[--text-muted] focus:bg-[--border-subtle]">
                     <span className="flex items-center gap-2">
                       <User className="size-3.5" />
                       Unassigned
@@ -846,10 +846,10 @@ function TaskModal({
                     <SelectItem
                       key={member.user_id}
                       value={member.user_id}
-                      className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]"
+                      className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]"
                     >
                       <span className="flex items-center gap-2">
-                        <Avatar className="size-5 border border-white/[0.08]">
+                        <Avatar className="size-5 border border-[--border-subtle]">
                           {member.profiles?.avatar_url && (
                             <AvatarImage src={member.profiles.avatar_url} alt="" />
                           )}
@@ -869,21 +869,21 @@ function TaskModal({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[#E5E7EB] text-sm">{t.tasks.dueDate}</Label>
+              <Label className="text-[--text-primary] text-sm">{t.tasks.dueDate}</Label>
               <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      'w-full justify-start text-left font-normal bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] hover:bg-[#0B0B0F] hover:border-white/[0.12]',
-                      !form.due_date && 'text-[#6B7280]'
+                      'w-full justify-start text-left font-normal bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-primary] hover:border-[--border-medium]',
+                      !form.due_date && 'text-[--text-muted]'
                     )}
                   >
                     <CalendarIcon className="mr-2 size-4" />
                     {form.due_date ? format(form.due_date, 'MMM d, yyyy') : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-[#111117] border-white/[0.08]" align="start">
+                <PopoverContent className="w-auto p-0 bg-[--bg-surface] border-[--border-subtle]" align="start">
                   <Calendar
                     mode="single"
                     selected={form.due_date}
@@ -903,7 +903,7 @@ function TaskModal({
             <button
               type="button"
               onClick={() => setForm((f) => ({ ...f, due_date: undefined }))}
-              className="text-[11px] text-[#6B7280] hover:text-[#E5E7EB] transition-colors flex items-center gap-1"
+              className="text-[11px] text-[--text-muted] hover:text-[--text-primary] transition-colors flex items-center gap-1"
             >
               <X className="size-3" />
               Clear due date
@@ -918,7 +918,7 @@ function TaskModal({
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06]"
+            className="text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
           >
             {t.common.cancel}
           </Button>
@@ -945,10 +945,10 @@ function DateSectionHeader({ group, count }: { group: DateGroup; count: number }
       <span className={cn('text-xs font-semibold uppercase tracking-wider', config.color)}>
         {config.label}
       </span>
-      <span className="text-[10px] text-[#6B7280] bg-white/[0.04] rounded-full px-2 py-0.5">
+      <span className="text-[10px] text-[--text-muted] bg-[--border-subtle] rounded-full px-2 py-0.5">
         {count}
       </span>
-      <div className="flex-1 h-px bg-white/[0.06]" />
+      <div className="flex-1 h-px bg-[--border-subtle]" />
     </div>
   )
 }
@@ -959,13 +959,13 @@ function StatusSectionHeader({ status, count }: { status: TaskStatus; count: num
   return (
     <div className="flex items-center gap-3 mt-6 mb-3 first:mt-0">
       {config.icon}
-      <span className="text-xs font-semibold uppercase tracking-wider text-[#E5E7EB]">
+      <span className="text-xs font-semibold uppercase tracking-wider text-[--text-primary]">
         {config.label}
       </span>
-      <span className="text-[10px] text-[#6B7280] bg-white/[0.04] rounded-full px-2 py-0.5">
+      <span className="text-[10px] text-[--text-muted] bg-[--border-subtle] rounded-full px-2 py-0.5">
         {count}
       </span>
-      <div className="flex-1 h-px bg-white/[0.06]" />
+      <div className="flex-1 h-px bg-[--border-subtle]" />
     </div>
   )
 }
@@ -1288,8 +1288,8 @@ export default function TasksPage() {
       <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-[#E5E7EB] tracking-tight">{t.tasks.title}</h1>
-            <p className="text-sm text-[#6B7280] mt-0.5">
+            <h1 className="text-2xl font-bold text-[--text-primary] tracking-tight">{t.tasks.title}</h1>
+            <p className="text-sm text-[--text-muted] mt-0.5">
               {tasks.length} task{tasks.length !== 1 ? 's' : ''} &middot; {taskCounts.done} completed
             </p>
           </div>
@@ -1313,17 +1313,17 @@ export default function TasksPage() {
 
         {/* Search bar */}
         <div className="relative mt-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7280]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[--text-muted]" />
           <Input
             placeholder={t.tasks.search}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-[#111117] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/50 h-10 rounded-xl"
+            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#6366F1]/50 h-10 rounded-xl"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E7EB] transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary] transition-colors"
             >
               <X className="size-4" />
             </button>
@@ -1335,7 +1335,7 @@ export default function TasksPage() {
       <div className="flex-shrink-0 px-4 sm:px-6 pb-3">
         <div className="flex items-center gap-2 flex-wrap">
           {/* Status filter */}
-          <div className="flex items-center gap-1 bg-[#111117] border border-white/[0.06] rounded-lg p-0.5">
+          <div className="flex items-center gap-1 bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5">
             {(['all', 'todo', 'in_progress', 'done'] as const).map((status) => {
               const isActive = filterStatus === status
               const label = status === 'all' ? 'All' : STATUS_CONFIG[status as TaskStatus].label
@@ -1348,7 +1348,7 @@ export default function TasksPage() {
                     'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
                     isActive
                       ? 'bg-[#6366F1] text-white shadow-sm'
-                      : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+                      : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
                   )}
                 >
                   {label}
@@ -1360,14 +1360,14 @@ export default function TasksPage() {
 
           {/* Priority filter */}
           <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v as TaskPriority | 'all')}>
-            <SelectTrigger className="h-8 text-xs bg-[#111117] border-white/[0.06] text-[#E5E7EB] w-[130px] rounded-lg">
-              <Filter className="size-3 mr-1 text-[#6B7280]" />
+            <SelectTrigger className="h-8 text-xs bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] w-[130px] rounded-lg">
+              <Filter className="size-3 mr-1 text-[--text-muted]" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#111117] border-white/[0.08]">
-              <SelectItem value="all" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">All Priorities</SelectItem>
+            <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
+              <SelectItem value="all" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">All Priorities</SelectItem>
               {(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => (
-                <SelectItem key={p} value={p} className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">
+                <SelectItem key={p} value={p} className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">
                   <span className="flex items-center gap-2">
                     <span className={cn('size-2 rounded-full', {
                       'bg-red-500': p === 'urgent',
@@ -1384,21 +1384,21 @@ export default function TasksPage() {
 
           {/* Sort */}
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-            <SelectTrigger className="h-8 text-xs bg-[#111117] border-white/[0.06] text-[#E5E7EB] w-[150px] rounded-lg">
-              <ArrowUpDown className="size-3 mr-1 text-[#6B7280]" />
+            <SelectTrigger className="h-8 text-xs bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] w-[150px] rounded-lg">
+              <ArrowUpDown className="size-3 mr-1 text-[--text-muted]" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#111117] border-white/[0.08]">
-              <SelectItem value="created_at" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Created Date</SelectItem>
-              <SelectItem value="due_date" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Due Date</SelectItem>
-              <SelectItem value="priority" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Priority</SelectItem>
-              <SelectItem value="status" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Status</SelectItem>
-              <SelectItem value="manual" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Manual Order</SelectItem>
+            <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
+              <SelectItem value="created_at" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Created Date</SelectItem>
+              <SelectItem value="due_date" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Due Date</SelectItem>
+              <SelectItem value="priority" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Priority</SelectItem>
+              <SelectItem value="status" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Status</SelectItem>
+              <SelectItem value="manual" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Manual Order</SelectItem>
             </SelectContent>
           </Select>
 
           {/* View toggle: List / Board */}
-          <div className="flex items-center gap-1 bg-[#111117] border border-white/[0.06] rounded-lg p-0.5 ml-auto">
+          <div className="flex items-center gap-1 bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5 ml-auto">
             <button
               onClick={() => setPageView('list')}
               title={t.tasks.listView}
@@ -1406,7 +1406,7 @@ export default function TasksPage() {
                 'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
                 pageView === 'list'
                   ? 'bg-[#6366F1]/20 text-[#6366F1]'
-                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
               )}
             >
               <LayoutList className="size-3.5" />
@@ -1419,7 +1419,7 @@ export default function TasksPage() {
                 'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
                 pageView === 'board'
                   ? 'bg-[#6366F1]/20 text-[#6366F1]'
-                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
               )}
             >
               <LayoutGrid className="size-3.5" />
@@ -1436,8 +1436,8 @@ export default function TasksPage() {
               className={cn(
                 'px-3 py-1 rounded-md text-xs font-medium transition-all duration-150',
                 viewMode === 'status'
-                  ? 'bg-white/[0.08] text-[#E5E7EB]'
-                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+                  ? 'bg-[--border-subtle] text-[--text-primary]'
+                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
               )}
             >
               By Status
@@ -1447,8 +1447,8 @@ export default function TasksPage() {
               className={cn(
                 'px-3 py-1 rounded-md text-xs font-medium transition-all duration-150',
                 viewMode === 'date'
-                  ? 'bg-white/[0.08] text-[#E5E7EB]'
-                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+                  ? 'bg-[--border-subtle] text-[--text-primary]'
+                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
               )}
             >
               By Date

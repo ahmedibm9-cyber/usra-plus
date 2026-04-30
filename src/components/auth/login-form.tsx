@@ -139,7 +139,7 @@ export function LoginForm() {
           <h1 className="text-3xl font-bold text-gray-100 tracking-tight">
             {t.app.name}
           </h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-[--text-muted] text-sm">
             {t.app.tagline}
           </p>
         </motion.div>
@@ -153,11 +153,11 @@ export function LoginForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <Label htmlFor="login-email" className="text-gray-300 text-sm font-medium">
+            <Label htmlFor="login-email" className="text-[--text-secondary] text-sm font-medium">
               {t.auth.email}
             </Label>
             <div className="auth-input-wrapper">
-              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
               <Input
                 id="login-email"
                 type="email"
@@ -167,7 +167,7 @@ export function LoginForm() {
                   setEmail(e.target.value)
                   if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
                 }}
-                className={`h-11 bg-[#111117] border-white/[0.08] text-gray-200 placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
+                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
                 disabled={isLoading}
                 autoComplete="email"
               />
@@ -188,7 +188,7 @@ export function LoginForm() {
             transition={{ duration: 0.4, delay: 0.15 }}
           >
             <div className="flex items-center justify-between">
-              <Label htmlFor="login-password" className="text-gray-300 text-sm font-medium">
+              <Label htmlFor="login-password" className="text-[--text-secondary] text-sm font-medium">
                 {t.auth.password}
               </Label>
               <button
@@ -200,7 +200,7 @@ export function LoginForm() {
               </button>
             </div>
             <div className="auth-input-wrapper">
-              <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+              <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
               <Input
                 id="login-password"
                 type={showPassword ? 'text' : 'password'}
@@ -210,14 +210,14 @@ export function LoginForm() {
                   setPassword(e.target.value)
                   if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
                 }}
-                className={`h-11 bg-[#111117] border-white/[0.08] text-gray-200 placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
+                className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}`}
                 disabled={isLoading}
                 autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className={`absolute top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
+                className={`absolute top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-secondary] transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -258,8 +258,8 @@ export function LoginForm() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.25 }}
         >
-          <Separator className="bg-white/[0.06]" />
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#111117]/80 backdrop-blur-sm px-3 text-xs text-gray-500">
+          <Separator className="bg-[--border-subtle]" />
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--bg-surface]/80 backdrop-blur-sm px-3 text-xs text-[--text-muted]">
             {t.auth.orContinueWith}
           </span>
         </motion.div>
@@ -276,7 +276,7 @@ export function LoginForm() {
             variant="outline"
             onClick={handleGoogleLogin}
             disabled={isGoogleLoading}
-            className="w-full border-white/[0.08] bg-[#111117] text-gray-300 hover:bg-[#1a1a22] hover:text-gray-200 hover:border-white/[0.12] hover:scale-[1.01] rounded-2xl h-11 font-medium transition-all duration-200"
+            className="w-full border-[--border-subtle] bg-[--bg-surface] text-[--text-secondary] hover:bg-[--bg-surface-2] hover:text-[--text-primary] hover:border-[--border-medium] hover:scale-[1.01] rounded-2xl h-11 font-medium transition-all duration-200"
           >
             {isGoogleLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -311,7 +311,7 @@ export function LoginForm() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.35 }}
         >
-          <p className="text-center text-xs text-gray-500 leading-relaxed">
+          <p className="text-center text-xs text-[--text-muted] leading-relaxed">
             {t.auth.termsAgreement}{' '}
             <button
               type="button"
@@ -339,8 +339,8 @@ export function LoginForm() {
           transition={{ duration: 0.4, delay: 0.4 }}
         >
           <div className="relative">
-            <Separator className="bg-white/[0.06]" />
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#111117]/80 backdrop-blur-sm px-3 text-xs text-gray-500">
+            <Separator className="bg-[--border-subtle]" />
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--bg-surface]/80 backdrop-blur-sm px-3 text-xs text-[--text-muted]">
               {isRTL ? 'أو' : 'or'}
             </span>
           </div>
@@ -687,7 +687,7 @@ export function LoginForm() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.45 }}
         >
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[--text-muted]">
             {t.auth.noAccount}{' '}
             <button
               type="button"

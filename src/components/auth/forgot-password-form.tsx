@@ -84,11 +84,11 @@ export function ForgotPasswordForm() {
           <h2 className="text-2xl font-bold text-gray-100">
             {t.auth.resetPassword}
           </h2>
-          <p className="text-gray-400 text-sm">
+          <p className="text-[--text-muted] text-sm">
             {t.auth.verificationSent}
           </p>
           <p className="text-indigo-300 font-medium text-sm">{email}</p>
-          <p className="text-gray-500 text-sm mt-2">
+          <p className="text-[--text-muted] text-sm mt-2">
             {t.auth.checkInbox}
           </p>
         </motion.div>
@@ -101,7 +101,7 @@ export function ForgotPasswordForm() {
           <Button
             onClick={() => setAuthView('login')}
             variant="outline"
-            className="w-full border-white/[0.08] bg-[#111117] text-gray-300 hover:bg-[#1a1a22] hover:text-gray-200 rounded-2xl h-11 hover:scale-[1.01] transition-all duration-200"
+            className="w-full border-[--border-subtle] bg-[--bg-surface] text-[--text-secondary] hover:bg-[--bg-surface-2] hover:text-[--text-primary] rounded-2xl h-11 hover:scale-[1.01] transition-all duration-200"
           >
             <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
             {t.auth.backToLogin}
@@ -128,7 +128,7 @@ export function ForgotPasswordForm() {
         <h2 className="text-2xl font-bold text-gray-100">
           {t.auth.resetPassword}
         </h2>
-        <p className="text-gray-400 text-sm">
+        <p className="text-[--text-muted] text-sm">
           {t.auth.verificationSent}
         </p>
       </motion.div>
@@ -141,11 +141,11 @@ export function ForgotPasswordForm() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <Label htmlFor="reset-email" className="text-gray-300 text-sm font-medium">
+          <Label htmlFor="reset-email" className="text-[--text-secondary] text-sm font-medium">
             {t.auth.email}
           </Label>
           <div className="auth-input-wrapper">
-            <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+            <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
             <Input
               id="reset-email"
               type="email"
@@ -155,7 +155,7 @@ export function ForgotPasswordForm() {
                 setEmail(e.target.value)
                 if (error) setError('')
               }}
-              className={`h-11 bg-[#111117] border-white/[0.08] text-gray-200 placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
+              className={`h-11 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-gray-600 rounded-xl focus:border-indigo-500/50 focus:ring-indigo-500/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
               disabled={isLoading}
             />
           </div>
@@ -195,7 +195,7 @@ export function ForgotPasswordForm() {
       >
         <button
           onClick={() => setAuthView('login')}
-          className="text-sm text-gray-400 hover:text-indigo-300 transition-colors duration-200 inline-flex items-center gap-1.5"
+          className="text-sm text-[--text-muted] hover:text-indigo-300 transition-colors duration-200 inline-flex items-center gap-1.5"
         >
           <ArrowLeft className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
           {t.auth.backToLogin}

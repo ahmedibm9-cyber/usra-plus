@@ -210,13 +210,13 @@ function EventCard({
     return (
       <button
         onClick={onClick}
-        className="w-full text-left group rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04] flex items-center gap-2"
+        className="w-full text-left group rounded-lg px-2 py-1.5 transition-colors hover:bg-[--border-subtle] flex items-center gap-2"
       >
         <div
           className="h-2 w-2 rounded-full shrink-0"
           style={{ backgroundColor: color }}
         />
-        <span className="text-xs text-[#E5E7EB] truncate">{event.title}</span>
+        <span className="text-xs text-[--text-primary] truncate">{event.title}</span>
       </button>
     )
   }
@@ -224,17 +224,17 @@ function EventCard({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left group rounded-xl p-3 transition-colors hover:bg-white/[0.04] flex gap-3 border border-white/[0.06]"
+      className="w-full text-left group rounded-xl p-3 transition-colors hover:bg-[--border-subtle] flex gap-3 border border-[--border-subtle]"
       style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#E5E7EB] truncate">{event.title}</p>
+        <p className="text-sm font-medium text-[--text-primary] truncate">{event.title}</p>
         <div className="flex items-center gap-1.5 mt-1">
-          <Clock className="size-3 text-[#6B7280]" />
-          <span className="text-xs text-[#6B7280]">{formatEventTime(event)}</span>
+          <Clock className="size-3 text-[--text-muted]" />
+          <span className="text-xs text-[--text-muted]">{formatEventTime(event)}</span>
         </div>
         {creatorName && (
-          <p className="text-xs text-[#6B7280] mt-1">by {creatorName}</p>
+          <p className="text-xs text-[--text-muted] mt-1">by {creatorName}</p>
         )}
       </div>
     </button>
@@ -264,11 +264,11 @@ function MonthView({
   return (
     <div className="flex flex-col h-full">
       {/* Day headers */}
-      <div className="grid grid-cols-7 border-b border-white/[0.06]">
+      <div className="grid grid-cols-7 border-b border-[--border-subtle]">
         {WEEK_DAYS.map((day, i) => (
           <div
             key={i}
-            className="py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wider"
+            className="py-3 text-center text-xs font-medium text-[--text-muted] uppercase tracking-wider"
           >
             {day}
           </div>
@@ -288,7 +288,7 @@ function MonthView({
             <div
               key={i}
               onClick={() => onDayClick(day)}
-              className={`relative border-b border-r border-white/[0.06] p-1 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-white/[0.03] ${
+              className={`relative border-b border-r border-[--border-subtle] p-1 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-[--border-subtle] ${
                 !inMonth ? 'opacity-40' : ''
               } ${today ? 'ring-1 ring-inset ring-[#6366F1]/40' : ''}`}
             >
@@ -297,7 +297,7 @@ function MonthView({
                   className={`inline-flex items-center justify-center size-7 text-sm rounded-full transition-colors ${
                     today
                       ? 'bg-[#6366F1] text-white font-semibold'
-                      : 'text-[#E5E7EB]'
+                      : 'text-[--text-primary]'
                   }`}
                 >
                   {format(day, 'd')}
@@ -324,7 +324,7 @@ function MonthView({
                   </button>
                 ))}
                 {moreCount > 0 && (
-                  <span className="text-[10px] text-[#6B7280] px-1.5">
+                  <span className="text-[10px] text-[--text-muted] px-1.5">
                     +{moreCount} {t.calendar.moreEvents}
                   </span>
                 )}
@@ -356,7 +356,7 @@ function WeekView({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Day headers */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-white/[0.06] shrink-0">
+      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-[--border-subtle] shrink-0">
         <div className="py-3" />
         {weekDays.map((day, i) => {
           const today = isToday(day)
@@ -364,16 +364,16 @@ function WeekView({
             <div
               key={i}
               onClick={() => onDayClick(day)}
-              className="py-3 text-center cursor-pointer hover:bg-white/[0.03] transition-colors"
+              className="py-3 text-center cursor-pointer hover:bg-[--border-subtle] transition-colors"
             >
-              <div className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">
+              <div className="text-xs font-medium text-[--text-muted] uppercase tracking-wider">
                 {format(day, 'EEE')}
               </div>
               <div
                 className={`mt-1 inline-flex items-center justify-center size-8 text-sm rounded-full ${
                   today
                     ? 'bg-[#6366F1] text-white font-semibold'
-                    : 'text-[#E5E7EB]'
+                    : 'text-[--text-primary]'
                 }`}
               >
                 {format(day, 'd')}
@@ -389,8 +389,8 @@ function WeekView({
           {HOURS.map((hour) => (
             <React.Fragment key={hour}>
               {/* Time label */}
-              <div className="h-16 border-b border-white/[0.04] pr-2 text-right flex items-start pt-1">
-                <span className="text-[10px] text-[#6B7280]">
+              <div className="h-16 border-b border-[--border-subtle] pr-2 text-right flex items-start pt-1">
+                <span className="text-[10px] text-[--text-muted]">
                   {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
                 </span>
               </div>
@@ -405,7 +405,7 @@ function WeekView({
                 return (
                   <div
                     key={di}
-                    className="h-16 border-b border-r border-white/[0.04] relative"
+                    className="h-16 border-b border-r border-[--border-subtle] relative"
                   >
                     {hourEvents.map((event) => {
                       const pos = getEventPosition(event, day)
@@ -433,7 +433,7 @@ function WeekView({
           ))}
           {/* All-day events row */}
           {weekDays.some((day) => getEventsForDay(events, day).some((e) => e.all_day)) && (
-            <div className="col-span-8 border-b border-white/[0.06] py-1 px-2 flex gap-1">
+            <div className="col-span-8 border-b border-[--border-subtle] py-1 px-2 flex gap-1">
               <div className="w-[60px] shrink-0" />
               {weekDays.map((day, di) => {
                 const allDay = getEventsForDay(events, day).filter((e) => e.all_day)
@@ -482,18 +482,18 @@ function DayView({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Day header */}
-      <div className="py-4 px-4 border-b border-white/[0.06] shrink-0">
+      <div className="py-4 px-4 border-b border-[--border-subtle] shrink-0">
         <div className="flex items-center gap-3">
           <div
             className={`inline-flex items-center justify-center size-12 text-xl font-semibold rounded-full ${
-              today ? 'bg-[#6366F1] text-white' : 'text-[#E5E7EB]'
+              today ? 'bg-[#6366F1] text-white' : 'text-[--text-primary]'
             }`}
           >
             {format(currentDate, 'd')}
           </div>
           <div>
-            <p className="text-sm text-[#6B7280]">{format(currentDate, 'EEEE')}</p>
-            <p className="text-lg font-medium text-[#E5E7EB]">{format(currentDate, 'MMMM yyyy')}</p>
+            <p className="text-sm text-[--text-muted]">{format(currentDate, 'EEEE')}</p>
+            <p className="text-lg font-medium text-[--text-primary]">{format(currentDate, 'MMMM yyyy')}</p>
           </div>
         </div>
         {allDayEvents.length > 0 && (
@@ -520,13 +520,13 @@ function DayView({
       <ScrollArea className="flex-1">
         <div className="relative">
           {HOURS.map((hour) => (
-            <div key={hour} className="flex min-h-[60px] border-b border-white/[0.04]">
+            <div key={hour} className="flex min-h-[60px] border-b border-[--border-subtle]">
               <div className="w-16 shrink-0 pr-2 text-right pt-1">
-                <span className="text-[10px] text-[#6B7280]">
+                <span className="text-[10px] text-[--text-muted]">
                   {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
                 </span>
               </div>
-              <div className="flex-1 relative border-l border-white/[0.06]">
+              <div className="flex-1 relative border-l border-[--border-subtle]">
                 {timedEvents
                   .filter((event) => getHours(parseISO(event.start_time)) === hour)
                   .map((event) => {
@@ -553,7 +553,7 @@ function DayView({
                         >
                           {event.title}
                         </p>
-                        <p className="text-[10px] text-[#6B7280] mt-0.5">
+                        <p className="text-[10px] text-[--text-muted] mt-0.5">
                           {formatEventTime(event)}
                         </p>
                       </button>
@@ -609,8 +609,8 @@ function AgendaView({
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <CalendarDays className="size-10 text-[#6B7280] mx-auto mb-3" />
-          <p className="text-sm text-[#6B7280]">{t.calendar.noEvents}</p>
+          <CalendarDays className="size-10 text-[--text-muted] mx-auto mb-3" />
+          <p className="text-sm text-[--text-muted]">{t.calendar.noEvents}</p>
         </div>
       </div>
     )
@@ -628,16 +628,16 @@ function AgendaView({
                   className={`inline-flex items-center justify-center size-9 text-sm font-semibold rounded-full shrink-0 ${
                     today
                       ? 'bg-[#6366F1] text-white'
-                      : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB]'
+                      : 'bg-[--bg-surface] border border-[--border-subtle] text-[--text-primary]'
                   }`}
                 >
                   {format(group.date, 'd')}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#E5E7EB]">
+                  <p className="text-sm font-medium text-[--text-primary]">
                     {format(group.date, 'EEEE')}
                   </p>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-[--text-muted]">
                     {format(group.date, 'MMMM yyyy')}
                   </p>
                 </div>
@@ -682,15 +682,15 @@ function DayEventsPanel({
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-[#E5E7EB]">
+        <h3 className="text-sm font-medium text-[--text-primary]">
           {format(day, 'EEEE, MMMM d, yyyy')}
         </h3>
-        <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0 text-[#6B7280] hover:text-[#E5E7EB]">
+        <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0 text-[--text-muted] hover:text-[--text-primary]">
           ×
         </Button>
       </div>
       {dayEvents.length === 0 ? (
-        <p className="text-xs text-[#6B7280] py-4 text-center">No events on this day</p>
+        <p className="text-xs text-[--text-muted] py-4 text-center">No events on this day</p>
       ) : (
         <div className="space-y-2">
           {dayEvents.map((event) => (
@@ -753,20 +753,20 @@ function MiniCalendar({
   }, [events])
 
   return (
-    <div className="bg-[#111117]/80 backdrop-blur-xl border border-white/[0.08] rounded-xl p-3">
+    <div className="bg-[--bg-surface]/80 backdrop-blur-xl border border-[--border-subtle] rounded-xl p-3">
       {/* Mini calendar header */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-semibold text-[#E5E7EB]">{t.calendar.miniCalendar}</h3>
+        <h3 className="text-xs font-semibold text-[--text-primary]">{t.calendar.miniCalendar}</h3>
         <div className="flex items-center gap-0.5">
           <button
             onClick={() => setMiniMonth((d) => subMonths(d, 1))}
-            className="size-5 flex items-center justify-center rounded text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06] transition-colors"
+            className="size-5 flex items-center justify-center rounded text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] transition-colors"
           >
             <ChevronLeft className="size-3" />
           </button>
           <button
             onClick={() => setMiniMonth((d) => addMonths(d, 1))}
-            className="size-5 flex items-center justify-center rounded text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06] transition-colors"
+            className="size-5 flex items-center justify-center rounded text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] transition-colors"
           >
             <ChevronRight className="size-3" />
           </button>
@@ -774,14 +774,14 @@ function MiniCalendar({
       </div>
 
       {/* Month label */}
-      <p className="text-[10px] text-[#6B7280] mb-2 text-center">
+      <p className="text-[10px] text-[--text-muted] mb-2 text-center">
         {format(miniMonth, 'MMMM yyyy')}
       </p>
 
       {/* Day headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAY_LABELS_SHORT.map((d, i) => (
-          <div key={i} className="h-[28px] flex items-center justify-center text-[10px] font-medium text-[#6B7280]">
+          <div key={i} className="h-[28px] flex items-center justify-center text-[10px] font-medium text-[--text-muted]">
             {d}
           </div>
         ))}
@@ -800,7 +800,7 @@ function MiniCalendar({
               key={i}
               onClick={() => onDateSelect(day)}
               className={`h-[28px] flex flex-col items-center justify-center rounded-md transition-colors relative ${
-                !inMonth ? 'opacity-30' : 'hover:bg-white/[0.06]'
+                !inMonth ? 'opacity-30' : 'hover:bg-[--border-subtle]'
               } ${selected && !today ? 'ring-1 ring-[#6366F1]/60 bg-[#6366F1]/10' : ''}`}
             >
               <span
@@ -809,7 +809,7 @@ function MiniCalendar({
                     ? 'bg-[#6366F1] text-white rounded-full size-5 flex items-center justify-center font-semibold'
                     : selected
                     ? 'text-[#6366F1] font-medium'
-                    : 'text-[#E5E7EB]'
+                    : 'text-[--text-primary]'
                 }`}
               >
                 {format(day, 'd')}
@@ -854,9 +854,9 @@ function UpcomingEventsPanel({
   }
 
   return (
-    <div className="bg-[#111117]/80 backdrop-blur-xl border border-white/[0.08] rounded-xl p-3">
+    <div className="bg-[--bg-surface]/80 backdrop-blur-xl border border-[--border-subtle] rounded-xl p-3">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-[#E5E7EB]">{t.calendar.upcomingEvents}</h3>
+        <h3 className="text-xs font-semibold text-[--text-primary]">{t.calendar.upcomingEvents}</h3>
         <button
           onClick={onViewAll}
           className="text-[10px] text-[#6366F1] hover:text-[#6366F1]/80 transition-colors font-medium"
@@ -866,7 +866,7 @@ function UpcomingEventsPanel({
       </div>
 
       {upcomingEvents.length === 0 ? (
-        <p className="text-[10px] text-[#6B7280] py-4 text-center">{t.calendar.noEvents}</p>
+        <p className="text-[10px] text-[--text-muted] py-4 text-center">{t.calendar.noEvents}</p>
       ) : (
         <div className="space-y-0">
           {upcomingEvents.map((event, idx) => {
@@ -875,15 +875,15 @@ function UpcomingEventsPanel({
               <button
                 key={event.id}
                 onClick={() => onEventClick(event)}
-                className="w-full text-left py-2 flex items-center gap-2 hover:bg-white/[0.04] -mx-1 px-1 rounded transition-colors"
+                className="w-full text-left py-2 flex items-center gap-2 hover:bg-[--border-subtle] -mx-1 px-1 rounded transition-colors"
               >
                 <div
                   className="size-2 rounded-full shrink-0"
                   style={{ backgroundColor: event.color || EVENT_COLORS[0] }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-[#E5E7EB] truncate font-medium">{event.title}</p>
-                  <p className="text-[10px] text-[#6B7280]">
+                  <p className="text-[11px] text-[--text-primary] truncate font-medium">{event.title}</p>
+                  <p className="text-[10px] text-[--text-muted]">
                     {event.all_day
                       ? format(parseISO(event.start_time), 'MMM d')
                       : format(parseISO(event.start_time), 'MMM d, h:mm a')}
@@ -898,7 +898,7 @@ function UpcomingEventsPanel({
                   </div>
                 )}
                 {idx < upcomingEvents.length - 1 && (
-                  <div className="absolute bottom-0 left-6 right-2 h-px bg-white/[0.04]" />
+                  <div className="absolute bottom-0 left-6 right-2 h-px bg-[--border-subtle]" />
                 )}
               </button>
             )
@@ -1102,12 +1102,12 @@ function EventModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#E5E7EB]">
+          <DialogTitle className="text-[--text-primary]">
             {isEditing ? t.calendar.editEvent : t.calendar.addEvent}
           </DialogTitle>
-          <DialogDescription className="text-[#6B7280]">
+          <DialogDescription className="text-[--text-muted]">
             {isEditing ? 'Update event details' : 'Fill in the details to create a new event'}
           </DialogDescription>
         </DialogHeader>
@@ -1115,7 +1115,7 @@ function EventModal({
         <div className="space-y-4 py-2">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="event-title" className="text-[#E5E7EB] text-sm">
+            <Label htmlFor="event-title" className="text-[--text-primary] text-sm">
               {t.calendar.eventTitle}
             </Label>
             <Input
@@ -1123,13 +1123,13 @@ function EventModal({
               value={form.title}
               onChange={(e) => updateForm({ title: e.target.value })}
               placeholder="Enter event title"
-              className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#6366F1]/50"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="event-desc" className="text-[#E5E7EB] text-sm">
+            <Label htmlFor="event-desc" className="text-[--text-primary] text-sm">
               {t.calendar.description}
             </Label>
             <Textarea
@@ -1138,13 +1138,13 @@ function EventModal({
               onChange={(e) => updateForm({ description: e.target.value })}
               placeholder="Add a description (optional)"
               rows={3}
-              className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] resize-none focus-visible:ring-[#6366F1]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] resize-none focus-visible:ring-[#6366F1]/50"
             />
           </div>
 
           {/* All Day Toggle */}
           <div className="flex items-center justify-between">
-            <Label className="text-[#E5E7EB] text-sm">{t.calendar.allDay}</Label>
+            <Label className="text-[--text-primary] text-sm">{t.calendar.allDay}</Label>
             <Switch
               checked={form.allDay}
               onCheckedChange={handleAllDayToggle}
@@ -1154,22 +1154,22 @@ function EventModal({
           {/* Start Date/Time */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-[#E5E7EB] text-sm">Start Date</Label>
+              <Label className="text-[--text-primary] text-sm">Start Date</Label>
               <Input
                 type="date"
                 value={form.startDate}
                 onChange={(e) => handleStartDateChange(e.target.value)}
-                className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
+                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
               />
             </div>
             {!form.allDay && (
               <div className="space-y-2">
-                <Label className="text-[#E5E7EB] text-sm">{t.calendar.startTime}</Label>
+                <Label className="text-[--text-primary] text-sm">{t.calendar.startTime}</Label>
                 <Input
                   type="time"
                   value={form.startTime}
                   onChange={(e) => updateForm({ startTime: e.target.value })}
-                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
                 />
               </div>
             )}
@@ -1178,22 +1178,22 @@ function EventModal({
           {/* End Date/Time */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-[#E5E7EB] text-sm">End Date</Label>
+              <Label className="text-[--text-primary] text-sm">End Date</Label>
               <Input
                 type="date"
                 value={form.endDate}
                 onChange={(e) => updateForm({ endDate: e.target.value })}
-                className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
+                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
               />
             </div>
             {!form.allDay && (
               <div className="space-y-2">
-                <Label className="text-[#E5E7EB] text-sm">{t.calendar.endTime}</Label>
+                <Label className="text-[--text-primary] text-sm">{t.calendar.endTime}</Label>
                 <Input
                   type="time"
                   value={form.endTime}
                   onChange={(e) => updateForm({ endTime: e.target.value })}
-                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#6366F1]/50 [color-scheme:dark]"
                 />
               </div>
             )}
@@ -1201,7 +1201,7 @@ function EventModal({
 
           {/* Location */}
           <div className="space-y-2">
-            <Label htmlFor="event-location" className="text-[#E5E7EB] text-sm flex items-center gap-1.5">
+            <Label htmlFor="event-location" className="text-[--text-primary] text-sm flex items-center gap-1.5">
               <MapPin className="size-3.5" />
               {t.calendar.location}
             </Label>
@@ -1210,13 +1210,13 @@ function EventModal({
               value={form.location}
               onChange={(e) => updateForm({ location: e.target.value })}
               placeholder="Add location (optional)"
-              className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#6366F1]/50"
             />
           </div>
 
           {/* Repeat */}
           <div className="space-y-2">
-            <Label className="text-[#E5E7EB] text-sm flex items-center gap-1.5">
+            <Label className="text-[--text-primary] text-sm flex items-center gap-1.5">
               <Repeat className="size-3.5" />
               {t.calendar.repeat}
             </Label>
@@ -1224,12 +1224,12 @@ function EventModal({
               value={form.repeat}
               onValueChange={(value) => updateForm({ repeat: value as RepeatOption })}
             >
-              <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus:ring-[#6366F1]/50">
+              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[#6366F1]/50">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#111117] border-white/[0.08]">
+              <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                 {repeatOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="text-[#E5E7EB] focus:bg-[#6366F1]/20 focus:text-[#E5E7EB]">
+                  <SelectItem key={option.value} value={option.value} className="text-[--text-primary] focus:bg-[#6366F1]/20 focus:text-[--text-primary]">
                     {option.label}
                   </SelectItem>
                 ))}
@@ -1239,7 +1239,7 @@ function EventModal({
 
           {/* Assign To */}
           <div className="space-y-2">
-            <Label className="text-[#E5E7EB] text-sm flex items-center gap-1.5">
+            <Label className="text-[--text-primary] text-sm flex items-center gap-1.5">
               <User className="size-3.5" />
               {t.calendar.assignTo}
             </Label>
@@ -1247,12 +1247,12 @@ function EventModal({
               value={form.assignTo}
               onValueChange={(value) => updateForm({ assignTo: value })}
             >
-              <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] focus:ring-[#6366F1]/50">
+              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[#6366F1]/50">
                 <SelectValue placeholder="Select member" />
               </SelectTrigger>
-              <SelectContent className="bg-[#111117] border-white/[0.08]">
+              <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                 {members.map((member) => (
-                  <SelectItem key={member.user_id} value={member.user_id} className="text-[#E5E7EB] focus:bg-[#6366F1]/20 focus:text-[#E5E7EB]">
+                  <SelectItem key={member.user_id} value={member.user_id} className="text-[--text-primary] focus:bg-[#6366F1]/20 focus:text-[--text-primary]">
                     <div className="flex items-center gap-2">
                       <div className="size-5 rounded-full bg-[#6366F1]/20 flex items-center justify-center text-[9px] text-[#6366F1] font-semibold">
                         {getMemberInitials(member)}
@@ -1267,7 +1267,7 @@ function EventModal({
 
           {/* Color Picker */}
           <div className="space-y-2">
-            <Label className="text-[#E5E7EB] text-sm">{t.calendar.color}</Label>
+            <Label className="text-[--text-primary] text-sm">{t.calendar.color}</Label>
             <div className="flex gap-2 flex-wrap">
               {EVENT_COLORS.map((color) => (
                 <button
@@ -1276,7 +1276,7 @@ function EventModal({
                   onClick={() => updateForm({ color })}
                   className={`size-7 rounded-full transition-all ${
                     form.color === color
-                      ? 'ring-2 ring-white ring-offset-2 ring-offset-[#111117] scale-110'
+                      ? 'ring-2 ring-white ring-offset-2 ring-offset-[--bg-surface] scale-110'
                       : 'hover:scale-105'
                   }`}
                   style={{ backgroundColor: color }}
@@ -1290,7 +1290,7 @@ function EventModal({
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]"
+            className="text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
           >
             {t.common.cancel}
           </Button>
@@ -1336,14 +1336,14 @@ function EventDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-md">
+      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div
               className="size-4 rounded-full shrink-0"
               style={{ backgroundColor: color }}
             />
-            <DialogTitle className="text-[#E5E7EB] text-lg">
+            <DialogTitle className="text-[--text-primary] text-lg">
               {event.title}
             </DialogTitle>
           </div>
@@ -1355,9 +1355,9 @@ function EventDetailDialog({
         <div className="space-y-4 py-2">
           {/* Time */}
           <div className="flex items-start gap-3">
-            <Clock className="size-4 text-[#6B7280] mt-0.5 shrink-0" />
+            <Clock className="size-4 text-[--text-muted] mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm text-[#E5E7EB]">{formatEventTime(event)}</p>
+              <p className="text-sm text-[--text-primary]">{formatEventTime(event)}</p>
               {event.all_day && (
                 <Badge className="mt-1 bg-[#6366F1]/20 text-[#6366F1] border-0 text-[10px]">
                   All Day
@@ -1369,8 +1369,8 @@ function EventDetailDialog({
           {/* Description */}
           {event.description && (
             <div className="flex items-start gap-3">
-              <CalendarClock className="size-4 text-[#6B7280] mt-0.5 shrink-0" />
-              <p className="text-sm text-[#E5E7EB] whitespace-pre-wrap">
+              <CalendarClock className="size-4 text-[--text-muted] mt-0.5 shrink-0" />
+              <p className="text-sm text-[--text-primary] whitespace-pre-wrap">
                 {event.description}
               </p>
             </div>
@@ -1379,8 +1379,8 @@ function EventDetailDialog({
           {/* Creator */}
           {creatorName && (
             <div className="flex items-center gap-3">
-              <CalendarIcon className="size-4 text-[#6B7280] shrink-0" />
-              <p className="text-sm text-[#6B7280]">Created by {creatorName}</p>
+              <CalendarIcon className="size-4 text-[--text-muted] shrink-0" />
+              <p className="text-sm text-[--text-muted]">Created by {creatorName}</p>
             </div>
           )}
         </div>
@@ -1638,21 +1638,21 @@ export default function CalendarPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <CalendarDays className="size-10 text-[#6B7280] mx-auto mb-3" />
-          <p className="text-sm text-[#6B7280]">Select a family to view calendar</p>
+          <CalendarDays className="size-10 text-[--text-muted] mx-auto mb-3" />
+          <p className="text-sm text-[--text-muted]">Select a family to view calendar</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0B0F]">
+    <div className="flex flex-col h-full bg-[--bg-primary]">
       {/* Header */}
-      <div className="shrink-0 border-b border-white/[0.06] px-4 sm:px-6 py-4">
+      <div className="shrink-0 border-b border-[--border-subtle] px-4 sm:px-6 py-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: Title + Navigation */}
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-[#E5E7EB]">{t.calendar.title}</h1>
+            <h1 className="text-xl font-semibold text-[--text-primary]">{t.calendar.title}</h1>
 
             <div className="flex items-center gap-1">
               <Tooltip>
@@ -1661,7 +1661,7 @@ export default function CalendarPage() {
                     variant="ghost"
                     size="icon"
                     onClick={navigatePrev}
-                    className="size-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]"
+                    className="size-8 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
                   >
                     <ChevronLeft className="size-4" />
                   </Button>
@@ -1672,7 +1672,7 @@ export default function CalendarPage() {
               <Button
                 variant="ghost"
                 onClick={navigateToday}
-                className="h-8 px-3 text-xs text-[#E5E7EB] hover:bg-white/[0.04]"
+                className="h-8 px-3 text-xs text-[--text-primary] hover:bg-[--border-subtle]"
               >
                 Today
               </Button>
@@ -1683,7 +1683,7 @@ export default function CalendarPage() {
                     variant="ghost"
                     size="icon"
                     onClick={navigateNext}
-                    className="size-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]"
+                    className="size-8 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
                   >
                     <ChevronRight className="size-4" />
                   </Button>
@@ -1692,7 +1692,7 @@ export default function CalendarPage() {
               </Tooltip>
             </div>
 
-            <h2 className="text-sm font-medium text-[#E5E7EB] hidden sm:block">
+            <h2 className="text-sm font-medium text-[--text-primary] hidden sm:block">
               {dateDisplay}
             </h2>
           </div>
@@ -1700,7 +1700,7 @@ export default function CalendarPage() {
           {/* Right: View Toggles + Add Button */}
           <div className="flex items-center gap-2">
             {/* View toggles */}
-            <div className="flex items-center bg-[#111117] border border-white/[0.08] rounded-lg p-0.5">
+            <div className="flex items-center bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5">
               {(['month', 'week', 'day', 'agenda'] as CalendarView[]).map((v) => (
                 <Button
                   key={v}
@@ -1710,7 +1710,7 @@ export default function CalendarPage() {
                   className={`h-7 px-2.5 text-xs rounded-md gap-1.5 transition-all ${
                     view === v
                       ? 'bg-[#6366F1] text-white hover:bg-[#6366F1]/90 shadow-sm'
-                      : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+                      : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
                   }`}
                 >
                   {viewIcons[v]}
@@ -1732,7 +1732,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Mobile date display */}
-        <h2 className="text-sm font-medium text-[#E5E7EB] mt-2 sm:hidden">
+        <h2 className="text-sm font-medium text-[--text-primary] mt-2 sm:hidden">
           {dateDisplay}
         </h2>
       </div>
@@ -1740,7 +1740,7 @@ export default function CalendarPage() {
       {/* Main content area with sidebar */}
       <div className="flex-1 overflow-hidden flex">
         {/* Mini Calendar Sidebar (desktop only) */}
-        <div className="hidden md:flex flex-col w-[220px] shrink-0 border-r border-white/[0.06] p-3 gap-3 overflow-y-auto">
+        <div className="hidden md:flex flex-col w-[220px] shrink-0 border-r border-[--border-subtle] p-3 gap-3 overflow-y-auto">
           <MiniCalendar
             currentDate={currentDate}
             onDateSelect={handleMiniCalDateSelect}
@@ -1811,7 +1811,7 @@ export default function CalendarPage() {
 
           {/* Day Events Slide-over (Month view) */}
           {selectedDay && view === 'month' && (
-            <div className="absolute top-0 right-0 bottom-0 w-80 bg-[#111117] border-l border-white/[0.08] shadow-xl z-20 animate-in slide-in-from-right duration-200">
+            <div className="absolute top-0 right-0 bottom-0 w-80 bg-[--bg-surface] border-l border-[--border-subtle] shadow-xl z-20 animate-in slide-in-from-right duration-200">
               <DayEventsPanel
                 day={selectedDay}
                 events={events}
@@ -1848,17 +1848,17 @@ export default function CalendarPage() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="bg-[#111117] border-white/[0.08]">
+        <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#E5E7EB]">
+            <AlertDialogTitle className="text-[--text-primary]">
               Delete Event
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#6B7280]">
+            <AlertDialogDescription className="text-[--text-muted]">
               Are you sure you want to delete &quot;{selectedEvent?.title}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-white/[0.08] text-[#E5E7EB] hover:bg-white/[0.04]">
+            <AlertDialogCancel className="bg-transparent border-[--border-subtle] text-[--text-primary] hover:bg-[--border-subtle]">
               {t.common.cancel}
             </AlertDialogCancel>
             <AlertDialogAction

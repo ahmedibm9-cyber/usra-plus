@@ -47,7 +47,7 @@ const moreNavItems: MoreNavItem[] = [
 function Ripple({ x, y }: { x: number; y: number }) {
   return (
     <motion.span
-      className="pointer-events-none absolute rounded-full bg-white/20"
+      className="pointer-events-none absolute rounded-full bg-[--border-medium]"
       initial={{
         width: 0,
         height: 0,

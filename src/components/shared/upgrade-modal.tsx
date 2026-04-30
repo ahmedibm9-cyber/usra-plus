@@ -76,7 +76,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[640px] p-0 overflow-hidden rounded-2xl">
+      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-[640px] p-0 overflow-hidden rounded-2xl">
         <DialogTitle className="sr-only">
           {isRTL ? 'ترقية الخططة' : 'Upgrade Plan'}
         </DialogTitle>
@@ -97,10 +97,10 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                 <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366F1] to-violet-500 shadow-lg shadow-[#6366F1]/20">
                   <Sparkles className="size-6 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-[#E5E7EB]">
+                <h2 className="text-xl font-bold text-[--text-primary]">
                   {isRTL ? 'لقد وصلت إلى الحد الأقصى' : 'You\'ve reached your limit'}
                 </h2>
-                <p className="text-sm text-[#6B7280] mt-1">
+                <p className="text-sm text-[--text-muted] mt-1">
                   {isRTL
                     ? `${featureLabel}: ${currentCount} / ${limit} — قم بالترقية للمتابعة`
                     : `${featureLabel}: ${currentCount}/${limit} — Upgrade to continue`}
@@ -108,14 +108,14 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
                 {/* Current plan badge */}
                 <div className="mt-3 flex items-center justify-center gap-2">
-                  <span className="text-xs text-[#6B7280]">
+                  <span className="text-xs text-[--text-muted]">
                     {isRTL ? 'خطتك الحالية:' : 'Current plan:'}
                   </span>
                   <Badge
                     variant="outline"
                     className={`text-[10px] px-2 py-0 h-5 font-semibold ${
                       plan === 'free'
-                        ? 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                        ? 'bg-gray-500/20 text-[--text-muted] border-gray-500/30'
                         : plan === 'pro'
                           ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
                           : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
@@ -137,12 +137,12 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
               >
                 <div className="grid grid-cols-3 gap-2.5">
                   {/* Free Plan */}
-                  <div className="relative bg-[#0B0B0F] border border-white/[0.06] rounded-xl p-3.5 flex flex-col">
-                    <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-1">
+                  <div className="relative bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-3.5 flex flex-col">
+                    <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-1">
                       {t.settings.free}
                     </p>
-                    <p className="text-lg font-bold text-[#E5E7EB]">$0</p>
-                    <p className="text-[10px] text-[#6B7280] mb-3">
+                    <p className="text-lg font-bold text-[--text-primary]">$0</p>
+                    <p className="text-[10px] text-[--text-muted] mb-3">
                       {isRTL ? 'مجانًا للأبد' : 'forever'}
                     </p>
 
@@ -156,9 +156,9 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                             {isIncluded ? (
                               <Check className="size-3 text-green-400/60 shrink-0" />
                             ) : (
-                              <X className="size-3 text-[#6B7280]/40 shrink-0" />
+                              <X className="size-3 text-[--text-muted]/40 shrink-0" />
                             )}
-                            <span className={`text-[10px] leading-tight ${isIncluded ? 'text-[#9CA3AF]' : 'text-[#6B7280]/40'}`}>
+                            <span className={`text-[10px] leading-tight ${isIncluded ? 'text-[--text-secondary]' : 'text-[--text-muted]/40'}`}>
                               {displayVal || (isRTL ? 'غير متاح' : 'Not available')}
                             </span>
                           </div>
@@ -170,7 +170,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                       <Button
                         variant="outline"
                         disabled
-                        className="w-full mt-3 h-8 text-xs border-white/10 text-[#6B7280]"
+                        className="w-full mt-3 h-8 text-xs border-[--border-subtle] text-[--text-muted]"
                       >
                         {isRTL ? 'الخطة الحالية' : 'Current Plan'}
                       </Button>
@@ -178,10 +178,10 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                   </div>
 
                   {/* Pro Plan - Recommended */}
-                  <div className="relative bg-[#0B0B0F] rounded-xl p-3.5 flex flex-col overflow-hidden">
+                  <div className="relative bg-[--bg-primary] rounded-xl p-3.5 flex flex-col overflow-hidden">
                     {/* Gradient border */}
                     <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#6366F1]/60 via-violet-500/30 to-[#6366F1]/10 pointer-events-none">
-                      <div className="w-full h-full rounded-xl bg-[#0B0B0F]" />
+                      <div className="w-full h-full rounded-xl bg-[--bg-primary]" />
                     </div>
 
                     {/* Popular badge */}
@@ -196,8 +196,8 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                       <p className="text-xs font-semibold text-[#6366F1] uppercase tracking-wider mb-1">
                         {t.settings.pro}
                       </p>
-                      <p className="text-lg font-bold text-[#E5E7EB]">$4.99</p>
-                      <p className="text-[10px] text-[#6B7280] mb-3">
+                      <p className="text-lg font-bold text-[--text-primary]">$4.99</p>
+                      <p className="text-[10px] text-[--text-muted] mb-3">
                         {isRTL ? '/شهريًا' : '/month'}
                       </p>
 
@@ -209,7 +209,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                           return (
                             <div key={feat.key} className="flex items-center gap-1.5">
                               <Check className="size-3 text-[#6366F1] shrink-0" />
-                              <span className="text-[10px] leading-tight text-[#E5E7EB]">
+                              <span className="text-[10px] leading-tight text-[--text-primary]">
                                 {displayVal || (isRTL ? 'متاح' : 'Included')}
                               </span>
                             </div>
@@ -231,12 +231,12 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                   </div>
 
                   {/* Family+ Plan */}
-                  <div className="relative bg-[#0B0B0F] border border-white/[0.06] rounded-xl p-3.5 flex flex-col">
+                  <div className="relative bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-3.5 flex flex-col">
                     <p className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider mb-1">
                       {t.settings.familyPlus}
                     </p>
-                    <p className="text-lg font-bold text-[#E5E7EB]">$9.99</p>
-                    <p className="text-[10px] text-[#6B7280] mb-3">
+                    <p className="text-lg font-bold text-[--text-primary]">$9.99</p>
+                    <p className="text-[10px] text-[--text-muted] mb-3">
                       {isRTL ? '/شهريًا' : '/month'}
                     </p>
 
@@ -250,9 +250,9 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                             {isIncluded ? (
                               <Check className="size-3 text-amber-400/70 shrink-0" />
                             ) : (
-                              <X className="size-3 text-[#6B7280]/40 shrink-0" />
+                              <X className="size-3 text-[--text-muted]/40 shrink-0" />
                             )}
-                            <span className={`text-[10px] leading-tight ${isIncluded ? 'text-[#9CA3AF]' : 'text-[#6B7280]/40'}`}>
+                            <span className={`text-[10px] leading-tight ${isIncluded ? 'text-[--text-secondary]' : 'text-[--text-muted]/40'}`}>
                               {displayVal || (isRTL ? 'متاح' : 'Included')}
                             </span>
                           </div>
@@ -283,21 +283,21 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
                 className="px-6 pb-3"
               >
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-[--border-subtle] border border-[--border-subtle]">
                     <Infinity className="size-4 text-[#6366F1] shrink-0" />
-                    <span className="text-[10px] text-[#9CA3AF]">
+                    <span className="text-[10px] text-[--text-secondary]">
                       {isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-[--border-subtle] border border-[--border-subtle]">
                     <Zap className="size-4 text-violet-400 shrink-0" />
-                    <span className="text-[10px] text-[#9CA3AF]">
+                    <span className="text-[10px] text-[--text-secondary]">
                       {isRTL ? 'مزامنة فورية' : 'Real-time Sync'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-[--border-subtle] border border-[--border-subtle]">
                     <HardDrive className="size-4 text-amber-400 shrink-0" />
-                    <span className="text-[10px] text-[#9CA3AF]">
+                    <span className="text-[10px] text-[--text-secondary]">
                       {isRTL ? 'مساحة أكبر' : 'More Storage'}
                     </span>
                   </div>
@@ -313,7 +313,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
               >
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="text-xs text-[#6B7280] hover:text-[#9CA3AF] transition-colors"
+                  className="text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors"
                 >
                   {isRTL ? 'ربما لاحقًا' : 'Maybe Later'}
                 </button>

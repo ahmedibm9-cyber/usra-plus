@@ -149,7 +149,7 @@ export function TermsModal() {
   return (
     <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
       <DialogContent
-        className="border-white/[0.08] bg-[#0B0B0F] text-gray-200 sm:max-w-2xl rounded-2xl p-0 overflow-hidden"
+        className="border-[--border-subtle] bg-[--bg-primary] text-[--text-primary] sm:max-w-2xl rounded-2xl p-0 overflow-hidden"
         showCloseButton={false}
       >
         {/* Header with gradient accent */}
@@ -164,7 +164,7 @@ export function TermsModal() {
                 <DialogTitle className="text-xl font-semibold text-gray-100">
                   {termsContent.title}
                 </DialogTitle>
-                <DialogDescription className="text-sm text-gray-400 mt-0.5">
+                <DialogDescription className="text-sm text-[--text-muted] mt-0.5">
                   {termsContent.subtitle}
                 </DialogDescription>
               </div>
@@ -172,7 +172,7 @@ export function TermsModal() {
           </DialogHeader>
 
           {/* Trust badges */}
-          <div className="relative flex items-center gap-4 mt-3 text-xs text-gray-500">
+          <div className="relative flex items-center gap-4 mt-3 text-xs text-[--text-muted]">
             <span className="flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-indigo-400" />
               PDPL Compliant
@@ -184,7 +184,7 @@ export function TermsModal() {
           </div>
         </div>
 
-        <Separator className="bg-white/[0.06]" />
+        <Separator className="bg-[--border-subtle]" />
 
         {/* Scrollable content */}
         <ScrollArea className="h-[400px] px-6" onScroll={handleScroll}>
@@ -194,7 +194,7 @@ export function TermsModal() {
                 <h3 className="text-sm font-semibold text-indigo-300 mb-2">
                   {section.title}
                 </h3>
-                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
+                <p className="text-sm leading-relaxed text-[--text-muted] whitespace-pre-line">
                   {section.content}
                 </p>
               </div>
@@ -202,11 +202,11 @@ export function TermsModal() {
           </div>
         </ScrollArea>
 
-        <Separator className="bg-white/[0.06]" />
+        <Separator className="bg-[--border-subtle]" />
 
         {/* Footer with actions */}
         <DialogFooter className="px-6 py-4 flex-row items-center justify-between gap-3 sm:justify-between">
-          <p className="text-xs text-gray-500 hidden sm:block">
+          <p className="text-xs text-[--text-muted] hidden sm:block">
             {isRTL
               ? (hasScrolled ? 'يمكنك الآن قبول الشروط' : 'يرجى قراءة الشروط بالكامل')
               : (hasScrolled ? 'You may now accept the terms' : 'Please read the terms in full')
@@ -216,7 +216,7 @@ export function TermsModal() {
             <Button
               variant="ghost"
               onClick={handleDecline}
-              className="flex-1 sm:flex-none text-gray-400 hover:text-gray-200 hover:bg-white/[0.05] rounded-xl"
+              className="flex-1 sm:flex-none text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] rounded-xl"
             >
               {isRTL ? 'رفض' : 'Decline'}
             </Button>

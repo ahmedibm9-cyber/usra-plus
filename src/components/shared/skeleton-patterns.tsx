@@ -19,7 +19,7 @@ export function TaskCardSkeleton({ count = 1 }: { count?: number }) {
     <div className="space-y-2">
       {Array.from({ length: count }).map((_, i) => (
         <ShimmerWrapper key={i}>
-          <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-[#111117] p-4">
+          <div className="flex items-start gap-3 rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
             <Skeleton className="w-5 h-5 rounded-full shrink-0" />
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
@@ -46,7 +46,7 @@ export function GroceryItemSkeleton({ count = 1 }: { count?: number }) {
     <div className="space-y-2">
       {Array.from({ length: count }).map((_, i) => (
         <ShimmerWrapper key={i}>
-          <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-[#111117] p-4">
+          <div className="flex items-center gap-3 rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
             <Skeleton className="w-5 h-5 rounded-md shrink-0" />
             <Skeleton className="w-4 h-4 rounded shrink-0" />
             <div className="flex-1 space-y-1.5">
@@ -68,7 +68,7 @@ export function EventCardSkeleton({ count = 1 }: { count?: number }) {
     <div className="space-y-2.5">
       {Array.from({ length: count }).map((_, i) => (
         <ShimmerWrapper key={i}>
-          <div className="flex items-center gap-3 rounded-lg border border-white/[0.04] bg-white/[0.02] p-3">
+          <div className="flex items-center gap-3 rounded-lg border border-[--border-subtle] bg-[--border-subtle] p-3">
             <Skeleton className="w-3 h-3 rounded-full shrink-0" />
             <div className="flex-1 space-y-1.5">
               <Skeleton className="h-4 w-3/5" />
@@ -113,7 +113,7 @@ export function FileCardSkeleton({ count = 1 }: { count?: number }) {
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
       {Array.from({ length: count }).map((_, i) => (
         <ShimmerWrapper key={i}>
-          <div className="rounded-xl border border-white/[0.06] bg-[#111117] overflow-hidden">
+          <div className="rounded-xl border border-[--border-subtle] bg-[--bg-surface] overflow-hidden">
             <Skeleton className="w-full aspect-square" />
             <div className="p-3 space-y-1.5">
               <Skeleton className="h-4 w-3/4" />
@@ -132,7 +132,7 @@ export function StatCardSkeleton({ count = 1 }: { count?: number }) {
     <div className={`grid grid-cols-2 ${count > 2 ? 'sm:grid-cols-4' : 'sm:grid-cols-2'} gap-3`}>
       {Array.from({ length: count }).map((_, i) => (
         <ShimmerWrapper key={i}>
-          <div className="glass rounded-2xl border border-white/[0.08] bg-[#111117] p-5">
+          <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-5">
             <div className="flex items-center gap-4">
               <Skeleton className="h-12 w-12 rounded-xl" />
               <div className="flex-1 space-y-2">
@@ -154,7 +154,7 @@ export function StatCardSkeleton({ count = 1 }: { count?: number }) {
 export function ChartSkeleton() {
   return (
     <ShimmerWrapper>
-      <div className="glass rounded-2xl border border-white/[0.08] bg-[#111117] p-5">
+      <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-5">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-3 w-20" />
@@ -183,14 +183,14 @@ export function ChartSkeleton() {
 export function PrayerTimesSkeleton() {
   return (
     <ShimmerWrapper>
-      <div className="glass rounded-2xl border border-white/[0.08] bg-[#111117] p-5">
+      <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-5">
         <div className="flex items-center gap-2 mb-4">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-4 w-24" />
         </div>
         <div className="space-y-2.5">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg border border-white/[0.06] p-3">
+            <div key={i} className="flex items-center justify-between rounded-lg border border-[--border-subtle] p-3">
               <div className="flex items-center gap-2.5">
                 <Skeleton className="h-7 w-7 rounded-md" />
                 <Skeleton className="h-4 w-16" />
@@ -211,7 +211,7 @@ export function PrayerTimesSkeleton() {
 export function ProductivityScoreSkeleton() {
   return (
     <ShimmerWrapper>
-      <div className="glass rounded-2xl border border-white/[0.08] bg-[#111117] p-6 flex flex-col items-center">
+      <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-6 flex flex-col items-center">
         <Skeleton className="h-[140px] w-[140px] rounded-full" />
         <Skeleton className="mt-4 h-5 w-32" />
         <Skeleton className="mt-2 h-4 w-24" />
@@ -224,7 +224,7 @@ export function ProductivityScoreSkeleton() {
 export function QuickActionsSkeleton() {
   return (
     <ShimmerWrapper>
-      <div className="glass rounded-2xl border border-white/[0.08] bg-[#111117] p-6">
+      <div className="glass rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-6">
         <Skeleton className="h-4 w-24 mb-4" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (

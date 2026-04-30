@@ -57,6 +57,9 @@ import {
   Share2,
   MessageSquare,
   Wand2,
+  Upload,
+  FileJson,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -85,6 +88,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Progress } from '@/components/ui/progress'
+import { Checkbox } from '@/components/ui/checkbox'
 
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -92,6 +96,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store'
 import { useTaskStore } from '@/stores/task-store'
 import { useGroceryStore } from '@/stores/grocery-store'
 import { useCalendarStore } from '@/stores/calendar-store'
+import { useChatStore } from '@/stores/chat-store'
 import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
 import { PlanBadge } from '@/components/shared/plan-badge'
 import { AvatarGenerator } from '@/components/shared/avatar-generator'
@@ -281,7 +286,7 @@ function FamilyManagementTab() {
   const roleBadgeColor: Record<FamilyRole, string> = {
     owner: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
     admin: 'bg-[--accent-primary]/20 text-[--accent-secondary] border-[#6366F1]/30',
-    member: 'bg-white/5 text-[--text-muted] border-white/10',
+    member: 'bg-[--border-subtle] text-[--text-muted] border-[--border-subtle]',
   }
 
   return (
@@ -307,7 +312,7 @@ function FamilyManagementTab() {
               <Input
                 value={familyName}
                 onChange={(e) => setFamilyName(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary]"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]"
               />
             </div>
             <div>
@@ -315,7 +320,7 @@ function FamilyManagementTab() {
               <Input
                 value={familyDesc}
                 onChange={(e) => setFamilyDesc(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary]"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]"
                 placeholder="Family description..."
               />
             </div>
@@ -354,14 +359,14 @@ function FamilyManagementTab() {
         <div>
           <span className="text-[--text-muted] text-xs block mb-2">{t.settings.inviteCode}</span>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[--accent-secondary] font-mono text-sm">
+            <code className="flex-1 bg-[--border-subtle] border border-[--border-subtle] rounded-lg px-3 py-2 text-[--accent-secondary] font-mono text-sm">
               {currentFamily.invite_code}
             </code>
             <Button
               variant="outline"
               size="sm"
               onClick={handleCopyCode}
-              className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2]"
+              className="border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-surface-2]"
             >
               {copied ? <Check className="size-4 text-green-400" /> : <Copy className="size-4" />}
               {copied ? t.common.copied : t.settings.copyCode}
@@ -415,10 +420,10 @@ function FamilyManagementTab() {
                     value={member.role}
                     onValueChange={(v) => handleChangeRole(member.id, v as FamilyRole)}
                   >
-                    <SelectTrigger className="h-7 w-24 text-xs bg-white/5 border-white/10 text-[--text-muted]">
+                    <SelectTrigger className="h-7 w-24 text-xs bg-[--border-subtle] border-[--border-subtle] text-[--text-muted]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[--bg-surface] border-white/10">
+                    <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                       <SelectItem value="admin" className="text-[--text-primary] text-xs">
                         {t.settings.admin}
                       </SelectItem>
@@ -437,7 +442,7 @@ function FamilyManagementTab() {
                         <Trash2 className="size-3.5" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-[--bg-surface] border-white/10">
+                    <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-[--text-primary]">{t.settings.removeMember}</AlertDialogTitle>
                         <AlertDialogDescription className="text-[--text-muted]">
@@ -445,7 +450,7 @@ function FamilyManagementTab() {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
+                        <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
                           {t.common.cancel}
                         </AlertDialogCancel>
                         <AlertDialogAction
@@ -485,7 +490,7 @@ function FamilyManagementTab() {
                   </Button>
                 </AlertDialogTrigger>
               </div>
-              <AlertDialogContent className="bg-[--bg-surface] border-white/10">
+              <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-[--text-primary]">Leave Family</AlertDialogTitle>
                   <AlertDialogDescription className="text-[--text-muted]">
@@ -493,7 +498,7 @@ function FamilyManagementTab() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
+                  <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
                     {t.common.cancel}
                   </AlertDialogCancel>
                   <AlertDialogAction onClick={handleLeaveFamily} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -519,7 +524,7 @@ function FamilyManagementTab() {
                   </Button>
                 </AlertDialogTrigger>
               </div>
-              <AlertDialogContent className="bg-[--bg-surface] border-white/10">
+              <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-[--text-primary]">Delete Family</AlertDialogTitle>
                   <AlertDialogDescription className="text-[--text-muted]">
@@ -527,7 +532,7 @@ function FamilyManagementTab() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
+                  <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
                     {t.common.cancel}
                   </AlertDialogCancel>
                   <AlertDialogAction onClick={handleDeleteFamily} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -665,7 +670,7 @@ function UserManagementTab() {
                 {t.avatarGen.changePhoto}
               </Label>
               <div className="flex items-center gap-3">
-                <Avatar className="size-14 border border-white/10">
+                <Avatar className="size-14 border border-[--border-subtle]">
                   <AvatarImage src={user?.avatar_url ?? ''} />
                   <AvatarFallback className="bg-[--accent-primary]/20 text-[--accent-secondary] text-lg">
                     {user?.first_name?.[0] ?? '?'}
@@ -938,7 +943,7 @@ function AccountSettingsTab() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary] flex-1"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary] flex-1"
               />
               <Button
                 size="sm"
@@ -971,7 +976,7 @@ function AccountSettingsTab() {
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary] pr-10"
                 placeholder="Enter current password"
               />
               <button
@@ -990,7 +995,7 @@ function AccountSettingsTab() {
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary] pr-10"
                 placeholder="Enter new password"
               />
               <button
@@ -1008,7 +1013,7 @@ function AccountSettingsTab() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="bg-white/5 border-white/10 text-[--text-primary]"
+              className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]"
               placeholder="Confirm new password"
             />
           </div>
@@ -1040,7 +1045,7 @@ function AccountSettingsTab() {
               {t.settings.deleteAccount}
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-[--bg-surface] border-white/10">
+          <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[--text-primary]">{t.settings.deleteAccount}</AlertDialogTitle>
               <AlertDialogDescription className="text-[--text-muted]">
@@ -1048,7 +1053,7 @@ function AccountSettingsTab() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
+              <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
                 {t.common.cancel}
               </AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteAccount} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
@@ -1577,7 +1582,7 @@ function SecurityTab() {
               key={session.id}
               className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
             >
-              <div className="size-9 rounded-lg bg-white/5 flex items-center justify-center">
+              <div className="size-9 rounded-lg bg-[--border-subtle] flex items-center justify-center">
                 <session.icon className="size-4 text-[--text-muted]" />
               </div>
               <div className="flex-1 min-w-0">
@@ -1626,7 +1631,7 @@ function SecurityTab() {
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary] pr-10"
                 placeholder="Enter current password"
               />
               <button
@@ -1645,7 +1650,7 @@ function SecurityTab() {
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary] pr-10"
                 placeholder="Enter new password"
               />
               <button
@@ -1664,7 +1669,7 @@ function SecurityTab() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-[--text-primary] pr-10"
+                className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary] pr-10"
                 placeholder="Confirm new password"
               />
               <button
@@ -1715,129 +1720,496 @@ function SecurityTab() {
 // ─── Data Control Tab ────────────────────────────────────────────────────────
 
 function DataControlTab() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const [exporting, setExporting] = useState(false)
-  const [exportingCSV, setExportingCSV] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [clearing, setClearing] = useState(false)
 
-  const handleExportJSON = useCallback(async () => {
+  // Export state
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json')
+  const [exportSelection, setExportSelection] = useState({
+    tasks: true,
+    events: true,
+    grocery: true,
+    messages: true,
+  })
+
+  // Import state
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importPreview, setImportPreview] = useState<{
+    tasks: number
+    events: number
+    grocery: number
+    messages: number
+    total: number
+  } | null>(null)
+  const [importData, setImportData] = useState<Record<string, unknown[]> | null>(null)
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Clear state
+  const [clearSelection, setClearSelection] = useState({
+    tasks: true,
+    events: true,
+    grocery: true,
+    messages: true,
+  })
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false)
+
+  // Data from stores
+  const { tasks } = useTaskStore()
+  const { events } = useCalendarStore()
+  const { items: groceryItems } = useGroceryStore()
+  const { messages } = useChatStore()
+
+  // Counts for display
+  const dataCounts = {
+    tasks: tasks.length,
+    events: events.length,
+    grocery: groceryItems.length,
+    messages: messages.length,
+  }
+
+  const toggleExport = useCallback((key: keyof typeof exportSelection) => {
+    setExportSelection((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
+
+  const toggleClear = useCallback((key: keyof typeof clearSelection) => {
+    setClearSelection((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
+
+  const isAllExportSelected = Object.values(exportSelection).every(Boolean)
+
+  const toggleAllExport = useCallback(() => {
+    const newVal = !isAllExportSelected
+    setExportSelection({ tasks: newVal, events: newVal, grocery: newVal, messages: newVal })
+  }, [isAllExportSelected])
+
+  const isAllClearSelected = Object.values(clearSelection).every(Boolean)
+
+  const toggleAllClear = useCallback(() => {
+    const newVal = !isAllClearSelected
+    setClearSelection({ tasks: newVal, events: newVal, grocery: newVal, messages: newVal })
+  }, [isAllClearSelected])
+
+  // ─── Export Logic ─────────────────────────────────────────────────────────
+
+  const handleExport = useCallback(async () => {
+    const hasSelection = Object.values(exportSelection).some(Boolean)
+    if (!hasSelection) {
+      toast.error(t.dataControl.noDataToExport)
+      return
+    }
+
     setExporting(true)
     try {
-      // Collect all data from Zustand stores
-      const { user } = useAuthStore.getState()
-      const { currentFamily, familyMembers } = useAppStore.getState()
-      const { tasks } = useTaskStore.getState()
-      const { items } = useGroceryStore.getState()
-      const { events } = useCalendarStore.getState()
+      const BOM = '\uFEFF'
 
-      const data = {
-        exportedAt: new Date().toISOString(),
-        family: currentFamily ? {
-          id: currentFamily.id,
-          name: currentFamily.name,
-          description: currentFamily.description,
-          invite_code: currentFamily.invite_code,
-        } : null,
-        members: familyMembers.map((m) => ({
-          id: m.id,
-          nickname: m.nickname,
-          role: m.role,
-          first_name: m.profiles?.first_name ?? null,
-          last_name: m.profiles?.last_name ?? null,
-          email: m.profiles?.email ?? null,
-        })),
-        tasks: tasks.map((task) => ({
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          status: task.status,
-          priority: task.priority,
-          due_date: task.due_date,
-          created_at: task.created_at,
-        })),
-        groceryItems: items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          quantity: item.quantity,
-          checked: item.checked,
-          created_at: item.created_at,
-        })),
-        events: events.map((event) => ({
-          id: event.id,
-          title: event.title,
-          description: event.description,
-          start_time: event.start_time,
-          end_time: event.end_time,
-          color: event.color,
-          all_day: event.all_day,
-        })),
+      if (exportFormat === 'json') {
+        const data: Record<string, unknown> = {
+          exportedAt: new Date().toISOString(),
+          version: '1.0',
+          app: 'USRA PLUS',
+        }
+
+        if (exportSelection.tasks) {
+          data.tasks = tasks.map((task) => ({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            assigned_to: task.assigned_to,
+            due_date: task.due_date,
+            completed_at: task.completed_at,
+            created_at: task.created_at,
+          }))
+        }
+
+        if (exportSelection.events) {
+          data.events = events.map((event) => ({
+            id: event.id,
+            title: event.title,
+            description: event.description,
+            start_time: event.start_time,
+            end_time: event.end_time,
+            all_day: event.all_day,
+            color: event.color,
+            created_at: event.created_at,
+          }))
+        }
+
+        if (exportSelection.grocery) {
+          data.groceryItems = groceryItems.map((item) => ({
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            quantity: item.quantity,
+            checked: item.checked,
+            created_at: item.created_at,
+          }))
+        }
+
+        if (exportSelection.messages) {
+          data.messages = messages.map((msg) => ({
+            id: msg.id,
+            content: msg.content,
+            sender_id: msg.sender_id,
+            message_type: msg.message_type,
+            created_at: msg.created_at,
+          }))
+        }
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `usra-plus-export-${new Date().toISOString().slice(0, 10)}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else {
+        // CSV Export with UTF-8 BOM for Arabic support
+        const sections: string[] = []
+
+        if (exportSelection.tasks) {
+          sections.push(
+            isRTL ? '--- المهام ---' : '--- Tasks ---',
+            ['Title', 'Status', 'Priority', 'Assignee', 'Due Date', 'Created At'].join(','),
+            ...tasks.map((task) =>
+              [
+                `"${(task.title ?? '').replace(/"/g, '""')}"`,
+                task.status ?? '',
+                task.priority ?? '',
+                task.assignee?.first_name ? `"${task.assignee.first_name} ${task.assignee.last_name ?? ''}".trim()` : '',
+                task.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
+                task.created_at ? new Date(task.created_at).toISOString().slice(0, 10) : '',
+              ].join(',')
+            )
+          )
+        }
+
+        if (exportSelection.events) {
+          sections.push(
+            '',
+            isRTL ? '--- أحداث التقويم ---' : '--- Calendar Events ---',
+            ['Title', 'Description', 'Start Time', 'End Time', 'All Day', 'Color', 'Created At'].join(','),
+            ...events.map((event) =>
+              [
+                `"${(event.title ?? '').replace(/"/g, '""')}"`,
+                `"${(event.description ?? '').replace(/"/g, '""')}"`,
+                event.start_time ?? '',
+                event.end_time ?? '',
+                event.all_day ? 'Yes' : 'No',
+                event.color ?? '',
+                event.created_at ? new Date(event.created_at).toISOString().slice(0, 10) : '',
+              ].join(',')
+            )
+          )
+        }
+
+        if (exportSelection.grocery) {
+          sections.push(
+            '',
+            isRTL ? '--- قائمة البقالة ---' : '--- Grocery List ---',
+            ['Name', 'Category', 'Quantity', 'Checked', 'Created At'].join(','),
+            ...groceryItems.map((item) =>
+              [
+                `"${(item.name ?? '').replace(/"/g, '""')}"`,
+                `"${(item.category ?? '').replace(/"/g, '""')}"`,
+                String(item.quantity ?? 1),
+                item.checked ? 'Yes' : 'No',
+                item.created_at ? new Date(item.created_at).toISOString().slice(0, 10) : '',
+              ].join(',')
+            )
+          )
+        }
+
+        if (exportSelection.messages) {
+          sections.push(
+            '',
+            isRTL ? '--- رسائل الدردشة ---' : '--- Chat Messages ---',
+            ['Content', 'Sender', 'Type', 'Timestamp'].join(','),
+            ...messages.map((msg) =>
+              [
+                `"${(msg.content ?? '').replace(/"/g, '""')}"`,
+                msg.sender?.first_name ? `"${msg.sender.first_name}"` : msg.sender_id ?? '',
+                msg.message_type ?? '',
+                msg.created_at ? new Date(msg.created_at).toISOString() : '',
+              ].join(',')
+            )
+          )
+        }
+
+        const csvContent = BOM + sections.join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `usra-plus-export-${new Date().toISOString().slice(0, 10)}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
       }
 
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `usra-plus-export-${new Date().toISOString().slice(0, 10)}.json`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('Data exported as JSON successfully')
+      toast.success(t.dataControl.exportSuccess)
     } catch {
       toast.error(t.common.error)
     } finally {
       setExporting(false)
     }
-  }, [t])
+  }, [exportFormat, exportSelection, tasks, events, groceryItems, messages, t, isRTL])
 
-  const handleExportCSV = useCallback(async () => {
-    setExportingCSV(true)
+  // ─── Import Logic ─────────────────────────────────────────────────────────
+
+  const parseImportFile = useCallback(
+    async (file: File) => {
+      try {
+        if (file.name.endsWith('.json')) {
+          const text = await file.text()
+          const parsed = JSON.parse(text)
+
+          // Validate structure - must be an object with array values
+          if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+            toast.error(t.dataControl.invalidFile)
+            return
+          }
+
+          // Count items per type
+          const preview = {
+            tasks: Array.isArray(parsed.tasks) ? parsed.tasks.length : 0,
+            events: Array.isArray(parsed.events) ? parsed.events.length : 0,
+            grocery: Array.isArray(parsed.groceryItems) ? parsed.groceryItems.length : 0,
+            messages: Array.isArray(parsed.messages) ? parsed.messages.length : 0,
+            total: 0,
+          }
+          preview.total = preview.tasks + preview.events + preview.grocery + preview.messages
+
+          if (preview.total === 0) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+
+          // Basic type validation on first item of each array
+          if (preview.tasks > 0 && !parsed.tasks[0]?.title) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+          if (preview.events > 0 && !parsed.events[0]?.title) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+          if (preview.grocery > 0 && !parsed.groceryItems[0]?.name) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+          if (preview.messages > 0 && !parsed.messages[0]?.content) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+
+          setImportPreview(preview)
+          setImportData(parsed)
+        } else if (file.name.endsWith('.csv')) {
+          // For CSV, we only support importing tasks from CSV
+          const text = await file.text()
+          const lines = text.split('\n').filter((l) => l.trim() && !l.startsWith('---'))
+
+          // Find the tasks section header
+          const taskStartIdx = lines.findIndex((l) =>
+            l.toLowerCase().includes('title') && l.toLowerCase().includes('status')
+          )
+
+          if (taskStartIdx < 0) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+
+          const taskLines = lines.slice(taskStartIdx + 1)
+          const validTaskLines = taskLines.filter((l) => l.trim() && !l.startsWith('---') && !l.includes('Calendar') && !l.includes('Grocery') && !l.includes('Chat'))
+
+          const preview = {
+            tasks: validTaskLines.length,
+            events: 0,
+            grocery: 0,
+            messages: 0,
+            total: validTaskLines.length,
+          }
+
+          if (preview.total === 0) {
+            toast.error(t.dataControl.importFailed)
+            return
+          }
+
+          // Parse CSV into simplified task objects
+          const taskObjects = validTaskLines.map((line, idx) => {
+            const parts = line.split(',').map((p) => p.replace(/^"|"$/g, '').trim())
+            return {
+              id: `imported-task-${Date.now()}-${idx}`,
+              title: parts[0] || `Task ${idx + 1}`,
+              status: parts[1] || 'todo',
+              priority: parts[2] || 'medium',
+              due_date: parts[4] || null,
+              created_at: new Date().toISOString(),
+            }
+          })
+
+          setImportPreview(preview)
+          setImportData({ tasks: taskObjects })
+        } else {
+          toast.error(t.dataControl.invalidFile)
+          return
+        }
+
+        setImportFile(file)
+      } catch {
+        toast.error(t.dataControl.importFailed)
+      }
+    },
+    [t]
+  )
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragging(false)
+      const file = e.dataTransfer.files[0]
+      if (file) parseImportFile(file)
+    },
+    [parseImportFile]
+  )
+
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) parseImportFile(file)
+    },
+    [parseImportFile]
+  )
+
+  const handleImportConfirm = useCallback(async () => {
+    if (!importData) return
+
+    setImporting(true)
     try {
-      const { tasks } = useTaskStore.getState()
-
-      // CSV header
-      const headers = ['Title', 'Status', 'Priority', 'Assignee', 'Due Date', 'Created At']
-      const rows = tasks.map((task) => [
-        `"${(task.title ?? '').replace(/"/g, '""')}"`,
-        task.status ?? '',
-        task.priority ?? '',
-        task.assignee?.first_name ? `${task.assignee.first_name} ${task.assignee.last_name ?? ''}`.trim() : '',
-        task.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
-        task.created_at ? new Date(task.created_at).toISOString().slice(0, 10) : '',
-      ])
-
-      const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `usra-plus-tasks-${new Date().toISOString().slice(0, 10)}.csv`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('Tasks exported as CSV successfully')
-    } catch {
-      toast.error(t.common.error)
-    } finally {
-      setExportingCSV(false)
-    }
-  }, [t])
-
-  const handleClearData = useCallback(async () => {
-    try {
-      // Clear all Zustand stores
+      // Merge strategy: add new items without overwriting existing data
       const taskStore = useTaskStore.getState()
       const groceryStore = useGroceryStore.getState()
       const calendarStore = useCalendarStore.getState()
-      const appStore = useAppStore.getState()
+      const chatStore = useChatStore.getState()
 
-      taskStore.setTasks([])
-      groceryStore.setItems([])
-      calendarStore.setEvents([])
-      appStore.setFamilyMembers([])
+      if (Array.isArray(importData.tasks)) {
+        const newTasks = importData.tasks.map((task: Record<string, unknown>) => ({
+          id: (task.id as string) || `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          family_id: '',
+          title: (task.title as string) || 'Untitled',
+          description: (task.description as string) || null,
+          status: (task.status as string) || 'todo',
+          priority: (task.priority as string) || 'medium',
+          assigned_to: (task.assigned_to as string) || null,
+          created_by: '',
+          due_date: (task.due_date as string) || null,
+          completed_at: (task.completed_at as string) || null,
+          created_at: (task.created_at as string) || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+        taskStore.setTasks([...taskStore.tasks, ...newTasks])
+      }
 
-      toast.success('All data cleared')
+      if (Array.isArray(importData.events)) {
+        const newEvents = importData.events.map((event: Record<string, unknown>) => ({
+          id: (event.id as string) || `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          family_id: '',
+          title: (event.title as string) || 'Untitled Event',
+          description: (event.description as string) || null,
+          start_time: (event.start_time as string) || new Date().toISOString(),
+          end_time: (event.end_time as string) || null,
+          all_day: (event.all_day as boolean) ?? false,
+          color: (event.color as string) || null,
+          created_by: '',
+          created_at: (event.created_at as string) || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+        calendarStore.setEvents([...calendarStore.events, ...newEvents])
+      }
+
+      if (Array.isArray(importData.groceryItems)) {
+        const newItems = importData.groceryItems.map((item: Record<string, unknown>) => ({
+          id: (item.id as string) || `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          family_id: '',
+          name: (item.name as string) || 'Unnamed Item',
+          category: (item.category as string) || null,
+          quantity: (item.quantity as number) ?? 1,
+          checked: (item.checked as boolean) ?? false,
+          added_by: '',
+          created_at: (item.created_at as string) || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+        groceryStore.setItems([...groceryStore.items, ...newItems])
+      }
+
+      if (Array.isArray(importData.messages)) {
+        const newMessages = importData.messages.map((msg: Record<string, unknown>) => ({
+          id: (msg.id as string) || `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          family_id: '',
+          content: (msg.content as string) || '',
+          sender_id: (msg.sender_id as string) || '',
+          message_type: (msg.message_type as string) || 'text',
+          reply_to: null,
+          created_at: (msg.created_at as string) || new Date().toISOString(),
+        }))
+        chatStore.setMessages([...chatStore.messages, ...newMessages])
+      }
+
+      // Reset import state
+      setImportPreview(null)
+      setImportData(null)
+      setImportFile(null)
+      setImportConfirmOpen(false)
+      toast.success(t.dataControl.importSuccess)
+    } catch {
+      toast.error(t.dataControl.importFailed)
+    } finally {
+      setImporting(false)
+    }
+  }, [importData, t])
+
+  const handleClearConfirm = useCallback(async () => {
+    setClearing(true)
+    try {
+      const taskStore = useTaskStore.getState()
+      const groceryStore = useGroceryStore.getState()
+      const calendarStore = useCalendarStore.getState()
+      const chatStore = useChatStore.getState()
+
+      if (clearSelection.tasks) taskStore.setTasks([])
+      if (clearSelection.events) calendarStore.setEvents([])
+      if (clearSelection.grocery) groceryStore.setItems([])
+      if (clearSelection.messages) chatStore.setMessages([])
+
+      setClearConfirmOpen(false)
+      toast.success(t.dataControl.clearSuccess)
     } catch {
       toast.error(t.common.error)
+    } finally {
+      setClearing(false)
     }
-  }, [t])
+  }, [clearSelection, t])
+
+  const dataTypeItems = [
+    { key: 'tasks' as const, icon: CheckCircle2, label: t.dataControl.tasks, count: dataCounts.tasks },
+    { key: 'events' as const, icon: CalendarDays, label: t.dataControl.events, count: dataCounts.events },
+    { key: 'grocery' as const, icon: ShoppingCart, label: t.dataControl.grocery, count: dataCounts.grocery },
+    { key: 'messages' as const, icon: MessageCircle, label: t.dataControl.messages, count: dataCounts.messages },
+  ]
 
   return (
     <div className="space-y-6">
@@ -1845,10 +2217,10 @@ function DataControlTab() {
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <HardDrive className="size-4 text-[--accent-primary]" /> Storage Usage
+            <HardDrive className="size-4 text-[--accent-primary]" /> {isRTL ? 'استخدام التخزين' : 'Storage Usage'}
           </span>
         </SectionTitle>
-        <SectionDescription>Your current storage consumption</SectionDescription>
+        <SectionDescription>{isRTL ? 'استهلاك التخزين الحالي' : 'Your current storage consumption'}</SectionDescription>
 
         <div className="space-y-4">
           <div>
@@ -1856,94 +2228,388 @@ function DataControlTab() {
               <span className="text-[--text-primary] text-sm">2.4 GB of 5 GB</span>
               <span className="text-[--accent-secondary] text-sm font-medium">48%</span>
             </div>
-            <Progress value={48} className="h-2 bg-white/5 [&>div]:bg-[--accent-primary]" />
+            <Progress value={48} className="h-2 bg-[--border-subtle] [&>div]:bg-[--accent-primary]" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
-              <p className="text-[--text-muted] text-xs">Files</p>
+              <p className="text-[--text-muted] text-xs">{t.files.title}</p>
               <p className="text-[--text-primary] text-sm font-medium">1.8 GB</p>
             </div>
             <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
-              <p className="text-[--text-muted] text-xs">Messages</p>
+              <p className="text-[--text-muted] text-xs">{t.chat.title}</p>
               <p className="text-[--text-primary] text-sm font-medium">0.4 GB</p>
             </div>
             <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
-              <p className="text-[--text-muted] text-xs">Tasks & Events</p>
+              <p className="text-[--text-muted] text-xs">{t.tasks.title} & {t.calendar.title}</p>
               <p className="text-[--text-primary] text-sm font-medium">0.1 GB</p>
             </div>
             <div className="p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]">
-              <p className="text-[--text-muted] text-xs">Other</p>
+              <p className="text-[--text-muted] text-xs">{isRTL ? 'أخرى' : 'Other'}</p>
               <p className="text-[--text-primary] text-sm font-medium">0.1 GB</p>
             </div>
           </div>
         </div>
       </SectionCard>
 
-      {/* Export */}
+      {/* ─── Export Section ─────────────────────────────────────────────────── */}
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Download className="size-4 text-[--accent-primary]" /> {t.settings.exportData}
+            <Download className="size-4 text-[--accent-primary]" /> {t.dataControl.exportData}
           </span>
         </SectionTitle>
-        <SectionDescription>Download a copy of all your data in your preferred format</SectionDescription>
+        <SectionDescription>
+          {isRTL ? 'قم بتنزيل نسخة من بياناتك بالتنسيق المفضل لديك' : 'Download a copy of your data in your preferred format'}
+        </SectionDescription>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="space-y-5">
+          {/* Format Selection */}
+          <div>
+            <Label className="text-[--text-primary] text-xs mb-2 block">{t.dataControl.exportFormat}</Label>
+            <div className="flex gap-2">
+              <Button
+                variant={exportFormat === 'json' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setExportFormat('json')}
+                className={
+                  exportFormat === 'json'
+                    ? 'bg-[--accent-primary] text-white hover:bg-[--accent-primary]/80 gap-1.5'
+                    : 'border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-surface-2] gap-1.5'
+                }
+              >
+                <FileJson className="size-4" />
+                {t.dataControl.json}
+              </Button>
+              <Button
+                variant={exportFormat === 'csv' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setExportFormat('csv')}
+                className={
+                  exportFormat === 'csv'
+                    ? 'bg-[--accent-primary] text-white hover:bg-[--accent-primary]/80 gap-1.5'
+                    : 'border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-surface-2] gap-1.5'
+                }
+              >
+                <FileSpreadsheet className="size-4" />
+                {t.dataControl.csv}
+              </Button>
+            </div>
+          </div>
+
+          {/* Data Selection */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-[--text-primary] text-xs">{t.dataControl.selectData}</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleAllExport}
+                className="text-[--accent-secondary] text-xs h-6 px-2"
+              >
+                {isAllExportSelected ? t.dataControl.deselectAll : t.dataControl.selectAll}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {dataTypeItems.map(({ key, icon: Icon, label, count }) => (
+                <div
+                  key={key}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle] cursor-pointer hover:bg-[--bg-surface-2]/80 transition-colors"
+                  onClick={() => toggleExport(key)}
+                >
+                  <Checkbox
+                    checked={exportSelection[key]}
+                    onCheckedChange={() => toggleExport(key)}
+                    className="data-[state=checked]:bg-[--accent-primary] data-[state=checked]:border-[--accent-primary]"
+                  />
+                  <Icon className="size-4 text-[--accent-secondary] shrink-0" />
+                  <span className="text-[--text-primary] text-sm flex-1">{label}</span>
+                  <Badge variant="outline" className="text-[10px] border-[--border-subtle] text-[--text-muted]">
+                    {count}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Export Button */}
           <Button
-            onClick={handleExportJSON}
-            disabled={exporting}
-            variant="outline"
-            className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2] gap-2"
+            onClick={handleExport}
+            disabled={exporting || !Object.values(exportSelection).some(Boolean)}
+            className="w-full bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white gap-2"
           >
-            {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-            Export as JSON
-          </Button>
-          <Button
-            onClick={handleExportCSV}
-            disabled={exportingCSV}
-            variant="outline"
-            className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2] gap-2"
-          >
-            {exportingCSV ? <Loader2 className="size-4 animate-spin" /> : <BarChart3 className="size-4" />}
-            Export Tasks as CSV
+            {exporting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Download className="size-4" />
+            )}
+            {exporting ? t.dataControl.exporting : t.dataControl.exportData}
           </Button>
         </div>
       </SectionCard>
 
-      {/* Clear Data */}
+      {/* ─── Import Section ─────────────────────────────────────────────────── */}
+      <SectionCard>
+        <SectionTitle>
+          <span className="flex items-center gap-2">
+            <Upload className="size-4 text-[--accent-primary]" /> {t.dataControl.importData}
+          </span>
+        </SectionTitle>
+        <SectionDescription>
+          {isRTL ? 'قم باستيراد البيانات من ملف JSON أو CSV' : 'Import data from a JSON or CSV file'}
+        </SectionDescription>
+
+        <div className="space-y-4">
+          {/* Drop Zone */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`
+              relative border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer
+              ${isDragging
+                ? 'border-[--accent-primary] bg-[--accent-primary]/5 scale-[1.01]'
+                : 'border-[--border-subtle] bg-[--bg-surface-2] hover:border-[--accent-primary]/50 hover:bg-[--bg-surface-2]/80'
+              }
+            `}
+            onClick={() => {
+              const input = document.getElementById('import-file-input') as HTMLInputElement | null
+              input?.click()
+            }}
+          >
+            <input
+              id="import-file-input"
+              type="file"
+              accept=".json,.csv"
+              className="hidden"
+              onChange={handleFileInput}
+            />
+            <motion.div
+              animate={isDragging ? { scale: 1.05, y: -4 } : { scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              <Upload className={`size-10 mx-auto mb-3 ${isDragging ? 'text-[--accent-primary]' : 'text-[--text-muted]'}`} />
+              <p className="text-[--text-primary] text-sm font-medium mb-1">{t.dataControl.dropzone}</p>
+              <p className="text-[--text-muted] text-xs">{t.dataControl.supportedFormats}</p>
+            </motion.div>
+          </div>
+
+          {/* File Selected Indicator */}
+          {importFile && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 p-3 rounded-xl bg-[--accent-primary]/10 border border-[--accent-primary]/20"
+            >
+              <FileJson className="size-5 text-[--accent-secondary]" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[--text-primary] text-sm font-medium truncate">{importFile.name}</p>
+                <p className="text-[--text-muted] text-xs">
+                  {(importFile.size / 1024).toFixed(1)} KB
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setImportFile(null)
+                  setImportPreview(null)
+                  setImportData(null)
+                }}
+                className="text-[--text-muted] hover:text-[--text-primary] shrink-0"
+              >
+                <X className="size-4" />
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Import Preview */}
+          {importPreview && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
+            >
+              <h4 className="text-[--text-primary] text-sm font-semibold mb-3 flex items-center gap-2">
+                <Eye className="size-4 text-[--accent-secondary]" />
+                {t.dataControl.importPreviewTitle}
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {importPreview.tasks > 0 && (
+                  <div className="p-2.5 rounded-lg bg-[--bg-primary] border border-[--border-subtle]">
+                    <p className="text-[--text-muted] text-xs">{t.dataControl.tasks}</p>
+                    <p className="text-[--text-primary] text-sm font-medium">
+                      {t.dataControl.itemCount.replace('{count}', String(importPreview.tasks))}
+                    </p>
+                  </div>
+                )}
+                {importPreview.events > 0 && (
+                  <div className="p-2.5 rounded-lg bg-[--bg-primary] border border-[--border-subtle]">
+                    <p className="text-[--text-muted] text-xs">{t.dataControl.events}</p>
+                    <p className="text-[--text-primary] text-sm font-medium">
+                      {t.dataControl.itemCount.replace('{count}', String(importPreview.events))}
+                    </p>
+                  </div>
+                )}
+                {importPreview.grocery > 0 && (
+                  <div className="p-2.5 rounded-lg bg-[--bg-primary] border border-[--border-subtle]">
+                    <p className="text-[--text-muted] text-xs">{t.dataControl.grocery}</p>
+                    <p className="text-[--text-primary] text-sm font-medium">
+                      {t.dataControl.itemCount.replace('{count}', String(importPreview.grocery))}
+                    </p>
+                  </div>
+                )}
+                {importPreview.messages > 0 && (
+                  <div className="p-2.5 rounded-lg bg-[--bg-primary] border border-[--border-subtle]">
+                    <p className="text-[--text-muted] text-xs">{t.dataControl.messages}</p>
+                    <p className="text-[--text-primary] text-sm font-medium">
+                      {t.dataControl.itemCount.replace('{count}', String(importPreview.messages))}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="mt-3 pt-3 border-t border-[--border-subtle]">
+                <p className="text-[--accent-secondary] text-xs font-medium">
+                  {isRTL ? 'الإجمالي' : 'Total'}: {t.dataControl.itemCount.replace('{count}', String(importPreview.total))}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Import Button */}
+          <Button
+            onClick={() => setImportConfirmOpen(true)}
+            disabled={!importPreview || importing}
+            className="w-full bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white gap-2"
+          >
+            {importing ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Upload className="size-4" />
+            )}
+            {importing ? t.dataControl.applying : t.dataControl.importData}
+          </Button>
+
+          {/* Import Confirmation Dialog */}
+          <AlertDialog open={importConfirmOpen} onOpenChange={setImportConfirmOpen}>
+            <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-[--text-primary]">
+                  {t.dataControl.importData}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-[--text-muted]">
+                  {t.dataControl.importWarning.replace('{count}', String(importPreview?.total ?? 0))}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
+                  {t.common.cancel}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleImportConfirm}
+                  className="bg-[--accent-primary] text-white hover:bg-[--accent-primary]/80"
+                >
+                  {t.common.confirm}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </SectionCard>
+
+      {/* ─── Clear Data Section ─────────────────────────────────────────────── */}
       <SectionCard className="border-[#EF4444]/20">
         <SectionTitle className="text-[#EF4444]">
           <span className="flex items-center gap-2">
-            <AlertTriangle className="size-4" /> {t.settings.clearData}
+            <AlertTriangle className="size-4" /> {t.dataControl.clearData}
           </span>
         </SectionTitle>
-        <SectionDescription>Permanently remove all your data from USRA PLUS</SectionDescription>
+        <SectionDescription>
+          {isRTL ? 'إزالة البيانات نهائيًا من USRA PLUS' : 'Permanently remove data from USRA PLUS'}
+        </SectionDescription>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="size-4" />
-              {t.settings.clearData}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="bg-[--bg-surface] border-white/10">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-[--text-primary]">Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription className="text-[--text-muted]">
-                This will delete all your data including tasks, grocery items, events, and family members. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
-                {t.common.cancel}
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleClearData} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
-                Yes, Clear All
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="space-y-4">
+          {/* Warning Alert */}
+          <Alert className="bg-[#EF4444]/5 border-[#EF4444]/20">
+            <AlertTriangle className="size-4 text-[#EF4444]" />
+            <AlertDescription className="text-[#EF4444]/80 text-xs">
+              {t.dataControl.clearWarning}
+            </AlertDescription>
+          </Alert>
+
+          {/* Data Selection for Clear */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-[--text-primary] text-xs">{t.dataControl.selectData}</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleAllClear}
+                className="text-[#EF4444]/70 text-xs h-6 px-2 hover:text-[#EF4444]"
+              >
+                {isAllClearSelected ? t.dataControl.deselectAll : t.dataControl.selectAll}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {dataTypeItems.map(({ key, icon: Icon, label, count }) => (
+                <div
+                  key={key}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle] cursor-pointer hover:bg-[--bg-surface-2]/80 transition-colors"
+                  onClick={() => toggleClear(key)}
+                >
+                  <Checkbox
+                    checked={clearSelection[key]}
+                    onCheckedChange={() => toggleClear(key)}
+                    className="data-[state=checked]:bg-[#EF4444] data-[state=checked]:border-[#EF4444]"
+                  />
+                  <Icon className="size-4 text-[--text-muted] shrink-0" />
+                  <span className="text-[--text-primary] text-sm flex-1">{label}</span>
+                  <Badge variant="outline" className="text-[10px] border-[--border-subtle] text-[--text-muted]">
+                    {count}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Clear Button */}
+          <Button
+            variant="destructive"
+            onClick={() => setClearConfirmOpen(true)}
+            disabled={!Object.values(clearSelection).some(Boolean) || clearing}
+            className="w-full gap-2"
+          >
+            {clearing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+            {clearing ? t.common.loading : t.dataControl.clearData}
+          </Button>
+
+          {/* Clear Confirmation Dialog */}
+          <AlertDialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
+            <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-[#EF4444]">
+                  {t.dataControl.clearData}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-[--text-muted]">
+                  {t.dataControl.clearWarning}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
+                  {t.common.cancel}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleClearConfirm}
+                  className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80"
+                >
+                  {t.common.confirm}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </SectionCard>
     </div>
   )
@@ -2048,14 +2714,14 @@ function IntegrationsTab() {
         <div>
           <span className="text-[--text-muted] text-xs block mb-2">{t.integrations.inviteCode}</span>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[--accent-secondary] font-mono text-sm tracking-widest">
+            <code className="flex-1 bg-[--border-subtle] border border-[--border-subtle] rounded-lg px-3 py-2 text-[--accent-secondary] font-mono text-sm tracking-widest">
               {inviteCode}
             </code>
             <Button
               variant="outline"
               size="sm"
               onClick={handleCopyCode}
-              className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2]"
+              className="border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-surface-2]"
             >
               {copied ? <Check className="size-4 text-green-400" /> : <Copy className="size-4" />}
               {copied ? t.common.copied : t.settings.copyCode}
@@ -2082,13 +2748,13 @@ function IntegrationsTab() {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 border-white/10 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2] rounded-xl"
+                className="flex-1 border-[--border-subtle] text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2] rounded-xl"
               >
                 <RefreshCw className="size-4" />
                 {t.integrations.regenerateCode}
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-[--bg-surface] border-white/10">
+            <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle]">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-[--text-primary]">
                   {t.integrations.regenerateConfirmTitle}
@@ -2098,7 +2764,7 @@ function IntegrationsTab() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
+                <AlertDialogCancel className="bg-[--border-subtle] border-[--border-subtle] text-[--text-primary]">
                   {t.common.cancel}
                 </AlertDialogCancel>
                 <AlertDialogAction
@@ -2129,7 +2795,7 @@ function IntegrationsTab() {
           {connectedApps.map((app) => (
             <div
               key={app.id}
-              className="flex items-center gap-3 p-4 rounded-xl opacity-60 bg-white/[0.02] border border-white/[0.06]"
+              className="flex items-center gap-3 p-4 rounded-xl opacity-60 bg-[--border-subtle] border border-[--border-subtle]"
             >
               <div className={`size-10 rounded-lg ${app.bgColor} flex items-center justify-center`}>
                 <app.icon className={`size-5 ${app.color}`} />
@@ -2311,7 +2977,7 @@ function PremiumTab() {
               <Button
                 variant="outline"
                 disabled
-                className="w-full border-white/10 text-[--text-muted]"
+                className="w-full border-[--border-subtle] text-[--text-muted]"
               >
                 {isRTL ? 'الخطة الحالية' : 'Current Plan'}
               </Button>
@@ -2321,7 +2987,7 @@ function PremiumTab() {
                 className={`w-full ${
                   plan.popular
                     ? 'bg-[--accent-primary] hover:bg-[--accent-primary]/80 text-white'
-                    : 'bg-white/5 border border-white/10 text-[--text-primary] hover:bg-white/10'
+                    : 'bg-[--border-subtle] border border-[--border-subtle] text-[--text-primary] hover:bg-[--border-subtle]'
                 }`}
                 variant={plan.popular ? 'default' : 'outline'}
               >

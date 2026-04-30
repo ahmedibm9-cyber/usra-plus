@@ -19,13 +19,13 @@ export function EmptyState({ icon: Icon, title, description, action, className =
       className={`flex flex-col items-center justify-center py-12 ${className}`}
     >
       <div className="relative mb-5">
-        <div className="w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-          <Icon className="w-10 h-10 text-[#6B7280]" />
+        <div className="w-20 h-20 rounded-2xl bg-[--border-subtle] border border-[--border-subtle] flex items-center justify-center">
+          <Icon className="w-10 h-10 text-[--text-muted]" />
         </div>
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/[0.03] to-violet-500/[0.03] blur-xl" />
       </div>
-      <h3 className="text-lg font-semibold text-[#E5E7EB] mb-2">{title}</h3>
-      <p className="text-sm text-[#6B7280] max-w-[280px] text-center leading-relaxed">{description}</p>
+      <h3 className="text-lg font-semibold text-[--text-primary] mb-2">{title}</h3>
+      <p className="text-sm text-[--text-muted] max-w-[280px] text-center leading-relaxed">{description}</p>
       {action && (
         <button
           onClick={action.onClick}

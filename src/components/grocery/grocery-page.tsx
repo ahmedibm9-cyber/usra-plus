@@ -172,7 +172,7 @@ function getCategoryColor(category: string | null) {
     snacks: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
     frozen: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
     household: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    other: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+    other: 'bg-gray-500/20 text-[--text-muted] border-gray-500/30',
   }
   return colors[category ?? 'other'] ?? colors.other
 }
@@ -208,10 +208,10 @@ function GroceryItemCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        'group bg-[#111117] border border-white/[0.08] rounded-xl p-3 sm:p-4 transition-all duration-300',
-        hovered && !isDragOverlay && 'border-white/[0.12] -translate-y-px shadow-lg shadow-black/20',
+        'group bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-3 sm:p-4 transition-all duration-300',
+        hovered && !isDragOverlay && 'border-[--border-medium] -translate-y-px shadow-lg shadow-black/20',
         flashItemId === item.id && 'bg-green-500/10',
-        isChecked && !isDragOverlay && 'bg-[#111117]/50 border-white/[0.04]',
+        isChecked && !isDragOverlay && 'bg-[--bg-surface]/50 border-[--border-subtle]',
         isDragOverlay && 'shadow-2xl ring-1 ring-white/10 scale-[1.02]'
       )}
     >
@@ -221,7 +221,7 @@ function GroceryItemCard({
           <button
             {...dragHandleProps}
             className={cn(
-              'w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[#6B7280] hover:text-[#E5E7EB]',
+              'w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[--text-muted] hover:text-[--text-primary]',
               isRTL ? 'ml-0 mr-0' : 'mr-0 ml-0'
             )}
             aria-label="Drag to reorder"
@@ -234,7 +234,7 @@ function GroceryItemCard({
         <Checkbox
           checked={item.checked}
           onCheckedChange={() => onToggleChecked(item)}
-          className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
+          className="h-5 w-5 rounded-md border-[--border-medium] data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
         />
 
         {/* Content */}
@@ -244,14 +244,14 @@ function GroceryItemCard({
             <span
               className={cn(
                 'text-sm font-medium truncate',
-                isChecked ? 'text-[#6B7280] line-through' : 'text-[#E5E7EB]'
+                isChecked ? 'text-[--text-muted] line-through' : 'text-[--text-primary]'
               )}
             >
               {item.name}
             </span>
           </div>
           {item.adder && !isChecked && (
-            <p className="text-xs text-[#6B7280] mt-0.5">
+            <p className="text-xs text-[--text-muted] mt-0.5">
               Added by {item.adder.first_name ?? 'Someone'}
             </p>
           )}
@@ -262,7 +262,7 @@ function GroceryItemCard({
           <span
             className={cn(
               'text-xs font-medium',
-              isChecked ? 'text-[#6B7280]/60 line-through' : 'text-[#6B7280]'
+              isChecked ? 'text-[--text-muted]/60 line-through' : 'text-[--text-muted]'
             )}
           >
             x{item.quantity}
@@ -283,7 +283,7 @@ function GroceryItemCard({
             size="icon"
             onClick={() => onDelete(item.id)}
             disabled={deletingId === item.id}
-            className="h-8 w-8 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="h-8 w-8 text-[--text-muted] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
@@ -356,7 +356,7 @@ function SortableGroceryItem({
 // ─── Recipe Skeleton Card ──────────────────────────────────────────────
 function RecipeSkeletonCard() {
   return (
-    <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-4">
+    <div className="bg-[--border-subtle] border border-[--border-subtle] rounded-xl p-4">
       <Skeleton className="h-5 w-3/5 mb-3" />
       <div className="flex items-center gap-3 mb-3">
         <Skeleton className="h-4 w-16" />
@@ -404,17 +404,17 @@ function RecipeCard({
   }
 
   return (
-    <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-4 hover:bg-white/[0.06] transition-colors">
+    <div className="bg-[--border-subtle] border border-[--border-subtle] rounded-xl p-4 hover:bg-[--border-subtle] transition-colors">
       {/* Title */}
-      <h4 className="text-sm font-bold text-[#E5E7EB] mb-2">{recipe.title}</h4>
+      <h4 className="text-sm font-bold text-[--text-primary] mb-2">{recipe.title}</h4>
 
       {/* Meta */}
       <div className={cn('flex items-center gap-3 mb-3 flex-wrap', isRTL && 'flex-row-reverse')}>
-        <span className="flex items-center gap-1 text-xs text-[#6B7280]">
+        <span className="flex items-center gap-1 text-xs text-[--text-muted]">
           <Clock className="w-3 h-3" />
           {recipe.cookTime}
         </span>
-        <span className="flex items-center gap-1 text-xs text-[#6B7280]">
+        <span className="flex items-center gap-1 text-xs text-[--text-muted]">
           <Users className="w-3 h-3" />
           {recipe.servings} {t.grocery.servings}
         </span>
@@ -432,7 +432,7 @@ function RecipeCard({
               'text-xs px-2 py-0.5 rounded-md border',
               isMatch(ing)
                 ? 'text-[#6366F1] font-medium bg-[#6366F1]/10 border-[#6366F1]/20'
-                : 'text-[#6B7280] bg-white/[0.03] border-white/[0.06]'
+                : 'text-[--text-muted] bg-[--border-subtle] border-[--border-subtle]'
             )}
           >
             {ing}
@@ -460,13 +460,13 @@ function RecipeCard({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
+            <div className="mt-3 pt-3 border-t border-[--border-subtle] space-y-2">
               {recipe.steps.map((step, idx) => (
                 <div key={idx} className={cn('flex gap-2 text-xs', isRTL && 'flex-row-reverse')}>
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#6366F1]/10 text-[#6366F1] flex items-center justify-center font-medium text-[10px]">
                     {idx + 1}
                   </span>
-                  <span className="text-[#9CA3AF] leading-relaxed">{step}</span>
+                  <span className="text-[--text-secondary] leading-relaxed">{step}</span>
                 </div>
               ))}
             </div>
@@ -929,7 +929,7 @@ export function GroceryPage() {
   const groceryItemNames = useMemo(() => items.map((i) => i.name), [items])
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
+    <div className="flex flex-col h-full w-full bg-[--bg-primary]">
       {/* Header */}
       <div className="flex-shrink-0 px-4 sm:px-6 pt-6 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -938,10 +938,10 @@ export function GroceryPage() {
               <ShoppingBag className="w-5 h-5 text-[#6366F1]" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#E5E7EB]">
+              <h1 className="text-xl sm:text-2xl font-bold text-[--text-primary]">
                 {t.grocery.title}
               </h1>
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-sm text-[--text-muted]">
                 {progress.checked}/{progress.total} items checked
               </p>
             </div>
@@ -949,15 +949,15 @@ export function GroceryPage() {
           <div className="flex items-center gap-2">
             {/* Sort dropdown */}
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-              <SelectTrigger className="h-9 text-xs bg-[#111117] border-white/[0.06] text-[#E5E7EB] w-[140px] rounded-lg">
-                <ArrowUpDown className="size-3 mr-1 text-[#6B7280]" />
+              <SelectTrigger className="h-9 text-xs bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] w-[140px] rounded-lg">
+                <ArrowUpDown className="size-3 mr-1 text-[--text-muted]" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#111117] border-white/[0.08]">
-                <SelectItem value="created_at" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Created Date</SelectItem>
-                <SelectItem value="name" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Name</SelectItem>
-                <SelectItem value="category" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Category</SelectItem>
-                <SelectItem value="manual" className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB]">Manual Order</SelectItem>
+              <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
+                <SelectItem value="created_at" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Created Date</SelectItem>
+                <SelectItem value="name" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Name</SelectItem>
+                <SelectItem value="category" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Category</SelectItem>
+                <SelectItem value="manual" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Manual Order</SelectItem>
               </SelectContent>
             </Select>
 
@@ -966,30 +966,30 @@ export function GroceryPage() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-9 gap-2 bg-[#111117] border-white/[0.06] text-[#E5E7EB] hover:bg-white/[0.06] rounded-lg text-xs"
+                  className="h-9 gap-2 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] hover:bg-[--border-subtle] rounded-lg text-xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   {t.grocery.exportList}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-[#111117] border-white/[0.08] rounded-xl" align="end">
+              <DropdownMenuContent className="bg-[--bg-surface] border-[--border-subtle] rounded-xl" align="end">
                 <DropdownMenuItem
                   onClick={handleCopyToClipboard}
-                  className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB] cursor-pointer gap-2"
+                  className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary] cursor-pointer gap-2"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   {t.grocery.copyToClipboard}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleShareWhatsApp}
-                  className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB] cursor-pointer gap-2"
+                  className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary] cursor-pointer gap-2"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   {t.grocery.shareWhatsApp}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDownloadText}
-                  className="text-[#E5E7EB] focus:bg-white/[0.06] focus:text-[#E5E7EB] cursor-pointer gap-2"
+                  className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary] cursor-pointer gap-2"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   {t.grocery.downloadPDF}
@@ -1008,14 +1008,14 @@ export function GroceryPage() {
         </div>
 
         {/* Progress bar */}
-        <div className="mt-5 bg-[#111117] border border-white/[0.08] rounded-2xl p-4">
+        <div className="mt-5 bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-[#E5E7EB]">{t.grocery.progress}</span>
+            <span className="text-sm font-medium text-[--text-primary]">{t.grocery.progress}</span>
             <span className="text-sm font-semibold text-[#A78BFA]">{progress.percentage}%</span>
           </div>
           <Progress
             value={progress.percentage}
-            className="h-2.5 bg-white/[0.06] [&>[data-slot=indicator]]:bg-gradient-to-r [&>[data-slot=indicator]]:from-[#6366F1] [&>[data-slot=indicator]]:to-[#A78BFA]"
+            className="h-2.5 bg-[--border-subtle] [&>[data-slot=indicator]]:bg-gradient-to-r [&>[data-slot=indicator]]:from-[#6366F1] [&>[data-slot=indicator]]:to-[#A78BFA]"
           />
         </div>
 
@@ -1024,14 +1024,14 @@ export function GroceryPage() {
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
-              <span className="text-xs font-medium text-[#6B7280]">Quick Add</span>
+              <span className="text-xs font-medium text-[--text-muted]">Quick Add</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {recentItems.map((recent) => (
                 <button
                   key={recent.name}
                   onClick={() => handleQuickAdd(recent.name, recent.category)}
-                  className="px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-[#E5E7EB] hover:bg-white/[0.08] transition-all"
+                  className="px-3 py-1.5 rounded-full bg-[--border-subtle] border border-[--border-subtle] text-xs text-[--text-primary] hover:bg-[--border-subtle] transition-all"
                 >
                   {recent.name}
                 </button>
@@ -1043,7 +1043,7 @@ export function GroceryPage() {
         {/* Search */}
         <div className="mt-4 relative">
           <Search className={cn(
-            'absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]',
+            'absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted]',
             isRTL ? 'right-3' : 'left-3'
           )} />
           <Input
@@ -1051,7 +1051,7 @@ export function GroceryPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.grocery.search}
             className={cn(
-              'bg-[#111117] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0',
+              'bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0',
               isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'
             )}
           />
@@ -1071,7 +1071,7 @@ export function GroceryPage() {
                     ${
                       filterCategory === cat.key
                         ? 'bg-[#6366F1] text-white shadow-lg shadow-[#6366F1]/25'
-                        : 'bg-white/[0.04] text-[#6B7280] hover:bg-white/[0.08] hover:text-[#E5E7EB] border border-white/[0.06]'
+                        : 'bg-[--border-subtle] text-[--text-muted] hover:bg-[--border-subtle] hover:text-[--text-primary] border border-[--border-subtle]'
                     }
                   `}
                 >
@@ -1079,7 +1079,7 @@ export function GroceryPage() {
                   {cat.key === 'all'
                     ? 'All'
                     : t.grocery.categories[cat.key as keyof typeof t.grocery.categories] ?? cat.label}
-                  <span className={`ml-0.5 text-[10px] ${filterCategory === cat.key ? 'text-white/70' : 'text-[#6B7280]/70'}`}>
+                  <span className={`ml-0.5 text-[10px] ${filterCategory === cat.key ? 'text-white/70' : 'text-[--text-muted]/70'}`}>
                     ({count})
                   </span>
                 </button>
@@ -1091,14 +1091,14 @@ export function GroceryPage() {
 
       {/* Tab switcher: List / Recipes */}
       <div className="flex-shrink-0 px-4 sm:px-6">
-        <div className="flex gap-1 bg-[#111117] border border-white/[0.06] rounded-lg p-1">
+        <div className="flex gap-1 bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-1">
           <button
             onClick={() => setActiveTab('list')}
             className={cn(
               'flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
               activeTab === 'list'
                 ? 'bg-[#6366F1] text-white shadow-sm'
-                : 'text-[#6B7280] hover:text-[#E5E7EB]'
+                : 'text-[--text-muted] hover:text-[--text-primary]'
             )}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
@@ -1115,7 +1115,7 @@ export function GroceryPage() {
               'flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
               activeTab === 'recipes'
                 ? 'bg-[#6366F1] text-white shadow-sm'
-                : 'text-[#6B7280] hover:text-[#E5E7EB]'
+                : 'text-[--text-muted] hover:text-[--text-primary]'
             )}
           >
             <ChefHat className="w-3.5 h-3.5" />
@@ -1172,7 +1172,7 @@ export function GroceryPage() {
 
                   {/* Separator between checked and unchecked */}
                   {checkedItems.length > 0 && uncheckedItems.length > 0 && (
-                    <Separator className="bg-white/[0.06] my-3" />
+                    <Separator className="bg-[--border-subtle] my-3" />
                   )}
 
                   {/* Checked items (not sortable, display-only) */}
@@ -1183,24 +1183,24 @@ export function GroceryPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 0.5 }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="group bg-[#111117]/50 border border-white/[0.04] rounded-xl p-3 sm:p-4"
+                        className="group bg-[--bg-surface]/50 border border-[--border-subtle] rounded-xl p-3 sm:p-4"
                       >
                         <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
                           <Checkbox
                             checked={item.checked}
                             onCheckedChange={() => handleToggleChecked(item)}
-                            className="h-5 w-5 rounded-md border-white/20 data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
+                            className="h-5 w-5 rounded-md border-[--border-medium] data-[state=checked]:bg-[#6366F1] data-[state=checked]:border-[#6366F1] data-[state=checked]:text-white flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
                             <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
                               <CategoryIconRender category={item.category} />
-                              <span className="text-sm font-medium text-[#6B7280] line-through truncate">
+                              <span className="text-sm font-medium text-[--text-muted] line-through truncate">
                                 {item.name}
                               </span>
                             </div>
                           </div>
                           <div className={cn('flex items-center gap-2 flex-shrink-0', isRTL && 'flex-row-reverse')}>
-                            <span className="text-xs text-[#6B7280]/60 font-medium line-through">
+                            <span className="text-xs text-[--text-muted]/60 font-medium line-through">
                               x{item.quantity}
                             </span>
                             <Button
@@ -1208,7 +1208,7 @@ export function GroceryPage() {
                               size="icon"
                               onClick={() => handleDeleteItem(item.id)}
                               disabled={deletingId === item.id}
-                              className="h-8 w-8 text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-8 w-8 text-[--text-muted] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -1264,7 +1264,7 @@ export function GroceryPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ChefHat className="w-4 h-4 text-[#6366F1]" />
-                  <span className="text-sm font-medium text-[#E5E7EB]">{t.grocery.recipeIdeas}</span>
+                  <span className="text-sm font-medium text-[--text-primary]">{t.grocery.recipeIdeas}</span>
                 </div>
                 <Button
                   variant="ghost"
@@ -1299,15 +1299,15 @@ export function GroceryPage() {
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <ChefHat className="w-10 h-10 text-[#6B7280]/40 mb-3" />
-                  <p className="text-sm text-[#6B7280]">
+                  <ChefHat className="w-10 h-10 text-[--text-muted]/40 mb-3" />
+                  <p className="text-sm text-[--text-muted]">
                     {isRTL ? 'أضف عناصر إلى قائمة البقالة للحصول على اقتراحات وصفات' : 'Add items to your grocery list to get recipe suggestions'}
                   </p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <ChefHat className="w-10 h-10 text-[#6B7280]/40 mb-3" />
-                  <p className="text-sm text-[#6B7280]">
+                  <ChefHat className="w-10 h-10 text-[--text-muted]/40 mb-3" />
+                  <p className="text-sm text-[--text-muted]">
                     {isRTL ? 'اضغط على تحديث للحصول على اقتراحات' : 'Click refresh to get suggestions'}
                   </p>
                 </div>
@@ -1319,17 +1319,17 @@ export function GroceryPage() {
 
       {/* Clear Checked Confirmation Dialog */}
       <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-        <AlertDialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] rounded-2xl">
+        <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#E5E7EB]">
+            <AlertDialogTitle className="text-[--text-primary]">
               {t.grocery.clearChecked}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#6B7280]">
+            <AlertDialogDescription className="text-[--text-muted]">
               {t.grocery.removeItems.replace('{n}', String(checkedCount))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-white/[0.08] text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04] rounded-xl">
+            <AlertDialogCancel className="bg-transparent border-[--border-subtle] text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] rounded-xl">
               {t.common.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
@@ -1352,9 +1352,9 @@ export function GroceryPage() {
           setAutoDetectedCategory(null)
         }
       }}>
-        <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[425px] rounded-2xl">
+        <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-[#E5E7EB] flex items-center gap-2">
+            <DialogTitle className="text-[--text-primary] flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-[#6366F1]/10">
                 <Plus className="w-4 h-4 text-[#6366F1]" />
               </div>
@@ -1363,12 +1363,12 @@ export function GroceryPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#E5E7EB]">{t.grocery.itemName}</label>
+              <label className="text-sm font-medium text-[--text-primary]">{t.grocery.itemName}</label>
               <Input
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 placeholder="e.g. Organic Bananas"
-                className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && newItemName.trim()) handleAddItem()
                 }}
@@ -1376,18 +1376,18 @@ export function GroceryPage() {
             </div>
             <div className="flex gap-4">
               <div className="space-y-2 flex-1">
-                <label className="text-sm font-medium text-[#E5E7EB]">{t.grocery.quantity}</label>
+                <label className="text-sm font-medium text-[--text-primary]">{t.grocery.quantity}</label>
                 <Input
                   type="number"
                   min={1}
                   value={newItemQuantity}
                   onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
                 />
               </div>
               <div className="space-y-2 flex-1">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-[#E5E7EB]">{t.grocery.category}</label>
+                  <label className="text-sm font-medium text-[--text-primary]">{t.grocery.category}</label>
                   {autoDetectedCategory && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#A78BFA] bg-[#6366F1]/10 px-1.5 py-0.5 rounded-md">
                       <Sparkles className="w-2.5 h-2.5" />
@@ -1399,15 +1399,15 @@ export function GroceryPage() {
                   setNewItemCategory(v)
                   setAutoDetectedCategory(null)
                 }}>
-                  <SelectTrigger className="bg-[#0B0B0F] border-white/[0.08] text-[#E5E7EB] rounded-xl h-10 focus:ring-[#6366F1]/30">
+                  <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] rounded-xl h-10 focus:ring-[#6366F1]/30">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] rounded-xl">
+                  <SelectContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl">
                     {CATEGORIES.filter((c) => c.key !== 'all').map((cat) => (
                       <SelectItem
                         key={cat.key}
                         value={cat.key}
-                        className="focus:bg-[#6366F1]/10 focus:text-[#E5E7EB]"
+                        className="focus:bg-[#6366F1]/10 focus:text-[--text-primary]"
                       >
                         <div className="flex items-center gap-2">
                           <cat.icon className="w-3.5 h-3.5" />
@@ -1431,7 +1431,7 @@ export function GroceryPage() {
                 setNewItemCategory('other')
                 setAutoDetectedCategory(null)
               }}
-              className="text-[#6B7280] hover:text-[#E5E7EB] rounded-xl"
+              className="text-[--text-muted] hover:text-[--text-primary] rounded-xl"
             >
               {t.common.cancel}
             </Button>
@@ -1441,7 +1441,7 @@ export function GroceryPage() {
               className="bg-[#6366F1] hover:bg-[#5558E6] text-white gap-2 rounded-xl min-w-[100px]"
             >
               {isAdding ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-[--border-medium] border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <Check className="w-4 h-4" />

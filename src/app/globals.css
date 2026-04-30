@@ -597,12 +597,12 @@ html[dir="rtl"] .sidebar-collapse-icon {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-subtle);
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--border-medium);
 }
 
 /* ─── Button Micro-interactions ──────────────────────────────────── */
@@ -690,6 +690,21 @@ html[dir="rtl"] .sidebar-collapse-icon {
 
 [data-sonner-toaster] [data-description] {
   color: #9CA3AF !important;
+}
+
+/* Light theme toast variant */
+.light [data-sonner-toaster] [data-styled="true"] {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1A1A2E !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border-left: 3px solid rgba(0, 0, 0, 0.08) !important;
+}
+.light [data-sonner-toaster] [data-title] {
+  color: #1A1A2E !important;
+}
+.light [data-sonner-toaster] [data-description] {
+  color: #6B7280 !important;
 }
 
 /* ─── Focus Ring Enhancement ─────────────────────────────────────── */

@@ -60,7 +60,7 @@ const ACTIVITY_TYPE_CONFIG: Record<ActivityType, {
   message_sent: {
     icon: MessageCircle,
     bgColor: 'bg-gray-500/20',
-    iconColor: 'text-gray-400',
+    iconColor: 'text-[--text-muted]',
   },
 }
 
@@ -106,11 +106,11 @@ function ActivityFeedItem({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.06 }}
-      className={`relative flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-white/[0.02] ${!isLast ? 'pb-4' : ''}`}
+      className={`relative flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-[--border-subtle] ${!isLast ? 'pb-4' : ''}`}
     >
       {/* Timeline line */}
       {!isLast && (
-        <div className="absolute left-4 top-8 bottom-0 w-px bg-white/[0.06]" />
+        <div className="absolute left-4 top-8 bottom-0 w-px bg-[--border-subtle]" />
       )}
 
       {/* Actor avatar with online indicator */}

@@ -145,7 +145,7 @@ export function FamilyQRCode({ inviteCode, familyName, size = 200 }: FamilyQRCod
           variant="outline"
           size="sm"
           onClick={handleDownload}
-          className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2] text-xs"
+          className="border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-surface-2] text-xs"
         >
           <Download className="size-3.5" />
           {t.integrations.downloadQR}
@@ -154,7 +154,7 @@ export function FamilyQRCode({ inviteCode, familyName, size = 200 }: FamilyQRCod
           variant="outline"
           size="sm"
           onClick={handlePrint}
-          className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2] text-xs"
+          className="border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-surface-2] text-xs"
         >
           <Printer className="size-3.5" />
           {t.integrations.printQR}

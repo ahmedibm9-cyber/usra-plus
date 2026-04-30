@@ -22,7 +22,7 @@ const PAGE_SHORTCUTS: { key: string; page: AppPage; labelKey: keyof import('@/i1
 // ─── Keyboard shortcut key component ──────────────────────────────
 function ShortcutKey({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 bg-white/[0.06] border border-white/[0.1] rounded-md text-xs font-mono text-[var(--text-secondary)]">
+    <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 bg-[--border-subtle] border border-[--border-subtle] rounded-md text-xs font-mono text-[var(--text-secondary)]">
       {children}
     </span>
   )
@@ -31,7 +31,7 @@ function ShortcutKey({ children }: { children: React.ReactNode }) {
 // ─── Shortcut row component ───────────────────────────────────────
 function ShortcutRow({ label, shortcut }: { label: string; shortcut: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-white/[0.04] last:border-0">
+    <div className="flex items-center justify-between py-2.5 border-b border-[--border-subtle] last:border-0">
       <span className="text-sm text-[var(--text-secondary)]">{label}</span>
       <div className="flex items-center gap-1">{shortcut}</div>
     </div>
@@ -248,11 +248,11 @@ export function ShortcutsModal() {
             dir={dir}
           >
             <div
-              className="bg-[var(--bg-surface)]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl max-w-lg w-full shadow-2xl shadow-black/40 overflow-hidden"
+              className="bg-[var(--bg-surface)]/95 backdrop-blur-xl border border-[--border-subtle] rounded-2xl max-w-lg w-full shadow-2xl shadow-black/40 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06]">
+              <div className="flex items-center gap-3 px-6 py-4 border-b border-[--border-subtle]">
                 <div className="flex items-center justify-center size-8 rounded-lg bg-[#6366F1]/10">
                   <Keyboard className="size-4 text-[#6366F1]" />
                 </div>
@@ -264,7 +264,7 @@ export function ShortcutsModal() {
               </div>
 
               {/* Shortcuts List */}
-              <div className="px-6 py-4 max-h-[60vh] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10">
+              <div className="px-6 py-4 max-h-[60vh] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[--border-subtle]">
                 {/* Navigation Group */}
                 <GroupHeader isFirst>{t.shortcuts.navigation}</GroupHeader>
 
@@ -323,7 +323,7 @@ export function ShortcutsModal() {
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-3 border-t border-white/[0.06] flex items-center justify-between">
+              <div className="px-6 py-3 border-t border-[--border-subtle] flex items-center justify-between">
                 <span className="text-[10px] text-[var(--text-muted)]">
                   {isRTL ? 'الاختصارات تعمل عندما لا يكون هناك حقل إدخال نشط' : 'Shortcuts work when no input is focused'}
                 </span>

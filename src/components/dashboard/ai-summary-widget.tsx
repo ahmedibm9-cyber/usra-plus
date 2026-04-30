@@ -261,7 +261,7 @@ export function AISummaryWidget({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111117] p-5">
+        <div className="relative overflow-hidden rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Skeleton className="size-5 rounded" />
@@ -285,10 +285,10 @@ export function AISummaryWidget({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111117] p-5">
+      <div className="relative overflow-hidden rounded-2xl border border-[--border-subtle] bg-[--bg-surface] p-5">
         {/* Gradient border overlay */}
         <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent bg-gradient-to-r from-[#6366F1]/20 to-[#A78BFA]/20 bg-clip-padding p-[1px]">
-          <div className="h-full w-full rounded-2xl bg-[#111117]" />
+          <div className="h-full w-full rounded-2xl bg-[--bg-surface]" />
         </div>
 
         {/* Content */}
@@ -299,7 +299,7 @@ export function AISummaryWidget({
               <div className="relative flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366F1]/20 to-[#A78BFA]/20">
                 <Sparkles className="size-4 text-[#A78BFA] animate-pulse" />
               </div>
-              <h3 className="text-sm font-semibold text-[#E5E7EB]">
+              <h3 className="text-sm font-semibold text-[--text-primary]">
                 {t.dashboard.familyInsights}
               </h3>
             </div>
@@ -310,7 +310,7 @@ export function AISummaryWidget({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 text-[#6B7280] hover:text-[#E5E7EB]"
+                className="h-7 w-7 p-0 text-[--text-muted] hover:text-[--text-primary]"
                 onClick={handleRegenerate}
                 disabled={isGenerating}
               >
@@ -328,10 +328,10 @@ export function AISummaryWidget({
                   <span className="size-1.5 rounded-full bg-[#6366F1] animate-bounce" style={{ animationDelay: '150ms' }} />
                   <span className="size-1.5 rounded-full bg-[#6366F1] animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-xs text-[#6B7280]">{t.dashboard.generating}</span>
+                <span className="text-xs text-[--text-muted]">{t.dashboard.generating}</span>
               </div>
             ) : (
-              <p className="text-sm leading-relaxed text-[#9CA3AF]">
+              <p className="text-sm leading-relaxed text-[--text-secondary]">
                 {displayedText}
                 {isTyping && (
                   <span className="animate-pulse border-r-2 border-[#6366F1] ml-0.5">&nbsp;</span>

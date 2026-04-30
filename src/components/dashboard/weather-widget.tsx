@@ -189,7 +189,7 @@ export function WeatherWidget() {
           <div ref={selectorRef} className="relative">
             <button
               onClick={() => setCitySelectorOpen(!citySelectorOpen)}
-              className="flex items-center gap-1 text-xs bg-transparent border border-white/[0.08] rounded-lg px-2 py-1 text-[--text-muted] hover:text-[--text-primary] hover:border-white/[0.15] transition-colors"
+              className="flex items-center gap-1 text-xs bg-transparent border border-[--border-subtle] rounded-lg px-2 py-1 text-[--text-muted] hover:text-[--text-primary] hover:border-[--border-medium] transition-colors"
             >
               {isRTL ? currentCity.nameAr : currentCity.nameEn}
               <ChevronDown className={`size-3 transition-transform ${citySelectorOpen ? 'rotate-180' : ''}`} />
@@ -202,7 +202,7 @@ export function WeatherWidget() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className={`absolute top-full mt-1 z-50 min-w-[140px] rounded-lg border border-white/[0.08] bg-[#111117]/95 backdrop-blur-xl shadow-xl overflow-hidden ${
+                  className={`absolute top-full mt-1 z-50 min-w-[140px] rounded-lg border border-[--border-subtle] bg-[--bg-surface]/95 backdrop-blur-xl shadow-xl overflow-hidden ${
                     isRTL ? 'left-0' : 'right-0'
                   }`}
                 >
@@ -210,7 +210,7 @@ export function WeatherWidget() {
                     <button
                       key={city.key}
                       onClick={() => handleCitySelect(city.key)}
-                      className={`w-full px-3 py-2 text-left text-xs transition-colors hover:bg-white/[0.05] ${
+                      className={`w-full px-3 py-2 text-left text-xs transition-colors hover:bg-[--border-subtle] ${
                         selectedCity === city.key
                           ? 'text-amber-400 bg-amber-400/[0.08]'
                           : 'text-[--text-muted]'
@@ -276,7 +276,7 @@ export function WeatherWidget() {
 
             {/* 3-Day Mini Forecast */}
             {weather?.forecast && weather.forecast.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-white/[0.06]">
+              <div className="mt-4 pt-3 border-t border-[--border-subtle]">
                 <p className="text-[10px] uppercase tracking-wider text-[--text-muted] mb-2">
                   {t.weather.forecast}
                 </p>

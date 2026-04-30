@@ -110,7 +110,7 @@ function getFileIconColor(fileType: string, fileName?: string) {
     return 'bg-green-500/15 text-green-400'
   if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext) || fileType.includes('zip') || fileType.includes('rar'))
     return 'bg-orange-500/15 text-orange-400'
-  return 'bg-gray-500/15 text-gray-400'
+  return 'bg-gray-500/15 text-[--text-muted]'
 }
 
 function formatFileSize(bytes: number): string {
@@ -365,7 +365,7 @@ export function FilesPage() {
   }, [previewFile, navigateLightbox])
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
+    <div className="flex flex-col h-full w-full bg-[--bg-primary]">
       {/* Header */}
       <div className="flex-shrink-0 px-4 sm:px-6 pt-6 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -374,10 +374,10 @@ export function FilesPage() {
               <FolderOpen className="w-5 h-5 text-[#6366F1]" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#E5E7EB]">
+              <h1 className="text-xl sm:text-2xl font-bold text-[--text-primary]">
                 {t.files.title}
               </h1>
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-sm text-[--text-muted]">
                 {files.length} file{files.length !== 1 ? 's' : ''}
               </p>
             </div>
@@ -385,7 +385,7 @@ export function FilesPage() {
 
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center bg-[#111117] border border-white/[0.08] rounded-xl p-0.5">
+            <div className="flex items-center bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-0.5">
               <Button
                 variant="ghost"
                 size="icon"
@@ -393,7 +393,7 @@ export function FilesPage() {
                 className={`h-8 w-8 rounded-lg ${
                   viewMode === 'grid'
                     ? 'bg-[#6366F1]/10 text-[#6366F1]'
-                    : 'text-[#6B7280] hover:text-[#E5E7EB]'
+                    : 'text-[--text-muted] hover:text-[--text-primary]'
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
@@ -405,7 +405,7 @@ export function FilesPage() {
                 className={`h-8 w-8 rounded-lg ${
                   viewMode === 'list'
                     ? 'bg-[#6366F1]/10 text-[#6366F1]'
-                    : 'text-[#6B7280] hover:text-[#E5E7EB]'
+                    : 'text-[--text-muted] hover:text-[--text-primary]'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -414,10 +414,10 @@ export function FilesPage() {
 
             {/* Sort dropdown */}
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
-              <SelectTrigger className="w-[120px] bg-[#111117] border-white/[0.08] text-[#E5E7EB] rounded-xl h-9 text-xs focus:ring-[#6366F1]/30">
+              <SelectTrigger className="w-[120px] bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl h-9 text-xs focus:ring-[#6366F1]/30">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] rounded-xl">
+              <SelectContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl">
                 <SelectItem value="date">Date</SelectItem>
                 <SelectItem value="name">Name</SelectItem>
                 <SelectItem value="size">Size</SelectItem>
@@ -437,19 +437,19 @@ export function FilesPage() {
         </div>
 
         {/* Storage usage */}
-        <div className="mt-5 bg-[#111117] border border-white/[0.08] rounded-2xl p-4">
+        <div className="mt-5 bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <HardDrive className="w-4 h-4 text-[#6B7280]" />
-              <span className="text-sm font-medium text-[#E5E7EB]">{t.files.storageUsed}</span>
+              <HardDrive className="w-4 h-4 text-[--text-muted]" />
+              <span className="text-sm font-medium text-[--text-primary]">{t.files.storageUsed}</span>
             </div>
-            <span className="text-xs text-[#6B7280]">
+            <span className="text-xs text-[--text-muted]">
               {formatFileSize(effectiveUsedStorage)} of {formatFileSize(totalStorage)}
             </span>
           </div>
           <Progress
             value={storagePercentage}
-            className={`h-2 bg-white/[0.06] [&>[data-slot=indicator]]:bg-gradient-to-r [&>[data-slot=indicator]]:from-[#6366F1] [&>[data-slot=indicator]]:to-[#A78BFA] ${
+            className={`h-2 bg-[--border-subtle] [&>[data-slot=indicator]]:bg-gradient-to-r [&>[data-slot=indicator]]:from-[#6366F1] [&>[data-slot=indicator]]:to-[#A78BFA] ${
               isStorageFull ? '[&>[data-slot=indicator]]:from-red-500 [&>[data-slot=indicator]]:to-red-400' : ''
             }`}
           />
@@ -465,12 +465,12 @@ export function FilesPage() {
 
         {/* Search */}
         <div className="mt-4 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted]" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.files.search}
-            className="pl-10 bg-[#111117] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
           />
         </div>
       </div>
@@ -504,7 +504,7 @@ export function FilesPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ delay: index * 0.03 }}
-                      className="group bg-[#111117] border border-white/[0.08] rounded-2xl p-4 hover:border-white/[0.16] hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+                      className="group bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-4 hover:border-[--border-medium] hover:scale-[1.02] transition-all duration-200 cursor-pointer"
                       onClick={() => isImage && setPreviewFile(file)}
                     >
                       {/* File icon / preview */}
@@ -529,14 +529,14 @@ export function FilesPage() {
                       </div>
 
                       {/* File info */}
-                      <p className="text-xs font-medium text-[#E5E7EB] truncate mb-0.5">
+                      <p className="text-xs font-medium text-[--text-primary] truncate mb-0.5">
                         {file.name}
                       </p>
-                      <p className="text-[10px] text-[#6B7280] mb-1">
+                      <p className="text-[10px] text-[--text-muted] mb-1">
                         {formatFileSize(file.file_size)}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-[#6B7280]">
+                        <span className="text-[10px] text-[--text-muted]">
                           {format(new Date(file.created_at), 'MMM d')}
                         </span>
                         <span className="text-[10px] text-[#A78BFA]">
@@ -551,7 +551,7 @@ export function FilesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 text-[#6B7280] hover:text-[#E5E7EB]"
+                              className="h-6 w-6 text-[--text-muted] hover:text-[--text-primary]"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <MoreVertical className="w-3 h-3" />
@@ -559,7 +559,7 @@ export function FilesPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] rounded-xl"
+                            className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl"
                           >
                             {isImage && (
                               <DropdownMenuItem
@@ -622,7 +622,7 @@ export function FilesPage() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ delay: index * 0.03 }}
-                      className="group flex items-center gap-3 bg-[#111117] border border-white/[0.08] rounded-xl px-4 py-3 hover:border-white/[0.12] transition-all duration-200 cursor-pointer"
+                      className="group flex items-center gap-3 bg-[--bg-surface] border border-[--border-subtle] rounded-xl px-4 py-3 hover:border-[--border-medium] transition-all duration-200 cursor-pointer"
                       onClick={() => isImage && setPreviewFile(file)}
                     >
                       {/* Icon */}
@@ -632,26 +632,26 @@ export function FilesPage() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#E5E7EB] truncate">{file.name}</p>
+                        <p className="text-sm font-medium text-[--text-primary] truncate">{file.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <Badge
                             variant="outline"
-                            className="text-[10px] px-1.5 py-0 h-4 border-white/[0.06] text-[#6B7280]"
+                            className="text-[10px] px-1.5 py-0 h-4 border-[--border-subtle] text-[--text-muted]"
                           >
                             {formatFileType(file.file_type)}
                           </Badge>
-                          <span className="text-[10px] text-[#6B7280]">
+                          <span className="text-[10px] text-[--text-muted]">
                             {formatFileSize(file.file_size)}
                           </span>
-                          <span className="text-[10px] text-[#6B7280]">·</span>
-                          <span className="text-[10px] text-[#6B7280]">
+                          <span className="text-[10px] text-[--text-muted]">·</span>
+                          <span className="text-[10px] text-[--text-muted]">
                             {getUploaderName(file.uploaded_by)}
                           </span>
                         </div>
                       </div>
 
                       {/* Date */}
-                      <span className="text-xs text-[#6B7280] flex-shrink-0 hidden sm:block">
+                      <span className="text-xs text-[--text-muted] flex-shrink-0 hidden sm:block">
                         {format(new Date(file.created_at), 'MMM d, yyyy')}
                       </span>
 
@@ -661,7 +661,7 @@ export function FilesPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB]"
+                            className="h-8 w-8 text-[--text-muted] hover:text-[--text-primary]"
                             onClick={(e) => {
                               e.stopPropagation()
                               setPreviewFile(file)
@@ -674,7 +674,7 @@ export function FilesPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB]"
+                            className="h-8 w-8 text-[--text-muted] hover:text-[--text-primary]"
                             onClick={(e) => {
                               e.stopPropagation()
                               window.open(file.url!, '_blank')
@@ -686,7 +686,7 @@ export function FilesPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-[#6B7280] hover:text-red-400"
+                          className="h-8 w-8 text-[--text-muted] hover:text-red-400"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleDeleteFile(file)
@@ -716,9 +716,9 @@ export function FilesPage() {
 
       {/* Upload Dialog */}
       <Dialog open={showUpload} onOpenChange={setShowUpload}>
-        <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[480px] rounded-2xl">
+        <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-[480px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-[#E5E7EB] flex items-center gap-2">
+            <DialogTitle className="text-[--text-primary] flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-[#6366F1]/10">
                 <Upload className="w-4 h-4 text-[#6366F1]" />
               </div>
@@ -731,27 +731,27 @@ export function FilesPage() {
               ${
                 isDragOver
                   ? 'border-[#6366F1] bg-[#6366F1]/5'
-                  : 'border-white/[0.08] hover:border-white/[0.15]'
+                  : 'border-[--border-subtle] hover:border-[--border-medium]'
               }
             `}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <div className={`mx-auto p-4 rounded-2xl w-fit mb-4 ${isDragOver ? 'bg-[#6366F1]/10' : 'bg-white/[0.04]'}`}>
-              <Cloud className={`w-8 h-8 ${isDragOver ? 'text-[#6366F1]' : 'text-[#6B7280]'}`} />
+            <div className={`mx-auto p-4 rounded-2xl w-fit mb-4 ${isDragOver ? 'bg-[#6366F1]/10' : 'bg-[--border-subtle]'}`}>
+              <Cloud className={`w-8 h-8 ${isDragOver ? 'text-[#6366F1]' : 'text-[--text-muted]'}`} />
             </div>
-            <p className="text-sm font-medium text-[#E5E7EB] mb-1">
+            <p className="text-sm font-medium text-[--text-primary] mb-1">
               {isDragOver ? 'Drop files here' : 'Drag & drop files here'}
             </p>
-            <p className="text-xs text-[#6B7280] mb-4">
+            <p className="text-xs text-[--text-muted] mb-4">
               or click to browse from your device
             </p>
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="border-white/[0.08] text-[#E5E7EB] hover:bg-white/[0.06] hover:text-[#E5E7EB] rounded-xl"
+              className="border-[--border-subtle] text-[--text-primary] hover:bg-[--border-subtle] hover:text-[--text-primary] rounded-xl"
             >
               {isUploading ? (
                 <div className="flex items-center gap-2">
@@ -778,7 +778,7 @@ export function FilesPage() {
             <Button
               variant="ghost"
               onClick={() => setShowUpload(false)}
-              className="text-[#6B7280] hover:text-[#E5E7EB] rounded-xl"
+              className="text-[--text-muted] hover:text-[--text-primary] rounded-xl"
             >
               {t.common.cancel}
             </Button>
@@ -799,7 +799,7 @@ export function FilesPage() {
           >
             {/* Close button */}
             <button
-              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-[--border-subtle] hover:bg-[--border-medium] text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation()
                 setPreviewFile(null)
@@ -812,7 +812,7 @@ export function FilesPage() {
             {imageFiles.length > 1 && (
               <>
                 <button
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[--border-subtle] hover:bg-[--border-medium] text-white transition-colors"
                   onClick={(e) => {
                     e.stopPropagation()
                     navigateLightbox('prev')
@@ -821,7 +821,7 @@ export function FilesPage() {
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[--border-subtle] hover:bg-[--border-medium] text-white transition-colors"
                   onClick={(e) => {
                     e.stopPropagation()
                     navigateLightbox('next')
@@ -868,7 +868,7 @@ export function FilesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white/70 hover:text-white hover:bg-white/10 rounded-lg text-xs"
+                    className="text-white/70 hover:text-white hover:bg-[--border-subtle] rounded-lg text-xs"
                     onClick={(e) => {
                       e.stopPropagation()
                       if (previewFile.url) window.open(previewFile.url!, '_blank')

@@ -65,7 +65,7 @@ function ErrorFallback({ onRetry, onGoToDashboard, error }: ErrorFallbackProps) 
       >
         {/* Glass morphism card */}
         <div
-          className="relative rounded-2xl border border-white/[0.08] p-8 text-center overflow-hidden"
+          className="relative rounded-2xl border border-[--border-subtle] p-8 text-center overflow-hidden"
           style={{ background: 'rgba(17, 17, 23, 0.8)', backdropFilter: 'blur(20px)' }}
         >
           {/* Ambient glow */}
@@ -90,7 +90,7 @@ function ErrorFallback({ onRetry, onGoToDashboard, error }: ErrorFallbackProps) 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="text-xl font-semibold text-[#E5E7EB] mb-2"
+              className="text-xl font-semibold text-[--text-primary] mb-2"
             >
               Something went wrong
             </motion.h2>
@@ -100,7 +100,7 @@ function ErrorFallback({ onRetry, onGoToDashboard, error }: ErrorFallbackProps) 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-sm text-[#6B7280] mb-2"
+              className="text-sm text-[--text-muted] mb-2"
             >
               This page encountered an unexpected error. You can try again or go back to the dashboard.
             </motion.p>
@@ -111,7 +111,7 @@ function ErrorFallback({ onRetry, onGoToDashboard, error }: ErrorFallbackProps) 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="mt-3 mb-5 px-3 py-2 rounded-lg bg-[#0B0B0F] border border-white/[0.06] text-xs text-[#6B7280] font-mono break-all"
+                className="mt-3 mb-5 px-3 py-2 rounded-lg bg-[--bg-primary] border border-[--border-subtle] text-xs text-[--text-muted] font-mono break-all"
               >
                 {error.message}
               </motion.div>
@@ -133,7 +133,7 @@ function ErrorFallback({ onRetry, onGoToDashboard, error }: ErrorFallbackProps) 
               </button>
               <button
                 onClick={onGoToDashboard}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-[#E5E7EB] text-sm font-medium border border-white/[0.08] transition-colors duration-200 active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[--border-subtle] hover:bg-[--border-subtle] text-[--text-primary] text-sm font-medium border border-[--border-subtle] transition-colors duration-200 active:scale-[0.98]"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 Go to Dashboard

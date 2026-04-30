@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { io as socketIo, Socket } from 'socket.io-client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, isToday, isYesterday } from 'date-fns'
 import {
@@ -23,6 +24,8 @@ import {
   Download,
   Upload,
   XCircle,
+  Wifi,
+  WifiOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -115,7 +118,7 @@ function getFileIconAndColor(fileName: string) {
     return { Icon: FileText, color: 'bg-red-500/15 text-red-400' }
   if (['doc', 'docx'].includes(ext))
     return { Icon: FileText, color: 'bg-blue-500/15 text-blue-400' }
-  return { Icon: File, color: 'bg-gray-500/15 text-gray-400' }
+  return { Icon: File, color: 'bg-gray-500/15 text-[--text-muted]' }
 }
 
 // Read receipt type for demo purposes
@@ -216,7 +219,7 @@ function VoiceMessageBubble({
               <motion.div
                 key={i}
                 className={`rounded-full w-[3px] transition-colors duration-150 ${
-                  isFilled ? 'bg-[#6366F1]' : isOwn ? 'bg-white/30' : 'bg-[#6366F1]/30'
+                  isFilled ? 'bg-[#6366F1]' : isOwn ? 'bg-[--border-medium]' : 'bg-[#6366F1]/30'
                 }`}
                 style={{ height: `${h}px` }}
                 initial={false}
@@ -227,7 +230,7 @@ function VoiceMessageBubble({
           })}
         </div>
 
-        <span className="text-xs text-[#6B7280] flex-shrink-0 min-w-[32px] text-center">
+        <span className="text-xs text-[--text-muted] flex-shrink-0 min-w-[32px] text-center">
           {formatDuration(duration)}
         </span>
       </div>
@@ -297,7 +300,7 @@ function ImageLightbox({
       onClick={onClose}
     >
       <button
-        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-[--border-subtle] hover:bg-[--border-medium] text-white transition-colors"
         onClick={(e) => {
           e.stopPropagation()
           onClose()
@@ -359,6 +362,11 @@ export function ChatPage() {
   const [showDemoTyping, setShowDemoTyping] = useState(false)
   const [activePickerMsgId, setActivePickerMsgId] = useState<string | null>(null)
 
+  // Socket.io connection state
+  const [socketStatus, setSocketStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('disconnected')
+  const socketRef = useRef<Socket | null>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
@@ -375,6 +383,7 @@ export function ChatPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
   const dragCounterRef = useRef(0)
+  const prevNewMessageRef = useRef('')
 
   const familyId = currentFamily?.id
   const userId = user?.id
@@ -605,8 +614,173 @@ export function ChatPage() {
     }
   }, [handleFileSelect])
 
+  // Socket.io real-time connection
+  useEffect(() => {
+    if (!familyId || !userId) return
+
+    const userName = user?.user_metadata?.first_name
+      ? `${user.user_metadata.first_name}${user.user_metadata.last_name ? ` ${user.user_metadata.last_name}` : ''}`
+      : 'User'
+
+    let socket: Socket | null = null
+
+    try {
+      socket = socketIo('/?XTransformPort=3030', {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 10000,
+      })
+
+      socket.on('connect', () => {
+        setSocketStatus('connected')
+        socket?.emit('join-family', { familyId, userId, userName })
+      })
+
+      socket.on('disconnect', () => {
+        setSocketStatus('disconnected')
+      })
+
+      socket.on('reconnect_attempt', () => {
+        setSocketStatus('reconnecting')
+      })
+
+      socket.on('reconnect', () => {
+        setSocketStatus('connected')
+        socket?.emit('join-family', { familyId, userId, userName })
+      })
+
+      // Listen for new messages from other users
+      socket.on('new-message', (message: Record<string, unknown>) => {
+        // Don't add our own messages - we already add them optimistically
+        if ((message as { sender_id?: string }).sender_id === userId) return
+
+        const chatMsg: ChatMessage = {
+          id: (message as { id: string }).id,
+          family_id: (message as { family_id: string }).family_id,
+          content: (message as { content: string }).content,
+          sender_id: (message as { sender_id: string }).sender_id,
+          message_type: (message as { message_type: string }).message_type as ChatMessage['message_type'],
+          file_url: (message as { file_url?: string | null }).file_url ?? null,
+          file_name: (message as { file_name?: string | null }).file_name ?? null,
+          file_size: (message as { file_size?: number | null }).file_size ?? null,
+          voice_duration: (message as { voice_duration?: number | null }).voice_duration ?? null,
+          reply_to: (message as { reply_to?: string | null }).reply_to ?? null,
+          created_at: (message as { created_at: string }).created_at,
+          sender: undefined,
+        }
+
+        // Try to find sender from family members
+        const senderMember = familyMembers.find(
+          (m) => m.user_id === chatMsg.sender_id
+        )
+        if (senderMember?.profiles) {
+          chatMsg.sender = {
+            id: senderMember.user_id,
+            email: '',
+            first_name: senderMember.profiles.first_name ?? null,
+            last_name: senderMember.profiles.last_name ?? null,
+            avatar_url: senderMember.profiles.avatar_url ?? null,
+            phone: null,
+            country_code: null,
+            created_at: '',
+            updated_at: '',
+          }
+        }
+
+        addMessage(chatMsg)
+
+        if (scrollRef.current) {
+          const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
+          if (scrollHeight - scrollTop - clientHeight < 200) {
+            setTimeout(() => {
+              bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+            }, 100)
+          }
+        }
+      })
+
+      // Listen for typing indicators
+      socket.on('user-typing', (data: { userId: string; userName: string }) => {
+        setTyping(data.userId, data.userName)
+      })
+
+      socket.on('user-stopped-typing', (data: { userId: string }) => {
+        clearTyping(data.userId)
+      })
+
+      // Listen for presence updates
+      socket.on('presence-update', (data: { userId: string; status: 'online' | 'offline' }) => {
+        if (data.status === 'online') {
+          setOnline(data.userId)
+        } else {
+          setOffline(data.userId)
+        }
+      })
+
+      // Listen for reaction updates
+      socket.on('reaction-update', (data: { messageId: string; userId: string; emoji: string }) => {
+        toggleReaction(data.messageId, data.emoji, data.userId)
+      })
+
+      socketRef.current = socket
+    } catch {
+      // Socket service not available - fall back to local-only mode
+      setSocketStatus('disconnected')
+    }
+
+    return () => {
+      if (socket) {
+        socket.emit('leave-family', { familyId })
+        socket.disconnect()
+      }
+      socketRef.current = null
+    }
+  }, [familyId, userId, user, familyMembers, addMessage, setTyping, clearTyping, setOnline, setOffline, toggleReaction])
+
+  // Emit typing start/stop via socket
+  useEffect(() => {
+    if (!socketRef.current || socketStatus !== 'connected' || !familyId || !userId) return
+
+    const socket = socketRef.current
+    const currentMsg = newMessage.trim()
+    const prevMsg = prevNewMessageRef.current.trim()
+
+    if (currentMsg.length > 0 && prevMsg.length === 0) {
+      // Started typing
+      const userName = user?.user_metadata?.first_name ?? 'User'
+      socket.emit('typing-start', { familyId, userId, userName })
+    } else if (currentMsg.length === 0 && prevMsg.length > 0) {
+      // Stopped typing
+      socket.emit('typing-stop', { familyId, userId })
+    }
+
+    // Auto-stop typing after 3 seconds of inactivity
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+
+    if (currentMsg.length > 0) {
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('typing-stop', { familyId, userId })
+      }, 3000)
+    }
+
+    prevNewMessageRef.current = newMessage
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+    }
+  }, [newMessage, socketStatus, familyId, userId, user])
+
   // Demo typing indicator
   useEffect(() => {
+    // Only run demo typing if socket is not connected
+    if (socketStatus === 'connected') return
     if (familyMembers.length > 0 && !showDemoTyping) {
       const timer1 = setTimeout(() => {
         const nouraMember = familyMembers.find((m) => m.user_id === 'demo-user-002')
@@ -624,11 +798,12 @@ export function ChatPage() {
 
       return () => clearTimeout(timer1)
     }
-  }, [familyMembers, isRTL, setTyping, clearTyping, showDemoTyping])
+  }, [familyMembers, isRTL, setTyping, clearTyping, showDemoTyping, socketStatus])
 
-  // Demo presence
+  // Demo presence (only when socket is not connected)
   useEffect(() => {
     if (familyMembers.length === 0) return
+    if (socketStatus === 'connected') return
 
     if (userId) {
       setOnline(userId)
@@ -659,7 +834,7 @@ export function ChatPage() {
     }, 8000)
 
     return () => clearInterval(interval)
-  }, [familyMembers, userId, setOnline, setOffline, isUserOnline])
+  }, [familyMembers, userId, setOnline, setOffline, isUserOnline, socketStatus])
 
   // Fetch messages
   const fetchMessages = useCallback(async () => {
@@ -756,6 +931,54 @@ export function ChatPage() {
     setIsSending(true)
     setNewMessage('')
 
+    const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+    const timestamp = new Date().toISOString()
+    const senderName = user?.user_metadata?.first_name
+      ? `${user.user_metadata.first_name}${user.user_metadata.last_name ? ` ${user.user_metadata.last_name}` : ''}`
+      : 'User'
+
+    // Optimistically add message locally
+    const optimisticMsg: ChatMessage = {
+      id: messageId,
+      family_id: familyId,
+      content,
+      sender_id: userId,
+      message_type: 'text',
+      reply_to: null,
+      created_at: timestamp,
+      sender: user ? {
+        id: user.id,
+        email: user.email ?? '',
+        first_name: user.user_metadata?.first_name ?? null,
+        last_name: user.user_metadata?.last_name ?? null,
+        avatar_url: user.user_metadata?.avatar_url ?? null,
+        phone: null,
+        country_code: null,
+        created_at: timestamp,
+        updated_at: timestamp,
+      } : undefined,
+    }
+
+    addMessage(optimisticMsg)
+
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+
+    // Emit via socket.io
+    if (socketRef.current && socketStatus === 'connected') {
+      socketRef.current.emit('send-message', {
+        familyId,
+        id: messageId,
+        senderId: userId,
+        senderName,
+        text: content,
+        timestamp,
+        messageType: 'text',
+      })
+    }
+
+    // Also try Supabase persistence
     try {
       const supabase = createClient()
       const { error } = await supabase.from('chat_messages').insert({
@@ -767,8 +990,7 @@ export function ChatPage() {
 
       if (error) throw error
     } catch {
-      toast.error(t.common.error)
-      setNewMessage(content)
+      // Silent fail in demo mode - message is already shown locally
     } finally {
       setIsSending(false)
       inputRef.current?.focus()
@@ -806,7 +1028,16 @@ export function ChatPage() {
     if (!userId) return
     toggleReaction(messageId, emoji, userId)
     setActivePickerMsgId(null)
-  }, [userId, toggleReaction])
+    // Emit reaction via socket
+    if (socketRef.current && socketStatus === 'connected' && familyId) {
+      socketRef.current.emit('message-reaction', {
+        familyId,
+        messageId,
+        userId,
+        emoji,
+      })
+    }
+  }, [userId, toggleReaction, socketStatus, familyId])
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -852,8 +1083,8 @@ export function ChatPage() {
             onClick={() => setLightboxImage({ url: msg.file_url!, alt: msg.file_name || 'Image' })}
           />
           {msg.content && msg.content !== t.chat.imageSent && (
-            <div className={`px-3 py-2 ${isOwn ? 'bg-[#6366F1]' : 'bg-[#111117] border-t border-white/[0.08]'}`}>
-              <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-[#E5E7EB]">
+            <div className={`px-3 py-2 ${isOwn ? 'bg-[#6366F1]' : 'bg-[--bg-surface] border-t border-[--border-subtle]'}`}>
+              <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-[--text-primary]">
                 {msg.content}
               </p>
             </div>
@@ -869,20 +1100,20 @@ export function ChatPage() {
           rounded-2xl inline-block
           ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
         `}>
-          <div className={`bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 flex items-center gap-3 min-w-[200px]`}>
+          <div className={`bg-[--border-subtle] border border-[--border-subtle] rounded-xl p-3 flex items-center gap-3 min-w-[200px]`}>
             <div className={`p-2 rounded-lg flex-shrink-0 ${color}`}>
               <Icon className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#E5E7EB] truncate">{msg.file_name}</p>
-              <p className="text-[10px] text-[#6B7280]">{msg.file_size ? formatFileSize(msg.file_size) : ''}</p>
+              <p className="text-sm font-medium text-[--text-primary] truncate">{msg.file_name}</p>
+              <p className="text-[10px] text-[--text-muted]">{msg.file_size ? formatFileSize(msg.file_size) : ''}</p>
             </div>
             {msg.file_url && (
               <a
                 href={msg.file_url}
                 download={msg.file_name}
                 onClick={(e) => e.stopPropagation()}
-                className="p-1.5 rounded-lg hover:bg-white/[0.08] text-[#6B7280] hover:text-[#E5E7EB] transition-colors flex-shrink-0"
+                className="p-1.5 rounded-lg hover:bg-[--border-subtle] text-[--text-muted] hover:text-[--text-primary] transition-colors flex-shrink-0"
                 aria-label={t.chat.download}
               >
                 <Download className="w-4 h-4" />
@@ -890,8 +1121,8 @@ export function ChatPage() {
             )}
           </div>
           {msg.content && msg.content !== t.chat.fileSent && (
-            <div className={`px-3 py-1.5 ${isOwn ? 'bg-[#6366F1]' : 'bg-[#111117] border-t border-white/[0.08] rounded-b-xl'}`}>
-              <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-[#E5E7EB]">
+            <div className={`px-3 py-1.5 ${isOwn ? 'bg-[#6366F1]' : 'bg-[--bg-surface] border-t border-[--border-subtle] rounded-b-xl'}`}>
+              <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-[--text-primary]">
                 {msg.content}
               </p>
             </div>
@@ -920,7 +1151,7 @@ export function ChatPage() {
           ${
             isOwn
               ? 'bg-[#6366F1] text-white rounded-br-md'
-              : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
+              : 'bg-[--bg-surface] border border-[--border-subtle] text-[--text-primary] rounded-bl-md'
           }
         `}
       >
@@ -933,7 +1164,7 @@ export function ChatPage() {
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-[#0B0B0F] relative"
+      className="flex flex-col h-full w-full bg-[--bg-primary] relative"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -980,10 +1211,37 @@ export function ChatPage() {
               <MessageCircle className="w-5 h-5 text-[#6366F1]" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#E5E7EB]">
-                {t.chat.title}
-              </h1>
-              <p className="text-sm text-[#6B7280]">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-[--text-primary]">
+                  {t.chat.title}
+                </h1>
+                {/* Connection Status Indicator */}
+                <div className="group/conn relative flex items-center" title={
+                  socketStatus === 'connected' ? t.chat.connected
+                    : socketStatus === 'reconnecting' ? t.chat.reconnecting
+                    : t.chat.disconnected
+                }>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                    socketStatus === 'connected'
+                      ? 'bg-green-500/10 text-green-400'
+                      : socketStatus === 'reconnecting'
+                        ? 'bg-yellow-500/10 text-yellow-400'
+                        : 'bg-red-500/10 text-red-400'
+                  }`}>
+                    <span className={`size-1.5 rounded-full ${
+                      socketStatus === 'connected'
+                        ? 'bg-green-400 online-dot-pulse'
+                        : socketStatus === 'reconnecting'
+                          ? 'bg-yellow-400 animate-pulse'
+                          : 'bg-red-400'
+                    }`} />
+                    {socketStatus === 'connected'
+                      ? t.chat.realTimeEnabled
+                      : t.chat.localMode}
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-[--text-muted]">
                 {familyMembers.length} {isRTL ? 'أعضاء' : 'members'} · {onlineCount} {t.chat.membersOnline}
               </p>
             </div>
@@ -992,7 +1250,7 @@ export function ChatPage() {
             variant="ghost"
             size="icon"
             onClick={() => setShowSearch(!showSearch)}
-            className="h-9 w-9 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.06] rounded-xl"
+            className="h-9 w-9 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] rounded-xl"
           >
             {showSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
           </Button>
@@ -1008,7 +1266,7 @@ export function ChatPage() {
             <div className="flex -space-x-2 rtl:space-x-reverse">
               {onlineMembers.slice(0, 5).map((member) => (
                 <div key={member.user_id} className="relative">
-                  <Avatar className="h-7 w-7 border-2 border-[#0B0B0F]">
+                  <Avatar className="h-7 w-7 border-2 border-[--bg-primary]">
                     <AvatarImage
                       src={member.profiles?.avatar_url ?? undefined}
                       alt={member.profiles?.first_name ?? ''}
@@ -1017,18 +1275,18 @@ export function ChatPage() {
                       {getInitials(member.profiles?.first_name ?? null, member.profiles?.last_name ?? null)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
+                  <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2 rounded-full bg-green-400 ring-2 ring-[--bg-surface] online-dot-pulse" />
                 </div>
               ))}
               {onlineMembers.length > 5 && (
-                <div className="h-7 w-7 rounded-full bg-[#111117] border-2 border-[#0B0B0F] flex items-center justify-center">
-                  <span className="text-[10px] text-[#6B7280] font-medium">
+                <div className="h-7 w-7 rounded-full bg-[--bg-surface] border-2 border-[--bg-primary] flex items-center justify-center">
+                  <span className="text-[10px] text-[--text-muted] font-medium">
                     +{onlineMembers.length - 5}
                   </span>
                 </div>
               )}
             </div>
-            <span className="text-xs text-[#6B7280] ml-1 rtl:mr-1 rtl:ml-0">
+            <span className="text-xs text-[--text-muted] ml-1 rtl:mr-1 rtl:ml-0">
               {onlineCount} {t.chat.membersOnline}
             </span>
           </motion.div>
@@ -1044,13 +1302,13 @@ export function ChatPage() {
               className="overflow-hidden"
             >
               <div className="mt-3 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted]" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t.chat.search}
                   autoFocus
-                  className="pl-10 bg-[#111117] border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+                  className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
                 />
               </div>
             </motion.div>
@@ -1083,8 +1341,8 @@ export function ChatPage() {
                   <div key={group.label}>
                     {/* Date separator */}
                     <div className="flex items-center justify-center my-6">
-                      <div className="bg-[#111117] border border-white/[0.06] rounded-full px-4 py-1">
-                        <span className="text-xs font-medium text-[#6B7280]">
+                      <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-full px-4 py-1">
+                        <span className="text-xs font-medium text-[--text-muted]">
                           {group.label}
                         </span>
                       </div>
@@ -1103,8 +1361,8 @@ export function ChatPage() {
                       if (isSystem) {
                         return (
                           <div key={msg.id} className="flex justify-center my-3">
-                            <div className="bg-[#111117]/60 border border-white/[0.04] rounded-full px-4 py-1.5 max-w-[85%]">
-                              <span className="text-xs text-[#6B7280] text-center">
+                            <div className="bg-[--bg-surface]/60 border border-[--border-subtle] rounded-full px-4 py-1.5 max-w-[85%]">
+                              <span className="text-xs text-[--text-muted] text-center">
                                 {msg.content}
                               </span>
                             </div>
@@ -1129,7 +1387,7 @@ export function ChatPage() {
                             <div className="flex-shrink-0 w-8">
                               {!isConsecutive ? (
                                 <div className="relative">
-                                  <Avatar className="h-8 w-8 border border-white/[0.08]">
+                                  <Avatar className="h-8 w-8 border border-[--border-subtle]">
                                     <AvatarImage
                                       src={getSenderAvatar(msg.sender_id) ?? undefined}
                                     />
@@ -1142,7 +1400,7 @@ export function ChatPage() {
                                     </AvatarFallback>
                                   </Avatar>
                                   {isUserOnline(msg.sender_id) && (
-                                    <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
+                                    <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[--bg-surface] online-dot-pulse" />
                                   )}
                                 </div>
                               ) : (
@@ -1180,7 +1438,7 @@ export function ChatPage() {
                                       activePickerMsgId === msg.id ? null : msg.id
                                     )
                                   }}
-                                  className={`opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-[#6B7280] absolute top-1/2 -translate-y-1/2 z-10 ${
+                                  className={`opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full bg-[--border-subtle] hover:bg-[--border-subtle] flex items-center justify-center text-[--text-muted] absolute top-1/2 -translate-y-1/2 z-10 ${
                                     isOwn ? '-left-8 rtl:-right-8 rtl:left-auto' : '-right-8 rtl:-left-8 rtl:right-auto'
                                   }`}
                                   aria-label={t.chat.addReaction}
@@ -1202,12 +1460,12 @@ export function ChatPage() {
                                     }`}
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <div className="bg-[var(--bg-surface,#111117)] border border-white/[0.08] rounded-xl p-1.5 shadow-xl flex items-center gap-0.5">
+                                    <div className="bg-[var(--bg-surface,#111117)] border border-[--border-subtle] rounded-xl p-1.5 shadow-xl flex items-center gap-0.5">
                                       {QUICK_EMOJIS.map((emoji) => (
                                         <button
                                           key={emoji}
                                           onClick={() => handleReaction(msg.id, emoji)}
-                                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.08] transition-colors text-base"
+                                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[--border-subtle] transition-colors text-base"
                                         >
                                           {emoji}
                                         </button>
@@ -1233,12 +1491,12 @@ export function ChatPage() {
                                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-all cursor-pointer ${
                                         isActive
                                           ? 'bg-[#6366F1]/10 border-[#6366F1]/30 hover:bg-[#6366F1]/20'
-                                          : 'bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.08]'
+                                          : 'bg-[--border-subtle] border-[--border-subtle] hover:bg-[--border-subtle]'
                                       }`}
                                       aria-label={`${reaction.emoji} ${reaction.users.length}`}
                                     >
                                       <span className="text-sm">{reaction.emoji}</span>
-                                      <span className={`${isActive ? 'text-[#A78BFA]' : 'text-[#6B7280]'}`}>
+                                      <span className={`${isActive ? 'text-[#A78BFA]' : 'text-[--text-muted]'}`}>
                                         {reaction.users.length}
                                       </span>
                                     </motion.button>
@@ -1252,11 +1510,11 @@ export function ChatPage() {
                               <div
                                 className={`flex items-center gap-1 mt-1 ${isOwn ? 'justify-end mr-1' : 'justify-start ml-1'}`}
                               >
-                                <p className="text-[10px] text-[#6B7280]">
+                                <p className="text-[10px] text-[--text-muted]">
                                   {formatMessageTime(msg.created_at)}
                                 </p>
                                 {isOwn && readStatus && (
-                                  <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[#6B7280]'}`}>
+                                  <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[--text-muted]'}`}>
                                     {readStatus === 'sent' ? (
                                       <Check className="w-3 h-3" />
                                     ) : (
@@ -1268,7 +1526,7 @@ export function ChatPage() {
                             )}
                             {isConsecutive && isOwn && readStatus && (
                               <div className="flex justify-end mr-1 -mt-0.5">
-                                <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[#6B7280]'}`}>
+                                <span className={`inline-flex ${readStatus === 'read' ? 'text-[#6366F1]' : 'text-[--text-muted]'}`}>
                                   {readStatus === 'sent' ? (
                                     <Check className="w-2.5 h-2.5" />
                                   ) : (
@@ -1296,7 +1554,7 @@ export function ChatPage() {
                     >
                       <div className="flex-shrink-0 w-8">
                         <div className="relative">
-                          <Avatar className="h-8 w-8 border border-white/[0.08]">
+                          <Avatar className="h-8 w-8 border border-[--border-subtle]">
                             <AvatarFallback className="bg-[#6366F1]/20 text-[#A78BFA] text-xs font-medium">
                               {typingUsers[0].userName
                                 .split(' ')
@@ -1305,16 +1563,16 @@ export function ChatPage() {
                                 .slice(0, 2)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[#111117] online-dot-pulse" />
+                          <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[--bg-surface] online-dot-pulse" />
                         </div>
                       </div>
-                      <div className="bg-[#111117] border border-white/[0.08] rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-2">
+                      <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-2">
                         <div className="flex items-center gap-0.5">
                           <span className="typing-dot-1 size-1.5 rounded-full bg-[#6B7280]" />
                           <span className="typing-dot-2 size-1.5 rounded-full bg-[#6B7280]" />
                           <span className="typing-dot-3 size-1.5 rounded-full bg-[#6B7280]" />
                         </div>
-                        <span className="text-xs text-[#6B7280]">
+                        <span className="text-xs text-[--text-muted]">
                           {typingUsers[0].userName} {t.chat.isTyping}
                         </span>
                       </div>
@@ -1339,7 +1597,7 @@ export function ChatPage() {
                     variant="ghost"
                     size="icon"
                     onClick={scrollToBottom}
-                    className="h-10 w-10 rounded-full bg-[#111117] border border-white/[0.08] text-[#6B7280] hover:text-[#E5E7EB] hover:bg-[#111117] shadow-lg"
+                    className="h-10 w-10 rounded-full bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface] shadow-lg"
                   >
                     <ArrowDown className="w-4 h-4" />
                   </Button>
@@ -1358,19 +1616,19 @@ export function ChatPage() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex-shrink-0 px-4 sm:px-6 border-t border-white/[0.06]"
+            className="flex-shrink-0 px-4 sm:px-6 border-t border-[--border-subtle]"
           >
             <div className="py-3 space-y-2">
               {pendingFiles.map((pending, index) => {
                 const isImage = pending.file.type.startsWith('image/')
                 return (
-                  <div key={index} className="flex items-start gap-2 bg-[#111117] border border-white/[0.08] rounded-xl p-2">
+                  <div key={index} className="flex items-start gap-2 bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-2">
                     {/* Preview */}
                     {isImage && pending.preview ? (
                       <img
                         src={pending.preview}
                         alt={pending.file.name}
-                        className="max-h-32 rounded-lg object-cover border border-white/[0.08]"
+                        className="max-h-32 rounded-lg object-cover border border-[--border-subtle]"
                       />
                     ) : (
                       <div className="flex items-center gap-2 p-2">
@@ -1383,8 +1641,8 @@ export function ChatPage() {
                           )
                         })()}
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-[#E5E7EB] truncate max-w-[150px]">{pending.file.name}</p>
-                          <p className="text-[10px] text-[#6B7280]">{formatFileSize(pending.file.size)}</p>
+                          <p className="text-xs font-medium text-[--text-primary] truncate max-w-[150px]">{pending.file.name}</p>
+                          <p className="text-[10px] text-[--text-muted]">{formatFileSize(pending.file.size)}</p>
                         </div>
                       </div>
                     )}
@@ -1399,11 +1657,11 @@ export function ChatPage() {
                           )
                         }}
                         placeholder={t.chat.addCaption}
-                        className="flex-1 h-7 bg-transparent border-white/[0.08] text-[#E5E7EB] placeholder:text-[#6B7280] text-xs rounded-lg focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
+                        className="flex-1 h-7 bg-transparent border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] text-xs rounded-lg focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-0"
                       />
                       <button
                         onClick={() => removePendingFile(index)}
-                        className="p-1 rounded-lg hover:bg-white/[0.06] text-[#6B7280] hover:text-red-400 transition-colors flex-shrink-0"
+                        className="p-1 rounded-lg hover:bg-[--border-subtle] text-[--text-muted] hover:text-red-400 transition-colors flex-shrink-0"
                       >
                         <XCircle className="w-4 h-4" />
                       </button>
@@ -1418,7 +1676,7 @@ export function ChatPage() {
                   variant="ghost"
                   size="sm"
                   onClick={cancelPendingFiles}
-                  className="text-[#6B7280] hover:text-[#E5E7EB] rounded-lg text-xs h-8"
+                  className="text-[--text-muted] hover:text-[--text-primary] rounded-lg text-xs h-8"
                 >
                   {t.common.cancel}
                 </Button>
@@ -1439,7 +1697,7 @@ export function ChatPage() {
       </AnimatePresence>
 
       {/* Message Input / Recording Panel */}
-      <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-white/[0.06]">
+      <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-[--border-subtle]">
         <AnimatePresence mode="wait">
           {isRecording ? (
             /* Recording Panel */
@@ -1451,14 +1709,14 @@ export function ChatPage() {
               transition={{ duration: 0.25, ease: 'easeOut' }}
               className="overflow-hidden"
             >
-              <div className="bg-[#111117] border border-[#6366F1]/20 rounded-2xl px-4 py-3">
+              <div className="bg-[--bg-surface] border border-[#6366F1]/20 rounded-2xl px-4 py-3">
                 <div className="flex items-center gap-3">
                   {/* Cancel button */}
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={handleCancelRecording}
-                    className="h-9 w-9 text-[#6B7280] hover:text-red-400 hover:bg-red-400/10 rounded-full flex-shrink-0 transition-colors"
+                    className="h-9 w-9 text-[--text-muted] hover:text-red-400 hover:bg-red-400/10 rounded-full flex-shrink-0 transition-colors"
                     aria-label={t.chat.cancelRecording}
                   >
                     <X className="w-5 h-5" />
@@ -1467,13 +1725,13 @@ export function ChatPage() {
                   {/* Recording indicator */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-sm text-[#E5E7EB] font-medium">
+                    <span className="text-sm text-[--text-primary] font-medium">
                       {t.chat.recording}
                     </span>
                   </div>
 
                   {/* Elapsed time */}
-                  <span className="text-sm text-[#6B7280] font-mono tabular-nums flex-shrink-0">
+                  <span className="text-sm text-[--text-muted] font-mono tabular-nums flex-shrink-0">
                     {formatDuration(recordingTime)}
                   </span>
 
@@ -1502,11 +1760,11 @@ export function ChatPage() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="flex items-center gap-2 bg-[#111117] border border-white/[0.08] rounded-2xl px-4 py-2 focus-within:border-[#6366F1]/30 transition-colors">
+              <div className="flex items-center gap-2 bg-[--bg-surface] border border-[--border-subtle] rounded-2xl px-4 py-2 focus-within:border-[#6366F1]/30 transition-colors">
                 {/* Paperclip button - opens file picker */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-8 h-8 rounded-full hover:bg-white/[0.06] flex items-center justify-center text-[var(--text-muted,#6B7280)] hover:text-[var(--text-primary,#E5E7EB)] transition-colors"
+                  className="w-8 h-8 rounded-full hover:bg-[--border-subtle] flex items-center justify-center text-[var(--text-muted,#6B7280)] hover:text-[var(--text-primary,#E5E7EB)] transition-colors"
                   aria-label={t.chat.attachFile}
                 >
                   <Paperclip className="w-4 h-4" />
@@ -1529,7 +1787,7 @@ export function ChatPage() {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={t.chat.placeholder}
-                  className="flex-1 border-0 bg-transparent text-[#E5E7EB] placeholder:text-[#6B7280] focus-visible:ring-0 focus-visible:ring-offset-0 h-8 px-0 text-sm"
+                  className="flex-1 border-0 bg-transparent text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-0 focus-visible:ring-offset-0 h-8 px-0 text-sm"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault()
@@ -1540,7 +1798,7 @@ export function ChatPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-[#6B7280] hover:text-[#E5E7EB] hover:bg-transparent rounded-lg flex-shrink-0"
+                  className="h-8 w-8 text-[--text-muted] hover:text-[--text-primary] hover:bg-transparent rounded-lg flex-shrink-0"
                 >
                   <Smile className="w-4 h-4" />
                 </Button>
@@ -1561,7 +1819,7 @@ export function ChatPage() {
                         className="h-8 w-8 p-0 bg-[#6366F1] hover:bg-[#5558E6] text-white rounded-lg flex-shrink-0 disabled:opacity-50"
                       >
                         {isSending ? (
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-[--border-medium] border-t-white rounded-full animate-spin" />
                         ) : (
                           <Send className="w-4 h-4" />
                         )}

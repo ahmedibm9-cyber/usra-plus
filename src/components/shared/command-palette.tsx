@@ -185,7 +185,7 @@ const typeConfig: Record<ContentType, { icon: React.ElementType; color: string; 
   grocery: { icon: ShoppingBag, color: 'text-[#F59E0B]', bgColor: 'bg-[#F59E0B]/15' },
   chat: { icon: MessageCircle, color: 'text-[#A78BFA]', bgColor: 'bg-[#A78BFA]/15' },
   files: { icon: FileText, color: 'text-[#EC4899]', bgColor: 'bg-[#EC4899]/15' },
-  settings: { icon: Settings, color: 'text-[#6B7280]', bgColor: 'bg-[#6B7280]/15' },
+  settings: { icon: Settings, color: 'text-[--text-muted]', bgColor: 'bg-[#6B7280]/15' },
 }
 
 // ─── Component ────────────────────────────────────────────────────
@@ -606,27 +606,27 @@ export function CommandPalette() {
           >
             <Command
               loop
-              className="rounded-2xl border border-white/[0.08] bg-[#111117]/95 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden"
+              className="rounded-2xl border border-[--border-subtle] bg-[--bg-surface]/95 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden"
               shouldFilter={false}
             >
               {/* Search Input */}
-              <div className="flex items-center border-b border-white/[0.08] px-4">
-                <Search className="size-4 shrink-0 text-[#6B7280]" />
+              <div className="flex items-center border-b border-[--border-subtle] px-4">
+                <Search className="size-4 shrink-0 text-[--text-muted]" />
                 <Command.Input
                   ref={inputRef}
                   value={query}
                   onValueChange={setQuery}
                   placeholder={t.search.searchAll}
-                  className="flex-1 bg-transparent px-3 py-3.5 text-sm text-[#E5E7EB] placeholder:text-[#6B7280] outline-none"
+                  className="flex-1 bg-transparent px-3 py-3.5 text-sm text-[--text-primary] placeholder:text-[--text-muted] outline-none"
                 />
-                <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium text-[#6B7280] shrink-0">
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-[--border-subtle] bg-[--border-subtle] px-1.5 py-0.5 text-[10px] font-medium text-[--text-muted] shrink-0">
                   ESC
                 </kbd>
               </div>
 
               {/* Filter Pills (show when there's a query) */}
               {showContentSearch && (
-                <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/[0.06] overflow-x-auto">
+                <div className="flex items-center gap-1.5 px-4 py-2 border-b border-[--border-subtle] overflow-x-auto">
                   {filterPills.map((pill) => (
                     <button
                       key={pill.key}
@@ -635,7 +635,7 @@ export function CommandPalette() {
                       className={`text-xs px-3 py-1 rounded-full cursor-pointer transition-all whitespace-nowrap ${
                         activeFilter === pill.key
                           ? 'bg-[#6366F1]/20 text-[#6366F1] border border-[#6366F1]/30'
-                          : 'bg-white/[0.04] text-[var(--text-muted)] hover:bg-white/[0.08] border border-transparent'
+                          : 'bg-[--border-subtle] text-[var(--text-muted)] hover:bg-[--border-subtle] border border-transparent'
                       }`}
                     >
                       {pill.label}
@@ -645,7 +645,7 @@ export function CommandPalette() {
               )}
 
               {/* Results */}
-              <Command.List className="max-h-80 overflow-y-auto p-2 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10">
+              <Command.List className="max-h-80 overflow-y-auto p-2 scroll-smooth [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[--border-subtle]">
 
                 {/* ─── No query state: Recent + Pages + Quick Actions ─── */}
                 {!showContentSearch && (
@@ -654,17 +654,17 @@ export function CommandPalette() {
                     {searchHistory.length > 0 && (
                       <Command.Group
                         heading={t.search.recentSearches}
-                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[--text-muted]"
                       >
                         <div className="flex items-center justify-between px-2 py-1">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6B7280]">{t.search.recentSearches}</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[--text-muted]">{t.search.recentSearches}</span>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleClearHistory()
                             }}
-                            className="text-[10px] text-[#6B7280] hover:text-[#6366F1] transition-colors cursor-pointer"
+                            className="text-[10px] text-[--text-muted] hover:text-[#6366F1] transition-colors cursor-pointer"
                           >
                             {t.search.clearHistory}
                           </button>
@@ -676,17 +676,17 @@ export function CommandPalette() {
                             onSelect={() => handleRecentSearchClick(searchQuery)}
                             className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg px-3 py-2.5 text-sm cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                           >
-                            <Clock className="size-3.5 shrink-0 text-[#6B7280]" />
-                            <span className="flex-1 truncate text-[#9CA3AF]">{searchQuery}</span>
+                            <Clock className="size-3.5 shrink-0 text-[--text-muted]" />
+                            <span className="flex-1 truncate text-[--text-secondary]">{searchQuery}</span>
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleRemoveSearchItem(idx)
                               }}
-                              className="p-0.5 rounded hover:bg-white/[0.08] transition-colors"
+                              className="p-0.5 rounded hover:bg-[--border-subtle] transition-colors"
                             >
-                              <X className="size-3 text-[#6B7280]" />
+                              <X className="size-3 text-[--text-muted]" />
                             </button>
                           </Command.Item>
                         ))}
@@ -697,7 +697,7 @@ export function CommandPalette() {
                     {recentItems.length > 0 && (
                       <Command.Group
                         heading={isRTL ? 'الأخيرة' : 'Recent'}
-                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[--text-muted]"
                       >
                         {recentItems.map((item) => {
                           const isPage = item.type === 'page'
@@ -713,11 +713,11 @@ export function CommandPalette() {
                                   navigateToPage(pageId as AppPage)
                                 }
                               }}
-                              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                             >
-                              <Icon className="size-4 shrink-0 text-[#6B7280] data-[selected=true]:text-[#6366F1]" />
+                              <Icon className="size-4 shrink-0 text-[--text-muted] data-[selected=true]:text-[#6366F1]" />
                               <span className="flex-1 truncate">{item.label}</span>
-                              <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">
+                              <span className="text-[10px] text-[--text-muted] uppercase tracking-wide">
                                 {isRTL ? (isPage ? 'صفحة' : 'إجراء') : (isPage ? 'Page' : 'Action')}
                               </span>
                             </Command.Item>
@@ -729,7 +729,7 @@ export function CommandPalette() {
                     {/* Pages Group */}
                     <Command.Group
                       heading={isRTL ? 'الصفحات' : 'Pages'}
-                      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[--text-muted]"
                     >
                       {pages.map((page) => {
                         const Icon = page.icon
@@ -739,11 +739,11 @@ export function CommandPalette() {
                             key={page.id}
                             value={`page-${page.id} ${label} ${page.keywords.join(' ')}`}
                             onSelect={() => navigateToPage(page.id)}
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                           >
-                            <Icon className="size-4 shrink-0 text-[#6B7280] group-data-[selected=true]:text-[#6366F1]" />
+                            <Icon className="size-4 shrink-0 text-[--text-muted] group-data-[selected=true]:text-[#6366F1]" />
                             <span className="flex-1 truncate">{label}</span>
-                            <span className="text-[10px] text-[#6B7280]">
+                            <span className="text-[10px] text-[--text-muted]">
                               {page.id === 'dashboard' ? '⌘1' : page.id === 'tasks' ? '⌘2' : page.id === 'calendar' ? '⌘3' : page.id === 'grocery' ? '⌘4' : page.id === 'chat' ? '⌘5' : page.id === 'files' ? '⌘6' : '⌘7'}
                             </span>
                           </Command.Item>
@@ -754,7 +754,7 @@ export function CommandPalette() {
                     {/* Quick Actions Group */}
                     <Command.Group
                       heading={isRTL ? 'إجراءات سريعة' : 'Quick Actions'}
-                      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[--text-muted]"
                     >
                       {quickActions.map((action) => {
                         const Icon = action.icon
@@ -764,11 +764,11 @@ export function CommandPalette() {
                             key={action.id}
                             value={`${action.id} ${label} ${action.keywords.join(' ')}`}
                             onSelect={action.action}
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                           >
-                            <Icon className="size-4 shrink-0 text-[#6B7280]" />
+                            <Icon className="size-4 shrink-0 text-[--text-muted]" />
                             <span className="flex-1 truncate">{label}</span>
-                            <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">
+                            <span className="text-[10px] text-[--text-muted] uppercase tracking-wide">
                               {isRTL ? 'إجراء' : 'Action'}
                             </span>
                           </Command.Item>
@@ -780,13 +780,13 @@ export function CommandPalette() {
                     {tasks.length > 0 && (
                       <Command.Group
                         heading={isRTL ? 'المهام' : 'Tasks'}
-                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                        className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[--text-muted]"
                       >
                         {tasks.slice(0, 8).map((task) => (
                           <Command.Item
                             key={task.id}
                             value={`task-${task.id} ${task.title} ${task.description || ''} ${task.priority} ${task.status}`}
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#E5E7EB] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[--text-primary] cursor-pointer data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white transition-colors"
                             onSelect={() => editTask(task)}
                           >
                             <button
@@ -798,13 +798,13 @@ export function CommandPalette() {
                               className={`size-4 shrink-0 rounded border transition-colors flex items-center justify-center ${
                                 task.status === 'done'
                                   ? 'bg-[#6366F1] border-[#6366F1] text-white'
-                                  : 'border-white/20 hover:border-[#6366F1]'
+                                  : 'border-[--border-medium] hover:border-[#6366F1]'
                               }`}
                               aria-label={task.status === 'done' ? 'Mark as incomplete' : 'Mark as complete'}
                             >
                               {task.status === 'done' && <Check className="size-2.5" />}
                             </button>
-                            <span className={`flex-1 truncate ${task.status === 'done' ? 'line-through text-[#6B7280]' : ''}`}>
+                            <span className={`flex-1 truncate ${task.status === 'done' ? 'line-through text-[--text-muted]' : ''}`}>
                               {task.title}
                             </span>
                             <div className="flex items-center gap-1.5 shrink-0">
@@ -823,7 +823,7 @@ export function CommandPalette() {
                                   ? t.tasks[task.priority as keyof typeof t.tasks] || task.priority
                                   : task.priority}
                               </span>
-                              <Pencil className="size-3 text-[#6B7280] opacity-0 group-data-[selected=true]:opacity-100" />
+                              <Pencil className="size-3 text-[--text-muted] opacity-0 group-data-[selected=true]:opacity-100" />
                             </div>
                           </Command.Item>
                         ))}
@@ -838,10 +838,10 @@ export function CommandPalette() {
                     {/* No results */}
                     {!hasContentResults && (
                       <div className="py-8 text-center">
-                        <div className="mx-auto mb-2 p-2.5 rounded-xl bg-white/[0.04] w-fit">
-                          <Search className="size-5 text-[#6B7280]" />
+                        <div className="mx-auto mb-2 p-2.5 rounded-xl bg-[--border-subtle] w-fit">
+                          <Search className="size-5 text-[--text-muted]" />
                         </div>
-                        <p className="text-sm text-[#6B7280]">{t.search.noResults}</p>
+                        <p className="text-sm text-[--text-muted]">{t.search.noResults}</p>
                         <p className="text-xs text-[#4B5563] mt-1">{t.search.tryDifferentSearch}</p>
                       </div>
                     )}
@@ -854,7 +854,7 @@ export function CommandPalette() {
                           <Command.Group
                             key={type}
                             heading={typeLabels[type]}
-                            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[#6B7280]"
+                            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[--text-muted]"
                           >
                             {items.map((result) => {
                               const ItemIcon = typeConfig[result.type].icon
@@ -863,7 +863,7 @@ export function CommandPalette() {
                                   key={result.id}
                                   value={`${result.id} ${result.title} ${result.snippet}`}
                                   onSelect={() => handleContentResultClick(result)}
-                                  className="px-3 py-2.5 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors flex items-center gap-3 data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white"
+                                  className="px-3 py-2.5 rounded-lg hover:bg-[--border-subtle] cursor-pointer transition-colors flex items-center gap-3 data-[selected=true]:bg-[#6366F1]/15 data-[selected=true]:text-white"
                                 >
                                   {/* Type icon */}
                                   <div className={`w-5 h-5 rounded-md flex items-center justify-center ${typeConfig[result.type].bgColor}`}>
@@ -872,10 +872,10 @@ export function CommandPalette() {
                                   {/* Content */}
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-sm text-[#E5E7EB] truncate">
+                                      <span className="text-sm text-[--text-primary] truncate">
                                         <HighlightMatch text={result.title} query={query} />
                                       </span>
-                                      <span className="text-[10px] text-[#6B7280] shrink-0">{result.subtitle}</span>
+                                      <span className="text-[10px] text-[--text-muted] shrink-0">{result.subtitle}</span>
                                     </div>
                                     <p className="text-xs text-[#4B5563] truncate mt-0.5">
                                       <HighlightMatch text={result.snippet} query={query} />
@@ -893,22 +893,22 @@ export function CommandPalette() {
                 )}
 
                 {/* Footer hint */}
-                <div className="flex items-center justify-between border-t border-white/[0.06] px-3 py-2 mt-1">
-                  <div className="flex items-center gap-3 text-[10px] text-[#6B7280]">
+                <div className="flex items-center justify-between border-t border-[--border-subtle] px-3 py-2 mt-1">
+                  <div className="flex items-center gap-3 text-[10px] text-[--text-muted]">
                     <span className="flex items-center gap-1">
-                      <kbd className="rounded border border-white/[0.08] bg-white/[0.04] px-1 py-0.5 text-[9px]">↑↓</kbd>
+                      <kbd className="rounded border border-[--border-subtle] bg-[--border-subtle] px-1 py-0.5 text-[9px]">↑↓</kbd>
                       {isRTL ? 'تنقل' : 'Navigate'}
                     </span>
                     <span className="flex items-center gap-1">
-                      <kbd className="rounded border border-white/[0.08] bg-white/[0.04] px-1 py-0.5 text-[9px]">↵</kbd>
+                      <kbd className="rounded border border-[--border-subtle] bg-[--border-subtle] px-1 py-0.5 text-[9px]">↵</kbd>
                       {isRTL ? 'اختيار' : 'Select'}
                     </span>
                     <span className="flex items-center gap-1">
-                      <kbd className="rounded border border-white/[0.08] bg-white/[0.04] px-1 py-0.5 text-[9px]">esc</kbd>
+                      <kbd className="rounded border border-[--border-subtle] bg-[--border-subtle] px-1 py-0.5 text-[9px]">esc</kbd>
                       {isRTL ? 'إغلاق' : 'Close'}
                     </span>
                   </div>
-                  <span className="text-[10px] text-[#6B7280]">
+                  <span className="text-[10px] text-[--text-muted]">
                     {user?.first_name || 'User'}
                   </span>
                 </div>

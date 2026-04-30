@@ -8,7 +8,7 @@ export function PlanBadge() {
   const { plan } = useSubscriptionStore()
   
   const config = {
-    free: { label: 'Free', className: 'bg-gray-500/20 text-gray-400 border-gray-500/30', icon: null },
+    free: { label: 'Free', className: 'bg-gray-500/20 text-[--text-muted] border-gray-500/30', icon: null },
     pro: { label: 'Pro', className: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', icon: Zap },
     family_plus: { label: 'Family+', className: 'bg-amber-500/20 text-amber-300 border-amber-500/30', icon: Crown },
   }
@@ -27,7 +27,7 @@ export function UpgradePrompt({ feature, currentCount, limit }: { feature: strin
   return (
     <div className="flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-violet-500/10 border border-indigo-500/20">
       <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
-      <p className="text-xs text-gray-300">
+      <p className="text-xs text-[--text-secondary]">
         {currentCount}/{limit} {feature} on Free plan. <span className="text-indigo-400 font-medium cursor-pointer hover:text-indigo-300">Upgrade to Pro</span> for unlimited.
       </p>
     </div>

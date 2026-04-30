@@ -40,7 +40,7 @@ const typeColors: Record<Notification['type'], string> = {
   grocery: 'text-amber-400 bg-amber-500/10',
   chat: 'text-violet-400 bg-violet-500/10',
   family: 'text-pink-400 bg-pink-500/10',
-  system: 'text-gray-400 bg-gray-500/10',
+  system: 'text-[--text-muted] bg-gray-500/10',
 }
 
 function formatTimeAgo(dateStr: string): string {
@@ -71,7 +71,7 @@ export function NotificationPanel() {
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0 relative text-gray-400 hover:text-white hover:bg-white/[0.05]"
+          className="shrink-0 relative text-[--text-muted] hover:text-white hover:bg-[--border-subtle]"
           aria-label="Notifications"
         >
           <Bell className="size-5" />
@@ -86,7 +86,7 @@ export function NotificationPanel() {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-80 sm:w-96 p-0 bg-[#111117] border-white/[0.08] rounded-2xl shadow-2xl shadow-black/50"
+        className="w-80 sm:w-96 p-0 bg-[--bg-surface] border-[--border-subtle] rounded-2xl shadow-2xl shadow-black/50"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3">
@@ -104,13 +104,13 @@ export function NotificationPanel() {
           )}
         </div>
 
-        <Separator className="bg-white/[0.06]" />
+        <Separator className="bg-[--border-subtle]" />
 
         {/* Notification List */}
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4">
             <Bell className="size-8 text-gray-600 mb-2" />
-            <p className="text-sm text-gray-500">No notifications</p>
+            <p className="text-sm text-[--text-muted]">No notifications</p>
           </div>
         ) : (
           <ScrollArea className="max-h-96">
@@ -132,8 +132,8 @@ export function NotificationPanel() {
                       <div
                         className={`
                           group flex gap-3 px-4 py-3 transition-colors cursor-pointer
-                          hover:bg-white/[0.03]
-                          ${!notification.read ? 'bg-white/[0.02]' : ''}
+                          hover:bg-[--border-subtle]
+                          ${!notification.read ? 'bg-[--border-subtle]' : ''}
                         `}
                         onClick={() => markAsRead(notification.id)}
                       >
@@ -151,7 +151,7 @@ export function NotificationPanel() {
                               className={`text-sm leading-tight ${
                                 !notification.read
                                   ? 'font-semibold text-white'
-                                  : 'font-medium text-gray-300'
+                                  : 'font-medium text-[--text-secondary]'
                               }`}
                             >
                               {notification.title}
@@ -160,7 +160,7 @@ export function NotificationPanel() {
                               <div className="shrink-0 size-2 rounded-full bg-violet-500 mt-1.5" />
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-[--text-muted] mt-0.5 line-clamp-2">
                             {notification.message}
                           </p>
                           <p className="text-[10px] text-gray-600 mt-1">
@@ -181,7 +181,7 @@ export function NotificationPanel() {
                           <Trash2 className="size-3" />
                         </Button>
                       </div>
-                      <Separator className="bg-white/[0.04] last:hidden" />
+                      <Separator className="bg-[--border-subtle] last:hidden" />
                     </motion.div>
                   )
                 })}
@@ -193,12 +193,12 @@ export function NotificationPanel() {
         {/* Footer */}
         {notifications.length > 0 && (
           <>
-            <Separator className="bg-white/[0.06]" />
+            <Separator className="bg-[--border-subtle]" />
             <div className="px-4 py-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full text-xs text-gray-400 hover:text-white hover:bg-white/[0.05]"
+                className="w-full text-xs text-[--text-muted] hover:text-white hover:bg-[--border-subtle]"
               >
                 View all notifications
               </Button>

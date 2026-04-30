@@ -63,7 +63,7 @@ const STYLE_PRESETS: StylePreset[] = [
 
 function ShimmerCard() {
   return (
-    <div className="rounded-xl aspect-square bg-white/[0.06] animate-pulse overflow-hidden relative">
+    <div className="rounded-xl aspect-square bg-[--border-subtle] animate-pulse overflow-hidden relative">
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.04]" />
       <div className="absolute inset-0 flex items-center justify-center">
         <Loader2 className="size-6 text-white/20 animate-spin" />
@@ -88,7 +88,7 @@ function PreviewCard({
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`rounded-xl overflow-hidden aspect-square bg-white/[0.04] cursor-pointer transition-all relative ${
+      className={`rounded-xl overflow-hidden aspect-square bg-[--border-subtle] cursor-pointer transition-all relative ${
         isSelected
           ? 'ring-2 ring-[#6366F1] shadow-[0_0_16px_rgba(99,102,241,0.3)]'
           : 'hover:ring-2 hover:ring-white/20'
@@ -234,14 +234,14 @@ export function AvatarGenerator({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] max-w-lg sm:max-w-md p-0 overflow-hidden">
+      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] max-w-lg sm:max-w-md p-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="p-5 pb-0">
           <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
             <Wand2 className="size-5 text-[#6366F1]" />
             {isRTL ? 'إنشاء صورة رمزية' : 'Generate Avatar'}
           </DialogTitle>
-          <DialogDescription className="text-[#9CA3AF] text-sm">
+          <DialogDescription className="text-[--text-secondary] text-sm">
             {isRTL
               ? 'اختر نمطاً ودع الذكاء الاصطناعي ينشئ لك صورة رمزية فريدة'
               : 'Choose a style and let AI create a unique avatar for you'}
@@ -252,7 +252,7 @@ export function AvatarGenerator({
           {/* Style Selector */}
           {mode === 'full' && (
             <div>
-              <label className="text-sm font-medium text-[#9CA3AF] mb-2 block">
+              <label className="text-sm font-medium text-[--text-secondary] mb-2 block">
                 {isRTL ? 'النمط' : 'Style'}
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -265,10 +265,10 @@ export function AvatarGenerator({
                       setSelectedStyle(preset.id)
                       handleReset()
                     }}
-                    className={`bg-white/[0.04] border rounded-xl p-3 hover:bg-white/[0.06] cursor-pointer transition-all text-left ${
+                    className={`bg-[--border-subtle] border rounded-xl p-3 hover:bg-[--border-subtle] cursor-pointer transition-all text-left ${
                       selectedStyle === preset.id
                         ? 'border-[#6366F1] bg-[#6366F1]/10'
-                        : 'border-white/[0.08]'
+                        : 'border-[--border-subtle]'
                     }`}
                   >
                     <span className="text-2xl block mb-1">{preset.emoji}</span>
@@ -283,7 +283,7 @@ export function AvatarGenerator({
 
           {/* Custom Prompt */}
           <div>
-            <label className="text-sm font-medium text-[#9CA3AF] mb-2 block">
+            <label className="text-sm font-medium text-[--text-secondary] mb-2 block">
               {isRTL ? 'وصف مخصص' : 'Custom Description'}
             </label>
             <Input
@@ -294,7 +294,7 @@ export function AvatarGenerator({
                   ? 'صف صورتك الرمزية...'
                   : (t as Record<string, Record<string, string>>).avatarGen?.customPrompt ?? 'Describe your avatar...'
               }
-              className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-[#6B7280] focus-visible:ring-[#6366F1]/30"
+              className="bg-[--border-subtle] border-[--border-subtle] text-white placeholder:text-[--text-muted] focus-visible:ring-[#6366F1]/30"
             />
           </div>
 
@@ -357,7 +357,7 @@ export function AvatarGenerator({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <label className="text-sm font-medium text-[#9CA3AF] mb-2 block">
+              <label className="text-sm font-medium text-[--text-secondary] mb-2 block">
                 {isRTL ? 'اختر صورة رمزية' : 'Select an avatar'}
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -376,7 +376,7 @@ export function AvatarGenerator({
                 <Button
                   variant="outline"
                   onClick={handleGenerate}
-                  className="flex-1 border-white/[0.08] text-[#9CA3AF] hover:bg-white/[0.06] hover:text-white rounded-xl h-10"
+                  className="flex-1 border-[--border-subtle] text-[--text-secondary] hover:bg-[--border-subtle] hover:text-white rounded-xl h-10"
                 >
                   <RefreshCw className="size-4 mr-2" />
                   {isRTL ? 'إعادة الإنشاء' : 'Regenerate'}

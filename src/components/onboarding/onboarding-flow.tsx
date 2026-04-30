@@ -69,7 +69,7 @@ function StepProgress({ currentStep }: { currentStep: OnboardingStep }) {
                   ? 'bg-indigo-500 text-white'
                   : step === currentStep
                   ? 'bg-indigo-500 text-white shadow-[0_0_12px_rgba(99,102,241,0.5)]'
-                  : 'bg-white/[0.06] text-gray-500 border border-white/[0.08]'
+                  : 'bg-[--border-subtle] text-[--text-muted] border border-[--border-subtle]'
               }`}
             >
               {step < currentStep ? (
@@ -93,7 +93,7 @@ function StepProgress({ currentStep }: { currentStep: OnboardingStep }) {
           {/* Connecting line */}
           {i < steps.length - 1 && (
             <div className="w-12 sm:w-16 h-[2px] mx-1 relative overflow-hidden rounded-full">
-              <div className="absolute inset-0 bg-white/[0.08]" />
+              <div className="absolute inset-0 bg-[--border-subtle]" />
               <motion.div
                 className="absolute inset-y-0 left-0 bg-indigo-500 rounded-full"
                 initial={{ width: '0%' }}
@@ -159,7 +159,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
 
       {/* Animated Tagline */}
       <div className="h-8 mb-10">
-        <p className="text-lg sm:text-xl text-gray-400 font-medium">
+        <p className="text-lg sm:text-xl text-[--text-muted] font-medium">
           {displayedText}
           <motion.span
             animate={{ opacity: [1, 0] }}
@@ -197,7 +197,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
         onClick={onSkip}
-        className="mt-6 text-gray-500 hover:text-gray-400 text-sm transition-colors"
+        className="mt-6 text-[--text-muted] hover:text-[--text-muted] text-sm transition-colors"
       >
         {t.onboarding.skip}
       </motion.button>
@@ -351,14 +351,14 @@ function FamilyStep({
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-[#111117] border border-green-500/30 rounded-xl p-4 mb-2"
+                className="bg-[--bg-surface] border border-green-500/30 rounded-xl p-4 mb-2"
               >
                 <p className="text-green-400 text-sm font-medium mb-2">Family created! Share this invite code:</p>
                 <div className="flex items-center gap-2">
                   <code className="bg-black/40 px-3 py-1.5 rounded-lg text-white font-mono text-lg tracking-wider">
                     {createdCode}
                   </code>
-                  <Button size="sm" variant="outline" onClick={copyCode} className="border-white/10">
+                  <Button size="sm" variant="outline" onClick={copyCode} className="border-[--border-subtle]">
                     {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
@@ -372,7 +372,7 @@ function FamilyStep({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setAction('create')}
-                className="group relative rounded-xl p-5 bg-[#111117] border border-white/[0.08] hover:border-indigo-500/50 transition-all duration-300 text-left overflow-hidden"
+                className="group relative rounded-xl p-5 bg-[--bg-surface] border border-[--border-subtle] hover:border-indigo-500/50 transition-all duration-300 text-left overflow-hidden"
               >
                 {/* Gradient border glow on hover */}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -381,7 +381,7 @@ function FamilyStep({
                     <Users className="w-6 h-6 text-indigo-400" />
                   </div>
                   <h3 className="text-white font-semibold mb-1">{t.onboarding.createFamily}</h3>
-                  <p className="text-gray-500 text-sm">Start a new family space</p>
+                  <p className="text-[--text-muted] text-sm">Start a new family space</p>
                 </div>
               </motion.button>
 
@@ -390,7 +390,7 @@ function FamilyStep({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setAction('join')}
-                className="group relative rounded-xl p-5 bg-[#111117] border border-white/[0.08] hover:border-violet-500/50 transition-all duration-300 text-left overflow-hidden"
+                className="group relative rounded-xl p-5 bg-[--bg-surface] border border-[--border-subtle] hover:border-violet-500/50 transition-all duration-300 text-left overflow-hidden"
               >
                 {/* Gradient border glow on hover */}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -399,13 +399,13 @@ function FamilyStep({
                     <UserPlus className="w-6 h-6 text-violet-400" />
                   </div>
                   <h3 className="text-white font-semibold mb-1">{t.onboarding.joinFamily}</h3>
-                  <p className="text-gray-500 text-sm">Enter an invite code</p>
+                  <p className="text-[--text-muted] text-sm">Enter an invite code</p>
                 </div>
               </motion.button>
             </div>
 
             {/* Skip for now */}
-            <p className="text-center text-gray-500 text-sm pt-2">
+            <p className="text-center text-[--text-muted] text-sm pt-2">
               {t.onboarding.chooseOrCreate || 'Choose an option to continue'}
             </p>
           </motion.div>
@@ -419,7 +419,7 @@ function FamilyStep({
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
-            <div className="bg-[#111117] border border-white/[0.08] rounded-xl p-6 space-y-4">
+            <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-6 space-y-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
                   <Users className="w-5 h-5 text-indigo-400" />
@@ -428,22 +428,22 @@ function FamilyStep({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-gray-300">{t.onboarding.familyName}</Label>
+                <Label className="text-[--text-secondary]">{t.onboarding.familyName}</Label>
                 <Input
                   value={familyName}
                   onChange={(e) => setFamilyName(e.target.value)}
                   placeholder="The Smith Family"
-                  className="bg-[#0B0B0F] border-white/[0.08] text-white placeholder:text-gray-600"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-white placeholder:text-gray-600"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-gray-300">{t.onboarding.familyDescription}</Label>
+                <Label className="text-[--text-secondary]">{t.onboarding.familyDescription}</Label>
                 <Textarea
                   value={familyDescription}
                   onChange={(e) => setFamilyDescription(e.target.value)}
                   placeholder="A loving family..."
-                  className="bg-[#0B0B0F] border-white/[0.08] text-white placeholder:text-gray-600 resize-none"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-white placeholder:text-gray-600 resize-none"
                   rows={3}
                 />
               </div>
@@ -452,7 +452,7 @@ function FamilyStep({
                 <Button
                   variant="outline"
                   onClick={() => setAction('choose')}
-                  className="flex-1 border-white/[0.08] text-gray-300 hover:bg-white/[0.05]"
+                  className="flex-1 border-[--border-subtle] text-[--text-secondary] hover:bg-[--border-subtle]"
                 >
                   {t.common.cancel}
                 </Button>
@@ -476,7 +476,7 @@ function FamilyStep({
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
-            <div className="bg-[#111117] border border-white/[0.08] rounded-xl p-6 space-y-4">
+            <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-6 space-y-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
                   <UserPlus className="w-5 h-5 text-violet-400" />
@@ -485,12 +485,12 @@ function FamilyStep({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-gray-300">{t.onboarding.enterCode}</Label>
+                <Label className="text-[--text-secondary]">{t.onboarding.enterCode}</Label>
                 <Input
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   placeholder="ABCD1234"
-                  className="bg-[#0B0B0F] border-white/[0.08] text-white font-mono text-lg tracking-widest text-center placeholder:text-gray-600"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-white font-mono text-lg tracking-widest text-center placeholder:text-gray-600"
                   maxLength={8}
                 />
               </div>
@@ -499,7 +499,7 @@ function FamilyStep({
                 <Button
                   variant="outline"
                   onClick={() => setAction('choose')}
-                  className="flex-1 border-white/[0.08] text-gray-300 hover:bg-white/[0.05]"
+                  className="flex-1 border-[--border-subtle] text-[--text-secondary] hover:bg-[--border-subtle]"
                 >
                   {t.common.cancel}
                 </Button>
@@ -559,13 +559,13 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
         >
           {displayAvatar}
         </motion.div>
-        <p className="text-gray-500 text-sm">{t.onboarding.familyAvatar || 'Choose your family avatar'}</p>
+        <p className="text-[--text-muted] text-sm">{t.onboarding.familyAvatar || 'Choose your family avatar'}</p>
       </div>
 
       {/* Avatar Grid */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-gray-300 text-sm font-medium">{t.onboarding.pickAvatar || 'Pick an avatar'}</h3>
+          <h3 className="text-[--text-secondary] text-sm font-medium">{t.onboarding.pickAvatar || 'Pick an avatar'}</h3>
           <Button
             variant="outline"
             size="sm"
@@ -589,7 +589,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
               className={`w-full aspect-square rounded-xl flex items-center justify-center text-2xl transition-all duration-200 ${
                 familyAvatar === emoji && !aiAvatarUrl
                   ? `${selectedColorOption.light} ${selectedColorOption.border} border-2 shadow-lg`
-                  : 'bg-[#111117] border border-white/[0.08] hover:border-white/[0.15]'
+                  : 'bg-[--bg-surface] border border-[--border-subtle] hover:border-[--border-medium]'
               }`}
             >
               {emoji}
@@ -600,7 +600,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
 
       {/* Color Theme Picker */}
       <div>
-        <h3 className="text-gray-300 text-sm font-medium mb-3">{t.onboarding.pickColor || 'Pick a color theme'}</h3>
+        <h3 className="text-[--text-secondary] text-sm font-medium mb-3">{t.onboarding.pickColor || 'Pick a color theme'}</h3>
         <div className="grid grid-cols-6 gap-3">
           {COLOR_OPTIONS.map((color) => (
             <motion.button
@@ -610,7 +610,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
               onClick={() => setFamilyColor(color.name)}
               className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all duration-200 ${
                 familyColor === color.name
-                  ? `ring-2 ring-offset-2 ring-offset-[#0B0B0F] ${color.bg} ring-white/30`
+                  ? `ring-2 ring-offset-2 ring-offset-[--bg-primary] ${color.bg} ring-white/30`
                   : `${color.bg}/30 hover:${color.bg}/50`
               }`}
               style={familyColor === color.name ? { boxShadow: `0 0 16px ${color.hex}66` } : undefined}
@@ -679,7 +679,7 @@ export function OnboardingFlow() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F] auth-bg flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[--bg-primary] auth-bg flex items-center justify-center p-4">
       {/* Animated gradient blobs */}
       <div className="auth-blob-1" />
       <div className="auth-blob-2" />
@@ -731,7 +731,7 @@ export function OnboardingFlow() {
               {/* Step 2 Header */}
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-white mb-1">{t.onboarding.setupFamily || 'Set Up Your Family'}</h2>
-                <p className="text-gray-500 text-sm">{t.onboarding.setupFamilyDesc || 'Create a new family or join an existing one'}</p>
+                <p className="text-[--text-muted] text-sm">{t.onboarding.setupFamilyDesc || 'Create a new family or join an existing one'}</p>
               </div>
               <FamilyStep onAdvance={() => goToStep(3)} />
             </motion.div>
@@ -750,7 +750,7 @@ export function OnboardingFlow() {
               {/* Step 3 Header */}
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-white mb-1">{t.onboarding.personalize || 'Personalize'}</h2>
-                <p className="text-gray-500 text-sm">{t.onboarding.personalizeDesc || 'Make it yours'}</p>
+                <p className="text-[--text-muted] text-sm">{t.onboarding.personalizeDesc || 'Make it yours'}</p>
               </div>
               <PersonalizeStep onComplete={handleComplete} />
             </motion.div>
