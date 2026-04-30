@@ -100,6 +100,7 @@ export interface ChatMessage {
   reply_to: string | null;
   created_at: string;
   sender?: UserProfile;
+  reactions?: { emoji: string; users: string[] }[];
 }
 
 export interface FamilyFile {

@@ -62,6 +62,11 @@ import {
   X,
   User,
   GripVertical,
+  MessageCircle,
+  Send,
+  CornerDownRight,
+  LayoutList,
+  LayoutGrid,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -89,6 +94,9 @@ import {
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { CSS } from '@dnd-kit/utilities'
 import { triggerConfetti } from '@/lib/confetti'
+import { KanbanBoard } from '@/components/tasks/kanban-board'
+import { useCommentStore } from '@/stores/comment-store'
+import type { TaskComment } from '@/stores/comment-store'
 
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { color: string; bg: string; border: string; label: string }> = {
@@ -159,6 +167,265 @@ const EMPTY_FORM: TaskFormData = {
   due_date: undefined,
 }
 
+// ─── Relative Time Helper ──────────────────────────────────────────
+function getRelativeTime(dateStr: string, isRTL: boolean): string {
+  const now = new Date()
+  const date = new Date(dateStr)
+  const diffMs = now.getTime() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHr = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHr / 24)
+
+  if (isRTL) {
+    if (diffMin < 1) return 'الآن'
+    if (diffMin < 60) return `${diffMin}د`
+    if (diffHr < 24) return `${diffHr}س`
+    if (diffDay < 7) return `${diffDay}ي`
+    return format(date, 'MMM d')
+  }
+  if (diffMin < 1) return 'now'
+  if (diffMin < 60) return `${diffMin}m`
+  if (diffHr < 24) return `${diffHr}h`
+  if (diffDay < 7) return `${diffDay}d`
+  return format(date, 'MMM d')
+}
+
+// ─── Comments Panel Component ────────────────────────────────────────
+function CommentsPanel({ taskId }: { taskId: string }) {
+  const { t, isRTL } = useI18n()
+  const { comments, addComment, removeComment, getCommentsForTask, getRepliesForComment, getCommentCountForTask } = useCommentStore()
+  const { user } = useAuthStore()
+  const [newComment, setNewComment] = useState('')
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  const [replyContent, setReplyContent] = useState('')
+  const [expanded, setExpanded] = useState(true)
+
+  // Force re-render when comments change
+  const _comments = comments
+  void _comments
+
+  const topLevelComments = getCommentsForTask(taskId)
+  const commentCount = getCommentCountForTask(taskId)
+
+  const handleAddComment = () => {
+    if (!newComment.trim() || !user) return
+    const comment: TaskComment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      task_id: taskId,
+      parent_id: null,
+      author_id: user.id,
+      author_name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email.split('@')[0],
+      author_avatar: user.avatar_url,
+      content: newComment.trim(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    addComment(comment)
+    setNewComment('')
+  }
+
+  const handleAddReply = (parentId: string) => {
+    if (!replyContent.trim() || !user) return
+    const reply: TaskComment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      task_id: taskId,
+      parent_id: parentId,
+      author_id: user.id,
+      author_name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email.split('@')[0],
+      author_avatar: user.avatar_url,
+      content: replyContent.trim(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    addComment(reply)
+    setReplyContent('')
+    setReplyingTo(null)
+  }
+
+  const handleTextareaResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const target = e.target
+    target.style.height = 'auto'
+    target.style.height = `${Math.min(target.scrollHeight, 4 * 24)}px`
+  }
+
+  return (
+    <div className="mt-4 border-t border-white/[0.06] pt-4">
+      {/* Header */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-2 w-full text-left mb-3"
+      >
+        <MessageCircle className="size-4 text-[#6366F1]" />
+        <span className="text-sm font-medium text-[#E5E7EB]">{t.comments.comments}</span>
+        {commentCount > 0 && (
+          <span className="text-xs text-[#6B7280] bg-white/[0.04] px-1.5 py-0.5 rounded-full">
+            {commentCount}
+          </span>
+        )}
+        <span className="ml-auto text-[#6B7280] text-xs">{expanded ? '▲' : '▼'}</span>
+      </button>
+
+      {expanded && (
+        <>
+          {/* Comments List */}
+          <div className="max-h-64 overflow-y-auto space-y-3 mb-3 custom-scrollbar">
+            {topLevelComments.length === 0 ? (
+              <div className="text-center py-4">
+                <MessageCircle className="size-8 text-[#6B7280]/40 mx-auto mb-2" />
+                <p className="text-sm text-[#6B7280]">{t.comments.noComments}</p>
+                <p className="text-xs text-[#6B7280]/60">{t.comments.startConversation}</p>
+              </div>
+            ) : (
+              topLevelComments.map((comment) => {
+                const replies = getRepliesForComment(comment.id)
+                return (
+                  <div key={comment.id}>
+                    {/* Top-level comment */}
+                    <div className="flex gap-2.5">
+                      <Avatar className="h-7 w-7 rounded-full border border-white/[0.08] flex-shrink-0">
+                        {comment.author_avatar && <AvatarImage src={comment.author_avatar} alt="" />}
+                        <AvatarFallback className="text-[10px] bg-[#6366F1]/20 text-[#6366F1]">
+                          {comment.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-[#E5E7EB]">{comment.author_name}</span>
+                          <span className="text-[11px] text-[#6B7280]">{getRelativeTime(comment.created_at, isRTL)}</span>
+                        </div>
+                        <p className="text-sm text-[#9CA3AF] mt-0.5 break-words">{comment.content}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <button
+                            onClick={() => {
+                              setReplyingTo(replyingTo === comment.id ? null : comment.id)
+                              setReplyContent('')
+                            }}
+                            className="text-xs text-[#6B7280] hover:text-[#6366F1] transition-colors"
+                          >
+                            <CornerDownRight className="size-3 inline mr-1" />
+                            {t.comments.reply}
+                          </button>
+                          {comment.author_id === user?.id && (
+                            <button
+                              onClick={() => removeComment(comment.id)}
+                              className="text-xs text-[#6B7280] hover:text-red-400 transition-colors"
+                            >
+                              {t.comments.delete}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Inline Reply Input */}
+                        {replyingTo === comment.id && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-2 flex gap-2"
+                          >
+                            <textarea
+                              value={replyContent}
+                              onChange={(e) => {
+                                setReplyContent(e.target.value)
+                                handleTextareaResize(e)
+                              }}
+                              placeholder={`${t.comments.replyTo} ${comment.author_name}...`}
+                              rows={1}
+                              className="flex-1 bg-[#0B0B0F] border border-white/[0.08] rounded-lg px-3 py-1.5 text-sm text-[#E5E7EB] placeholder:text-[#6B7280] focus:outline-none focus:border-[#6366F1]/50 resize-none overflow-hidden min-h-[32px]"
+                            />
+                            <div className="flex gap-1 flex-shrink-0">
+                              <Button
+                                size="sm"
+                                onClick={() => handleAddReply(comment.id)}
+                                disabled={!replyContent.trim()}
+                                className="h-7 px-2 bg-[#6366F1] hover:bg-[#6366F1]/90 text-white text-xs"
+                              >
+                                <Send className="size-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => { setReplyingTo(null); setReplyContent('') }}
+                                className="h-7 px-2 text-[#6B7280] hover:text-[#E5E7EB] text-xs"
+                              >
+                                {t.comments.cancel}
+                              </Button>
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {/* Replies */}
+                        {replies.length > 0 && (
+                          <div className="ml-8 border-l-2 border-[#6366F1]/20 pl-3 mt-2 space-y-2">
+                            {replies.map((reply) => (
+                              <div key={reply.id} className="flex gap-2">
+                                <Avatar className="h-5 w-5 rounded-full border border-white/[0.08] flex-shrink-0">
+                                  {reply.author_avatar && <AvatarImage src={reply.author_avatar} alt="" />}
+                                  <AvatarFallback className="text-[8px] bg-[#6366F1]/20 text-[#6366F1]">
+                                    {reply.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-medium text-[#E5E7EB]">{reply.author_name}</span>
+                                    <span className="text-[10px] text-[#6B7280]">{getRelativeTime(reply.created_at, isRTL)}</span>
+                                  </div>
+                                  <p className="text-xs text-[#9CA3AF] mt-0.5 break-words">{reply.content}</p>
+                                  {reply.author_id === user?.id && (
+                                    <button
+                                      onClick={() => removeComment(reply.id)}
+                                      className="text-[10px] text-[#6B7280] hover:text-red-400 transition-colors mt-0.5"
+                                    >
+                                      {t.comments.delete}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+
+          {/* Comment Input */}
+          <div className="flex gap-2">
+            <textarea
+              value={newComment}
+              onChange={(e) => {
+                setNewComment(e.target.value)
+                handleTextareaResize(e)
+              }}
+              placeholder={t.comments.addComment}
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleAddComment()
+                }
+              }}
+              className="flex-1 bg-[#0B0B0F] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[#E5E7EB] placeholder:text-[#6B7280] focus:outline-none focus:border-[#6366F1]/50 resize-none overflow-hidden min-h-[36px]"
+            />
+            <Button
+              size="sm"
+              onClick={handleAddComment}
+              disabled={!newComment.trim()}
+              className="h-9 px-3 bg-[#6366F1] hover:bg-[#6366F1]/90 text-white"
+            >
+              <Send className="size-4" />
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 // ─── Task Card Component ────────────────────────────────────────────
 function TaskCard({
   task,
@@ -179,6 +446,7 @@ function TaskCard({
   const priority = PRIORITY_CONFIG[task.priority]
   const status = STATUS_CONFIG[task.status]
   const isOverdue = task.due_date && task.status !== 'done' && isPast(parseISO(task.due_date)) && !isToday(parseISO(task.due_date))
+  const commentCount = useCommentStore((s) => s.getCommentCountForTask(task.id))
 
   const dueDateLabel = useMemo(() => {
     if (!task.due_date) return null
@@ -275,6 +543,13 @@ function TaskCard({
           >
             {priority.label}
           </Badge>
+          {/* Comment count badge */}
+          {commentCount > 0 && (
+            <span className="text-xs text-[var(--text-muted)] bg-white/[0.04] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <MessageCircle className="size-3" />
+              {commentCount}
+            </span>
+          )}
         </div>
 
         {task.description && (
@@ -464,7 +739,7 @@ function TaskModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[520px]">
+      <DialogContent className="bg-[#111117] border-white/[0.08] text-[#E5E7EB] sm:max-w-[520px] max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-[#E5E7EB]">
             {editingTask ? t.tasks.editTask : t.tasks.addTask}
@@ -474,7 +749,7 @@ function TaskModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-2">
+        <div className="grid gap-4 py-2 overflow-y-auto flex-1 min-h-0">
           {/* Title */}
           <div className="space-y-2">
             <Label className="text-[#E5E7EB] text-sm">{t.tasks.taskTitle}</Label>
@@ -636,6 +911,9 @@ function TaskModal({
           )}
         </div>
 
+        {/* Comments section - only for existing tasks */}
+        {editingTask && <CommentsPanel taskId={editingTask.id} />}
+
         <DialogFooter className="gap-2">
           <Button
             variant="ghost"
@@ -721,6 +999,7 @@ export default function TasksPage() {
     getFilteredTasks,
   } = useTaskStore()
 
+  const [pageView, setPageView] = useState<'list' | 'board'>('list')
   const [viewMode, setViewMode] = useState<'status' | 'date'>('status')
   const [members, setMembers] = useState<FamilyMember[]>(familyMembers)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
@@ -924,6 +1203,43 @@ export default function TasksPage() {
     [supabase, removeTask]
   )
 
+  // Handle kanban status change (drag between columns)
+  const handleKanbanStatusChange = useCallback(
+    async (taskId: string, newStatus: TaskStatus) => {
+      const task = tasks.find((t) => t.id === taskId)
+      if (!task || task.status === newStatus) return
+      const completedAt = newStatus === 'done' ? new Date().toISOString() : null
+      try {
+        const { error } = await supabase
+          .from('tasks')
+          .update({ status: newStatus, completed_at: completedAt })
+          .eq('id', taskId)
+        if (error) throw error
+        updateTask({ ...task, status: newStatus, completed_at: completedAt })
+        if (newStatus === 'done') {
+          triggerConfetti()
+          toast.success('🎉 Task completed!')
+        } else {
+          toast.success(t.tasks.moveToStatus.replace('{status}', STATUS_CONFIG[newStatus].label))
+        }
+      } catch {
+        toast.error('Failed to update task')
+      }
+    },
+    [supabase, tasks, updateTask, t]
+  )
+
+  // Handle add task from kanban column
+  const handleKanbanAddTask = useCallback((status: TaskStatus) => {
+    if (!canCreateTask(tasks.length)) {
+      setUpgradeModalOpen(true)
+      return
+    }
+    setEditingTask(null)
+    // Set default status when adding from kanban column
+    setShowAddTask(true)
+  }, [canCreateTask, tasks.length, setEditingTask, setShowAddTask])
+
   // Filtered tasks
   const filteredTasks = useMemo(() => getFilteredTasks(), [tasks, searchQuery, filterStatus, filterPriority, sortBy, getFilteredTasks])
 
@@ -1081,15 +1397,47 @@ export default function TasksPage() {
             </SelectContent>
           </Select>
 
-          {/* View mode toggle */}
+          {/* View toggle: List / Board */}
           <div className="flex items-center gap-1 bg-[#111117] border border-white/[0.06] rounded-lg p-0.5 ml-auto">
+            <button
+              onClick={() => setPageView('list')}
+              title={t.tasks.listView}
+              className={cn(
+                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
+                pageView === 'list'
+                  ? 'bg-[#6366F1]/20 text-[#6366F1]'
+                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+              )}
+            >
+              <LayoutList className="size-3.5" />
+              <span className="hidden sm:inline">{t.tasks.listView}</span>
+            </button>
+            <button
+              onClick={() => setPageView('board')}
+              title={t.tasks.boardView}
+              className={cn(
+                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
+                pageView === 'board'
+                  ? 'bg-[#6366F1]/20 text-[#6366F1]'
+                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
+              )}
+            >
+              <LayoutGrid className="size-3.5" />
+              <span className="hidden sm:inline">{t.tasks.boardView}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Sub-toggle: By Status / By Date (only in list view) */}
+        {pageView === 'list' && (
+          <div className="flex items-center gap-1 mt-2">
             <button
               onClick={() => setViewMode('status')}
               className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
+                'px-3 py-1 rounded-md text-xs font-medium transition-all duration-150',
                 viewMode === 'status'
                   ? 'bg-white/[0.08] text-[#E5E7EB]'
-                  : 'text-[#6B7280] hover:text-[#E5E7EB]'
+                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
               )}
             >
               By Status
@@ -1097,109 +1445,134 @@ export default function TasksPage() {
             <button
               onClick={() => setViewMode('date')}
               className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
+                'px-3 py-1 rounded-md text-xs font-medium transition-all duration-150',
                 viewMode === 'date'
                   ? 'bg-white/[0.08] text-[#E5E7EB]'
-                  : 'text-[#6B7280] hover:text-[#E5E7EB]'
+                  : 'text-[#6B7280] hover:text-[#E5E7EB] hover:bg-white/[0.04]'
               )}
             >
               By Date
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* ─── Task List ──────────────────────────────────────────── */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-      <div className="flex-1 min-h-0 px-4 sm:px-6 pb-6">
-        {isLoading ? (
-          <div className="space-y-2">
-            <TaskCardSkeleton count={5} />
-          </div>
-        ) : filteredTasks.length === 0 ? (
-          <EmptyState
-            icon={ClipboardList}
-            title="No tasks yet"
-            description="Create your first task to get started"
-            action={{ label: 'Add Task', onClick: handleAddTask }}
-          />
-        ) : (
-          <ScrollArea className="h-full">
-            <AnimatePresence mode="popLayout">
-              {viewMode === 'status' ? (
-                // Group by status
-                (['todo', 'in_progress', 'done'] as TaskStatus[]).map((status) => {
-                  const group = groupedByStatus[status]
-                  if (group.length === 0) return null
-                  return (
-                    <div key={status}>
-                      <StatusSectionHeader status={status} count={group.length} />
-                      <SortableContext items={group.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-2">
-                          {group.map((task) => (
-                            <SortableTaskCard
-                              key={task.id}
-                              task={task}
-                              onToggleDone={handleToggleDone}
-                              onEdit={(task) => setEditingTask(task)}
-                              onDelete={handleDeleteTask}
-                            />
-                          ))}
-                        </div>
-                      </SortableContext>
-                    </div>
-                  )
-                })
-              ) : (
-                // Group by date
-                DATE_GROUP_ORDER.map((group) => {
-                  const tasksInGroup = groupedByDate[group]
-                  if (tasksInGroup.length === 0) return null
-                  return (
-                    <div key={group}>
-                      <DateSectionHeader group={group} count={tasksInGroup.length} />
-                      <SortableContext items={tasksInGroup.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-2">
-                          {tasksInGroup.map((task) => (
-                            <SortableTaskCard
-                              key={task.id}
-                              task={task}
-                              onToggleDone={handleToggleDone}
-                              onEdit={(task) => setEditingTask(task)}
-                              onDelete={handleDeleteTask}
-                            />
-                          ))}
-                        </div>
-                      </SortableContext>
-                    </div>
-                  )
-                })
-              )}
-            </AnimatePresence>
-          </ScrollArea>
         )}
       </div>
 
-      {/* ─── Drag Overlay ───────────────────────────────────────── */}
-      <DragOverlay>
-        {activeId ? (
-          <TaskCard
-            task={filteredTasks.find((t) => t.id === activeId)!}
-            onToggleDone={handleToggleDone}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            isDragOverlay
-          />
-        ) : null}
-      </DragOverlay>
-      </DndContext>
+      {/* ─── Task Content: List or Board ─────────────────────── */}
+      {pageView === 'board' ? (
+        /* ─── Board View ────────────────────────────────────── */
+        <div className="flex-1 min-h-0 px-4 sm:px-6 pb-6">
+          {isLoading ? (
+            <div className="space-y-2">
+              <TaskCardSkeleton count={5} />
+            </div>
+          ) : filteredTasks.length === 0 ? (
+            <EmptyState
+              icon={ClipboardList}
+              title="No tasks yet"
+              description="Create your first task to get started"
+              action={{ label: 'Add Task', onClick: handleAddTask }}
+            />
+          ) : (
+            <KanbanBoard
+              tasks={filteredTasks}
+              onStatusChange={handleKanbanStatusChange}
+              onAddTask={handleKanbanAddTask}
+            />
+          )}
+        </div>
+      ) : (
+        /* ─── List View ─────────────────────────────────────── */
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+        <div className="flex-1 min-h-0 px-4 sm:px-6 pb-6">
+          {isLoading ? (
+            <div className="space-y-2">
+              <TaskCardSkeleton count={5} />
+            </div>
+          ) : filteredTasks.length === 0 ? (
+            <EmptyState
+              icon={ClipboardList}
+              title="No tasks yet"
+              description="Create your first task to get started"
+              action={{ label: 'Add Task', onClick: handleAddTask }}
+            />
+          ) : (
+            <ScrollArea className="h-full">
+              <AnimatePresence mode="popLayout">
+                {viewMode === 'status' ? (
+                  // Group by status
+                  (['todo', 'in_progress', 'done'] as TaskStatus[]).map((status) => {
+                    const group = groupedByStatus[status]
+                    if (group.length === 0) return null
+                    return (
+                      <div key={status}>
+                        <StatusSectionHeader status={status} count={group.length} />
+                        <SortableContext items={group.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-2">
+                            {group.map((task) => (
+                              <SortableTaskCard
+                                key={task.id}
+                                task={task}
+                                onToggleDone={handleToggleDone}
+                                onEdit={(task) => setEditingTask(task)}
+                                onDelete={handleDeleteTask}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </div>
+                    )
+                  })
+                ) : (
+                  // Group by date
+                  DATE_GROUP_ORDER.map((group) => {
+                    const tasksInGroup = groupedByDate[group]
+                    if (tasksInGroup.length === 0) return null
+                    return (
+                      <div key={group}>
+                        <DateSectionHeader group={group} count={tasksInGroup.length} />
+                        <SortableContext items={tasksInGroup.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-2">
+                            {tasksInGroup.map((task) => (
+                              <SortableTaskCard
+                                key={task.id}
+                                task={task}
+                                onToggleDone={handleToggleDone}
+                                onEdit={(task) => setEditingTask(task)}
+                                onDelete={handleDeleteTask}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </div>
+                    )
+                  })
+                )}
+              </AnimatePresence>
+            </ScrollArea>
+          )}
+        </div>
+
+        {/* ─── Drag Overlay ───────────────────────────────────── */}
+        <DragOverlay>
+          {activeId ? (
+            <TaskCard
+              task={filteredTasks.find((t) => t.id === activeId)!}
+              onToggleDone={handleToggleDone}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              isDragOverlay
+            />
+          ) : null}
+        </DragOverlay>
+        </DndContext>
+      )}
 
       {/* ─── Upgrade Modal ─────────────────────────────────────── */}
       <UpgradeModal

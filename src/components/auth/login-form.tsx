@@ -419,9 +419,88 @@ export function LoginForm() {
               presenceStore.setOnline('demo-user-002') // Noura
               presenceStore.setOnline('demo-user-003') // Khalid
 
+              // Seed demo activity feed
+              const { useActivityStore } = await import('@/stores/activity-store')
+              const activityStore = useActivityStore.getState()
+              const actNow = Date.now()
+              const hour = 3600000
+              const day = 86400000
+              activityStore.setActivities([
+                {
+                  id: 'act-1',
+                  type: 'message_sent',
+                  actor: { id: 'demo-user-002', name: isRTL ? 'نورة' : 'Noura', avatar_url: null },
+                  description: isRTL ? 'أرسل رسالة في المحادثة' : 'sent a message in the chat',
+                  created_at: new Date(actNow - 2 * 60000).toISOString(),
+                },
+                {
+                  id: 'act-2',
+                  type: 'task_completed',
+                  actor: { id: 'demo-user-003', name: isRTL ? 'خالد' : 'Khalid', avatar_url: null },
+                  description: isRTL ? 'أكمل مهمة "حجز طاولة العشاء"' : 'completed task "Book dinner table"',
+                  created_at: new Date(actNow - 15 * 60000).toISOString(),
+                },
+                {
+                  id: 'act-3',
+                  type: 'grocery_added',
+                  actor: { id: 'demo-user-001', name: isRTL ? 'أحمد' : 'Ahmed', avatar_url: null },
+                  description: isRTL ? 'أضاف "أرز بسمتي" إلى قائمة البقالة' : 'added "Basmati Rice" to grocery list',
+                  created_at: new Date(actNow - 45 * 60000).toISOString(),
+                },
+                {
+                  id: 'act-4',
+                  type: 'event_created',
+                  actor: { id: 'demo-user-001', name: isRTL ? 'أحمد' : 'Ahmed', avatar_url: null },
+                  description: isRTL ? 'أضاف حدث "عشاء العائلة"' : 'added event "Family Dinner"',
+                  created_at: new Date(actNow - 2 * hour).toISOString(),
+                },
+                {
+                  id: 'act-5',
+                  type: 'task_created',
+                  actor: { id: 'demo-user-002', name: isRTL ? 'نورة' : 'Noura', avatar_url: null },
+                  description: isRTL ? 'أنشأ مهمة "تحضير واجبات المدرسة"' : 'created task "Help with homework"',
+                  created_at: new Date(actNow - 4 * hour).toISOString(),
+                },
+                {
+                  id: 'act-6',
+                  type: 'grocery_checked',
+                  actor: { id: 'demo-user-003', name: isRTL ? 'خالد' : 'Khalid', avatar_url: null },
+                  description: isRTL ? 'أزال "عصير برتقال" من القائمة' : 'checked off "Orange Juice"',
+                  created_at: new Date(actNow - 6 * hour).toISOString(),
+                },
+                {
+                  id: 'act-7',
+                  type: 'member_joined',
+                  actor: { id: 'demo-user-003', name: isRTL ? 'خالد' : 'Khalid', avatar_url: null },
+                  description: isRTL ? 'انضم إلى العائلة' : 'joined the family',
+                  created_at: new Date(actNow - 12 * hour).toISOString(),
+                },
+                {
+                  id: 'act-8',
+                  type: 'task_created',
+                  actor: { id: 'demo-user-001', name: isRTL ? 'أحمد' : 'Ahmed', avatar_url: null },
+                  description: isRTL ? 'أنشأ مهمة "شراء الهدايا لعيد الفطر"' : 'created task "Buy Eid gifts"',
+                  created_at: new Date(actNow - day).toISOString(),
+                },
+                {
+                  id: 'act-9',
+                  type: 'message_sent',
+                  actor: { id: 'demo-user-003', name: isRTL ? 'خالد' : 'Khalid', avatar_url: null },
+                  description: isRTL ? 'أرسل رسالة في المحادثة' : 'sent a message in the chat',
+                  created_at: new Date(actNow - day - 3 * hour).toISOString(),
+                },
+                {
+                  id: 'act-10',
+                  type: 'grocery_added',
+                  actor: { id: 'demo-user-002', name: isRTL ? 'نورة' : 'Noura', avatar_url: null },
+                  description: isRTL ? 'أضاف "خبز تمر" إلى قائمة البقالة' : 'added "Date Bread" to grocery list',
+                  created_at: new Date(actNow - 2 * day).toISOString(),
+                },
+              ])
+
               // Seed demo calendar events
-              const now = new Date()
-              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+              const calNow = new Date()
+              const today = new Date(calNow.getFullYear(), calNow.getMonth(), calNow.getDate())
               const tomorrow = new Date(today.getTime() + 86400000)
               // Find next Saturday (day 6)
               const daysUntilSat = (6 - today.getDay() + 7) % 7 || 7
@@ -432,10 +511,122 @@ export function LoginForm() {
 
               const { useCalendarStore } = await import('@/stores/calendar-store')
               useCalendarStore.getState().setEvents([
-                { id: 'event-1', family_id: 'demo-family-001', title: isRTL ? 'عشاء العائلة' : 'Family Dinner', description: isRTL ? 'في المنزل' : 'At home', start_time: new Date(today.getTime() + 19 * 3600000).toISOString(), end_time: new Date(today.getTime() + 21 * 3600000).toISOString(), all_day: false, color: '#6366F1', created_by: 'demo-user-001', created_at: now.toISOString(), updated_at: now.toISOString() },
-                { id: 'event-2', family_id: 'demo-family-001', title: isRTL ? 'موعد الطبيب' : 'Doctor Appointment', description: isRTL ? 'فحص سنوي' : 'Annual checkup', start_time: new Date(tomorrow.getTime() + 10 * 3600000).toISOString(), end_time: new Date(tomorrow.getTime() + 11 * 3600000).toISOString(), all_day: false, color: '#22C55E', created_by: 'demo-user-002', created_at: now.toISOString(), updated_at: now.toISOString() },
-                { id: 'event-3', family_id: 'demo-family-001', title: isRTL ? 'يوم عائلي' : 'Family Day Out', description: null, start_time: nextSat.toISOString(), end_time: null, all_day: true, color: '#F59E0B', created_by: 'demo-user-001', created_at: now.toISOString(), updated_at: now.toISOString() },
-                { id: 'event-4', family_id: 'demo-family-001', title: isRTL ? 'اجتماع المدرسة' : 'School Meeting', description: null, start_time: new Date(nextMon.getTime() + 15 * 3600000).toISOString(), end_time: new Date(nextMon.getTime() + 16 * 3600000).toISOString(), all_day: false, color: '#A78BFA', created_by: 'demo-user-003', created_at: now.toISOString(), updated_at: now.toISOString() },
+                { id: 'event-1', family_id: 'demo-family-001', title: isRTL ? 'عشاء العائلة' : 'Family Dinner', description: isRTL ? 'في المنزل' : 'At home', start_time: new Date(today.getTime() + 19 * 3600000).toISOString(), end_time: new Date(today.getTime() + 21 * 3600000).toISOString(), all_day: false, color: '#6366F1', created_by: 'demo-user-001', created_at: calNow.toISOString(), updated_at: calNow.toISOString() },
+                { id: 'event-2', family_id: 'demo-family-001', title: isRTL ? 'موعد الطبيب' : 'Doctor Appointment', description: isRTL ? 'فحص سنوي' : 'Annual checkup', start_time: new Date(tomorrow.getTime() + 10 * 3600000).toISOString(), end_time: new Date(tomorrow.getTime() + 11 * 3600000).toISOString(), all_day: false, color: '#22C55E', created_by: 'demo-user-002', created_at: calNow.toISOString(), updated_at: calNow.toISOString() },
+                { id: 'event-3', family_id: 'demo-family-001', title: isRTL ? 'يوم عائلي' : 'Family Day Out', description: null, start_time: nextSat.toISOString(), end_time: null, all_day: true, color: '#F59E0B', created_by: 'demo-user-001', created_at: calNow.toISOString(), updated_at: calNow.toISOString() },
+                { id: 'event-4', family_id: 'demo-family-001', title: isRTL ? 'اجتماع المدرسة' : 'School Meeting', description: null, start_time: new Date(nextMon.getTime() + 15 * 3600000).toISOString(), end_time: new Date(nextMon.getTime() + 16 * 3600000).toISOString(), all_day: false, color: '#A78BFA', created_by: 'demo-user-003', created_at: calNow.toISOString(), updated_at: calNow.toISOString() },
+              ])
+
+              // Seed demo comments
+              const { useCommentStore } = await import('@/stores/comment-store')
+              useCommentStore.getState().setComments([
+                // Comments on task-1 (Buy Eid gifts)
+                { id: 'comment-1', task_id: 'task-1', parent_id: null, author_id: 'demo-user-001', author_name: isRTL ? 'أحمد' : 'Ahmed', author_avatar: null, content: isRTL ? 'يجب أن نبدأ بالتسوق قريبًا' : 'We should start shopping soon', created_at: new Date(Date.now() - 3600000).toISOString(), updated_at: new Date(Date.now() - 3600000).toISOString() },
+                { id: 'comment-2', task_id: 'task-1', parent_id: 'comment-1', author_id: 'demo-user-002', author_name: isRTL ? 'نورة' : 'Noura', author_avatar: null, content: isRTL ? 'أنا سأشتري الهدايا للأطفال' : "I'll get the gifts for the kids", created_at: new Date(Date.now() - 1800000).toISOString(), updated_at: new Date(Date.now() - 1800000).toISOString() },
+                { id: 'comment-3', task_id: 'task-1', parent_id: null, author_id: 'demo-user-003', author_name: isRTL ? 'خالد' : 'Khalid', author_avatar: null, content: isRTL ? 'لا تنسوا بطاقات التهنئة!' : "Don't forget greeting cards!", created_at: new Date(Date.now() - 900000).toISOString(), updated_at: new Date(Date.now() - 900000).toISOString() },
+                // Comments on task-4 (Help with homework)
+                { id: 'comment-4', task_id: 'task-4', parent_id: null, author_id: 'demo-user-002', author_name: isRTL ? 'نورة' : 'Noura', author_avatar: null, content: isRTL ? 'الواجب في الرياضيات هذا الأسبوع' : 'Math homework this week', created_at: new Date(Date.now() - 7200000).toISOString(), updated_at: new Date(Date.now() - 7200000).toISOString() },
+                { id: 'comment-5', task_id: 'task-4', parent_id: 'comment-4', author_id: 'demo-user-001', author_name: isRTL ? 'أحمد' : 'Ahmed', author_avatar: null, content: isRTL ? 'سأساعد بعد صلاة العصر' : "I'll help after Asr prayer", created_at: new Date(Date.now() - 5400000).toISOString(), updated_at: new Date(Date.now() - 5400000).toISOString() },
+                // Comment on task-2 (Clean the house)
+                { id: 'comment-6', task_id: 'task-2', parent_id: null, author_id: 'demo-user-003', author_name: isRTL ? 'خالد' : 'Khalid', author_avatar: null, content: isRTL ? 'سأنظف المطبخ والصالة' : "I'll clean the kitchen and living room", created_at: new Date(Date.now() - 10800000).toISOString(), updated_at: new Date(Date.now() - 10800000).toISOString() },
+              ])
+
+              // Seed demo chat messages with reactions
+              const { useChatStore } = await import('@/stores/chat-store')
+              useChatStore.getState().setMessages([
+                {
+                  id: 'chat-1',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'صباح الخير يا عائلة! 🌞' : 'Good morning family! 🌞',
+                  sender_id: 'demo-user-001',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 4 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '👍', users: ['demo-user-002', 'demo-user-001'] },
+                    { emoji: '❤️', users: ['demo-user-003'] },
+                  ],
+                },
+                {
+                  id: 'chat-2',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'صباح النور أحمد! هل نحتاج لشراء شيء اليوم؟' : 'Good morning Ahmed! Do we need to buy anything today?',
+                  sender_id: 'demo-user-002',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 3.9 * 3600000).toISOString(),
+                  reactions: [],
+                },
+                {
+                  id: 'chat-3',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'نعم، نحتاج حليب وخبز من المتجر' : 'Yes, we need milk and bread from the store',
+                  sender_id: 'demo-user-001',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 3.8 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '👍', users: ['demo-user-002'] },
+                  ],
+                },
+                {
+                  id: 'chat-4',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'سأمر بالمتجر بعد صلاة الظهر إن شاء الله' : "I'll pass by the store after Dhuhr prayer insha'Allah",
+                  sender_id: 'demo-user-003',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 3.5 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '❤️', users: ['demo-user-001'] },
+                  ],
+                },
+                {
+                  id: 'chat-5',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'شكرًا خالد! 👏' : 'Thanks Khalid! 👏',
+                  sender_id: 'demo-user-002',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 3.4 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '🎉', users: ['demo-user-001', 'demo-user-003'] },
+                  ],
+                },
+                {
+                  id: 'chat-6',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'لا تنسوا عشاء العائلة اليوم الساعة ٧ 🍽️' : "Don't forget family dinner tonight at 7! 🍽️",
+                  sender_id: 'demo-user-001',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '❤️', users: ['demo-user-002', 'demo-user-003'] },
+                  ],
+                },
+                {
+                  id: 'chat-7',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'مستعدة! 😄' : "I'm ready! 😄",
+                  sender_id: 'demo-user-002',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 1.5 * 3600000).toISOString(),
+                  reactions: [],
+                },
+                {
+                  id: 'chat-8',
+                  family_id: 'demo-family-001',
+                  content: isRTL ? 'أنا أيضًا! هل نحتاج أن أحضر شيئًا؟' : 'Me too! Should I bring anything?',
+                  sender_id: 'demo-user-003',
+                  message_type: 'text',
+                  reply_to: null,
+                  created_at: new Date(Date.now() - 1 * 3600000).toISOString(),
+                  reactions: [
+                    { emoji: '🙏', users: ['demo-user-001'] },
+                  ],
+                },
               ])
 
               toast.success(isRTL ? 'مرحبًا بك في النسخة التجريبية!' : 'Welcome to the demo!')

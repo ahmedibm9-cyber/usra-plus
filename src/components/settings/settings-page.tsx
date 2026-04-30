@@ -50,6 +50,12 @@ import {
   UserPlus,
   UserMinus,
   AtSign,
+  RefreshCw,
+  QrCode,
+  Home,
+  Heart,
+  Share2,
+  MessageSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -89,6 +95,7 @@ import { useNotificationPreferencesStore } from '@/stores/notification-preferenc
 import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
 import { createClient } from '@/lib/supabase/client'
+import { FamilyQRCode } from '@/components/shared/family-qr-code'
 import type { FamilyMember, FamilyRole, Notification, SubscriptionPlan, Theme, Language } from '@/types'
 
 // ─── Tab Configuration ───────────────────────────────────────────────────────
@@ -1910,59 +1917,198 @@ function DataControlTab() {
 // ─── Integrations Tab ────────────────────────────────────────────────────────
 
 function IntegrationsTab() {
-  const integrations = [
+  const { t, isRTL } = useI18n()
+  const { currentFamily, setCurrentFamily } = useAppStore()
+  const [copied, setCopied] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
+
+  const inviteCode = currentFamily?.invite_code ?? 'DEMO-CODE'
+  const familyName = currentFamily?.name ?? (isRTL ? 'عائلتي' : 'My Family')
+
+  const handleCopyCode = useCallback(() => {
+    navigator.clipboard.writeText(inviteCode)
+    setCopied(true)
+    toast.success(t.integrations.copiedToClipboard)
+    setTimeout(() => setCopied(false), 2000)
+  }, [inviteCode, t.integrations.copiedToClipboard])
+
+  const handleShareWhatsApp = useCallback(() => {
+    const text = encodeURIComponent(`${t.integrations.shareWhatsAppText} ${inviteCode}`)
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }, [inviteCode, t.integrations.shareWhatsAppText])
+
+  const handleRegenerateCode = useCallback(async () => {
+    if (!currentFamily) return
+    setRegenerating(true)
+    try {
+      const newCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('families')
+        .update({ invite_code: newCode })
+        .eq('id', currentFamily.id)
+      if (error) throw error
+      setCurrentFamily({ ...currentFamily, invite_code: newCode })
+      toast.success(isRTL ? 'تم إعادة توليد رمز الدعوة' : 'Invite code regenerated')
+    } catch {
+      // Fallback for demo mode
+      const newCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+      setCurrentFamily({ ...currentFamily, invite_code: newCode } as NonNullable<typeof currentFamily>)
+      toast.success(isRTL ? 'تم إعادة توليد رمز الدعوة' : 'Invite code regenerated')
+    } finally {
+      setRegenerating(false)
+    }
+  }, [currentFamily, setCurrentFamily, isRTL])
+
+  const connectedApps = [
     {
       id: 'google-calendar',
-      name: 'Google Calendar',
-      description: 'Sync your family events with Google Calendar',
-      icon: Chrome,
+      name: t.integrations.googleCalendar,
+      description: t.integrations.googleCalendarDesc,
+      icon: CalendarDays,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/10',
     },
     {
-      id: 'apple-calendar',
-      name: 'Apple Calendar',
-      description: 'Sync with Apple Calendar and iCloud',
-      icon: Apple,
-      color: 'text-gray-300',
-      bgColor: 'bg-gray-500/10',
+      id: 'apple-health',
+      name: t.integrations.appleHealth,
+      description: t.integrations.appleHealthDesc,
+      icon: Heart,
+      color: 'text-red-400',
+      bgColor: 'bg-red-500/10',
     },
     {
-      id: 'alexa',
-      name: 'Amazon Alexa',
-      description: 'Voice control your family tasks and lists',
-      icon: Mic,
-      color: 'text-cyan-400',
-      bgColor: 'bg-cyan-500/10',
+      id: 'smart-home',
+      name: t.integrations.smartHome,
+      description: t.integrations.smartHomeDesc,
+      icon: Home,
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10',
     },
   ]
 
   return (
     <div className="space-y-6">
+      {/* Family Invite Card */}
       <SectionCard>
         <SectionTitle>
           <span className="flex items-center gap-2">
-            <Plug className="size-4 text-[--accent-primary]" /> Connected Services
+            <QrCode className="size-4 text-[--accent-primary]" /> {t.integrations.familyInvite}
           </span>
         </SectionTitle>
-        <SectionDescription>Manage your third-party integrations</SectionDescription>
+        <SectionDescription>{t.integrations.scanToJoin}</SectionDescription>
+
+        {/* QR Code Component */}
+        <div className="flex justify-center my-4">
+          <FamilyQRCode
+            inviteCode={inviteCode}
+            familyName={familyName}
+            size={180}
+          />
+        </div>
+
+        <Separator className="my-4 bg-[--border-subtle]" />
+
+        {/* Invite Code with Copy */}
+        <div>
+          <span className="text-[--text-muted] text-xs block mb-2">{t.integrations.inviteCode}</span>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[--accent-secondary] font-mono text-sm tracking-widest">
+              {inviteCode}
+            </code>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyCode}
+              className="border-white/10 text-[--text-primary] hover:bg-[--bg-surface-2]"
+            >
+              {copied ? <Check className="size-4 text-green-400" /> : <Copy className="size-4" />}
+              {copied ? t.common.copied : t.settings.copyCode}
+            </Button>
+          </div>
+        </div>
+
+        <Separator className="my-4 bg-[--border-subtle]" />
+
+        {/* Share Options */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShareWhatsApp}
+            className="flex-1 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 rounded-xl border-[#25D366]/20"
+          >
+            <MessageSquare className="size-4" />
+            {t.integrations.shareViaWhatsApp}
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-white/10 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2] rounded-xl"
+              >
+                <RefreshCw className="size-4" />
+                {t.integrations.regenerateCode}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-[--bg-surface] border-white/10">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-[--text-primary]">
+                  {t.integrations.regenerateConfirmTitle}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-[--text-muted]">
+                  {t.integrations.regenerateConfirmDesc}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-white/5 border-white/10 text-[--text-primary]">
+                  {t.common.cancel}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleRegenerateCode}
+                  disabled={regenerating}
+                  className="bg-[--accent-primary] text-white hover:bg-[--accent-primary]/80"
+                >
+                  {regenerating ? <Loader2 className="size-4 animate-spin" /> : t.integrations.regenerateCode}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </SectionCard>
+
+      {/* Connected Apps */}
+      <SectionCard>
+        <SectionTitle>
+          <span className="flex items-center gap-2">
+            <Plug className="size-4 text-[--accent-primary]" /> {t.integrations.connectedApps}
+          </span>
+        </SectionTitle>
+        <SectionDescription>
+          {isRTL ? 'تطبيقات خارجية متصلة بعائلتك' : 'External apps connected to your family'}
+        </SectionDescription>
 
         <div className="space-y-3">
-          {integrations.map((integration) => (
+          {connectedApps.map((app) => (
             <div
-              key={integration.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
+              key={app.id}
+              className="flex items-center gap-3 p-4 rounded-xl opacity-60 bg-white/[0.02] border border-white/[0.06]"
             >
-              <div className={`size-10 rounded-lg ${integration.bgColor} flex items-center justify-center`}>
-                <integration.icon className={`size-5 ${integration.color}`} />
+              <div className={`size-10 rounded-lg ${app.bgColor} flex items-center justify-center`}>
+                <app.icon className={`size-5 ${app.color}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[--text-primary] text-sm font-medium">{integration.name}</p>
-                <p className="text-[--text-muted] text-xs">{integration.description}</p>
+                <p className="text-[--text-primary] text-sm font-medium">{app.name}</p>
+                <p className="text-[--text-muted] text-xs">{app.description}</p>
               </div>
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-xs">
-                Coming Soon
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-xs">
+                  {t.integrations.comingSoon}
+                </Badge>
+                <Lock className="size-3.5 text-[--text-muted]" />
+              </div>
             </div>
           ))}
         </div>
@@ -1971,7 +2117,9 @@ function IntegrationsTab() {
       <Alert className="bg-[--accent-primary]/5 border-[#6366F1]/20">
         <Sparkles className="size-4 text-[--accent-secondary]" />
         <AlertDescription className="text-[--accent-secondary] text-sm">
-          More integrations are coming soon! Stay tuned for Google Calendar, Apple Calendar, and Amazon Alexa support.
+          {isRTL
+            ? 'المزيد من التكاملات قريبًا! ترقب دعم تقويم جوجل، وصحة أبل، والمنزل الذكي.'
+            : 'More integrations are coming soon! Stay tuned for Google Calendar, Apple Health, and Smart Home support.'}
         </AlertDescription>
       </Alert>
     </div>

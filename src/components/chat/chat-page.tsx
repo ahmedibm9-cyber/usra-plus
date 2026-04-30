@@ -16,6 +16,7 @@ import {
   Mic,
   Play,
   Pause,
+  Plus,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -31,6 +32,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+const QUICK_EMOJIS = ['👍', '❤️', '😂', '🎉', '😢', '🙏']
 
 interface MessageGroup {
   label: string
@@ -255,6 +258,7 @@ export function ChatPage() {
     setSearchQuery,
     setNewMessage,
     getFilteredMessages,
+    toggleReaction,
   } = useChatStore()
 
   const {
@@ -272,6 +276,7 @@ export function ChatPage() {
   const [showSearch, setShowSearch] = useState(false)
   const [showScrollBottom, setShowScrollBottom] = useState(false)
   const [showDemoTyping, setShowDemoTyping] = useState(false)
+  const [activePickerMsgId, setActivePickerMsgId] = useState<string | null>(null)
 
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false)
@@ -581,6 +586,26 @@ export function ChatPage() {
   // Determine if send button or mic button should show
   const showSendButton = newMessage.trim().length > 0
 
+  // Handle emoji reaction
+  const handleReaction = useCallback((messageId: string, emoji: string) => {
+    if (!userId) return
+    toggleReaction(messageId, emoji, userId)
+    setActivePickerMsgId(null)
+  }, [userId, toggleReaction])
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    if (!activePickerMsgId) return
+    const handleClickOutside = () => setActivePickerMsgId(null)
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside)
+    }, 0)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [activePickerMsgId])
+
   return (
     <div className="flex flex-col h-full w-full bg-[#0B0B0F]">
       {/* Header */}
@@ -731,7 +756,7 @@ export function ChatPage() {
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.2 }}
-                          className={`flex gap-2.5 mb-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${
+                          className={`group relative flex gap-2.5 mb-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${
                             isConsecutive ? 'mt-0.5' : 'mt-3'
                           }`}
                         >
@@ -779,37 +804,113 @@ export function ChatPage() {
                               </div>
                             )}
 
-                            {/* Voice message bubble */}
-                            {isVoice ? (
-                              <div
-                                className={`
-                                  rounded-2xl inline-block
-                                  ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
-                                `}
+                            {/* Message content + add reaction button */}
+                            <div className="relative">
+                              {/* Voice message bubble */}
+                              {isVoice ? (
+                                <div
+                                  className={`
+                                    rounded-2xl inline-block
+                                    ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'}
+                                  `}
+                                >
+                                  <VoiceMessageBubble
+                                    msg={msg}
+                                    isOwn={isOwn}
+                                    isRTL={isRTL}
+                                    voiceMessageLabel={t.chat.voiceMessage}
+                                    durationLabel={t.chat.duration}
+                                  />
+                                </div>
+                              ) : (
+                                /* Text message bubble */
+                                <div
+                                  className={`
+                                    rounded-2xl px-4 py-2.5 inline-block
+                                    ${
+                                      isOwn
+                                        ? 'bg-[#6366F1] text-white rounded-br-md'
+                                        : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
+                                    }
+                                  `}
+                                >
+                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                                    {msg.content}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Add reaction button - appears on hover */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setActivePickerMsgId(
+                                    activePickerMsgId === msg.id ? null : msg.id
+                                  )
+                                }}
+                                className={`opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-[#6B7280] absolute top-1/2 -translate-y-1/2 z-10 ${
+                                  isOwn ? '-left-8 rtl:-right-8 rtl:left-auto' : '-right-8 rtl:-left-8 rtl:right-auto'
+                                }`}
+                                aria-label={t.chat.addReaction}
                               >
-                                <VoiceMessageBubble
-                                  msg={msg}
-                                  isOwn={isOwn}
-                                  isRTL={isRTL}
-                                  voiceMessageLabel={t.chat.voiceMessage}
-                                  durationLabel={t.chat.duration}
-                                />
-                              </div>
-                            ) : (
-                              /* Text message bubble */
-                              <div
-                                className={`
-                                  rounded-2xl px-4 py-2.5 inline-block
-                                  ${
-                                    isOwn
-                                      ? 'bg-[#6366F1] text-white rounded-br-md'
-                                      : 'bg-[#111117] border border-white/[0.08] text-[#E5E7EB] rounded-bl-md'
-                                  }
-                                `}
-                              >
-                                <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                                  {msg.content}
-                                </p>
+                                <Plus className="w-3 h-3" />
+                              </button>
+
+                              {/* Emoji picker */}
+                              <AnimatePresence>
+                                {activePickerMsgId === msg.id && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.9, y: 4 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.9, y: 4 }}
+                                    transition={{ duration: 0.15 }}
+                                    className={`absolute z-20 top-full mt-1 ${
+                                      isOwn ? 'right-0 rtl:right-auto rtl:left-0' : 'left-0 rtl:left-auto rtl:right-0'
+                                    }`}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <div className="bg-[var(--bg-surface,#111117)] border border-white/[0.08] rounded-xl p-1.5 shadow-xl flex items-center gap-0.5">
+                                      {QUICK_EMOJIS.map((emoji) => (
+                                        <button
+                                          key={emoji}
+                                          onClick={() => handleReaction(msg.id, emoji)}
+                                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.08] transition-colors text-base"
+                                        >
+                                          {emoji}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+
+                            {/* Reaction pills */}
+                            {msg.reactions && msg.reactions.length > 0 && (
+                              <div className={`flex flex-wrap gap-1 mt-1 ${isOwn ? 'justify-end mr-1' : 'justify-start ml-1'}`}>
+                                {msg.reactions.map((reaction) => {
+                                  const isActive = userId ? reaction.users.includes(userId) : false
+                                  return (
+                                    <motion.button
+                                      key={reaction.emoji}
+                                      initial={{ scale: 0.6, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      transition={{ type: 'spring', stiffness: 500, damping: 25, duration: 0.2 }}
+                                      onClick={() => handleReaction(msg.id, reaction.emoji)}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-all cursor-pointer ${
+                                        isActive
+                                          ? 'bg-[#6366F1]/10 border-[#6366F1]/30 hover:bg-[#6366F1]/20'
+                                          : 'bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.08]'
+                                      }`}
+                                      aria-label={`${reaction.emoji} ${reaction.users.length}`}
+                                    >
+                                      <span className="text-sm">{reaction.emoji}</span>
+                                      <span className={`${isActive ? 'text-[#A78BFA]' : 'text-[#6B7280]'}`}>
+                                        {reaction.users.length}
+                                      </span>
+                                    </motion.button>
+                                  )
+                                })}
                               </div>
                             )}
 

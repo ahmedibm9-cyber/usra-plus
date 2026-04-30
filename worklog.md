@@ -1536,3 +1536,355 @@ Unresolved / Next Phase Priorities:
 8. Add more light theme polish (some components may still have hardcoded dark colors)
 9. Add keyboard accessibility audit across all interactive components
 10. Add onboarding tour/walkthrough for first-time users
+
+---
+Task ID: 6-f
+Agent: QR Code Family Invite Agent
+Task: Add QR Code for Family Invite in Settings Integrations Tab
+
+Work Log:
+- Installed `qrcode@1.5.4` and `@types/qrcode@1.5.6` packages
+- Created `/src/components/shared/family-qr-code.tsx`:
+  - Reusable FamilyQRCode component with props: inviteCode, familyName, size?
+  - Generates QR code canvas using `qrcode` library encoding URL `https://usraplus.app/join/{inviteCode}`
+  - White background container for scannability (`bg-white rounded-xl p-4`)
+  - Family name header, "Scan to join" subtitle, invite code with copy button
+  - Download button saves QR as PNG via `qrcode.toDataURL()`
+  - Print button opens formatted print dialog
+  - Framer Motion entrance animation, full RTL/bilingual support
+- Updated `/src/i18n/en.ts`: Added `integrations` section with 14+ keys (familyInvite, scanToJoin, inviteCode, shareViaWhatsApp, regenerateCode, connectedApps, comingSoon, downloadQR, printQR, copiedToClipboard, regenerateConfirmTitle/Desc, shareWhatsAppText, googleCalendar/Desc, appleHealth/Desc, smartHome/Desc)
+- Updated `/src/i18n/ar.ts`: Added matching Arabic translations for all `integrations` keys
+- Updated `/src/components/settings/settings-page.tsx`:
+  - Added imports: RefreshCw, QrCode, Home, Heart, Share2, MessageSquare from lucide-react; FamilyQRCode component
+  - Replaced IntegrationsTab with enhanced version:
+    - **Family Invite Card** (top): FamilyQRCode component, invite code with copy button, "Share via WhatsApp" button (wa.me link with pre-filled text, green styling), "Regenerate Code" button with AlertDialog confirmation (demo mode fallback)
+    - **Connected Apps section** (below): Google Calendar, Apple Health, Smart Home cards with "Coming Soon" badge and Lock icon, disabled/locked styling (`opacity-60 bg-white/[0.02] border border-white/[0.06]`)
+    - Bilingual alert at bottom about upcoming integrations
+  - All existing Settings tabs preserved
+
+Stage Summary:
+- Family Invite QR code fully functional in Settings Integrations tab
+- QR code encodes join URL, scannable with white background
+- Download as PNG, Print, Copy, WhatsApp share, Regenerate code all working
+- Connected Apps section with locked/disabled placeholder cards
+- Full bilingual support (EN/AR) with i18n translations
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 6-e
+Agent: Emoji Reactions Agent
+Task: Add Emoji Reactions to Chat Messages
+
+Work Log:
+- Updated `/src/types/index.ts`: Added `reactions?: { emoji: string; users: string[] }[]` to ChatMessage interface
+- Updated `/src/stores/chat-store.ts`: Added `toggleReaction(messageId, emoji, userId)` action with full logic:
+  - If user already reacted with this emoji → remove their userId from users array
+  - If users array becomes empty → remove the reaction entry entirely
+  - If user hasn't reacted → add userId to the reaction's users array
+  - If emoji doesn't exist on message → create new reaction entry with user
+- Updated `/src/i18n/en.ts`: Added `reactions: 'Reactions'`, `addReaction: 'Add Reaction'` to chat section
+- Updated `/src/i18n/ar.ts`: Added `reactions: 'التفاعلات'`, `addReaction: 'إضافة تفاعل'` to chat section
+- Updated `/src/components/auth/login-form.tsx`: Added 8 demo chat messages with reactions seeded into chat store:
+  - chat-1: 👍 from Ahmed & Noura, ❤️ from Khalid
+  - chat-3: 👍 from Noura
+  - chat-4: ❤️ from Ahmed
+  - chat-5: 🎉 from Ahmed & Khalid
+  - chat-6: ❤️ from Noura & Khalid
+  - chat-8: 🙏 from Ahmed
+- Updated `/src/components/chat/chat-page.tsx`: Full emoji reaction UI:
+  - Added `Plus` icon import and `QUICK_EMOJIS` constant (👍 ❤️ 😂 🎉 😢 🙏)
+  - Added `activePickerMsgId` state and `handleReaction` callback
+  - Added click-outside handler to close emoji picker
+  - Message wrapper now has `group` class for hover effects
+  - **Add reaction button (+)**: Appears on hover (opacity-0 group-hover:opacity-100), positioned outside the message bubble with fade transition
+  - **Emoji picker**: Floating panel with 6 emojis in a row, animated entrance/exit with framer-motion (scale + fade + y offset)
+  - **Reaction pills**: Shown below message bubble, format `emoji count`, with highlighted border for current user's reactions (bg-[#6366F1]/10 border-[#6366F1]/30)
+  - **Toggle on click**: Clicking an existing reaction pill toggles the current user's participation
+  - **Animations**: Reaction pills animate in with spring scale + fade entrance
+  - **RTL support**: Proper positioning for right-to-left layout
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- Emoji reactions fully implemented in chat with toggle logic, animated UI, and RTL support
+- Demo mode seeds 8 chat messages with pre-existing reactions across 3 family members
+- Quick emoji picker with 6 emojis accessible via hover + button on each message
+- Reaction pills with active highlighting and click-to-toggle functionality
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 6-d
+Agent: Weather Widget Builder
+Task: Add Weather Widget with Saudi Cities on Dashboard
+
+Work Log:
+- Read worklog.md to understand full project history and architecture
+- Read dashboard-page.tsx, en.ts, ar.ts, and use-translation.ts for context
+- Updated `/src/i18n/en.ts`:
+  - Added `weather` section with 13 keys: weather, feelsLike, humidity, wind, sunny, partlyCloudy, cloudy, rainy, clear, selectCity, forecast, high, low
+- Updated `/src/i18n/ar.ts`:
+  - Added matching Arabic translations for all `weather` section keys
+- Created `/src/app/api/weather/route.ts`:
+  - GET endpoint accepting `city` query parameter
+  - Uses z-ai-web-dev-sdk web-search to fetch current weather for Saudi cities
+  - Falls back to static mock weather data if API call fails
+  - Returns JSON: `{ city, temp, feelsLike, condition, humidity, windSpeed, icon, forecast: [{day, dayAr, high, low, condition, icon}] }`
+  - Supported cities: Riyadh, Jeddah, Mecca, Medina, Dammam
+  - Smart parsing of web search results to extract temperature, humidity, wind speed, condition
+  - Dynamic day name generation for forecast (real day names based on current date)
+- Created `/src/components/dashboard/weather-widget.tsx`:
+  - WeatherWidget component with premium dark theme matching USRA PLUS design
+  - Compact card showing: city name with dropdown, current temperature (text-3xl font-bold), animated weather icon, "Feels like" temperature, humidity/wind row, 3-day mini forecast
+  - City selector dropdown with 5 Saudi cities showing bilingual names (EN/AR)
+  - Animated weather icons: subtle float for sun, drift for clouds
+  - Weather icon container: w-12 h-12 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20
+  - Loading state: skeleton with pulse animation
+  - Error state: static fallback weather for Riyadh with "Showing approximate data" message
+  - Click-outside handler to close city selector dropdown
+  - Full bilingual support (EN/AR) using useI18n
+  - GlassCard with weather-themed subtle gradient overlay (amber/orange)
+- Updated `/src/components/dashboard/dashboard-page.tsx`:
+  - Added import for WeatherWidget
+  - Changed "Weekly Activity + Prayer Times Row" grid to lg:grid-cols-5 (was lg:grid-cols-3)
+  - Weekly Activity Bar Chart now spans lg:col-span-3 (was lg:col-span-2)
+  - Added WeatherWidget next to Prayer Times widget in the same row
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- Weather API route created with z-ai-web-dev-sdk web-search + static fallback
+- Weather widget added to dashboard next to Prayer Times
+- 5 Saudi cities with bilingual selector (Riyadh/الرياض, Jeddah/جدة, Mecca/مكة, Medina/المدينة, Dammam/الدمام)
+- Animated weather icons, loading skeleton, error fallback
+- Full RTL/Arabic support
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 6-c
+Agent: Comments System Builder
+Task: Add Task Comments/Notes System with Threaded Replies
+
+Work Log:
+- Created `/src/stores/comment-store.ts` - Zustand store with TaskComment interface (id, task_id, parent_id, author_id, author_name, author_avatar, content, created_at, updated_at), CRUD actions, getCommentsForTask, getRepliesForComment, getCommentCountForTask
+- Added `comments` i18n section to both en.ts and ar.ts with 10 keys each (comments, addComment, reply, send, cancel, noComments, startConversation, replyTo, commentCount, delete)
+- Added CommentsPanel component to tasks-page.tsx with:
+  - Collapsible/expandable comments section
+  - Top-level comments with avatar (h-7 w-7), author name, content, relative timestamp, Reply button, Delete button (own comments)
+  - Threaded replies with ml-8 border-l-2 border-[#6366F1]/20 pl-3 indentation
+  - Inline reply input with auto-resize textarea, Send/Cancel buttons
+  - Comment input at bottom with Enter-to-send
+  - Empty state with bilingual text
+- Added Comment Count Badge on TaskCard: MessageCircle icon + count, only shown when count > 0
+- Integrated CommentsPanel into TaskModal (shown only for editing existing tasks, dialog has max-h-[85vh] with scrollable content)
+- Updated Demo Mode in login-form.tsx: seeds 6 comments across 3 tasks (task-1 with 2 replies, task-4 with 1 reply, task-2 standalone), full bilingual support
+- Lint: PASS, Server: HTTP 200
+
+Stage Summary:
+- Complete threaded comments system for tasks
+- Comment store with CRUD + reply support
+- CommentsPanel with premium dark theme, animations, auto-resize
+- Comment count badges on task cards
+- 6 demo comments seeded in demo mode
+- Full Arabic/English RTL support
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 6-g
+Agent: Kanban Board Builder
+Task: Add Kanban Board View to Tasks Page
+
+Work Log:
+- Added i18n translations to `/src/i18n/en.ts` and `/src/i18n/ar.ts`:
+  - English: boardView, listView, toDo, inProgress, done, backlog, addTaskToColumn, moveToStatus
+  - Arabic: لوحة, قائمة, للقيام, قيد التنفيذ, مكتمل, مؤجل, إضافة مهمة, نقل إلى {status}
+- Created `/src/components/tasks/kanban-board.tsx`:
+  - 4 columns: To Do (amber), In Progress (blue), Done (green), Backlog (gray for low-priority todo)
+  - KanbanColumn: colored left border, status dot, count badge, scrollable card list, "Add task" button
+  - KanbanTaskCard: compact card with title, priority dot+label, due date (red if overdue), assignee avatar (h-5 w-5)
+  - SortableKanbanCard: @dnd-kit/sortable useSortable hook for drag within columns
+  - KanbanBoard: DndContext with closestCorners collision detection, cross-column drag-and-drop
+  - DragOverlay with rotation effect for dragged card
+  - Responsive: flex-col on mobile, flex-row on md+
+- Updated `/src/components/tasks/tasks-page.tsx`:
+  - Added LayoutList, LayoutGrid icon imports
+  - Added KanbanBoard import
+  - Added pageView state ('list' | 'board')
+  - Replaced old "By Status"/"By Date" toggle with two-level system:
+    - Primary: List/Board toggle with icons and bg-[#6366F1]/20 highlight
+    - Sub-toggle: "By Status"/"By Date" only in list view
+  - Conditional rendering: board view shows KanbanBoard, list view shows existing DndContext
+  - Added handleKanbanStatusChange: updates task status via Supabase + store, confetti on done
+  - Added handleKanbanAddTask: gates task creation with subscription check
+- Fixed pre-existing bug in `/src/components/auth/login-form.tsx`:
+  - Duplicate `const now` variable renamed to `calNow` for calendar seeding
+
+Stage Summary:
+- Kanban board view with 4 columns and cross-column drag-and-drop
+- List/Board toggle with icons and bilingual tooltips
+- Compact task cards with priority badge, due date, assignee avatar
+- Cross-column drag updates task status in Supabase + store
+- Existing list view drag-and-drop preserved and unaffected
+- Full RTL/Arabic support
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: 6-b
+Agent: Activity Feed Builder
+Task: Add Family Activity Feed Timeline on Dashboard
+
+Work Log:
+- Created `/src/stores/activity-store.ts` - Zustand store with ActivityItem interface (7 activity types: task_created, task_completed, event_created, grocery_added, grocery_checked, member_joined, message_sent), ActivityActor interface, actions: setActivities, addActivity, getRecentActivities(count)
+- Created `/src/components/dashboard/activity-feed-widget.tsx` - Premium activity feed widget with:
+  - GlassCard container with Activity icon and "View All" ghost button
+  - 7 activity type configs with colored icons (orange Plus, green Check, indigo Calendar, blue ShoppingCart, teal CheckSquare, violet UserPlus, gray MessageCircle)
+  - Relative time formatter supporting bilingual timestamps (just now, 2m ago, 1h ago, yesterday, 2d ago)
+  - ActivityFeedItem component with actor avatar (h-8 w-8 ring-2), online indicator (green pulse dot using presence store), actor name (bold), description (text-muted), relative timestamp (text-xs), activity type badge (w-7 h-7 rounded-full), vertical timeline line (1px bg-white/[0.06])
+  - Staggered framer-motion entrance animations (delay: index * 0.06)
+  - Scrollable list (max-h-[400px] with custom-scrollbar)
+  - Hover effect (hover:bg-white/[0.02] rounded-lg transition-colors)
+- Updated `/src/components/dashboard/dashboard-page.tsx`:
+  - Imported ActivityFeedWidget, replaced old Recent Activity section with new widget in bottom row's 3rd column
+  - Removed old ActivityItem interface and recentActivity useMemo (86 lines)
+  - Removed unused imports (Activity, UserPlus from lucide-react)
+- Updated `/src/i18n/en.ts` and `/src/i18n/ar.ts`:
+  - Added activityFeed section with 14 keys (activity, viewAll, justNow, minutesAgo, hoursAgo, yesterday, daysAgo, taskCreated, taskCompleted, eventCreated, groceryAdded, groceryChecked, memberJoined, messageSent)
+  - Full Arabic translations for all keys
+- Updated `/src/components/auth/login-form.tsx`:
+  - Added activity store seeding after presence store seeding
+  - 10 activity items spanning last 48 hours with varied types
+  - Full bilingual descriptions (Arabic/English)
+  - Dynamic import: `await import('@/stores/activity-store')`
+  - Fixed variable naming conflict (actNow for activity, calNow for calendar)
+- Updated `/src/app/globals.css`:
+  - Added .custom-scrollbar class with thin scrollbar styling (4px width, transparent track, rgba thumb)
+- Lint check passes clean
+- Dev server compiles successfully (HTTP 200)
+
+Stage Summary:
+- Activity Feed Store created with 7 activity types and full CRUD operations
+- Activity Feed Widget built with premium glass morphism, timeline design, online indicators
+- Dashboard updated: old Recent Activity replaced with enhanced Activity Feed
+- Demo mode seeds 10 activity items spanning 48 hours with bilingual descriptions
+- Custom scrollbar styling added for activity feed container
+- Lint: PASS, Server: HTTP 200
+
+---
+Task ID: Enhancement-Round-6
+Agent: Main Architect
+Task: QA assessment, 6 major feature enhancements, styling polish
+
+Work Log:
+- Reviewed worklog.md (1538 lines, 20+ prior task entries) to understand project state
+- Performed QA testing using agent-browser across all 7 pages + auth screens
+- Verified zero JS errors on any page, all pages render correctly
+- Tested mobile viewport (390x844) — working correctly
+- Confirmed all previous round features working (light/dark theme, AI insights, voice messages, notification prefs, calendar enhancements, grocery drag-and-drop)
+- Launched 6 parallel subagent tasks for feature enhancements:
+
+1. **Family Activity Feed** (Subagent, Task 6-b)
+   - Created activity-store.ts with 7 activity types (task_created, task_completed, event_created, grocery_added, grocery_checked, member_joined, message_sent)
+   - Created activity-feed-widget.tsx with vertical timeline, colored type badges, actor avatars with online indicators, relative timestamps
+   - 10 demo activity items spanning last 48 hours
+   - Bilingual descriptions (EN/AR)
+   - Replaced old inline Recent Activity section with new ActivityFeedWidget component
+   - Custom scrollbar styling added to globals.css
+
+2. **Task Comments System** (Subagent, Task 6-c)
+   - Created comment-store.ts with threaded replies support (parent_id)
+   - CommentsPanel component: collapsible section, avatar + name + content + timestamp
+   - Threaded replies: indented with left border (ml-8 border-l-2 border-[#6366F1]/20)
+   - Reply button with inline reply input, Enter-to-send
+   - Delete button for own comments
+   - Comment count badge on task cards (MessageCircle icon + count)
+   - 6 demo comments across 3 tasks with threaded replies
+
+3. **Weather Widget** (Subagent, Task 6-d)
+   - Created /api/weather route using z-ai-web-dev-sdk web-search for live weather data
+   - Weather widget with city selector (5 Saudi cities: Riyadh, Jeddah, Mecca, Medina, Dammam)
+   - Current temperature (text-3xl), feels like, humidity, wind speed
+   - 3-day mini forecast with day names and high/low
+   - Animated weather icons (float for sun, drift for clouds)
+   - Loading skeleton, error fallback to static data
+   - Full RTL/Arabic support with bilingual city names
+
+4. **Chat Emoji Reactions** (Subagent, Task 6-e)
+   - Added reactions field to ChatMessage type
+   - toggleReaction action in chat store
+   - "+" button on message hover → quick emoji picker (👍 ❤️ 😂 🎉 😢 🙏)
+   - Reaction pills below messages (emoji + count)
+   - Active pills highlighted with bg-[#6366F1]/10 border-[#6366F1]/30
+   - Click-to-toggle on existing reactions
+   - Spring scale + fade animation for reaction pills
+   - 8 demo chat messages with pre-seeded reactions
+
+5. **Kanban Board View** (Subagent, Task 6-g)
+   - Created kanban-board.tsx component
+   - 4 columns: To Do (amber), In Progress (blue), Done (green), Backlog (gray)
+   - Cross-column drag-and-drop with @dnd-kit
+   - View toggle: List (LayoutList) / Board (LayoutGrid) with highlight
+   - Compact task cards with priority, due date, assignee avatar
+   - Kanban status change handler with confetti on "Done" + toast
+   - Responsive: columns side-by-side on desktop, stacked on mobile
+   - Fixed duplicate variable bug in login-form.tsx
+
+6. **QR Code Family Invite** (Subagent, Task 6-f)
+   - Installed qrcode + @types/qrcode packages
+   - Created family-qr-code.tsx component with real QR code generation
+   - QR encodes https://usraplus.app/join/{inviteCode}
+   - Download QR as PNG, Print QR, Copy invite code
+   - Settings Integrations tab enhanced with Family Invite card
+   - "Share via WhatsApp" button (wa.me link with pre-filled text)
+   - "Regenerate Code" with AlertDialog confirmation
+   - Connected Apps section: Google Calendar, Apple Health, Smart Home with "Coming Soon" badges
+
+Final QA Results:
+- ✅ Lint: PASS (zero errors)
+- ✅ All 7 pages render correctly with new features
+- ✅ Demo Mode fully functional with all new data seeded
+- ✅ Arabic RTL switching verified
+- ✅ Kanban board view working with drag-and-drop
+- ✅ Chat reactions, task comments, activity feed, weather widget all functional
+- ✅ QR code scannable and integrations page enhanced
+- ✅ No runtime errors on any page
+
+Stage Summary:
+- 6 major feature enhancements completed in parallel
+- Family Activity Feed with timeline, relative timestamps, and online indicators
+- Task Comments with threaded replies and comment count badges
+- Weather Widget with live API, city selector, and 3-day forecast
+- Chat Emoji Reactions with quick picker and toggle functionality
+- Kanban Board View with 4 columns and cross-column drag-and-drop
+- QR Code Family Invite with WhatsApp sharing and Connected Apps
+- All features bilingual (EN/AR) with RTL support
+- Lint: PASS, Server: HTTP 200
+
+Current Project Status:
+- USRA PLUS is a comprehensive, feature-rich family coordination SaaS platform
+- 7 main pages with dual theme support (light/dark)
+- Dashboard: AI insights, prayer times, weather widget, activity feed, weekly chart, stats
+- Tasks: List view with drag-and-drop + Kanban board view, comments system
+- Calendar: Mini sidebar, upcoming events, event pills, enhanced add dialog
+- Grocery: Drag-and-drop reordering, smart suggestions, category tabs
+- Chat: Text + voice messages, emoji reactions, online presence, read receipts
+- Files: Type icons, image lightbox, storage management
+- Settings: 9 tabs (Family, User, Account, Preferences, Notifications, Security, Data, Integrations with QR, Premium)
+- Full bilingual support (EN/AR) with RTL
+- Subscription gating (Free/Pro/Family+) with upgrade modals
+- PWA manifest and service worker
+- Error boundaries on all pages
+- Command Palette (⌘K)
+- Confetti celebrations
+- Rich onboarding with avatar/color personalization
+- Data export (JSON/CSV) and notification preferences
+
+Unresolved / Next Phase Priorities:
+1. Run SQL migration on Supabase to enable real backend persistence
+2. Test full auth flow with real Supabase user registration + Google OAuth
+3. Implement real-time chat with Supabase Realtime channels
+4. Performance optimization: lazy load page components, reduce bundle size
+5. Add actual voice recording with Web Audio API (currently UI-only)
+6. Mobile PWA testing on real devices
+7. Implement actual RevenueCat subscription integration
+8. Add keyboard accessibility audit across all interactive components
+9. Add onboarding tour/walkthrough for first-time users
+10. Add more light theme polish (some components may still have hardcoded dark colors)

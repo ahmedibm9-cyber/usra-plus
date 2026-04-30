@@ -17,9 +17,7 @@ import {
   ListTodo,
   Calendar,
   ShoppingBag,
-  Activity,
   Home,
-  UserPlus,
   Moon,
   TrendingUp,
   TrendingDown,
@@ -51,6 +49,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { EmptyState } from '@/components/shared/empty-state'
 import { StatCardSkeleton, TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
 import { AISummaryWidget } from '@/components/dashboard/ai-summary-widget'
+import { WeatherWidget } from '@/components/dashboard/weather-widget'
+import { ActivityFeedWidget } from '@/components/dashboard/activity-feed-widget'
 
 // ─── Sub-components ─────────────────────────────────────────────
 
@@ -245,17 +245,6 @@ function formatEventTime(dateStr: string): string {
 
 // EmptyState is now imported from shared component
 
-// ─── Activity Feed Item Types ───────────────────────────────────
-
-interface ActivityItem {
-  id: string
-  type: 'task_completed' | 'task_created' | 'event_created' | 'grocery_added' | 'member_joined'
-  message: string
-  timestamp: string
-  icon: React.ElementType
-  color: string
-}
-
 // ─── Prayer Times Data (Static - Riyadh) ───────────────────────
 
 const PRAYER_TIMES = [
@@ -413,93 +402,6 @@ export default function DashboardPage() {
   const upcomingEvents = useMemo(() => {
     return events.slice(0, 3)
   }, [events])
-
-  // ─── Recent Activity ────────────────────────────────────────
-
-  const recentActivity: ActivityItem[] = useMemo(() => {
-    const activities: ActivityItem[] = []
-
-    // Recent completed tasks
-    tasks
-      .filter((t) => t.status === 'done' && t.completed_at)
-      .sort((a, b) => parseISO(b.completed_at!).getTime() - parseISO(a.completed_at!).getTime())
-      .slice(0, 2)
-      .forEach((task) => {
-        activities.push({
-          id: `task-done-${task.id}`,
-          type: 'task_completed',
-          message: `"${task.title}" completed`,
-          timestamp: task.completed_at!,
-          icon: CheckCircle2,
-          color: '#22C55E',
-        })
-      })
-
-    // Recent created tasks
-    tasks
-      .sort((a, b) => parseISO(b.created_at).getTime() - parseISO(a.created_at).getTime())
-      .slice(0, 2)
-      .forEach((task) => {
-        if (task.status !== 'done') {
-          activities.push({
-            id: `task-created-${task.id}`,
-            type: 'task_created',
-            message: `"${task.title}" created`,
-            timestamp: task.created_at,
-            icon: ListTodo,
-            color: '#6366F1',
-          })
-        }
-      })
-
-    // Recent events
-    events.slice(0, 2).forEach((event) => {
-      activities.push({
-        id: `event-${event.id}`,
-        type: 'event_created',
-        message: `"${event.title}" upcoming`,
-        timestamp: event.created_at,
-        icon: Calendar,
-        color: '#A78BFA',
-      })
-    })
-
-    // Recent grocery items
-    groceryItems
-      .sort((a, b) => parseISO(b.created_at).getTime() - parseISO(a.created_at).getTime())
-      .slice(0, 2)
-      .forEach((item) => {
-        activities.push({
-          id: `grocery-${item.id}`,
-          type: 'grocery_added',
-          message: `"${item.name}" added to grocery list`,
-          timestamp: item.created_at,
-          icon: ShoppingBag,
-          color: '#F59E0B',
-        })
-      })
-
-    // Member joins
-    familyMembers
-      .sort((a, b) => parseISO(b.joined_at).getTime() - parseISO(a.joined_at).getTime())
-      .slice(0, 1)
-      .forEach((member) => {
-        const name = member.profiles?.first_name || member.nickname || 'A member'
-        activities.push({
-          id: `member-${member.id}`,
-          type: 'member_joined',
-          message: `${name} joined the family`,
-          timestamp: member.joined_at,
-          icon: UserPlus,
-          color: '#22C55E',
-        })
-      })
-
-    // Sort all activities by timestamp
-    return activities
-      .sort((a, b) => parseISO(b.timestamp).getTime() - parseISO(a.timestamp).getTime())
-      .slice(0, 8)
-  }, [tasks, events, groceryItems, familyMembers])
 
   // ─── Productivity Chart Data ────────────────────────────────
 
@@ -753,10 +655,10 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* ─── Weekly Activity + Prayer Times Row ────────────── */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* ─── Weekly Activity + Prayer Times + Weather Row ──── */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {/* Weekly Activity Bar Chart */}
-          <GlassCard delay={0.22} className="p-5 sm:col-span-1 lg:col-span-2">
+          <GlassCard delay={0.22} className="p-5 sm:col-span-1 lg:col-span-3">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[--text-primary]">
                 {isRTL ? 'هذا الأسبوع' : 'This Week'}
@@ -852,6 +754,9 @@ export default function DashboardPage() {
               {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
             </p>
           </GlassCard>
+
+          {/* Weather Widget */}
+          <WeatherWidget />
         </div>
 
         {/* ─── Middle Row: Productivity + Quick Actions ───────── */}
@@ -1185,61 +1090,8 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
 
-          {/* Recent Activity */}
-          <GlassCard delay={0.5} className="p-5 lg:col-span-1">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[--text-primary]">{t.dashboard.recentActivity}</h3>
-              <Activity className="size-4 text-[--text-muted]" />
-            </div>
-            <ScrollArea className="max-h-80">
-              {isLoading ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <Skeleton className="size-8 rounded-lg" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/3" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : recentActivity.length === 0 ? (
-                <EmptyState
-                  icon={Activity}
-                  title="No recent activity"
-                  description="Activity will appear here as your family uses USRA PLUS"
-                />
-              ) : (
-                <div className="space-y-1">
-                  <AnimatePresence>
-                    {recentActivity.map((item, index) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.04 }}
-                        className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-[--bg-surface-2]"
-                      >
-                        <div
-                          className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: `${item.color}15` }}
-                        >
-                          <item.icon className="size-3.5" style={{ color: item.color }} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm text-[--text-primary]">{item.message}</p>
-                          <p className="mt-0.5 text-[10px] text-[--text-muted]/60">
-                            {format(parseISO(item.timestamp), 'MMM d, h:mm a')}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
-            </ScrollArea>
-          </GlassCard>
+          {/* Activity Feed Timeline */}
+          <ActivityFeedWidget />
         </div>
       </div>
     </div>
