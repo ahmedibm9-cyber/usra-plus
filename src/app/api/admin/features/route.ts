@@ -50,11 +50,11 @@ export async function GET(_request: NextRequest) {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', thirtyDaysAgo.toISOString())
 
-      // Tasks completed in last 30 days
+      // Tasks done in last 30 days (tasks.status values: 'todo', 'in_progress', 'done')
       const { count: completedTasks } = await supabase
         .from('tasks')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed')
+        .eq('status', 'done')
         .gte('updated_at', thirtyDaysAgo.toISOString())
 
       // Daily average over last 7 days

@@ -4675,3 +4675,70 @@ Unresolved / Next Phase Priorities:
 3. Test full auth flow with real Supabase user registration
 4. Remove mock data from analytics pages
 5. Mobile responsiveness testing and polish
+
+---
+Task ID: 2-fix-admin-api-routes
+Agent: Admin API Fix Agent
+Task: Fix all admin API route files to work correctly with real Supabase database schema
+
+Work Log:
+- Read all 9 admin API route files to identify schema mismatches
+- Fixed overview/route.ts:
+  - Verified `last_login` column now exists (was previously missing)
+  - Verified `country` column now exists in profiles
+  - Changed source logic: always return `source: 'live'` when data comes from Supabase (previously required 3+ data keys)
+  - Added safety check for plan values in planCounts
+- Fixed users/route.ts:
+  - Removed `plan` and `status` from profiles select — `plan` does NOT exist in profiles table
+  - Added separate query to `subscriptions` table to get user plans (with active status check)
+  - Added plan-based filtering: when `plan` query param is provided, queries subscriptions first to get user IDs, then filters profiles
+  - `name` column works as-is (it's a generated column: first_name + last_name)
+  - `country` column works as-is (exists in profiles)
+  - `status` column exists in profiles, kept in select
+  - family_count enrichment preserved via family_members table
+- Fixed analytics/route.ts:
+  - Changed `tasks.status = 'completed'` → `'done'` (tasks status values: 'todo', 'in_progress', 'done')
+  - Changed `grocery_items.completed = true` → `grocery_items.checked = true`
+  - Removed `getDemoAnalytics()` function with fake numbers (12847 users, $28940 MRR, etc.)
+  - Returns zeros for missing data instead of fake demo numbers
+  - Returns `source: 'live'` when any data comes from Supabase
+- Fixed subscriptions/route.ts:
+  - Changed status tracking from 'trial'/'lifetime' to 'active'/'cancelled'/'expired' (matching actual DB values)
+  - Updated planStatusCounts to use correct status categories
+  - Added paymentHealth section with active/cancelled/expired counts
+  - MRR calculation now uses only active subscriptions
+  - Returns `source: 'live'` when data is available
+- Fixed features/route.ts:
+  - Changed `tasks.status = 'completed'` → `'done'`
+  - Added comment documenting tasks status values
+- Fixed families/route.ts:
+  - Removed `plan` from families select (no `plan` column in families table)
+  - Changed `tasks.status = 'completed'` → `'done'` for completed task counts
+  - Added plan lookup via subscriptions table: queries family_members to get user IDs, then subscriptions to get plans
+  - Assigns highest plan in family as family plan (ranking: free < pro < family_plus)
+  - Plan filter now works through subscriptions → family_members → families chain
+- Fixed support/route.ts:
+  - Added Supabase client connection (was previously returning empty data without DB check)
+  - Returns `source: 'live'` when Supabase is connected (even though support tables may not exist yet)
+  - Preserved empty data structures for when support tables are added later
+- Fixed infrastructure/route.ts:
+  - Verified `last_login` column exists for active connections tracking
+  - Changed `source: 'unavailable'` → `source: 'demo'` for consistency with other routes
+  - Improved error response consistency
+- Fixed route.ts (main admin route):
+  - Removed all fake demo data (12847 users, $28940 MRR, 3256 families, etc.)
+  - Added real Supabase queries for each metric type (overview, users, families, features, subscriptions, infrastructure, support)
+  - Uses `createClient` with service role key
+  - Returns `source: 'live'` when data is from Supabase, `source: 'demo'` when not
+  - `getEmptyMetricData()` function returns zeros instead of fake numbers
+  - `generateTimeSeriesFromDates()` creates time series from actual profile creation dates
+- All admin API routes now consistently return `source: 'live'` when data comes from Supabase
+- Lint passes clean (zero errors)
+- Dev server returns HTTP 200 for all admin API routes
+
+Stage Summary:
+- All 9 admin API route files fixed to work with real Supabase database schema
+- Key fixes: tasks status 'done' (not 'completed'), grocery 'checked' (not 'completed'), plan from subscriptions (not profiles), subscription status values (active/cancelled/expired)
+- All demo/fake data removed — routes return zeros for missing data
+- Source consistently reported as 'live' when data is from Supabase
+- Lint: PASS, Server: HTTP 200 for all routes

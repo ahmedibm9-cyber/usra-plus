@@ -5,6 +5,9 @@ import { createClient } from '@supabase/supabase-js'
 // Queries families table with aggregate metrics
 // Returns: id, name, member_count, plan, tasks_completed_count, last_active, activity_score
 // All data is privacy-safe: aggregate metrics only, no personal content
+// families table has 'created_by' (not 'owner'), NO 'plan' column
+// Plan is fetched from subscriptions table
+// tasks.status = 'done' (not 'completed')
 // When Supabase is unavailable or tables don't exist, returns empty data with source: 'demo'
 
 function getSupabaseAdmin() {
@@ -49,14 +52,54 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Build base query — select only privacy-safe fields
+    // Build base query — families table does NOT have a 'plan' column
+    // families: id, name, created_by, created_at, updated_at
     let query = supabase
       .from('families')
-      .select('id, name, plan, created_at, updated_at', { count: 'exact' })
+      .select('id, name, created_at, updated_at', { count: 'exact' })
 
+    // If filtering by plan, we need to get families via subscriptions
     if (plan) {
-      query = query.eq('plan', plan)
+      // Get user_ids with this plan from subscriptions
+      const { data: subsByPlan, error: subsPlanError } = await supabase
+        .from('subscriptions')
+        .select('user_id')
+        .eq('plan', plan)
+        .eq('status', 'active')
+
+      if (subsPlanError || !subsByPlan || subsByPlan.length === 0) {
+        return NextResponse.json({
+          source: 'live',
+          data: [],
+          total: 0,
+          page,
+          pageSize,
+          hasMore: false,
+        })
+      }
+
+      // Get family_ids those users belong to
+      const userIds = subsByPlan.map(s => s.user_id)
+      const { data: memberships } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .in('user_id', userIds)
+
+      if (!memberships || memberships.length === 0) {
+        return NextResponse.json({
+          source: 'live',
+          data: [],
+          total: 0,
+          page,
+          pageSize,
+          hasMore: false,
+        })
+      }
+
+      const familyIds = memberships.map(m => m.family_id)
+      query = query.in('id', familyIds)
     }
+
     if (search) {
       query = query.ilike('name', `%${search}%`)
     }
@@ -79,10 +122,11 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Enrich with member counts and task completion counts
+    // Enrich with member counts, task completion counts, and plan info
     const familyIds = (families || []).map(f => f.id)
     const memberCounts: Record<string, number> = {}
     const taskCompletionCounts: Record<string, number> = {}
+    const familyPlans: Record<string, string> = {}
 
     if (familyIds.length > 0) {
       // Get member counts
@@ -97,16 +141,49 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Get completed task counts per family
-      const { data: completedTasks } = await supabase
+      // Get done task counts per family (tasks.status = 'done', NOT 'completed')
+      const { data: doneTasks } = await supabase
         .from('tasks')
         .select('family_id')
-        .eq('status', 'completed')
+        .eq('status', 'done')
         .in('family_id', familyIds)
 
-      if (completedTasks) {
-        for (const t of completedTasks) {
+      if (doneTasks) {
+        for (const t of doneTasks) {
           taskCompletionCounts[t.family_id] = (taskCompletionCounts[t.family_id] || 0) + 1
+        }
+      }
+
+      // Get plan info from subscriptions via family members
+      const { data: familyMembersList } = await supabase
+        .from('family_members')
+        .select('family_id, user_id')
+        .in('family_id', familyIds)
+
+      if (familyMembersList && familyMembersList.length > 0) {
+        const userIds = familyMembersList.map(fm => fm.user_id)
+        const { data: subs } = await supabase
+          .from('subscriptions')
+          .select('user_id, plan, status')
+          .in('user_id', userIds)
+
+        if (subs) {
+          // Map subscription plans back to families
+          const userPlanMap: Record<string, string> = {}
+          for (const sub of subs) {
+            if (sub.status === 'active' && !userPlanMap[sub.user_id]) {
+              userPlanMap[sub.user_id] = sub.plan || 'free'
+            }
+          }
+          // Assign the highest plan in the family as the family plan
+          const planRank: Record<string, number> = { free: 0, pro: 1, family_plus: 2 }
+          for (const fm of familyMembersList) {
+            const userPlan = userPlanMap[fm.user_id] || 'free'
+            const currentPlan = familyPlans[fm.family_id] || 'free'
+            if ((planRank[userPlan] || 0) > (planRank[currentPlan] || 0)) {
+              familyPlans[fm.family_id] = userPlan
+            }
+          }
         }
       }
     }
@@ -138,7 +215,7 @@ export async function GET(request: NextRequest) {
         id: f.id,
         name: f.name || '',
         member_count: memberCount,
-        plan: f.plan || 'free',
+        plan: familyPlans[f.id] || 'free',
         tasks_completed_count: tasksCompleted,
         last_active: f.updated_at || f.created_at || null,
         activity_score: calculateActivityScore(f.updated_at, memberCount, tasksCompleted),

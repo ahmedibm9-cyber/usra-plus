@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 // Admin Analytics API Route
 // Queries REAL Supabase aggregate data using service role key
 // All data is privacy-safe: aggregate counts only, no personal content
+// Returns zeros for missing data instead of demo fake numbers
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,54 +15,21 @@ function getSupabaseAdmin() {
   })
 }
 
-// ─── Demo fallback data (used when tables don't exist or Supabase is unreachable) ──
-
-function getDemoAnalytics() {
-  return {
-    users: {
-      total: 12847,
-      newThisMonth: 147,
-      active: 8429,
-      dailyActive: 2891,
-      monthlyActive: 8429,
-    },
-    families: {
-      total: 3256,
-      avgSize: 3.8,
-      active: 2891,
-    },
-    tasks: {
-      created: 48921,
-      completed: 31247,
-      completionRate: 0.639,
-    },
-    groceries: {
-      itemsTracked: 24156,
-      completedLists: 8423,
-    },
-    subscriptions: {
-      mrr: 28940,
-      arr: 347280,
-      free: 9612,
-      pro: 2158,
-      familyPlus: 1077,
-      conversionRate: 0.224,
-    },
-    chat: {
-      totalMessages: 156782,
-      // NO content — count only
-    },
-  }
-}
-
 export async function GET(_request: NextRequest) {
   const supabase = getSupabaseAdmin()
 
-  // If no Supabase client, return demo data
+  // If no Supabase client, return zeros
   if (!supabase) {
     return NextResponse.json({
       source: 'demo',
-      data: getDemoAnalytics(),
+      data: {
+        users: { total: 0, newThisMonth: 0, active: 0, dailyActive: 0, monthlyActive: 0 },
+        families: { total: 0, avgSize: 0, active: 0 },
+        tasks: { created: 0, completed: 0, completionRate: 0 },
+        groceries: { itemsTracked: 0, completedLists: 0 },
+        subscriptions: { mrr: 0, arr: 0, free: 0, pro: 0, familyPlus: 0, conversionRate: 0 },
+        chat: { totalMessages: 0 },
+      },
       lastUpdated: new Date().toISOString(),
     })
   }
@@ -88,7 +56,7 @@ export async function GET(_request: NextRequest) {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', startOfMonth.toISOString())
 
-      // Active users (logged in last 30 days)
+      // Active users (logged in last 30 days) — last_login column exists
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
@@ -145,6 +113,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // ─── Query tasks table ────────────────────────────────────────────────
+    // tasks.status values: 'todo', 'in_progress', 'done' (NOT 'completed')
     const { count: tasksCreated, error: tasksError } = await supabase
       .from('tasks')
       .select('*', { count: 'exact', head: true })
@@ -155,7 +124,7 @@ export async function GET(_request: NextRequest) {
       const { count: tasksCompleted } = await supabase
         .from('tasks')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed')
+        .eq('status', 'done')
 
       data.tasks = {
         created: tasksCreated,
@@ -165,6 +134,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // ─── Query grocery_items table ────────────────────────────────────────
+    // grocery_items uses 'checked' column (NOT 'completed')
     const { count: groceryItems, error: groceryError } = await supabase
       .from('grocery_items')
       .select('*', { count: 'exact', head: true })
@@ -172,18 +142,20 @@ export async function GET(_request: NextRequest) {
     if (!groceryError && groceryItems !== null) {
       hasAnyLive = true
 
-      const { count: completedItems } = await supabase
+      const { count: checkedItems } = await supabase
         .from('grocery_items')
         .select('*', { count: 'exact', head: true })
-        .eq('completed', true)
+        .eq('checked', true)
 
       data.groceries = {
         itemsTracked: groceryItems,
-        completedLists: completedItems ?? 0,
+        completedLists: checkedItems ?? 0,
       }
     }
 
-    // ─── Query subscriptions table (optional — may not exist) ─────────────
+    // ─── Query subscriptions table ────────────────────────────────────────
+    // subscriptions.plan: 'free', 'pro', 'family_plus'
+    // subscriptions.status: 'active', 'cancelled', 'expired'
     const { data: subscriptions, error: subsError } = await supabase
       .from('subscriptions')
       .select('plan, status')
@@ -194,7 +166,9 @@ export async function GET(_request: NextRequest) {
       const planCounts: Record<string, number> = { free: 0, pro: 0, family_plus: 0 }
       for (const sub of subscriptions) {
         const plan = sub.plan || 'free'
-        planCounts[plan] = (planCounts[plan] || 0) + 1
+        if (plan in planCounts) {
+          planCounts[plan]++
+        }
       }
       const totalPaid = planCounts.pro + planCounts.family_plus
       const total = planCounts.free + totalPaid
@@ -222,29 +196,47 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    // If no live data at all, return full demo
+    // If no live data at all, return zeros
     if (!hasAnyLive) {
       return NextResponse.json({
         source: 'demo',
-        data: getDemoAnalytics(),
+        data: {
+          users: { total: 0, newThisMonth: 0, active: 0, dailyActive: 0, monthlyActive: 0 },
+          families: { total: 0, avgSize: 0, active: 0 },
+          tasks: { created: 0, completed: 0, completionRate: 0 },
+          groceries: { itemsTracked: 0, completedLists: 0 },
+          subscriptions: { mrr: 0, arr: 0, free: 0, pro: 0, familyPlus: 0, conversionRate: 0 },
+          chat: { totalMessages: 0 },
+        },
         lastUpdated: new Date().toISOString(),
       })
     }
 
-    // Merge live data with demo defaults for missing sections
-    const demoDefaults = getDemoAnalytics()
-    const finalData = { ...demoDefaults, ...data }
-
+    // Return live data with zeros for missing sections
     return NextResponse.json({
-      source: Object.keys(data).length < 6 ? 'demo' : 'live',
-      data: finalData,
+      source: 'live',
+      data: {
+        users: (data.users as Record<string, unknown>) || { total: 0, newThisMonth: 0, active: 0, dailyActive: 0, monthlyActive: 0 },
+        families: (data.families as Record<string, unknown>) || { total: 0, avgSize: 0, active: 0 },
+        tasks: (data.tasks as Record<string, unknown>) || { created: 0, completed: 0, completionRate: 0 },
+        groceries: (data.groceries as Record<string, unknown>) || { itemsTracked: 0, completedLists: 0 },
+        subscriptions: (data.subscriptions as Record<string, unknown>) || { mrr: 0, arr: 0, free: 0, pro: 0, familyPlus: 0, conversionRate: 0 },
+        chat: (data.chat as Record<string, unknown>) || { totalMessages: 0 },
+      },
       lastUpdated: new Date().toISOString(),
     })
   } catch {
-    // On any error, return demo data
+    // On any error, return zeros
     return NextResponse.json({
       source: 'demo',
-      data: getDemoAnalytics(),
+      data: {
+        users: { total: 0, newThisMonth: 0, active: 0, dailyActive: 0, monthlyActive: 0 },
+        families: { total: 0, avgSize: 0, active: 0 },
+        tasks: { created: 0, completed: 0, completionRate: 0 },
+        groceries: { itemsTracked: 0, completedLists: 0 },
+        subscriptions: { mrr: 0, arr: 0, free: 0, pro: 0, familyPlus: 0, conversionRate: 0 },
+        chat: { totalMessages: 0 },
+      },
       lastUpdated: new Date().toISOString(),
     })
   }

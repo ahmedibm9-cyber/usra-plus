@@ -58,6 +58,7 @@ export async function GET() {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', startOfMonth.toISOString())
 
+      // last_login column exists in profiles
       const { count: activeUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
@@ -85,12 +86,14 @@ export async function GET() {
       .from('subscriptions')
       .select('plan, status')
 
-    if (!subsError && subscriptions && subscriptions.length > 0) {
+    if (!subsError && subscriptions) {
       hasAnyLive = true
       const planCounts: Record<string, number> = { free: 0, pro: 0, family_plus: 0 }
       for (const sub of subscriptions) {
         const plan = sub.plan || 'free'
-        planCounts[plan] = (planCounts[plan] || 0) + 1
+        if (plan in planCounts) {
+          planCounts[plan]++
+        }
       }
       data.planDistribution = [
         { name: 'Free', value: planCounts.free, color: '#6B7280' },
@@ -129,6 +132,7 @@ export async function GET() {
     }
 
     // ─── Regional Distribution ───────────────────────────────────────
+    // profiles table has both 'country' and 'country_code' columns
     const { data: countryData, error: countryError } = await supabase
       .from('profiles')
       .select('country')
@@ -197,7 +201,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      source: Object.keys(data).length >= 3 ? 'live' : 'demo',
+      source: 'live',
       data: {
         metrics: data.metrics || null,
         revenueTimeSeries: data.revenueTimeSeries || [],

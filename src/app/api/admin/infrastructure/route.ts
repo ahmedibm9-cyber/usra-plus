@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 // Admin Infrastructure API Route
 // Queries REAL Supabase system metrics
 // Returns database health, storage, and connection data
+// profiles.last_login column exists for active connections tracking
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -19,9 +20,9 @@ export async function GET(_request: NextRequest) {
 
   if (!supabase) {
     return NextResponse.json({
-      source: 'unavailable',
+      source: 'demo',
       data: null,
-      message: 'No system metrics available - connect your database to see infrastructure data',
+      message: 'No database connection configured',
       lastUpdated: new Date().toISOString(),
     })
   }
@@ -73,6 +74,7 @@ export async function GET(_request: NextRequest) {
 
     // ─── Active connections approximation ──────────────────────────────
     // We count profiles with last_login in the last hour as "active connections"
+    // last_login column exists in profiles table
     const oneHourAgo = new Date()
     oneHourAgo.setHours(oneHourAgo.getHours() - 1)
 
@@ -117,7 +119,7 @@ export async function GET(_request: NextRequest) {
 
     if (!hasAnyLive) {
       return NextResponse.json({
-        source: 'unavailable',
+        source: 'demo',
         data: null,
         message: 'No system metrics available - connect your database to see infrastructure data',
         lastUpdated: new Date().toISOString(),
@@ -131,7 +133,7 @@ export async function GET(_request: NextRequest) {
     })
   } catch {
     return NextResponse.json({
-      source: 'unavailable',
+      source: 'demo',
       data: null,
       message: 'Unable to fetch infrastructure metrics',
       lastUpdated: new Date().toISOString(),

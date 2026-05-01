@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 // Queries profiles table with pagination and filtering
 // Returns ONLY privacy-safe fields: id, email, name, plan, status, last_login, created_at, family_count, language, country
 // NO private data (no messages, files, task content)
+// Plan is fetched from subscriptions table (not stored in profiles)
 // When Supabase is unavailable or tables don't exist, returns empty data with source: 'demo'
 
 function getSupabaseAdmin() {
@@ -53,20 +54,45 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Build query — select only privacy-safe fields
+    // Build query — select only fields that exist in profiles table
+    // profiles: id, email, first_name, last_name, name (generated), phone, country_code,
+    //           avatar_url, language, theme, last_login, country, status, created_at, updated_at
+    // NOTE: NO 'plan' column in profiles — plan comes from subscriptions table
     let query = supabase
       .from('profiles')
-      .select('id, email, name, plan, status, last_login, created_at, language, country', { count: 'exact' })
+      .select('id, email, name, status, last_login, created_at, language, country', { count: 'exact' })
 
-    // Apply filters
-    if (plan) {
-      query = query.eq('plan', plan)
-    }
+    // Apply filters on profiles columns
     if (status) {
       query = query.eq('status', status)
     }
     if (search) {
       query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`)
+    }
+
+    // If filtering by plan, we need to first get user IDs from subscriptions
+    // then filter profiles by those IDs
+    let planFilteredUserIds: string[] | null = null
+    if (plan) {
+      const { data: subsByPlan, error: subsPlanError } = await supabase
+        .from('subscriptions')
+        .select('user_id')
+        .eq('plan', plan)
+
+      if (subsPlanError || !subsByPlan || subsByPlan.length === 0) {
+        // No users with this plan — return empty
+        return NextResponse.json({
+          source: 'live',
+          data: [],
+          total: 0,
+          page,
+          pageSize,
+          hasMore: false,
+        })
+      }
+
+      planFilteredUserIds = subsByPlan.map(s => s.user_id)
+      query = query.in('id', planFilteredUserIds)
     }
 
     // Apply pagination
@@ -87,10 +113,30 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Enrich with family_count from family_members table
     const userIds = (profiles || []).map(p => p.id)
-    let familyCounts: Record<string, number> = {}
 
+    // Enrich with plan from subscriptions table
+    let userPlans: Record<string, string> = {}
+    if (userIds.length > 0) {
+      const { data: subs } = await supabase
+        .from('subscriptions')
+        .select('user_id, plan, status')
+        .in('user_id', userIds)
+
+      if (subs) {
+        for (const sub of subs) {
+          // Use the active subscription's plan; if cancelled/expired, mark accordingly
+          if (sub.status === 'active') {
+            userPlans[sub.user_id] = sub.plan || 'free'
+          } else {
+            userPlans[sub.user_id] = 'free'
+          }
+        }
+      }
+    }
+
+    // Enrich with family_count from family_members table
+    let familyCounts: Record<string, number> = {}
     if (userIds.length > 0) {
       const { data: memberships } = await supabase
         .from('family_members')
@@ -114,7 +160,7 @@ export async function GET(request: NextRequest) {
       id: p.id,
       email: p.email || '',
       name: p.name || '',
-      plan: p.plan || 'free',
+      plan: userPlans[p.id] || 'free',
       status: p.status || 'active',
       last_login: p.last_login || null,
       created_at: p.created_at || '',
