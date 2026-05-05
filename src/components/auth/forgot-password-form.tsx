@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Mail, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-export function ForgotPasswordForm() {
+export default function ForgotPasswordForm() {
   const { setAuthView } = useAuthStore()
   const { t, isRTL } = useI18n()
   const [email, setEmail] = useState('')

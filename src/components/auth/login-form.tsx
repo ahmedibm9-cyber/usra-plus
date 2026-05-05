@@ -24,7 +24,7 @@ import {
 import { toast } from 'sonner'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
 
-export function LoginForm() {
+export default function LoginForm() {
   const { setAuthView, setShowTermsModal, setUser, setIsAuthenticated } = useAuthStore()
   const appStore = useAppStore()
   const { t, isRTL } = useI18n()

@@ -52,31 +52,37 @@ export function createClient(): SupabaseClient {
       updateUser: () => Promise.resolve({ data: { user: null }, error: null }),
     }
 
-    const fromStub = (_table: string) => new Proxy({}, {
-      get(_target, method) {
-        // Terminal methods that return a promise
-        const terminalMethods = ['select', 'insert', 'update', 'delete', 'upsert']
-        if (terminalMethods.includes(method as string)) {
-          return (..._args: unknown[]) => Promise.resolve({ data: null, error: null })
+    const fromStub = (_table: string) => {
+      const createQueryBuilder = () => {
+        const builder = {
+          select: (..._args: unknown[]) => builder,
+          insert: (..._args: unknown[]) => builder,
+          update: (..._args: unknown[]) => builder,
+          delete: (..._args: unknown[]) => builder,
+          upsert: (..._args: unknown[]) => builder,
+          eq: (..._args: unknown[]) => builder,
+          neq: (..._args: unknown[]) => builder,
+          gt: (..._args: unknown[]) => builder,
+          gte: (..._args: unknown[]) => builder,
+          lt: (..._args: unknown[]) => builder,
+          lte: (..._args: unknown[]) => builder,
+          like: (..._args: unknown[]) => builder,
+          ilike: (..._args: unknown[]) => builder,
+          in: (..._args: unknown[]) => builder,
+          contains: (..._args: unknown[]) => builder,
+          containedBy: (..._args: unknown[]) => builder,
+          range: (..._args: unknown[]) => builder,
+          order: (..._args: unknown[]) => builder,
+          limit: (..._args: unknown[]) => builder,
+          single: () => Promise.resolve({ data: null, error: null }),
+          maybeSingle: () => Promise.resolve({ data: null, error: null }),
+          csv: () => Promise.resolve({ data: null, error: null }),
+          explain: () => Promise.resolve({ data: null, error: null }),
         }
-        // Chainable methods (eq, neq, etc.)
-        return (..._args: unknown[]) => new Proxy({}, {
-          get(_t2, m2) {
-            if (terminalMethods.includes(m2 as string)) {
-              return (..._a2: unknown[]) => Promise.resolve({ data: null, error: null })
-            }
-            return (..._a2: unknown[]) => new Proxy({}, {
-              get(_t3, m3) {
-                if (['single', 'maybeSingle', 'limit', 'order', 'range'].includes(m3 as string)) {
-                  return (..._a3: unknown[]) => Promise.resolve({ data: null, error: null })
-                }
-                return () => new Proxy({}, this.get as any)
-              }
-            })
-          }
-        })
+        return builder
       }
-    })
+      return createQueryBuilder()
+    }
 
     const channelStub = (_name: string) => ({
       on: () => channelStub(_name),

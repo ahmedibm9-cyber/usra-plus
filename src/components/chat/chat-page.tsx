@@ -327,7 +327,7 @@ function ImageLightbox({
   )
 }
 
-export function ChatPage() {
+export default function ChatPage() {
   const { currentFamily, familyMembers } = useAppStore()
   const { user } = useAuthStore()
   const { t, isRTL } = useI18n()

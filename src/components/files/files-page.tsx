@@ -141,7 +141,7 @@ function formatFileType(mimeType: string): string {
   return map[mimeType] ?? mimeType.split('/').pop()?.toUpperCase() ?? 'FILE'
 }
 
-export function FilesPage() {
+export default function FilesPage() {
   const { currentFamily, familyMembers } = useAppStore()
   const { user } = useAuthStore()
   const { t, isRTL } = useI18n()

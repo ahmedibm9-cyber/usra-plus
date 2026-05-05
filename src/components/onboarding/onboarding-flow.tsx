@@ -662,7 +662,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
 }
 
 // ─── Main Onboarding Flow ───────────────────────────────────────
-export function OnboardingFlow() {
+export default function OnboardingFlow() {
   const { t } = useI18n()
   const { setShowOnboarding } = useAppStore()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1)

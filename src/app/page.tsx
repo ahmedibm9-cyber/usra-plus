@@ -16,22 +16,22 @@ const BottomNav = dynamic(() => import('@/components/layout/bottom-nav').then(m 
 // ALL page and heavy components are loaded dynamically to prevent OOM
 // during compilation. Each dynamic() creates a separate chunk that
 // Turbopack/Webpack can compile independently.
-const LoginForm = dynamic(() => import('@/components/auth/login-form').then(m => ({ default: m.LoginForm })), { ssr: false, loading: () => <ChunkLoader /> })
-const SignupForm = dynamic(() => import('@/components/auth/signup-form').then(m => ({ default: m.SignupForm })), { ssr: false, loading: () => <ChunkLoader /> })
-const ForgotPasswordForm = dynamic(() => import('@/components/auth/forgot-password-form').then(m => ({ default: m.ForgotPasswordForm })), { ssr: false, loading: () => <ChunkLoader /> })
+const LoginForm = dynamic(() => import('@/components/auth/login-form'), { ssr: false, loading: () => <ChunkLoader /> })
+const SignupForm = dynamic(() => import('@/components/auth/signup-form'), { ssr: false, loading: () => <ChunkLoader /> })
+const ForgotPasswordForm = dynamic(() => import('@/components/auth/forgot-password-form'), { ssr: false, loading: () => <ChunkLoader /> })
 
 const DashboardPage = dynamic(() => import('@/components/dashboard/dashboard-page'), { ssr: false, loading: () => <ChunkLoader /> })
 const TasksPage = dynamic(() => import('@/components/tasks/tasks-page'), { ssr: false, loading: () => <ChunkLoader /> })
 const CalendarPage = dynamic(() => import('@/components/calendar/calendar-page'), { ssr: false, loading: () => <ChunkLoader /> })
-const GroceryPage = dynamic(() => import('@/components/grocery/grocery-page').then(m => ({ default: m.GroceryPage })), { ssr: false, loading: () => <ChunkLoader /> })
-const ChatPage = dynamic(() => import('@/components/chat/chat-page').then(m => ({ default: m.ChatPage })), { ssr: false, loading: () => <ChunkLoader /> })
-const FilesPage = dynamic(() => import('@/components/files/files-page').then(m => ({ default: m.FilesPage })), { ssr: false, loading: () => <ChunkLoader /> })
-const SettingsPage = dynamic(() => import('@/components/settings/settings-page').then(m => ({ default: m.SettingsPage })), { ssr: false, loading: () => <ChunkLoader /> })
+const GroceryPage = dynamic(() => import('@/components/grocery/grocery-page'), { ssr: false, loading: () => <ChunkLoader /> })
+const ChatPage = dynamic(() => import('@/components/chat/chat-page'), { ssr: false, loading: () => <ChunkLoader /> })
+const FilesPage = dynamic(() => import('@/components/files/files-page'), { ssr: false, loading: () => <ChunkLoader /> })
+const SettingsPage = dynamic(() => import('@/components/settings/settings-page'), { ssr: false, loading: () => <ChunkLoader /> })
 const BudgetPage = dynamic(() => import('@/components/budget/budget-page'), { ssr: false, loading: () => <ChunkLoader /> })
 const MealPlanPage = dynamic(() => import('@/components/meal-plan/meal-plan-page'), { ssr: false, loading: () => <ChunkLoader /> })
 const MilestonesPage = dynamic(() => import('@/components/milestones/milestones-page'), { ssr: false, loading: () => <ChunkLoader /> })
 const ChoresPage = dynamic(() => import('@/components/chores/chores-page'), { ssr: false, loading: () => <ChunkLoader /> })
-const OnboardingFlow = dynamic(() => import('@/components/onboarding/onboarding-flow').then(m => ({ default: m.OnboardingFlow })), { ssr: false, loading: () => <ChunkLoader /> })
+const OnboardingFlow = dynamic(() => import('@/components/onboarding/onboarding-flow'), { ssr: false, loading: () => <ChunkLoader /> })
 
 const CommandPalette = dynamic(() => import('@/components/shared/command-palette').then(m => ({ default: m.CommandPalette })), { ssr: false })
 const ShortcutsModal = dynamic(() => import('@/components/shared/shortcuts-modal').then(m => ({ default: m.ShortcutsModal })), { ssr: false })

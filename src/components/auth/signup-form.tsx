@@ -54,7 +54,7 @@ interface FormErrors {
   terms?: string
 }
 
-export function SignupForm() {
+export default function SignupForm() {
   const { setAuthView, setShowTermsModal } = useAuthStore()
   const { t, isRTL } = useI18n()
 

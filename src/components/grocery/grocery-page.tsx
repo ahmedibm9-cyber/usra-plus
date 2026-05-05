@@ -485,7 +485,7 @@ function RecipeCard({
 }
 
 // ─── Main Grocery Page ──────────────────────────────────────────────────
-export function GroceryPage() {
+export default function GroceryPage() {
   const { currentFamily } = useAppStore()
   const { user } = useAuthStore()
   const { t, isRTL: storeIsRTL } = useI18n()
