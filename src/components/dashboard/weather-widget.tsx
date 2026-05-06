@@ -139,25 +139,26 @@ export function WeatherWidget() {
     }
   }, [citySelectorOpen])
 
-  const fetchWeather = useCallback(async (city: string) => {
-    setIsLoading(true)
-    setError(false)
-    try {
-      const response = await fetch(`/api/weather?city=${city}`)
-      if (!response.ok) throw new Error('Failed to fetch weather')
-      const data = await response.json() as WeatherData
-      setWeather(data)
-    } catch {
-      setError(true)
-      setWeather(FALLBACK_WEATHER)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+
 
   useEffect(() => {
-    fetchWeather(selectedCity)
-  }, [selectedCity, fetchWeather])
+    setIsLoading(true)
+    setError(false)
+    const fetch = async () => {
+      try {
+        const response = await fetch(`/api/weather?city=${selectedCity}`)
+        if (!response.ok) throw new Error('Failed to fetch weather')
+        const data = await response.json() as WeatherData
+        setWeather(data)
+      } catch {
+        setError(true)
+        setWeather(FALLBACK_WEATHER)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetch()
+  }, [selectedCity])
 
   const currentCity = CITIES.find((c) => c.key === selectedCity) || CITIES[0]
 

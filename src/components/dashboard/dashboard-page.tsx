@@ -364,9 +364,9 @@ export default function DashboardPage() {
 
   const supabase = createClient()
 
-  // ─── Fetch Data ─────────────────────────────────────────────
 
-  const fetchData = useCallback(async () => {
+
+  useEffect(() => {
     if (!currentFamily) {
       setIsLoading(false)
       return
@@ -375,62 +375,61 @@ export default function DashboardPage() {
     setIsLoading(true)
     setError(null)
 
-    try {
-      const familyId = currentFamily.id
+    const fetch = async () => {
+      try {
+        const familyId = currentFamily.id
 
-      // First, try to use Zustand store data (populated by demo mode or realtime)
-      const storeTasks = taskStore.tasks
-      const storeGrocery = groceryStore.items
+        // First, try to use Zustand store data (populated by demo mode or realtime)
+        const storeTasks = taskStore.tasks
+        const storeGrocery = groceryStore.items
 
-      if (storeTasks.length > 0) {
-        setTasks(storeTasks)
-      }
-      if (storeGrocery.length > 0) {
-        setGroceryItems(storeGrocery)
-      }
+        if (storeTasks.length > 0) {
+          setTasks(storeTasks)
+        }
+        if (storeGrocery.length > 0) {
+          setGroceryItems(storeGrocery)
+        }
 
-      // Then try Supabase (may fail if tables don't exist)
-      const [tasksRes, eventsRes, groceryRes, membersRes] = await Promise.allSettled([
-        supabase.from('tasks').select('*').eq('family_id', familyId),
-        supabase
-          .from('calendar_events')
-          .select('*')
-          .eq('family_id', familyId)
-          .gte('start_time', new Date().toISOString())
-          .order('start_time', { ascending: true }),
-        supabase.from('grocery_items').select('*').eq('family_id', familyId),
-        supabase
-          .from('family_members')
-          .select('*, profiles(*)')
-          .eq('family_id', familyId),
-      ])
+        // Then try Supabase (may fail if tables don't exist)
+        const [tasksRes, eventsRes, groceryRes, membersRes] = await Promise.allSettled([
+          supabase.from('tasks').select('*').eq('family_id', familyId),
+          supabase
+            .from('calendar_events')
+            .select('*')
+            .eq('family_id', familyId)
+            .gte('start_time', new Date().toISOString())
+            .order('start_time', { ascending: true }),
+          supabase.from('grocery_items').select('*').eq('family_id', familyId),
+          supabase
+            .from('family_members')
+            .select('*, profiles(*)')
+            .eq('family_id', familyId),
+        ])
 
-      // Override with Supabase data if available (it's the source of truth)
-      if (tasksRes.status === 'fulfilled' && tasksRes.value.data && tasksRes.value.data.length > 0) {
-        setTasks(tasksRes.value.data as Task[])
+        // Override with Supabase data if available (it's the source of truth)
+        if (tasksRes.status === 'fulfilled' && tasksRes.value.data && tasksRes.value.data.length > 0) {
+          setTasks(tasksRes.value.data as Task[])
+        }
+        if (eventsRes.status === 'fulfilled' && eventsRes.value.data) {
+          setEvents(eventsRes.value.data as CalendarEvent[])
+        }
+        if (groceryRes.status === 'fulfilled' && groceryRes.value.data && groceryRes.value.data.length > 0) {
+          setGroceryItems(groceryRes.value.data as GroceryItem[])
+        }
+        if (membersRes.status === 'fulfilled' && membersRes.value.data && membersRes.value.data.length > 0) {
+          setFamilyMembers(membersRes.value.data as FamilyMember[])
+        }
+      } catch {
+        // Don't set error if we have store data - just use what we have
+        if (tasks.length === 0 && groceryItems.length === 0) {
+          setError(t.common.error)
+        }
+      } finally {
+        setIsLoading(false)
       }
-      if (eventsRes.status === 'fulfilled' && eventsRes.value.data) {
-        setEvents(eventsRes.value.data as CalendarEvent[])
-      }
-      if (groceryRes.status === 'fulfilled' && groceryRes.value.data && groceryRes.value.data.length > 0) {
-        setGroceryItems(groceryRes.value.data as GroceryItem[])
-      }
-      if (membersRes.status === 'fulfilled' && membersRes.value.data && membersRes.value.data.length > 0) {
-        setFamilyMembers(membersRes.value.data as FamilyMember[])
-      }
-    } catch {
-      // Don't set error if we have store data - just use what we have
-      if (tasks.length === 0 && groceryItems.length === 0) {
-        setError(t.common.error)
-      }
-    } finally {
-      setIsLoading(false)
     }
+    fetch()
   }, [currentFamily, supabase, setFamilyMembers, t.common.error, taskStore.tasks, groceryStore.items])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
 
   // ─── Computed Stats ─────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from 'react'
 import {
   format,
   startOfMonth,
@@ -724,7 +724,7 @@ function MiniCalendar({
   const [miniMonth, setMiniMonth] = useState(currentDate)
 
   // Sync mini calendar month with main calendar
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMiniMonth(currentDate)
   }, [currentDate])
 
@@ -936,7 +936,7 @@ function EventModal({
   const [saving, setSaving] = useState(false)
   const isEditing = !!event
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (open) {
       if (event) {
         const start = parseISO(event.start_time)

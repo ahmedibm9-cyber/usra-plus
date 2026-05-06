@@ -112,7 +112,9 @@ function useTypingAnimation(text: string, speed: number = 25) {
   const textRef = useRef(text)
 
   // Keep textRef in sync
-  textRef.current = text
+  useEffect(() => {
+    textRef.current = text
+  }, [text])
 
   useEffect(() => {
     // Reset on text change

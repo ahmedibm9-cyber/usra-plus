@@ -329,7 +329,7 @@ export default function FilesPage() {
       return
     }
     setShowUpload(true)
-  }, [isStorageFull])
+  }, [isStorageFull, setUpgradeModalOpen, setShowUpload])
 
   const getUploaderName = (uploaderId: string) => {
     const member = familyMembers.find((m) => m.user_id === uploaderId)
@@ -350,7 +350,7 @@ export default function FilesPage() {
       ? (currentIndex + 1) % imageFiles.length
       : (currentIndex - 1 + imageFiles.length) % imageFiles.length
     setPreviewFile(imageFiles[newIndex])
-  }, [previewFile, imageFiles])
+  }, [previewFile, imageFiles, setPreviewFile])
 
   // Keyboard navigation for lightbox
   useEffect(() => {

@@ -276,31 +276,32 @@ export function AdminInfrastructure() {
     return () => clearInterval(interval)
   }, [])
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/admin/infrastructure')
-      if (!res.ok) throw new Error('Failed to fetch infrastructure data')
-      const json = await res.json()
-      setDataSource(json.source)
-      if (json.source === 'unavailable' || !json.data) {
-        setApiData(null)
-        setError(json.message || 'No data available')
-      } else {
-        setApiData(json.data)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data')
-      setApiData(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    setLoading(true)
+    setError(null)
+    const fetch = async () => {
+      try {
+        const res = await fetch('/api/admin/infrastructure')
+        if (!res.ok) throw new Error('Failed to fetch infrastructure data')
+        const json = await res.json()
+        setDataSource(json.source)
+        if (json.source === 'unavailable' || !json.data) {
+          setApiData(null)
+          setError(json.message || 'No data available')
+        } else {
+          setApiData(json.data)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data')
+        setApiData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetch()
+  }, [])
 
   const hasData = apiData !== null && (apiData.totalRows ?? 0) > 0
 
