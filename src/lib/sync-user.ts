@@ -1,5 +1,5 @@
 /**
- * Sync a Supabase Auth user to the Prisma User table.
+ * Sync a Supabase Auth user to the Prisma User table and/or Supabase profiles.
  *
  * When users sign up or log in via Supabase Auth (e.g. on Vercel/production),
  * they exist in Supabase's `auth.users` table but NOT in Prisma's `User` table.
@@ -8,15 +8,15 @@
  *   2. We can't create Prisma Sessions for them, so we store the Supabase
  *      access_token (JWT) in the cookie, which expires after ~1 hour.
  *
- * By syncing the Supabase user to Prisma, we can:
- *   - Create a proper Prisma Session with a long-lived UUID token
+ * By syncing the Supabase user, we can:
+ *   - Create a proper Prisma Session with a long-lived UUID token (when Prisma is available)
+ *   - Ensure the profile exists in Supabase `profiles` table
  *   - Show the user in the admin dashboard
  *   - Make all Prisma-based features work (families, subscriptions, etc.)
  */
 
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import bcrypt from 'bcryptjs'
 
 interface SupabaseAuthUser {
   id: string
@@ -27,8 +27,9 @@ interface SupabaseAuthUser {
 }
 
 /**
- * Ensure a Prisma User record exists for the given Supabase Auth user.
- * Returns the Prisma User ID.
+ * Ensure a User record exists for the given Supabase Auth user.
+ * Tries Prisma first, falls back to Supabase REST API.
+ * Returns the user ID.
  */
 export async function syncSupabaseUserToPrisma(authUser: SupabaseAuthUser): Promise<string> {
   const email = (authUser.email || '').toLowerCase()
@@ -59,6 +60,7 @@ export async function syncSupabaseUserToPrisma(authUser: SupabaseAuthUser): Prom
   const language = (profile?.language as string) || 'en'
   const theme = (profile?.theme as string) || 'dark'
 
+  // ── Try Prisma first ──────────────────────────────────────────────
   // Check if user already exists in Prisma by ID
   try {
     const existingById = await db.user.findUnique({ where: { id: supabaseId } })
@@ -80,7 +82,7 @@ export async function syncSupabaseUserToPrisma(authUser: SupabaseAuthUser): Prom
       return supabaseId
     }
   } catch {
-    // Prisma might fail
+    // Prisma unavailable (likely on Vercel)
   }
 
   // Check if user exists by email
@@ -104,13 +106,14 @@ export async function syncSupabaseUserToPrisma(authUser: SupabaseAuthUser): Prom
       return existingByEmail.id
     }
   } catch {
-    // Prisma might fail
+    // Prisma unavailable
   }
 
-  // User doesn't exist — create them
-  const placeholderHash = await bcrypt.hash(`supabase-sync-${supabaseId}-${Date.now()}`, 4)
-
+  // Try to create in Prisma
   try {
+    const bcrypt = await import('bcryptjs')
+    const placeholderHash = await bcrypt.hash(`supabase-sync-${supabaseId}-${Date.now()}`, 4)
+
     await db.user.create({
       data: {
         id: supabaseId,
@@ -128,8 +131,12 @@ export async function syncSupabaseUserToPrisma(authUser: SupabaseAuthUser): Prom
     })
     return supabaseId
   } catch (createError) {
-    console.error('[Sync User] Failed to create with Supabase ID:', createError)
+    console.error('[Sync User] Prisma create failed:', createError)
+
+    // Try creating with auto-generated ID (Supabase ID might conflict)
     try {
+      const bcrypt = await import('bcryptjs')
+      const placeholderHash = await bcrypt.hash(`supabase-sync-${supabaseId}-${Date.now()}`, 4)
       const newUser = await db.user.create({
         data: {
           email,
@@ -145,16 +152,45 @@ export async function syncSupabaseUserToPrisma(authUser: SupabaseAuthUser): Prom
         },
       })
       return newUser.id
-    } catch (secondError) {
-      console.error('[Sync User] Failed completely:', secondError)
-      return supabaseId
+    } catch {
+      // Prisma completely unavailable
     }
   }
+
+  // ── Fallback: Ensure Supabase profile exists ──────────────────────
+  if (supabase) {
+    try {
+      // Upsert profile in Supabase
+      const { error: upsertError } = await supabase.from('profiles').upsert({
+        id: supabaseId,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+        country_code: countryCode,
+        avatar_url: avatarUrl,
+        language,
+        theme,
+      }, { onConflict: 'id' })
+
+      if (upsertError) {
+        console.error('[Sync User] Supabase profile upsert failed:', upsertError.message)
+      }
+    } catch (e) {
+      console.error('[Sync User] Supabase profile fallback failed:', e)
+    }
+  }
+
+  // Return the Supabase user ID even if we couldn't sync to Prisma
+  // The user can still authenticate via Supabase Auth cookies
+  return supabaseId
 }
 
 /**
  * Create a Prisma Session for the given user ID.
  * Returns the session token.
+ * If Prisma is unavailable, returns a UUID token (not persisted,
+ * but the Supabase Auth JWT in the cookie still works for authentication).
  */
 export async function createPrismaSession(userId: string): Promise<string> {
   const token = crypto.randomUUID()
@@ -173,6 +209,8 @@ export async function createPrismaSession(userId: string): Promise<string> {
     return token
   } catch (error) {
     console.error('[Sync User] Failed to create Prisma session:', error)
+    // Return the token anyway — it won't be persisted in Prisma,
+    // but the Supabase Auth JWT in the cookie can still authenticate
     return token
   }
 }
