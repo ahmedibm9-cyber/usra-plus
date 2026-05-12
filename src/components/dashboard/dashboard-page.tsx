@@ -269,8 +269,8 @@ function StatCard({
             style={{
               background: `linear-gradient(135deg, ${progressColor}30, ${progressColor}10)`,
               boxShadow: `0 0 12px ${progressColor}15`,
-              ringColor: `${progressColor}20`,
-            }}
+              '--tw-ring-color': `${progressColor}20`,
+            } as React.CSSProperties}
           >
             <Icon className="size-[18px]" style={{ color: progressColor }} />
           </div>
