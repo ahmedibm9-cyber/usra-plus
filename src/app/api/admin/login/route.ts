@@ -41,20 +41,16 @@ async function getPasswordHash(): Promise<string> {
   return cachedHash
 }
 
-const FOUNDER_EMAILS = [
-  'admin@usraplus.com',
-]
-
 // Track failed login attempts for brute force protection
 const failedAttempts = new Map<string, { count: number; lockedUntil: number }>()
 const MAX_FAILED_ATTEMPTS = 10
 const LOCKOUT_DURATION = 30 * 60 * 1000 // 30 minutes
 
 export async function POST(request: NextRequest) {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_LOGIN)
-  if (rateLimitResponse) return rateLimitResponse
-
   try {
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_LOGIN)
+    if (rateLimitResponse) return rateLimitResponse
+
     const { email, password, role } = await request.json()
 
     if (!email || !password) {

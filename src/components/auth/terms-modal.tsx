@@ -39,7 +39,6 @@ export function TermsModal() {
 
   const handleAccept = () => {
     setShowTermsModal(false)
-    // Reset after close
     setTimeout(() => {
       setHasScrolledToBottom(false)
       setScrollPercent(0)
@@ -64,7 +63,6 @@ export function TermsModal() {
     }
     const percent = Math.round((scrollTop / scrollableHeight) * 100)
     setScrollPercent(percent)
-    // Must be within 5% of bottom to enable accept
     if (scrollHeight - scrollTop - clientHeight < 30) {
       setHasScrolledToBottom(true)
     }
@@ -181,62 +179,61 @@ export function TermsModal() {
   return (
     <Dialog open={showTermsModal} onOpenChange={handleOpenChange}>
       <DialogPortal data-slot="dialog-portal">
-        {/* iOS 26 Opaque Glass Overlay: strong dimming + blur */}
         <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
         <DialogPrimitive.Content
           data-slot="dialog-content"
           key={modalKey}
-          className="border-[--border-subtle] bg-[--bg-surface] text-[--text-primary] sm:max-w-2xl rounded-3xl p-0 overflow-hidden gap-0 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] duration-200"
+          className="border-border bg-card text-card-foreground sm:max-w-2xl rounded-2xl p-0 overflow-hidden gap-0 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] duration-200"
         >
-          {/* Header with iOS 26 blue gradient accent */}
-          <div className="relative bg-gradient-to-r from-[#007AFF]/10 via-[#007AFF]/5 to-[#007AFF]/10 px-6 pt-6 pb-4">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#007AFF]/5 to-transparent" />
+          {/* Header with emerald gradient accent */}
+          <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 px-6 pt-6 pb-4">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
             <DialogHeader className="relative">
               <div className="flex items-center gap-3 mb-2">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#007AFF]/10 border border-[#007AFF]/20">
-                  <Scale className="w-6 h-6 text-[#007AFF]" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/20">
+                  <Scale className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-bold text-[--text-primary] font-display">
+                  <DialogTitle className="text-xl font-bold text-foreground font-display">
                     {termsContent.title}
                   </DialogTitle>
-                  <DialogDescription className="text-sm text-[--text-muted] mt-0.5">
+                  <DialogDescription className="text-sm text-muted-foreground mt-0.5">
                     {termsContent.subtitle}
                   </DialogDescription>
                 </div>
               </div>
             </DialogHeader>
 
-            {/* Trust badges — iOS 26 style */}
-            <div className="relative flex items-center gap-4 mt-3 text-xs text-[--text-muted]">
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[--bg-surface] border border-[--border-subtle]">
-                <Shield className="w-3.5 h-3.5 text-[#007AFF]" />
+            {/* Trust badges */}
+            <div className="relative flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border">
+                <Shield className="w-3.5 h-3.5 text-primary" />
                 PDPL Compliant
               </span>
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[--bg-surface] border border-[--border-subtle]">
-                <FileText className="w-3.5 h-3.5 text-[#007AFF]" />
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border">
+                <FileText className="w-3.5 h-3.5 text-primary" />
                 KSA Governed
               </span>
             </div>
           </div>
 
-          <Separator className="bg-[--border-subtle]" />
+          <Separator className="bg-border" />
 
-          {/* Scroll progress indicator — Blue (#007AFF) gradient while reading, green when complete */}
+          {/* Scroll progress indicator */}
           <div className="px-6 pt-3 flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-[--border-subtle] rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
                 style={{
                   background: hasScrolledToBottom
-                    ? 'linear-gradient(90deg, #34C759, #30D158)'
-                    : 'linear-gradient(90deg, #007AFF, #5AC8FA)',
+                    ? 'var(--primary)'
+                    : 'linear-gradient(90deg, var(--primary), var(--accent))',
                 }}
                 animate={{ width: `${scrollPercent}%` }}
                 transition={{ duration: 0.15, ease: 'easeOut' }}
               />
             </div>
-            <span className="text-xs font-medium tabular-nums text-[--text-muted] min-w-[36px] text-right font-metric">
+            <span className="text-xs font-medium tabular-nums text-muted-foreground min-w-[36px] text-right font-mono">
               {scrollPercent}%
             </span>
           </div>
@@ -249,10 +246,10 @@ export function TermsModal() {
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                className="mx-6 mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF9500]/10 border border-[#FF9500]/20"
+                className="mx-6 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 border border-accent/20"
               >
-                <AlertCircle className="w-4 h-4 text-[#FF9500] shrink-0" />
-                <p className="text-xs text-[#FF9500]/90">
+                <AlertCircle className="w-4 h-4 text-accent shrink-0" />
+                <p className="text-xs text-accent/90">
                   {isRTL
                     ? 'يرجى قراءة جميع الشروط بالكامل حتى تتمكن من قبولها'
                     : 'Please read all terms in full before you can accept'}
@@ -264,10 +261,10 @@ export function TermsModal() {
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                className="mx-6 mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#34C759]/10 border border-[#34C759]/20"
+                className="mx-6 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20"
               >
-                <CheckCircle2 className="w-4 h-4 text-[#34C759] shrink-0" />
-                <p className="text-xs text-[#34C759]/90">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <p className="text-xs text-primary/90">
                   {isRTL
                     ? 'يمكنك الآن قبول الشروط'
                     : 'You have read all terms — you may now accept'}
@@ -280,22 +277,18 @@ export function TermsModal() {
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="h-[400px] overflow-y-auto px-6 scroll-smooth"
-            style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'var(--border-medium) transparent',
-            }}
+            className="h-[400px] overflow-y-auto px-6 scroll-smooth custom-scrollbar"
           >
             <div className="py-4 space-y-5" dir={isRTL ? 'rtl' : 'ltr'}>
               {termsContent.sections.map((section, index) => (
                 <div key={index} className="group">
-                  <h3 className="text-sm font-bold text-[#007AFF] mb-1.5 flex items-center gap-2 font-display">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#007AFF]/15 text-[10px] font-bold text-[#007AFF] shrink-0">
+                  <h3 className="text-sm font-bold text-primary mb-1.5 flex items-center gap-2 font-display">
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-primary/15 text-[10px] font-bold text-primary shrink-0">
                       {index + 1}
                     </span>
                     {section.title.replace(/^\d+\.\s*/, '')}
                   </h3>
-                  <p className="text-sm leading-relaxed text-[--text-secondary] whitespace-pre-line pl-7">
+                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line pl-7">
                     {section.content}
                   </p>
                 </div>
@@ -303,14 +296,14 @@ export function TermsModal() {
             </div>
           </div>
 
-          {/* Scroll down hint — shown when not at bottom */}
+          {/* Scroll down hint */}
           <AnimatePresence>
             {!hasScrolledToBottom && scrollPercent < 10 && (
               <motion.div
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
-                className="flex items-center justify-center gap-1.5 py-1 text-[--text-muted]"
+                className="flex items-center justify-center gap-1.5 py-1 text-muted-foreground"
               >
                 <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
                 <span className="text-xs">
@@ -320,17 +313,17 @@ export function TermsModal() {
             )}
           </AnimatePresence>
 
-          <Separator className="bg-[--border-subtle]" />
+          <Separator className="bg-border" />
 
-          {/* Footer with actions — iOS 26 style */}
+          {/* Footer with actions */}
           <DialogFooter className="px-6 py-4 flex-row items-center justify-between gap-3 sm:justify-between">
             <div className="flex items-center gap-2">
               {hasScrolledToBottom ? (
-                <CheckCircle2 className="w-4 h-4 text-[#34C759]" />
+                <CheckCircle2 className="w-4 h-4 text-primary" />
               ) : (
-                <div className="w-4 h-4 rounded-full border-2 border-[--border-medium]" />
+                <div className="w-4 h-4 rounded-full border-2 border-border" />
               )}
-              <p className="text-xs text-[--text-muted] hidden sm:block">
+              <p className="text-xs text-muted-foreground hidden sm:block">
                 {hasScrolledToBottom
                   ? (isRTL ? 'تمت قراءة جميع الشروط' : 'All terms read')
                   : (isRTL
@@ -343,23 +336,14 @@ export function TermsModal() {
               <Button
                 variant="ghost"
                 onClick={handleDecline}
-                className="flex-1 sm:flex-none text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] rounded-xl h-10"
+                className="flex-1 sm:flex-none text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl h-10"
               >
                 {isRTL ? 'رفض' : 'Decline'}
               </Button>
               <Button
                 onClick={handleAccept}
                 disabled={!hasScrolledToBottom}
-                className="flex-1 sm:flex-none rounded-xl h-10 font-semibold transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:saturate-0 font-display"
-                style={{
-                  background: hasScrolledToBottom
-                    ? '#007AFF'
-                    : 'linear-gradient(135deg, #007AFF, #5AC8FA)',
-                  color: '#fff',
-                  boxShadow: hasScrolledToBottom
-                    ? '0 8px 24px rgba(0, 122, 255, 0.35)'
-                    : 'none',
-                }}
+                className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 font-semibold transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:saturate-0 shadow-lg shadow-primary/20 font-display"
               >
                 {hasScrolledToBottom
                   ? (isRTL ? 'قبول الشروط ✓' : 'Accept Terms ✓')

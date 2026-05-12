@@ -1,11 +1,10 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Sun, Moon } from 'lucide-react'
 import { useAppStore } from '@/stores/app-store'
 
-// useSyncExternalStore avoids the "setState in effect" lint error
 const emptySubscribe = () => () => {}
 function useIsMounted() {
   return useSyncExternalStore(
@@ -22,10 +21,10 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="w-9 h-9 rounded-xl border border-[--border-subtle] bg-[--bg-surface] flex items-center justify-center"
+        className="w-9 h-9 rounded-xl border border-border bg-card flex items-center justify-center"
         aria-label="Toggle theme"
       >
-        <Moon className="w-4 h-4 text-[--text-muted]" />
+        <Moon className="w-4 h-4 text-muted-foreground" />
       </button>
     )
   }
@@ -39,7 +38,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="relative w-9 h-9 rounded-xl border border-[--border-subtle] bg-[--bg-surface] hover:bg-[--bg-surface-2] hover:border-[--border-medium] flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E50914]/30"
+      className="relative w-9 h-9 rounded-xl border border-border bg-card hover:bg-secondary hover:border-border transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring/30"
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
@@ -62,7 +61,7 @@ export function ThemeToggle() {
             exit={{ rotate: -90, scale: 0.5, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
           >
-            <Moon className="w-4 h-4 text-[#E50914]" />
+            <Moon className="w-4 h-4 text-emerald-600" />
           </motion.div>
         )}
       </AnimatePresence>

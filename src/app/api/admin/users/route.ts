@@ -29,20 +29,20 @@ interface SafeUserRecord {
 }
 
 export async function GET(request: NextRequest) {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
-  if (rateLimitResponse) return rateLimitResponse
-
-  const auth = verifyAdminAuth(request)
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { searchParams } = new URL(request.url)
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '20', 10)))
-  const search = searchParams.get('search')
-
   try {
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    if (rateLimitResponse) return rateLimitResponse
+
+    const auth = verifyAdminAuth(request)
+    if (!auth.authenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '20', 10)))
+    const search = searchParams.get('search')
+
     const start = (page - 1) * pageSize
 
     // Build where clause for search
@@ -55,9 +55,9 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    // Get total count and paginated users
+    // Get total count and paginated users — add .catch() for Prisma failures
     const [total, users] = await Promise.all([
-      db.user.count({ where }),
+      db.user.count({ where }).catch(() => 0),
       db.user.findMany({
         where,
         select: {
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         skip: start,
         take: pageSize,
-      }),
+      }).catch(() => []),
     ])
 
     // Get subscription and family data for all users in this page
@@ -88,11 +88,11 @@ export async function GET(request: NextRequest) {
       db.userSubscription.findMany({
         where: { userId: { in: userIds } },
         select: { userId: true, plan: true, status: true },
-      }),
+      }).catch(() => []),
       db.familyMember.findMany({
         where: { userId: { in: userIds } },
         select: { userId: true },
-      }),
+      }).catch(() => []),
     ])
 
     // Build lookup maps
@@ -140,9 +140,10 @@ export async function GET(request: NextRequest) {
       source: 'live' as const,
       data: [],
       total: 0,
-      page,
-      pageSize,
+      page: 1,
+      pageSize: 20,
       hasMore: false,
-    })
+      error: 'Database query failed',
+    }, { status: 500 })
   }
 }

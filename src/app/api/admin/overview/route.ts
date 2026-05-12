@@ -9,17 +9,18 @@ import { db } from '@/lib/db'
 // Pre-launch mode: shows REAL counts (which may be 0)
 
 export async function GET(request: Request) {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
-  if (rateLimitResponse) return rateLimitResponse
-
-  const auth = verifyAdminAuth(request)
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   try {
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    if (rateLimitResponse) return rateLimitResponse
+
+    const auth = verifyAdminAuth(request)
+    if (!auth.authenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // ─── Core Metrics from Prisma ──────────────────────────────────
     // Run queries in parallel for better performance on serverless
+    // Each query has .catch() so a single DB failure doesn't crash the whole request
     const [totalUsers, newThisMonthResult, activeSessions, totalSessions, verifiedUsers, totalFamilies, subscriptions] = await Promise.all([
       db.user.count().catch(() => 0),
       db.user.count({ where: { createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } }).catch(() => 0),
@@ -43,11 +44,11 @@ export async function GET(request: Request) {
       monthNames.push(key)
     }
 
-    // Get all user creation dates for the time series
+    // Get all user creation dates for the time series (with catch for Prisma failures)
     const users = await db.user.findMany({
       select: { createdAt: true },
       orderBy: { createdAt: 'asc' },
-    })
+    }).catch(() => [])
 
     for (const u of users) {
       const key = u.createdAt.toLocaleDateString('en-US', { month: 'short' })
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
       select: { email: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
       take: 10,
-    })
+    }).catch(() => [])
 
     const activityFeed = recentUsers.map((u, i) => ({
       id: `act-${i}`,
@@ -78,7 +79,7 @@ export async function GET(request: Request) {
     // ─── Regional Distribution: from countryCode ──────────────────────────
     const usersWithCountry = await db.user.findMany({
       select: { countryCode: true },
-    })
+    }).catch(() => [])
     const countryCounts: Record<string, number> = {}
     for (const u of usersWithCountry) {
       if (u.countryCode) {
@@ -112,7 +113,7 @@ export async function GET(request: Request) {
     // ─── Language Distribution ────────────────────────────────────────────
     const usersWithLang = await db.user.findMany({
       select: { language: true },
-    })
+    }).catch(() => [])
     const langCounts: Record<string, number> = {}
     for (const u of usersWithLang) {
       langCounts[u.language] = (langCounts[u.language] || 0) + 1

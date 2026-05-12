@@ -18,19 +18,19 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
  * - isRevenueCatPro: Whether RevenueCat reports the user as pro
  */
 export async function GET(request: NextRequest) {
-  // Rate limit
-  const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_READ)
-  if (!rateLimitResult.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', retryAfter: Math.ceil(rateLimitResult.retryAfterMs / 1000) },
-      {
-        status: 429,
-        headers: { 'Retry-After': Math.ceil(rateLimitResult.retryAfterMs / 1000).toString() },
-      }
-    )
-  }
-
   try {
+    // Rate limit
+    const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_READ)
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', retryAfter: Math.ceil(rateLimitResult.retryAfterMs / 1000) },
+        {
+          status: 429,
+          headers: { 'Retry-After': Math.ceil(rateLimitResult.retryAfterMs / 1000).toString() },
+        }
+      )
+    }
+
     // Verify authentication
     const userId = await getAuthenticatedUserId(request)
     if (!userId) {
@@ -38,10 +38,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch subscription from local database
-    const { db } = await import('@/lib/db')
-    const subscription = await db.userSubscription.findFirst({
-      where: { userId },
-    })
+    let subscription = null
+    try {
+      const { db: dbClient } = await import('@/lib/db')
+      subscription = await dbClient.userSubscription.findFirst({
+        where: { userId },
+      })
+    } catch (dbError) {
+      console.warn('[SubscriptionAPI] Prisma query failed, using fallback:', dbError)
+    }
 
     let plan = 'free'
     let status = 'none'
@@ -160,19 +165,19 @@ export async function GET(request: NextRequest) {
  * { api_version: string, event: { type: string, ... } }
  */
 export async function POST(request: NextRequest) {
-  // Rate limit
-  const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_WRITE)
-  if (!rateLimitResult.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', retryAfter: Math.ceil(rateLimitResult.retryAfterMs / 1000) },
-      {
-        status: 429,
-        headers: { 'Retry-After': Math.ceil(rateLimitResult.retryAfterMs / 1000).toString() },
-      }
-    )
-  }
-
   try {
+    // Rate limit
+    const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_WRITE)
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', retryAfter: Math.ceil(rateLimitResult.retryAfterMs / 1000) },
+        {
+          status: 429,
+          headers: { 'Retry-After': Math.ceil(rateLimitResult.retryAfterMs / 1000).toString() },
+        }
+      )
+    }
+
     const rawBody = await request.text()
     let body: Record<string, unknown>
 
@@ -299,36 +304,41 @@ async function handleSync(request: NextRequest, body: Record<string, unknown>) {
     }
 
     // Update local database
-    const { db } = await import('@/lib/db')
-    const existing = await db.userSubscription.findFirst({
-      where: { userId },
-    })
-
-    const subscriptionData = {
-      plan,
-      status,
-      productIdentifier,
-      store,
-      expirationDate,
-      isSandbox,
-      autoRenew: status === 'active',
-      lastRevenuecatEvent: 'SYNC',
-      lastEventAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    if (existing) {
-      await db.userSubscription.update({
-        where: { id: existing.id },
-        data: subscriptionData,
+    try {
+      const { db: dbSync } = await import('@/lib/db')
+      const existing = await dbSync.userSubscription.findFirst({
+        where: { userId },
       })
-    } else {
-      await db.userSubscription.create({
-        data: {
-          userId,
-          ...subscriptionData,
-        },
-      })
+
+      const subscriptionData = {
+        plan,
+        status,
+        productIdentifier,
+        store,
+        expirationDate,
+        isSandbox,
+        autoRenew: status === 'active',
+        lastRevenuecatEvent: 'SYNC',
+        lastEventAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      if (existing) {
+        await dbSync.userSubscription.update({
+          where: { id: existing.id },
+          data: subscriptionData,
+        })
+      } else {
+        await dbSync.userSubscription.create({
+          data: {
+            userId,
+            ...subscriptionData,
+          },
+        })
+      }
+    } catch (dbError) {
+      console.error('[SubscriptionAPI] DB sync failed:', dbError)
+      // Non-critical — the RevenueCat data is still valid, just not persisted locally
     }
 
     return NextResponse.json({

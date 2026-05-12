@@ -175,57 +175,67 @@ function parseWeatherFromSearch(city: string, searchResult: string): WeatherData
 // ─── API Route Handler ─────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const city = (searchParams.get('city') || 'riyadh').toLowerCase()
-
-  // Validate city
-  if (!VALID_CITIES.includes(city)) {
-    return NextResponse.json(
-      { error: 'Invalid city. Supported cities: riyadh, jeddah, mecca, medina, dammam' },
-      { status: 400 }
-    )
-  }
-
-  // Try to fetch real weather data using z-ai-web-dev-sdk
   try {
-    const zai = await ZAI.create()
-    const cityName = MOCK_WEATHER[city].city
-    const searchResult = await zai.functions.invoke('web_search', {
-      query: `current weather in ${cityName} Saudi Arabia today temperature`,
+    const searchParams = request.nextUrl.searchParams
+    const city = (searchParams.get('city') || 'riyadh').toLowerCase()
+
+    // Validate city
+    if (!VALID_CITIES.includes(city)) {
+      return NextResponse.json(
+        { error: 'Invalid city. Supported cities: riyadh, jeddah, mecca, medina, dammam' },
+        { status: 400 }
+      )
+    }
+
+    // Try to fetch real weather data using z-ai-web-dev-sdk
+    try {
+      const zai = await ZAI.create()
+      const cityName = MOCK_WEATHER[city].city
+      const searchResult = await zai.functions.invoke('web_search', {
+        query: `current weather in ${cityName} Saudi Arabia today temperature`,
+      })
+
+      if (searchResult && searchResult.length > 0) {
+        // Combine search snippets
+        const combinedText = searchResult
+          .slice(0, 3)
+          .map((r) => `${r.name || ''} ${r.snippet || ''}`)
+          .join(' ')
+
+        const parsedWeather = parseWeatherFromSearch(city, combinedText)
+        if (parsedWeather) {
+          return NextResponse.json(parsedWeather)
+        }
+      }
+    } catch {
+      // z-ai-web-dev-sdk call failed, fall back to static data
+    }
+
+    // Fall back to static mock weather data
+    const mockData = MOCK_WEATHER[city]
+
+    // Use real day names for forecast
+    const forecast: ForecastDay[] = [1, 2, 3].map((offset, idx) => {
+      const { day, dayAr } = getDayName(offset)
+      const baseForecast = mockData.forecast[idx]
+      return {
+        ...baseForecast,
+        day,
+        dayAr,
+      }
     })
 
-    if (searchResult && searchResult.length > 0) {
-      // Combine search snippets
-      const combinedText = searchResult
-        .slice(0, 3)
-        .map((r) => `${r.name || ''} ${r.snippet || ''}`)
-        .join(' ')
-
-      const parsedWeather = parseWeatherFromSearch(city, combinedText)
-      if (parsedWeather) {
-        return NextResponse.json(parsedWeather)
-      }
-    }
-  } catch {
-    // z-ai-web-dev-sdk call failed, fall back to static data
+    return NextResponse.json({
+      ...mockData,
+      forecast,
+    })
+  } catch (error) {
+    console.error('[Weather API] Error:', error)
+    // Return static Riyadh data as ultimate fallback
+    const riyadh = MOCK_WEATHER.riyadh
+    return NextResponse.json({
+      ...riyadh,
+      forecast: riyadh.forecast,
+    })
   }
-
-  // Fall back to static mock weather data
-  const mockData = MOCK_WEATHER[city]
-
-  // Use real day names for forecast
-  const forecast: ForecastDay[] = [1, 2, 3].map((offset, idx) => {
-    const { day, dayAr } = getDayName(offset)
-    const baseForecast = mockData.forecast[idx]
-    return {
-      ...baseForecast,
-      day,
-      dayAr,
-    }
-  })
-
-  return NextResponse.json({
-    ...mockData,
-    forecast,
-  })
 }

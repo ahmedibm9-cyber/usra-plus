@@ -3,12 +3,11 @@
 import { useEffect, useState, useRef, useCallback, useMemo, Component } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient, isDemoMode } from '@/lib/supabase/client'
-import { localGetMe, localLogout, localUserToProfile } from '@/lib/local-auth'
+import { localGetMe, localUserToProfile } from '@/lib/local-auth'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
-import { useUIPreferencesStore } from '@/stores/ui-preferences-store'
 import { initErrorCapture } from '@/lib/error-capture'
 
 // Layout Components
@@ -43,7 +42,6 @@ const PageWrapper = dynamic(() => import('@/components/shared/page-wrapper').the
 // Admin
 const AdminLayout = dynamic(() => import('@/components/admin/admin-layout').then(m => ({ default: m.AdminLayout })), { ssr: false, loading: () => <ChunkLoader /> })
 
-import { Loader2 } from 'lucide-react'
 import type { AppPage } from '@/types'
 
 // ─── Safe Supabase client creation ────────────────────────────────
@@ -56,37 +54,13 @@ function safeCreateClient() {
   }
 }
 
-// Chunk loader — NothingOS industrial spinner
+// Chunk loader — clean emerald spinner
 function ChunkLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-3">
-        <div className="relative w-8 h-8">
-          <div className="absolute inset-0 border-2 border-transparent border-t-[#E50914] rounded-full animate-spin" />
-        </div>
-      </div>
+      <div className="size-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
     </div>
   )
-}
-
-// Live announcer — uses a single persistent live region element
-let _liveRegion: HTMLDivElement | null = null
-function getLiveRegion(): HTMLDivElement {
-  if (_liveRegion && _liveRegion.parentNode) return _liveRegion
-  const el = document.createElement('div')
-  el.setAttribute('role', 'status')
-  el.setAttribute('aria-live', 'polite')
-  el.setAttribute('aria-atomic', 'true')
-  el.className = 'sr-only'
-  document.body.appendChild(el)
-  _liveRegion = el
-  return el
-}
-function announce(message: string) {
-  if (typeof window === 'undefined') return
-  const el = getLiveRegion()
-  el.textContent = ''
-  window.setTimeout(() => { el.textContent = message }, 100)
 }
 
 // ─── Render Error Boundary ────────────────────────────────────────
@@ -108,49 +82,23 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback
       return (
-        <div style={{
-          minHeight: '100vh',
-          background: '#000000',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1.5rem',
-        }}>
-          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px',
-              borderRadius: '14px',
-              background: '#E50914',
-              marginBottom: '20px',
-            }}>
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <div className="max-w-sm w-full text-center">
+            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
               <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                <path d="M8 6L16 2L24 6V14L16 18L8 14V6Z" fill="white" fillOpacity="0.9"/>
-                <path d="M4 16L16 22L28 16V24L16 30L4 24V16Z" fill="white" fillOpacity="0.6"/>
+                <path d="M8 6L16 2L24 6V14L16 18L8 14V6Z" fill="currentColor" className="text-primary" fillOpacity="0.9"/>
+                <path d="M4 16L16 22L28 16V24L16 30L4 24V16Z" fill="currentColor" className="text-primary" fillOpacity="0.5"/>
               </svg>
             </div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#F5F5F0', marginBottom: '8px', fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h2 className="text-lg font-semibold text-foreground mb-2 font-[family-name:var(--font-sans)]">
               Something went wrong
             </h2>
-            <p style={{ fontSize: '14px', color: '#8A8A8A', marginBottom: '16px', lineHeight: '1.6' }}>
+            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               A rendering error occurred. Please try refreshing the page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              style={{
-                padding: '10px 24px',
-                borderRadius: '10px',
-                background: '#E50914',
-                color: '#FFFFFF',
-                fontSize: '14px',
-                fontWeight: 600,
-                fontFamily: "'Space Grotesk', sans-serif",
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Refresh Page
             </button>
@@ -162,38 +110,46 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-// ─── Auth Screen — NothingOS Industrial ───────────────────────────
+// ─── Auth Screen — USRA PLUS Premium ───────────────────────────
 function AuthScreen() {
   const { authView } = useAuthStore()
 
   return (
-    <div className="min-h-screen bg-[--bg-primary] flex items-center justify-center p-4 auth-bg">
-      <div className="auth-blob-1" />
-      <div className="auth-blob-2" />
-      <div className="auth-blob-3" />
-      {authView === 'login' && <LoginForm />}
-      {authView === 'signup' && <SignupForm />}
-      {authView === 'forgot-password' && <ForgotPasswordForm />}
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle background image overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.06] dark:opacity-[0.04] pointer-events-none"
+        style={{ backgroundImage: 'url(/auth-bg.png)' }}
+      />
+      {/* Emerald gradient accent blobs */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
+      <div className="relative z-10 w-full max-w-md">
+        {authView === 'login' && <LoginForm />}
+        {authView === 'signup' && <SignupForm />}
+        {authView === 'forgot-password' && <ForgotPasswordForm />}
+      </div>
     </div>
   )
 }
 
-// ─── Loading Screen — NothingOS Boot Sequence ─────────────────────
+// ─── Loading Screen — USRA PLUS Premium ───────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#E50914] mb-4 animate-pulse-glow">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path d="M8 6L16 2L24 6V14L16 18L8 14V6Z" fill="white" fillOpacity="0.9"/>
-            <path d="M4 16L16 22L28 16V24L16 30L4 24V16Z" fill="white" fillOpacity="0.6"/>
+        <div className="inline-flex items-center justify-center w-14 h-14 mb-4">
+          <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-14 h-14">
+            <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="var(--primary)" fillOpacity="0.15" stroke="var(--primary)" strokeWidth="1.5" />
+            <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="var(--primary)" fillOpacity="0.6" />
+            <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="var(--primary)" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-[#F5F5F0] tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>USRA PLUS</h1>
-        <div className="mt-4">
-          <div className="relative w-6 h-6 mx-auto">
-            <div className="absolute inset-0 border-2 border-transparent border-t-[#E50914] rounded-full animate-spin" />
-          </div>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">
+          USRA PLUS
+        </h1>
+        <div className="mt-4 flex justify-center">
+          <div className="size-5 border-2 border-muted border-t-primary rounded-full animate-spin" />
         </div>
       </div>
     </div>
@@ -205,30 +161,15 @@ const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'milestones', '
 const SWIPE_MIN_DISTANCE = 80
 const SWIPE_MIN_VELOCITY = 0.3
 
-// ─── Main App Layout — NothingOS Dashboard ────────────────────────
+// ─── Main App Layout ──────────────────────────────────────────────
 function MainApp() {
   const { currentPage, currentFamily, showOnboarding, setCurrentPage, demoDataReady } = useAppStore()
   const { user, setUser } = useAuthStore()
-  const reflectionsEnabled = useUIPreferencesStore((s) => s.reflectionsEnabled)
   const supabase = useMemo(() => safeCreateClient(), [])
 
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
   const [swipeOffset, setSwipeOffset] = useState(0)
-  const [scrollProgress, setScrollProgress] = useState(0)
   const mainRef = useRef<HTMLElement>(null)
-  const scrollRafRef = useRef<number | null>(null)
-
-  const handleScrollProgress = useCallback(() => {
-    if (scrollRafRef.current) return
-    scrollRafRef.current = requestAnimationFrame(() => {
-      if (!mainRef.current) { scrollRafRef.current = null; return }
-      const { scrollTop, scrollHeight, clientHeight } = mainRef.current
-      const scrollableHeight = scrollHeight - clientHeight
-      if (scrollableHeight <= 0) { setScrollProgress(0); scrollRafRef.current = null; return }
-      setScrollProgress(Math.min(100, Math.max(0, (scrollTop / scrollableHeight) * 100)))
-      scrollRafRef.current = null
-    })
-  }, [])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0]
@@ -353,16 +294,6 @@ function MainApp() {
     return () => data?.subscription?.unsubscribe()
   }, [supabase, setUser])
 
-  const headingRef = useRef<HTMLHeadingElement>(null)
-  const prevPageRef = useRef<AppPage>(currentPage)
-  useEffect(() => {
-    if (prevPageRef.current !== currentPage) {
-      prevPageRef.current = currentPage
-      announce(`Navigated to ${currentPage} page`)
-      setTimeout(() => { headingRef.current?.focus() }, 100)
-    }
-  }, [currentPage])
-
   if (showOnboarding && !currentFamily) return <OnboardingFlow />
 
   const renderPage = () => {
@@ -383,26 +314,20 @@ function MainApp() {
   }
 
   return (
-    <div className={`min-h-screen bg-[--bg-primary] flex${reflectionsEnabled ? '' : ' reflections-off'}`}>
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#E50914] focus:text-white" tabIndex={0}>
+    <div className="min-h-screen bg-background flex">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground" tabIndex={0}>
         Skip to main content
       </a>
       {/* Demo data loading overlay */}
       {!demoDataReady && (
-        <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-300">
+        <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#E50914] mb-4 animate-pulse-glow">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <path d="M8 6L16 2L24 6V14L16 18L8 14V6Z" fill="white" fillOpacity="0.9"/>
-                <path d="M4 16L16 22L28 16V24L16 30L4 24V16Z" fill="white" fillOpacity="0.6"/>
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-[#F5F5F0] tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>USRA PLUS</h1>
-            <p className="text-sm text-[#8A8A8A] mt-2">Loading demo data…</p>
-            <div className="mt-4">
-              <div className="relative w-6 h-6 mx-auto">
-                <div className="absolute inset-0 border-2 border-transparent border-t-[#E50914] rounded-full animate-spin" />
-              </div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight font-[family-name:var(--font-sans)]">
+              USRA PLUS
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">Loading demo data…</p>
+            <div className="mt-4 flex justify-center">
+              <div className="size-5 border-2 border-muted border-t-primary rounded-full animate-spin" />
             </div>
           </div>
         </div>
@@ -410,16 +335,15 @@ function MainApp() {
       <div className="hidden md:block"><AppSidebar /></div>
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <AppHeader />
-        <div className="scroll-progress" style={{ width: scrollProgress > 0 ? `${scrollProgress}%` : '0%', opacity: scrollProgress > 0 ? 1 : 0 }} />
-        <main id="main-content" ref={mainRef} role="main" className="flex-1 overflow-y-auto relative" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScrollProgress}>
+        <main id="main-content" ref={mainRef} role="main" className="flex-1 overflow-y-auto relative" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
           {swipeOffset !== 0 && (
             <>
-              <div className="fixed top-0 left-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150" style={{ background: 'linear-gradient(to right, rgba(229,9,20,0.4), transparent)', opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0 }} />
-              <div className="fixed top-0 right-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150" style={{ background: 'linear-gradient(to left, rgba(229,9,20,0.4), transparent)', opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0 }} />
+              <div className="fixed top-0 left-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-gradient-to-r from-primary/30 to-transparent" style={{ opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0 }} />
+              <div className="fixed top-0 right-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-gradient-to-l from-primary/30 to-transparent" style={{ opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0 }} />
             </>
           )}
           <div className="p-4 md:p-6 pb-20 md:pb-6 transition-transform duration-100 ease-out" style={{ transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined }}>
-            <h1 ref={headingRef} tabIndex={-1} className="sr-only">{currentPage}</h1>
+            <h1 tabIndex={-1} className="sr-only">{currentPage}</h1>
             {renderPage()}
           </div>
         </main>

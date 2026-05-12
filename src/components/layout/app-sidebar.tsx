@@ -85,34 +85,27 @@ function NavItemButton({
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5
-        text-sm font-medium transition-all duration-200 font-['Inter',sans-serif]
-        hover:bg-[#E50914]/5 btn-bounce
+        group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5
+        text-sm font-medium transition-all duration-150
         ${isActive
-          ? 'sidebar-active-item bg-[#E50914]/10 text-[#E50914]'
-          : 'text-[--sidebar-foreground]/40 hover:text-[--sidebar-foreground]/70'
+          ? 'bg-primary/10 text-primary'
+          : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-muted'
         }
         ${collapsed ? 'justify-center px-2' : ''}
       `}
     >
-      {/* Active left border indicator with Red glow pulse */}
+      {/* Active left border indicator */}
       {isActive && (
         <motion.div
           layoutId="sidebar-active-indicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-[#E50914] sidebar-active-glow badge-pulse-premium"
-          style={{ boxShadow: '0 0 10px rgba(229,9,20,0.5)' }}
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-primary"
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       )}
 
-      {/* Hover left border at 50% opacity */}
-      {!isActive && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full bg-[#E50914]/0 group-hover:bg-[#E50914]/50 transition-colors duration-200" />
-      )}
-
       <Icon
-        className={`size-5 shrink-0 transition-colors duration-200 ${
-          isActive ? 'text-[#E50914]' : 'text-[--sidebar-foreground]/40 group-hover:text-[--sidebar-foreground]/70'
+        className={`size-[18px] shrink-0 transition-colors duration-150 ${
+          isActive ? 'text-primary' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'
         }`}
       />
 
@@ -182,19 +175,13 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
   }, [user])
 
   return (
-    <div
-      className="flex h-full flex-col bg-[--sidebar]"
-      style={{
-        backgroundImage: 'radial-gradient(circle, var(--sidebar-dot-color, rgba(229,9,20,0.03)) 1px, transparent 1px)',
-        backgroundSize: '20px 20px',
-      }}
-    >
+    <div className="flex h-full flex-col bg-sidebar">
       {/* Logo & Family Selector */}
       <div className={`flex flex-col gap-2 ${collapsed ? 'px-2' : 'px-4'} pt-5 pb-2`}>
         {/* Logo */}
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} mb-2`}>
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#E50914] shadow-lg shadow-[#E50914]/20">
-            <span className="text-sm font-bold text-white font-['Space_Grotesk',sans-serif]">U+</span>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary">
+            <span className="text-sm font-bold text-primary-foreground">U+</span>
           </div>
           <AnimatePresence mode="wait">
             {!collapsed && (
@@ -205,7 +192,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                 transition={{ duration: 0.15 }}
                 className="overflow-hidden"
               >
-                <h1 className="text-lg font-bold text-[--sidebar-foreground] tracking-tight whitespace-nowrap font-['Space_Grotesk',sans-serif]">
+                <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight whitespace-nowrap">
                   USRA PLUS
                 </h1>
               </motion.div>
@@ -217,28 +204,28 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         {!collapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-[#E50914]/5 font-['Inter',sans-serif]">
-                <div className="flex size-6 items-center justify-center rounded-md bg-[#E50914]/20">
-                  <Users className="size-3.5 text-[#E50914]" />
+              <button className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted">
+                <div className="flex size-6 items-center justify-center rounded-md bg-primary/15">
+                  <Users className="size-3.5 text-primary" />
                 </div>
-                <span className="flex-1 truncate text-[--sidebar-foreground]/70">
+                <span className="flex-1 truncate text-sidebar-foreground/70">
                   {currentFamily?.name || t.nav.dashboard}
                 </span>
-                <ChevronsUpDown className="size-3.5 text-[--sidebar-foreground]/30" />
+                <ChevronsUpDown className="size-3.5 text-sidebar-foreground/30" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-56 bg-[--sidebar] border-[--sidebar-border] text-[--sidebar-foreground]/70"
+              className="w-56"
             >
-              <DropdownMenuLabel className="text-[--sidebar-foreground]/30 text-xs font-['Space_Grotesk',sans-serif]">
+              <DropdownMenuLabel className="text-muted-foreground text-xs">
                 {t.settings.family}
               </DropdownMenuLabel>
               {families.map((family) => (
                 <DropdownMenuItem
                   key={family.id}
                   onClick={() => handleFamilySwitch(family.id)}
-                  className={currentFamily?.id === family.id ? 'bg-[#E50914]/10 text-[#E50914]' : ''}
+                  className={currentFamily?.id === family.id ? 'bg-primary/10 text-primary' : ''}
                 >
                   <Users className="size-4 mr-2" />
                   {family.name}
@@ -249,11 +236,11 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         )}
       </div>
 
-      <Separator className="bg-[--sidebar-border] mx-3" />
+      <Separator className="mx-3" />
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-2 py-3">
-        <nav role="navigation" aria-label="Main navigation" data-tour="sidebar" className="flex flex-col gap-1">
+        <nav role="navigation" aria-label="Main navigation" data-tour="sidebar" className="flex flex-col gap-0.5">
           {navItems.map((item) => (
             <NavItemButton
               key={item.page}
@@ -266,7 +253,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         </nav>
       </ScrollArea>
 
-      <Separator className="bg-[--sidebar-border] mx-3" />
+      <Separator className="mx-3" />
 
       {/* User Profile */}
       <div className={`p-3 ${collapsed ? 'px-2' : ''}`}>
@@ -275,14 +262,14 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             <button
               aria-label="User menu"
               className={`
-                flex w-full items-center gap-3 rounded-xl px-2.5 py-2
-                transition-colors hover:bg-[#E50914]/5 font-['Inter',sans-serif]
+                flex w-full items-center gap-3 rounded-lg px-2.5 py-2
+                transition-colors hover:bg-muted
                 ${collapsed ? 'justify-center' : ''}
               `}
             >
-              <Avatar className="size-8 ring-2 ring-[--sidebar-border]">
+              <Avatar className="size-8 ring-2 ring-sidebar-border">
                 <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className="bg-[#E50914]/20 text-[#E50914] text-xs font-semibold font-['Space_Grotesk',sans-serif]">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
@@ -296,10 +283,10 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                     className="flex-1 overflow-hidden text-left"
                   >
                     <div className="flex items-center gap-1.5">
-                      <p className="truncate text-sm font-medium text-[--sidebar-foreground] font-['Space_Grotesk',sans-serif]">{displayName}</p>
+                      <p className="truncate text-sm font-medium text-sidebar-foreground">{displayName}</p>
                       <PlanBadge />
                     </div>
-                    <p className="truncate text-xs text-[--sidebar-foreground]/40 font-['Inter',sans-serif]">{user?.email}</p>
+                    <p className="truncate text-xs text-sidebar-foreground/40">{user?.email}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -307,23 +294,23 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56 bg-[--sidebar] border-[--sidebar-border] text-[--sidebar-foreground]/70"
+            className="w-56"
           >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-[--sidebar-foreground] font-['Space_Grotesk',sans-serif]">{displayName}</p>
-                <p className="text-xs text-[--sidebar-foreground]/40 font-['Inter',sans-serif]">{user?.email}</p>
+                <p className="text-sm font-medium text-foreground">{displayName}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-[--sidebar-border]" />
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleNavClick('settings')}>
               <Settings className="size-4 mr-2" />
               {t.nav.settings}
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-[--sidebar-border]" />
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={logout}
-              className="text-red-400 focus:text-red-300 focus:bg-red-500/10"
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <LogOut className="size-4 mr-2" />
               {t.auth.logout}
@@ -343,7 +330,7 @@ export function AppSidebar() {
     <>
       {/* Desktop Sidebar */}
       <motion.aside
-        className="hidden md:flex relative h-screen border-r border-[--sidebar-border] bg-[--sidebar] z-30"
+        className="hidden md:flex relative h-screen border-r border-sidebar-border bg-sidebar z-30"
         animate={{ width: sidebarCollapsed ? 72 : 256 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
@@ -352,7 +339,7 @@ export function AppSidebar() {
         {/* Collapse Toggle */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-[--sidebar-border] bg-[--sidebar] text-[--sidebar-foreground]/40 shadow-lg transition-all hover:bg-[#E50914]/10 hover:text-[#E50914] hover:border-[#E50914]/30"
+          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-all hover:bg-primary/10 hover:text-primary hover:border-primary/30"
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {sidebarCollapsed ? (
@@ -367,7 +354,7 @@ export function AppSidebar() {
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent
           side="left"
-          className="w-72 border-r border-[--sidebar-border] bg-[--sidebar] p-0"
+          className="w-72 border-r border-sidebar-border bg-sidebar p-0"
         >
           <SheetTitle className="sr-only">{t.app.name}</SheetTitle>
           <SidebarContent

@@ -8,10 +8,26 @@ import { useI18n } from '@/i18n/use-translation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArrowLeft, Mail, Loader2, CheckCircle2, CircleAlert } from 'lucide-react'
+import { ArrowLeft, Mail, Loader2, CheckCircle2 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { toast } from 'sonner'
+
+// ─── USRA PLUS Emerald Hexagon Logo SVG ──────────────────────────
+function HexLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#059669" fillOpacity="0.15" stroke="#059669" strokeWidth="1.5" />
+      <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#059669" fillOpacity="0.6" />
+      <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#059669" />
+    </svg>
+  )
+}
+
+// ─── Animation variants ───────────────────────────────────────────
+const fadeUp = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+}
 
 export function ForgotPasswordForm() {
   const { setAuthView } = useAuthStore()
@@ -39,7 +55,6 @@ export function ForgotPasswordForm() {
     setIsLoading(true)
 
     try {
-      // Password reset not available in local mode
       if (isDemoMode()) {
         setError(isRTL ? 'إعادة تعيين كلمة المرور غير متاحة حالياً. يرجى إنشاء حساب جديد.' : 'Password reset is not available in offline mode. Please create a new account.')
         toast.error(isRTL ? 'إعادة تعيين كلمة المرور غير متاحة' : 'Password reset unavailable')
@@ -69,76 +84,76 @@ export function ForgotPasswordForm() {
     }
   }
 
+  // ─── Success State ──────────────────────────────────────────────
   if (isSent) {
     return (
       <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
-        {/* Decorative accent line at top */}
-        <div className="absolute -top-px inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-[#E50914] via-[#007AFF] to-[#007AFF]" />
-
-        <div className="bg-gradient-to-b from-[--bg-surface] to-[--bg-surface-2] rounded-3xl p-8 border border-[--border-subtle] shadow-2xl backdrop-blur-xl text-center space-y-6">
+        <motion.div
+          className="bg-card rounded-2xl p-8 border border-border shadow-xl backdrop-blur-sm text-center space-y-6"
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
           {/* Theme toggle */}
           <div className="flex justify-start">
             <ThemeToggle />
           </div>
 
-          {/* Success illustration — iOS 26 green (#34C759) */}
+          {/* Success illustration */}
           <motion.div
             className="flex justify-center"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0 }}
+            {...fadeUp}
+            transition={{ duration: 0.35, delay: 0 }}
           >
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-center">
-                <CheckCircle2 className="w-10 h-10 text-[#34C759]" />
+              <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-primary" />
               </div>
-              <div className="absolute -inset-2 rounded-full bg-[#34C759]/5 animate-pulse" />
+              <div className="absolute -inset-2 rounded-full bg-primary/5 animate-pulse" />
             </div>
           </motion.div>
 
           <motion.div
             className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            {...fadeUp}
+            transition={{ duration: 0.35, delay: 0.1 }}
           >
-            <h2 className="text-2xl font-bold text-[--text-primary] font-display">
+            <h2 className="text-2xl font-bold text-foreground font-display">
               {t.auth.resetPassword}
             </h2>
-            <p className="text-[--text-muted] text-sm">
+            <p className="text-muted-foreground text-sm">
               {t.auth.verificationSent}
             </p>
-            <p className="text-[#007AFF] font-medium text-sm">{email}</p>
-            <p className="text-[--text-muted] text-sm mt-2">
+            <p className="text-primary font-medium text-sm">{email}</p>
+            <p className="text-muted-foreground text-sm mt-2">
               {t.auth.checkInbox}
             </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
+          <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
             <Button
               onClick={() => setAuthView('login')}
               variant="outline"
-              className="w-full border-[--border-subtle] bg-[--bg-surface] text-[--text-secondary] hover:bg-[--bg-surface-2] hover:text-[--text-primary] rounded-xl h-11 hover:scale-[1.01] transition-all duration-200"
+              className="w-full border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground rounded-xl h-11 transition-all duration-200"
             >
               <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
               {t.auth.backToLogin}
             </Button>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
+  // ─── Default State ──────────────────────────────────────────────
   return (
     <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Decorative accent line at top */}
-      <div className="absolute -top-px inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-[#E50914] via-[#007AFF] to-[#007AFF]" />
-
-      <div className="bg-gradient-to-b from-[--bg-surface] to-[--bg-surface-2] rounded-3xl p-8 border border-[--border-subtle] shadow-2xl backdrop-blur-xl space-y-6">
+      <motion.div
+        className="bg-card rounded-2xl p-8 border border-border shadow-xl backdrop-blur-sm space-y-6"
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
         {/* Theme toggle */}
         <div className="flex justify-start">
           <ThemeToggle />
@@ -147,36 +162,34 @@ export function ForgotPasswordForm() {
         {/* Header */}
         <motion.div
           className="space-y-2 text-center"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0 }}
+          {...fadeUp}
+          transition={{ duration: 0.35, delay: 0 }}
         >
           <div className="flex justify-center mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-[#007AFF]/10 border border-[#007AFF]/20 flex items-center justify-center">
-              <Mail className="w-7 h-7 text-[#007AFF]" />
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Mail className="w-7 h-7 text-primary" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[--text-primary] font-display">
-            {t.auth.resetPassword}
+          <h2 className="text-2xl font-bold text-foreground font-display">
+            {isRTL ? 'إعادة تعيين كلمة المرور' : 'Reset Password'}
           </h2>
-          <p className="text-[--text-muted] text-sm">
-            {t.auth.verificationSent}
+          <p className="text-muted-foreground text-sm">
+            {isRTL ? 'أدخل بريدك الإلكتروني وسنرسل لك رابط الإعادة' : "Enter your email and we'll send you a reset link"}
           </p>
         </motion.div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            className="space-y-1.5"
+            {...fadeUp}
+            transition={{ duration: 0.35, delay: 0.1 }}
           >
-            <Label htmlFor="reset-email" className="text-[--text-secondary] text-sm font-medium">
+            <Label htmlFor="reset-email" className="text-sm font-medium text-muted-foreground">
               {t.auth.email}
             </Label>
-            <div className="auth-input-wrapper">
-              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+            <div className="relative">
+              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
               <Input
                 id="reset-email"
                 type="email"
@@ -186,35 +199,25 @@ export function ForgotPasswordForm() {
                   setEmail(e.target.value)
                   if (error) setError('')
                 }}
-                className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
+                className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
                 disabled={isLoading}
               />
             </div>
-            {/* Error using Alert */}
             {error && (
-              <Alert variant="destructive" className="border-[#FF3B30]/20 bg-[#FF3B30]/5 rounded-xl mt-2">
-                <CircleAlert className="h-4 w-4 text-[#FF3B30]" />
-                <AlertDescription className="text-sm text-[#FF3B30]">
-                  {error}
-                </AlertDescription>
-              </Alert>
+              <p className="text-xs text-destructive mt-1">{error}</p>
             )}
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-          >
+          <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.15 }}>
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-[#007AFF]/20 hover:shadow-[0_0_20px_rgba(0,122,255,0.3)] hover:shadow-[#007AFF]/30 font-display"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-primary/20 font-display"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                t.auth.resetPassword
+                isRTL ? 'إرسال رابط الإعادة' : 'Send Reset Link'
               )}
             </Button>
           </motion.div>
@@ -223,21 +226,20 @@ export function ForgotPasswordForm() {
         {/* Back to login */}
         <motion.div
           className="text-center"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
+          {...fadeUp}
+          transition={{ duration: 0.35, delay: 0.2 }}
         >
           <Button
             type="button"
             variant="ghost"
             onClick={() => setAuthView('login')}
-            className="text-sm text-[--text-muted] hover:text-[#007AFF] transition-colors duration-200 inline-flex items-center gap-1.5 h-auto p-0 hover:bg-transparent"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200 inline-flex items-center gap-1.5 h-auto p-0 hover:bg-transparent"
           >
             <ArrowLeft className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
             {t.auth.backToLogin}
           </Button>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }

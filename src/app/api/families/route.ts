@@ -57,14 +57,13 @@ function serializeSupabaseFamily(family: Record<string, unknown>) {
 
 // ─── POST: Create Family ────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(req)
-  if (auth.error) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-  }
-
-  const userId = auth.userId
-
   try {
+    const auth = await requireAuth(req)
+    if (auth.error) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
+    const userId = auth.userId
     const body = await req.json()
     const { name, description } = body as { name?: string; description?: string }
 
@@ -213,14 +212,13 @@ export async function POST(req: NextRequest) {
 
 // ─── PUT: Join Family ───────────────────────────────────────────────────
 export async function PUT(req: NextRequest) {
-  const auth = await requireAuth(req)
-  if (auth.error) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-  }
-
-  const userId = auth.userId
-
   try {
+    const auth = await requireAuth(req)
+    if (auth.error) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
+    const userId = auth.userId
     const body = await req.json()
     const { inviteCode } = body as { inviteCode?: string }
 
@@ -345,14 +343,13 @@ export async function PUT(req: NextRequest) {
 
 // ─── GET: List User's Families ──────────────────────────────────────────
 export async function GET(req: NextRequest) {
-  const auth = await requireAuth(req)
-  if (auth.error) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-  }
-
-  const userId = auth.userId
-
   try {
+    const auth = await requireAuth(req)
+    if (auth.error) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
+    const userId = auth.userId
     // Try Prisma first
     try {
       // Get all FamilyMember records for the user, including family data

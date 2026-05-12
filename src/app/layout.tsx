@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
 const spaceGrotesk = Space_Grotesk({
-  variable: "--font-sans",
+  variable: "--font-display",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
@@ -54,7 +54,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#E50914",
+  themeColor: "#059669",
 };
 
 export default function RootLayout({

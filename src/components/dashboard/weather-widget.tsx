@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Sun,
-  Cloud,
-  CloudRain,
-  CloudSun,
-  Droplets,
-  Wind,
-  MapPin,
-  ChevronDown,
+ Sun,
+ Cloud,
+ CloudRain,
+ CloudSun,
+ Droplets,
+ Wind,
+ MapPin,
+ ChevronDown,
 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useI18n } from '@/i18n/use-translation'
@@ -18,294 +18,294 @@ import { useI18n } from '@/i18n/use-translation'
 // ─── Types ────────────────────────────────────────────────────────
 
 interface ForecastDay {
-  day: string
-  dayAr: string
-  high: number
-  low: number
-  condition: string
-  icon: string
+ day: string
+ dayAr: string
+ high: number
+ low: number
+ condition: string
+ icon: string
 }
 
 interface WeatherData {
-  city: string
-  temp: number
-  feelsLike: number
-  condition: string
-  humidity: number
-  windSpeed: number
-  icon: string
-  forecast: ForecastDay[]
+ city: string
+ temp: number
+ feelsLike: number
+ condition: string
+ humidity: number
+ windSpeed: number
+ icon: string
+ forecast: ForecastDay[]
 }
 
 // ─── City Data ─────────────────────────────────────────────────────
 
 const CITIES = [
-  { key: 'riyadh', nameEn: 'Riyadh', nameAr: 'الرياض' },
-  { key: 'jeddah', nameEn: 'Jeddah', nameAr: 'جدة' },
-  { key: 'mecca', nameEn: 'Mecca', nameAr: 'مكة' },
-  { key: 'medina', nameEn: 'Medina', nameAr: 'المدينة' },
-  { key: 'dammam', nameEn: 'Dammam', nameAr: 'الدمام' },
+ { key: 'riyadh', nameEn: 'Riyadh', nameAr: 'الرياض' },
+ { key: 'jeddah', nameEn: 'Jeddah', nameAr: 'جدة' },
+ { key: 'mecca', nameEn: 'Mecca', nameAr: 'مكة' },
+ { key: 'medina', nameEn: 'Medina', nameAr: 'المدينة' },
+ { key: 'dammam', nameEn: 'Dammam', nameAr: 'الدمام' },
 ]
 
 // ─── Condition Icon Mapper ─────────────────────────────────────────
 
 function WeatherIcon({ icon, className = '', animate = false }: { icon: string; className?: string; animate?: boolean }) {
-  const iconMap: Record<string, React.ElementType> = {
-    sun: Sun,
-    cloud: Cloud,
-    'cloud-rain': CloudRain,
-    'cloud-sun': CloudSun,
-  }
+ const iconMap: Record<string, React.ElementType> = {
+  sun: Sun,
+  cloud: Cloud,
+  'cloud-rain': CloudRain,
+  'cloud-sun': CloudSun,
+ }
 
-  const IconComponent = iconMap[icon] || Sun
+ const IconComponent = iconMap[icon] || Sun
 
-  if (animate) {
-    return (
-      <motion.div
-        animate={
-          icon === 'sun'
-            ? { y: [0, -3, 0] }
-            : icon === 'cloud' || icon === 'cloud-sun'
-              ? { x: [0, 2, 0] }
-              : { y: [0, 1, 0] }
-        }
-        transition={{
-          duration: icon === 'sun' ? 3 : icon === 'cloud' || icon === 'cloud-sun' ? 4 : 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-        className={className}
-      >
-        <IconComponent className="size-full" />
-      </motion.div>
-    )
-  }
+ if (animate) {
+  return (
+   <motion.div
+    animate={
+     icon === 'sun'
+      ? { y: [0, -3, 0] }
+      : icon === 'cloud' || icon === 'cloud-sun'
+       ? { x: [0, 2, 0] }
+       : { y: [0, 1, 0] }
+    }
+    transition={{
+     duration: icon === 'sun' ? 3 : icon === 'cloud' || icon === 'cloud-sun' ? 4 : 2,
+     repeat: Infinity,
+     ease: 'easeInOut',
+    }}
+    className={className}
+   >
+    <IconComponent className="size-full" />
+   </motion.div>
+  )
+ }
 
-  return <IconComponent className={className} />
+ return <IconComponent className={className} />
 }
 
 // ─── Condition Label ───────────────────────────────────────────────
 
 function getConditionLabel(condition: string, isRTL: boolean): string {
-  const t = useI18n.getState().t
-  const labels: Record<string, string> = {
-    sunny: t.weather.sunny,
-    partlyCloudy: t.weather.partlyCloudy,
-    cloudy: t.weather.cloudy,
-    rainy: t.weather.rainy,
-    clear: t.weather.clear,
-  }
-  return labels[condition] || (isRTL ? 'مشمس' : 'Sunny')
+ const t = useI18n.getState().t
+ const labels: Record<string, string> = {
+  sunny: t.weather.sunny,
+  partlyCloudy: t.weather.partlyCloudy,
+  cloudy: t.weather.cloudy,
+  rainy: t.weather.rainy,
+  clear: t.weather.clear,
+ }
+ return labels[condition] || (isRTL ? 'مشمس' : 'Sunny')
 }
 
 // ─── Fallback Weather (Riyadh) ─────────────────────────────────────
 
 const FALLBACK_WEATHER: WeatherData = {
-  city: 'Riyadh',
-  temp: 34,
-  feelsLike: 36,
-  condition: 'sunny',
-  humidity: 18,
-  windSpeed: 12,
-  icon: 'sun',
-  forecast: [
-    { day: 'Thu', dayAr: 'خميس', high: 36, low: 22, condition: 'sunny', icon: 'sun' },
-    { day: 'Fri', dayAr: 'جمعة', high: 35, low: 21, condition: 'partlyCloudy', icon: 'cloud-sun' },
-    { day: 'Sat', dayAr: 'سبت', high: 37, low: 23, condition: 'sunny', icon: 'sun' },
-  ],
+ city: 'Riyadh',
+ temp: 34,
+ feelsLike: 36,
+ condition: 'sunny',
+ humidity: 18,
+ windSpeed: 12,
+ icon: 'sun',
+ forecast: [
+  { day: 'Thu', dayAr: 'خميس', high: 36, low: 22, condition: 'sunny', icon: 'sun' },
+  { day: 'Fri', dayAr: 'جمعة', high: 35, low: 21, condition: 'partlyCloudy', icon: 'cloud-sun' },
+  { day: 'Sat', dayAr: 'سبت', high: 37, low: 23, condition: 'sunny', icon: 'sun' },
+ ],
 }
 
 // ─── Weather Widget Component ──────────────────────────────────────
 
 export function WeatherWidget() {
-  const { t, isRTL } = useI18n()
-  const [selectedCity, setSelectedCity] = useState('riyadh')
-  const [weather, setWeather] = useState<WeatherData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [citySelectorOpen, setCitySelectorOpen] = useState(false)
-  const selectorRef = useRef<HTMLDivElement>(null)
+ const { t, isRTL } = useI18n()
+ const [selectedCity, setSelectedCity] = useState('riyadh')
+ const [weather, setWeather] = useState<WeatherData | null>(null)
+ const [isLoading, setIsLoading] = useState(true)
+ const [error, setError] = useState(false)
+ const [citySelectorOpen, setCitySelectorOpen] = useState(false)
+ const selectorRef = useRef<HTMLDivElement>(null)
 
-  // Close city selector when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) {
-        setCitySelectorOpen(false)
-      }
-    }
-    if (citySelectorOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [citySelectorOpen])
-
-  const fetchWeather = useCallback(async (city: string) => {
-    setIsLoading(true)
-    setError(false)
-    try {
-      const response = await fetch(`/api/weather?city=${city}`)
-      if (!response.ok) throw new Error('Failed to fetch weather')
-      const data = await response.json() as WeatherData
-      setWeather(data)
-    } catch {
-      setError(true)
-      setWeather(FALLBACK_WEATHER)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchWeather(selectedCity)
-  }, [selectedCity, fetchWeather])
-
-  const currentCity = CITIES.find((c) => c.key === selectedCity) || CITIES[0]
-
-  const handleCitySelect = (cityKey: string) => {
-    setSelectedCity(cityKey)
+ // Close city selector when clicking outside
+ useEffect(() => {
+  function handleClickOutside(e: MouseEvent) {
+   if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) {
     setCitySelectorOpen(false)
+   }
   }
+  if (citySelectorOpen) {
+   document.addEventListener('mousedown', handleClickOutside)
+   return () => document.removeEventListener('mousedown', handleClickOutside)
+  }
+ }, [citySelectorOpen])
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.23, ease: [0.25, 0.46, 0.45, 0.94] }}
-    >
-      <div className="relative overflow-hidden glass-card card-hover rounded-xl border border-[--border-subtle] bg-[--bg-surface] dot-grid-bg shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 p-4 lg:p-5">
-        {/* Weather-themed subtle gradient overlay */}
-        <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-[#E50914]/[0.03] via-transparent to-[#F4C430]/[0.02]" />
+ const fetchWeather = useCallback(async (city: string) => {
+  setIsLoading(true)
+  setError(false)
+  try {
+   const response = await fetch(`/api/weather?city=${city}`)
+   if (!response.ok) throw new Error('Failed to fetch weather')
+   const data = await response.json() as WeatherData
+   setWeather(data)
+  } catch {
+   setError(true)
+   setWeather(FALLBACK_WEATHER)
+  } finally {
+   setIsLoading(false)
+  }
+ }, [])
 
-        {/* Header: Title + City Selector */}
-        <div className="relative mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="size-4 text-[#E50914]" />
-            <h3 className="section-header-lg">
-              {t.weather.weather}
-            </h3>
-          </div>
+ useEffect(() => {
+  fetchWeather(selectedCity)
+ }, [selectedCity, fetchWeather])
 
-          {/* City Selector Dropdown */}
-          <div ref={selectorRef} className="relative">
-            <button
-              onClick={() => setCitySelectorOpen(!citySelectorOpen)}
-              className="flex items-center gap-1 text-xs bg-transparent border border-[--border-subtle] rounded-lg px-2 py-1 text-[--text-muted] hover:text-[--text-primary] hover:border-[--border-medium] transition-colors"
-            >
-              {isRTL ? currentCity.nameAr : currentCity.nameEn}
-              <ChevronDown className={`size-3 transition-transform ${citySelectorOpen ? 'rotate-180' : ''}`} />
-            </button>
+ const currentCity = CITIES.find((c) => c.key === selectedCity) || CITIES[0]
 
-            <AnimatePresence>
-              {citySelectorOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -4, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className={`absolute top-full mt-1 z-50 min-w-[140px] rounded-lg border border-[--border-subtle] bg-[--bg-surface] shadow-xl overflow-hidden ${
-                    isRTL ? 'left-0' : 'right-0'
-                  }`}
-                >
-                  {CITIES.map((city) => (
-                    <button
-                      key={city.key}
-                      onClick={() => handleCitySelect(city.key)}
-                      className={`w-full px-3 py-2 text-left text-xs transition-colors hover:bg-[--border-subtle] ${
-                        selectedCity === city.key
-                          ? 'text-[#E50914] bg-[#E50914]/[0.08]'
-                          : 'text-[--text-muted]'
-                      }`}
-                    >
-                      <span className="text-[--text-primary]">{isRTL ? city.nameAr : city.nameEn}</span>
-                      <span className="text-[--text-muted] mx-1.5">·</span>
-                      <span className="text-[--text-muted]">{isRTL ? city.nameEn : city.nameAr}</span>
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+ const handleCitySelect = (cityKey: string) => {
+  setSelectedCity(cityKey)
+  setCitySelectorOpen(false)
+ }
 
-        {/* Main Weather Display */}
-        {isLoading ? (
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-10 rounded-full" />
-            <div className="flex-1 space-y-1.5">
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          </div>
-        ) : (
-          <div className="relative">
-            <div className="flex items-center gap-3">
-              {/* Weather Icon Container with CSS animation */}
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#E50914]/20 to-[#E50914]/10 flex items-center justify-center text-[#E50914]">
-                <WeatherIcon icon={weather?.icon || 'sun'} className="size-5" animate />
-              </div>
+ return (
+  <motion.div
+   initial={{ opacity: 0, y: 12 }}
+   animate={{ opacity: 1, y: 0 }}
+   transition={{ duration: 0.4, delay: 0.23, ease: [0.25, 0.46, 0.45, 0.94] }}
+  >
+   <div className="relative overflow-hidden card-hover rounded-xl border border-border bg-card shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 p-4 lg:p-5">
+    {/* Weather-themed subtle gradient overlay */}
+    <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-primary/[0.03] via-transparent to-accent/[0.02]" />
 
-              {/* Temperature + Condition */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-heading-2 text-[--text-primary] text-metric">
-                    {weather?.temp ?? '--'}°
-                  </span>
-                  <span className="text-caption text-[--text-muted]">
-                    {weather ? getConditionLabel(weather.condition, isRTL) : ''}
-                  </span>
-                </div>
-                <p className="text-[10px] text-[--text-muted]">
-                  {t.weather.feelsLike} {weather?.feelsLike ?? '--'}°
-                </p>
-              </div>
-            </div>
+    {/* Header: Title + City Selector */}
+    <div className="relative mb-3 flex items-center justify-between">
+     <div className="flex items-center gap-2">
+      <MapPin className="size-4 text-primary" />
+      <h3 className="section-header-lg">
+       {t.weather.weather}
+      </h3>
+     </div>
 
-            {/* Humidity + Wind Row */}
-            <div className="flex items-center gap-4 mt-2.5">
-              <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-                <Droplets className="size-3 text-blue-400" />
-                <span>{weather?.humidity ?? '--'}%</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-                <Wind className="size-3 text-[#F4C430]" />
-                <span>{weather?.windSpeed ?? '--'} km/h</span>
-              </div>
-            </div>
+     {/* City Selector Dropdown */}
+     <div ref={selectorRef} className="relative">
+      <button
+       onClick={() => setCitySelectorOpen(!citySelectorOpen)}
+       className="flex items-center gap-1 text-xs bg-transparent border border-border rounded-lg px-2 py-1 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+      >
+       {isRTL ? currentCity.nameAr : currentCity.nameEn}
+       <ChevronDown className={`size-3 transition-transform ${citySelectorOpen ? 'rotate-180' : ''}`} />
+      </button>
 
-            {/* 3-Day Forecast - Horizontal on desktop, vertical on mobile */}
-            {weather?.forecast && weather.forecast.length > 0 && (
-              <div className="mt-3 pt-2.5 border-t border-[--border-subtle]">
-                <p className="text-[10px] uppercase tracking-wider text-[--text-muted] mb-2">
-                  {t.weather.forecast}
-                </p>
-                <div className="flex gap-3 sm:flex-row sm:justify-between">
-                  {weather.forecast.map((day) => (
-                    <div
-                      key={day.day}
-                      className="flex items-center gap-1.5 text-xs text-[--text-muted] min-w-0"
-                    >
-                      <span className="text-[--text-primary] font-medium text-[11px] shrink-0">
-                        {isRTL ? day.dayAr : day.day}
-                      </span>
-                      <WeatherIcon icon={day.icon} className="size-3.5 shrink-0" />
-                      <span className="text-[--text-primary] font-medium">{day.high}°</span>
-                      <span className="text-[--text-muted]">/</span>
-                      <span>{day.low}°</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+      <AnimatePresence>
+       {citySelectorOpen && (
+        <motion.div
+         initial={{ opacity: 0, y: -4, scale: 0.95 }}
+         animate={{ opacity: 1, y: 0, scale: 1 }}
+         exit={{ opacity: 0, y: -4, scale: 0.95 }}
+         transition={{ duration: 0.15 }}
+         className={`absolute top-full mt-1 z-50 min-w-[140px] rounded-lg border border-border bg-card shadow-xl overflow-hidden ${
+          isRTL ? 'left-0' : 'right-0'
+         }`}
+        >
+         {CITIES.map((city) => (
+          <button
+           key={city.key}
+           onClick={() => handleCitySelect(city.key)}
+           className={`w-full px-3 py-2 text-left text-xs transition-colors hover:bg-border ${
+            selectedCity === city.key
+             ? 'text-primary bg-primary/[0.08]'
+             : 'text-muted-foreground'
+           }`}
+          >
+           <span className="text-foreground">{isRTL ? city.nameAr : city.nameEn}</span>
+           <span className="text-muted-foreground mx-1.5">·</span>
+           <span className="text-muted-foreground">{isRTL ? city.nameEn : city.nameAr}</span>
+          </button>
+         ))}
+        </motion.div>
+       )}
+      </AnimatePresence>
+     </div>
+    </div>
 
-            {/* Error indicator */}
-            {error && (
-              <p className="mt-2 text-[10px] text-[--text-muted]/50 text-center">
-                {isRTL ? 'يتم عرض بيانات تقريبية' : 'Showing approximate data'}
-              </p>
-            )}
-          </div>
-        )}
+    {/* Main Weather Display */}
+    {isLoading ? (
+     <div className="flex items-center gap-3">
+      <Skeleton className="size-10 rounded-full" />
+      <div className="flex-1 space-y-1.5">
+       <Skeleton className="h-6 w-16" />
+       <Skeleton className="h-3 w-24" />
       </div>
-    </motion.div>
-  )
+     </div>
+    ) : (
+     <div className="relative">
+      <div className="flex items-center gap-3">
+       {/* Weather Icon Container with CSS animation */}
+       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary">
+        <WeatherIcon icon={weather?.icon || 'sun'} className="size-5" animate />
+       </div>
+
+       {/* Temperature + Condition */}
+       <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-1.5">
+         <span className="text-xl text-foreground">
+          {weather?.temp ?? '--'}°
+         </span>
+         <span className="text-xs text-muted-foreground">
+          {weather ? getConditionLabel(weather.condition, isRTL) : ''}
+         </span>
+        </div>
+        <p className="text-[10px] text-muted-foreground">
+         {t.weather.feelsLike} {weather?.feelsLike ?? '--'}°
+        </p>
+       </div>
+      </div>
+
+      {/* Humidity + Wind Row */}
+      <div className="flex items-center gap-4 mt-2.5">
+       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Droplets className="size-3 text-blue-400" />
+        <span>{weather?.humidity ?? '--'}%</span>
+       </div>
+       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Wind className="size-3 text-accent" />
+        <span>{weather?.windSpeed ?? '--'} km/h</span>
+       </div>
+      </div>
+
+      {/* 3-Day Forecast - Horizontal on desktop, vertical on mobile */}
+      {weather?.forecast && weather.forecast.length > 0 && (
+       <div className="mt-3 pt-2.5 border-t border-border">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+         {t.weather.forecast}
+        </p>
+        <div className="flex gap-3 sm:flex-row sm:justify-between">
+         {weather.forecast.map((day) => (
+          <div
+           key={day.day}
+           className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0"
+          >
+           <span className="text-foreground font-medium text-[11px] shrink-0">
+            {isRTL ? day.dayAr : day.day}
+           </span>
+           <WeatherIcon icon={day.icon} className="size-3.5 shrink-0" />
+           <span className="text-foreground font-medium">{day.high}°</span>
+           <span className="text-muted-foreground">/</span>
+           <span>{day.low}°</span>
+          </div>
+         ))}
+        </div>
+       </div>
+      )}
+
+      {/* Error indicator */}
+      {error && (
+       <p className="mt-2 text-[10px] text-muted-foreground/50 text-center">
+        {isRTL ? 'يتم عرض بيانات تقريبية' : 'Showing approximate data'}
+       </p>
+      )}
+     </div>
+    )}
+   </div>
+  </motion.div>
+ )
 }
