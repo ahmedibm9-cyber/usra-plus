@@ -1,0 +1,224 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import bcrypt from 'bcryptjs'
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { firstName, lastName, email, password, phone, countryCode } = body
+
+    // Validation
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: 'Email and password are required' },
+        { status: 400 }
+      )
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: 'Password must be at least 8 characters' },
+        { status: 400 }
+      )
+    }
+
+    const emailLower = email.toLowerCase()
+    const passwordHash = await bcrypt.hash(password, 12)
+
+    // Try Prisma first (local SQLite), fall back to Supabase REST API (Vercel)
+    let user: {
+      id: string
+      email: string
+      firstName: string | null
+      lastName: string | null
+      phone: string | null
+      countryCode: string | null
+      avatarUrl: string | null
+      language: string
+      theme: string
+      emailVerified: boolean
+      createdAt: string
+      updatedAt: string
+    }
+
+    try {
+      // Try Prisma (local dev with SQLite)
+      const existing = await db.user.findUnique({ where: { email: emailLower } })
+      if (existing) {
+        return NextResponse.json(
+          { error: 'An account with this email already exists' },
+          { status: 409 }
+        )
+      }
+
+      // Create user with emailVerified = false — OTP verification required
+      const dbUser = await db.user.create({
+        data: {
+          email: emailLower,
+          passwordHash,
+          firstName: firstName || null,
+          lastName: lastName || null,
+          phone: phone || null,
+          countryCode: countryCode || '+966',
+          emailVerified: false,
+        },
+      })
+
+      // Invalidate any existing unused codes for this email
+      await db.verificationCode.updateMany({
+        where: {
+          email: emailLower,
+          usedAt: null,
+          expiresAt: { gt: new Date() },
+        },
+        data: { usedAt: new Date() },
+      })
+
+      // Generate 6-digit OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+
+      // Store the verification code
+      await db.verificationCode.create({
+        data: {
+          email: emailLower,
+          code: otpCode,
+          expiresAt: otpExpiresAt,
+        },
+      })
+
+      user = {
+        id: dbUser.id,
+        email: dbUser.email,
+        firstName: dbUser.firstName,
+        lastName: dbUser.lastName,
+        phone: dbUser.phone,
+        countryCode: dbUser.countryCode,
+        avatarUrl: dbUser.avatarUrl,
+        language: dbUser.language,
+        theme: dbUser.theme,
+        emailVerified: false,
+        createdAt: dbUser.createdAt.toISOString(),
+        updatedAt: dbUser.updatedAt.toISOString(),
+      }
+
+      // In dev mode, include the OTP code so the UI can display it
+      const isDev = process.env.NODE_ENV !== 'production'
+
+      return NextResponse.json({
+        user,
+        needsVerification: true,
+        message: 'Account created. Please verify your email with the code sent.',
+        ...(isDev ? { devCode: otpCode } : {}),
+        expiresIn: 600,
+      }, { status: 201 })
+
+    } catch (prismaError) {
+      // Prisma failed (likely on Vercel) — use Supabase REST API
+      console.log('[Local Auth] Prisma unavailable, using Supabase REST API')
+      const supabase = getSupabaseAdmin()
+      if (!supabase) {
+        throw new Error('No database available')
+      }
+
+      // Check existing user in Supabase profiles table
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', emailLower)
+        .maybeSingle()
+
+      if (existingProfile) {
+        return NextResponse.json(
+          { error: 'An account with this email already exists' },
+          { status: 409 }
+        )
+      }
+
+      // Create user in Supabase using Auth Admin API (not auto-confirmed)
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: emailLower,
+        password,
+        email_confirm: false, // Don't auto-confirm — user needs to verify
+        user_metadata: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone || null,
+          country_code: countryCode || '+966',
+        },
+      })
+
+      if (authError) {
+        console.error('[Local Auth] Supabase auth error:', authError)
+        return NextResponse.json(
+          { error: authError.message || 'Failed to create account' },
+          { status: 400 }
+        )
+      }
+
+      const authUser = authData.user
+
+      // Create profile in profiles table
+      await supabase.from('profiles').insert({
+        id: authUser.id,
+        email: emailLower,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        phone: phone || null,
+        country_code: countryCode || '+966',
+        language: 'en',
+        theme: 'dark',
+      })
+
+      // Store OTP in Supabase verification_codes table
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+
+      await supabase.from('verification_codes').insert({
+        email: emailLower,
+        code: otpCode,
+        expires_at: otpExpiresAt,
+      })
+
+      user = {
+        id: authUser.id,
+        email: emailLower,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        phone: phone || null,
+        countryCode: countryCode || '+966',
+        avatarUrl: null,
+        language: 'en',
+        theme: 'dark',
+        emailVerified: false,
+        createdAt: authUser.created_at,
+        updatedAt: authUser.updated_at || authUser.created_at,
+      }
+
+      const isDev = process.env.NODE_ENV !== 'production'
+
+      return NextResponse.json({
+        user,
+        needsVerification: true,
+        message: 'Account created. Please verify your email with the code sent.',
+        ...(isDev ? { devCode: otpCode } : {}),
+        expiresIn: 600,
+      }, { status: 201 })
+    }
+  } catch (error) {
+    console.error('[Local Auth] Signup error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

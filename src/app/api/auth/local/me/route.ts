@@ -1,0 +1,90 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+
+export async function GET(req: NextRequest) {
+  try {
+    const token = req.cookies.get('usra-auth-token')?.value
+
+    if (!token) {
+      return NextResponse.json({ user: null }, { status: 401 })
+    }
+
+    // ─── Try Prisma first (works when using SQLite or PostgreSQL via Prisma) ───
+    try {
+      const session = await db.session.findUnique({
+        where: { token },
+        include: { user: true },
+      })
+
+      if (session && session.expiresAt > new Date()) {
+        return NextResponse.json({
+          user: {
+            id: session.user.id,
+            email: session.user.email,
+            firstName: session.user.firstName,
+            lastName: session.user.lastName,
+            phone: session.user.phone,
+            countryCode: session.user.countryCode,
+            avatarUrl: session.user.avatarUrl,
+            language: session.user.language,
+            theme: session.user.theme,
+            createdAt: session.user.createdAt.toISOString(),
+            updatedAt: session.user.updatedAt.toISOString(),
+          },
+        })
+      }
+
+      // Clean up expired session
+      if (session) {
+        await db.session.delete({ where: { id: session.id } }).catch(() => {})
+      }
+    } catch (prismaError) {
+      console.log('[Local Auth] Prisma unavailable for session check, trying Supabase')
+    }
+
+    // ─── Fallback: Check Supabase Auth with the token ───
+    // When login falls back to Supabase, the token is the Supabase access_token
+    const supabase = getSupabaseAdmin()
+    if (supabase) {
+      try {
+        const { data: { user: authUser }, error } = await (supabase.auth.admin as any).getUser(token)
+
+        if (!error && authUser) {
+          // Get profile from profiles table
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authUser.id)
+            .maybeSingle()
+
+          return NextResponse.json({
+            user: {
+              id: authUser.id,
+              email: authUser.email || '',
+              firstName: profile?.first_name || authUser.user_metadata?.first_name || null,
+              lastName: profile?.last_name || authUser.user_metadata?.last_name || null,
+              phone: profile?.phone || null,
+              countryCode: profile?.country_code || '+966',
+              avatarUrl: profile?.avatar_url || null,
+              language: profile?.language || 'en',
+              theme: profile?.theme || 'dark',
+              createdAt: authUser.created_at,
+              updatedAt: authUser.updated_at || authUser.created_at,
+            },
+          })
+        }
+      } catch (supabaseError) {
+        console.error('[Local Auth] Supabase session check failed:', supabaseError)
+      }
+    }
+
+    return NextResponse.json({ user: null }, { status: 401 })
+  } catch (error) {
+    console.error('[Local Auth] Me error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
