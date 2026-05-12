@@ -137,11 +137,13 @@ function SectionCard({
   className?: string
 }) {
   return (
-    <div
-      className={`bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-6 ${className ?? ''}`}
+    <Card
+      className={`bg-[--bg-surface] border border-[--border-subtle] rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 ${className ?? ''}`}
     >
-      {children}
-    </div>
+      <CardContent className="p-6">
+        {children}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -165,7 +167,7 @@ function SettingRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3">
+    <div className="flex items-center justify-between gap-4 py-3 border-b border-[--border-subtle]/50 last:border-0 last:pb-0">
       <div className="flex-1 min-w-0">
         <p className="text-[--text-primary] text-sm font-medium">{label}</p>
         {description && <p className="text-[--text-muted] text-xs mt-0.5">{description}</p>}
@@ -397,7 +399,7 @@ function FamilyManagementTab() {
             {familyMembers.map((member: FamilyMember) => (
               <div
                 key={member.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle] hover:bg-[--bg-surface-2] transition-colors"
+                className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle] hover:border-[--border-medium] hover:bg-[--bg-surface-2]/80 transition-all duration-150"
               >
                 <Avatar className="size-9">
                   <AvatarImage src={member.profiles?.avatar_url ?? ''} />
@@ -482,8 +484,11 @@ function FamilyManagementTab() {
       </SectionCard>
 
       {/* Danger Zone */}
-      <SectionCard className="border-[#EF4444]/20">
-        <SectionTitle className="text-[#EF4444]">Danger Zone</SectionTitle>
+      <SectionCard className="border-[#EF4444]/20 hover:shadow-[#EF4444]/5">
+        <div className="flex items-center gap-2 mb-1">
+          <AlertTriangle className="size-4 text-[#EF4444]" />
+          <SectionTitle className="text-[#EF4444] mb-0">Danger Zone</SectionTitle>
+        </div>
         <SectionDescription>Irreversible and destructive actions</SectionDescription>
 
         <div className="space-y-3">
@@ -642,7 +647,7 @@ function UserManagementTab() {
       {/* Profile Card */}
       <SectionCard>
         <div className="flex items-center gap-4 mb-6">
-          <Avatar className="size-16 border-2 border-[--accent-primary]/30">
+          <Avatar className="size-16 border-2 border-[--accent-primary]/30 ring-4 ring-[--accent-primary]/10">
             <AvatarImage src={user?.avatar_url ?? ''} />
             <AvatarFallback className="bg-[--accent-primary]/20 text-[--accent-secondary] text-xl">
               {user?.first_name?.[0] ?? user?.email?.[0] ?? '?'}
@@ -847,7 +852,7 @@ function UserManagementTab() {
             {families.map((family) => (
               <div
                 key={family.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle]"
+                className="flex items-center gap-3 p-3 rounded-xl bg-[--bg-surface-2] border border-[--border-subtle] hover:border-[--border-medium] transition-all duration-150 cursor-pointer"
               >
                 <div className="size-9 rounded-lg bg-[--accent-primary]/20 flex items-center justify-center">
                   <Users className="size-4 text-[--accent-secondary]" />

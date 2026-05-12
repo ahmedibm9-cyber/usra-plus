@@ -47,6 +47,8 @@ import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { EmptyState } from '@/components/shared/empty-state'
 import { StatCardSkeleton, TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
 import { AISummaryWidget } from '@/components/dashboard/ai-summary-widget'
@@ -103,22 +105,33 @@ function GlassCard({
   children,
   className = '',
   delay = 0,
+  accentColor,
 }: {
   children: React.ReactNode
   className?: string
   delay?: number
+  accentColor?: string
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: Math.min(delay, 0.15), ease: 'easeOut' }}
     >
-      <div
-        className={`glass-card card-hover rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-lg hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-200 ${className}`}
+      <Card
+        className={`glass-card card-hover rounded-2xl border border-[--border-subtle] bg-[--bg-surface] shadow-lg hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10 transition-all duration-200 overflow-hidden relative ${className}`}
+        style={accentColor ? { '--glass-accent': accentColor } as React.CSSProperties : undefined}
       >
-        {children}
-      </div>
+        {accentColor && (
+          <div
+            className="absolute top-0 left-0 right-0 h-px opacity-60"
+            style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
+          />
+        )}
+        <CardContent className="p-0">
+          {children}
+        </CardContent>
+      </Card>
     </motion.div>
   )
 }
@@ -239,7 +252,7 @@ function StatCard({
   }, [value])
 
   return (
-    <GlassCard delay={delay} className="stat-card-wrapper p-4 lg:p-5">
+    <GlassCard delay={delay} className="stat-card-wrapper p-4 lg:p-5" accentColor={progressColor}>
       {isLoading ? (
         <div className="flex items-center gap-3">
           <Skeleton className="size-10 rounded-full" />
@@ -250,11 +263,13 @@ function StatCard({
         </div>
       ) : (
         <div className="flex items-center gap-3">
-          {/* 40px gradient icon circle */}
+          {/* Gradient icon circle with subtle ring */}
           <div
-            className="flex size-10 shrink-0 items-center justify-center rounded-full"
+            className="flex size-10 shrink-0 items-center justify-center rounded-full ring-1"
             style={{
-              background: `linear-gradient(135deg, ${progressColor}25, ${progressColor}10)`,
+              background: `linear-gradient(135deg, ${progressColor}30, ${progressColor}10)`,
+              boxShadow: `0 0 12px ${progressColor}15`,
+              ringColor: `${progressColor}20`,
             }}
           >
             <Icon className="size-[18px]" style={{ color: progressColor }} />
@@ -270,14 +285,21 @@ function StatCard({
                 {displayValue}
               </motion.p>
               {trend && trend !== 'neutral' && (
-                <span className={`flex items-center text-[10px] font-medium ${trend === 'up' ? 'text-[#E50914]' : 'text-[#E50914]/60'}`}>
+                <Badge
+                  variant="secondary"
+                  className={`gap-0.5 px-1.5 py-0 text-[9px] font-semibold ${
+                    trend === 'up'
+                      ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15'
+                      : 'bg-red-500/10 text-red-400 hover:bg-red-500/15'
+                  }`}
+                >
                   {trend === 'up' ? (
-                    <TrendingUp className="size-3 mr-0.5" />
+                    <TrendingUp className="size-2.5" />
                   ) : (
-                    <TrendingDown className="size-3 mr-0.5" />
+                    <TrendingDown className="size-2.5" />
                   )}
                   {trendLabel}
-                </span>
+                </Badge>
               )}
             </div>
             {subValue && (
@@ -805,7 +827,7 @@ export default function DashboardPage() {
         {/* ─── Weekly Chart (left) + Prayer Times + Weather (right) ── */}
         <section className="scroll-mt-20 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Weekly Activity Bar Chart */}
-          <GlassCard delay={0.22} className="p-4 lg:p-5">
+          <GlassCard delay={0.22} className="p-4 lg:p-5" accentColor="#E50914">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="section-header-lg flex items-center gap-2">
                 <BarChart3 className="size-4 text-[#E50914]" />
@@ -844,7 +866,7 @@ export default function DashboardPage() {
           {/* Prayer Times + Weather combined column */}
           <div className="flex flex-col gap-4 lg:gap-6">
             {/* Prayer Times Widget */}
-            <GlassCard delay={0.24} className="p-4 lg:p-5" data-tour="dashboard-prayer">
+            <GlassCard delay={0.24} className="p-4 lg:p-5" data-tour="dashboard-prayer" accentColor="#F4C430">
               <div className="mb-3 flex items-center gap-2">
                 <Moon className="size-4 text-[#F4C430]" />
                 <h3 className="section-header-lg font-display">
@@ -892,9 +914,9 @@ export default function DashboardPage() {
                         {prayer.time}
                       </span>
                       {prayer.isNext && (
-                        <span className="rounded-full bg-[#E50914]/20 px-2 py-0.5 text-[9px] font-medium text-[#E50914]">
+                        <Badge className="bg-[#E50914]/15 text-[#E50914] hover:bg-[#E50914]/20 text-[9px] px-1.5 py-0 font-medium border-0">
                           {isRTL ? 'التالي' : 'Next'}
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -945,7 +967,7 @@ export default function DashboardPage() {
           {/* Right Column: Quick Actions + Upcoming Tasks/Events/Grocery */}
           <div className="flex flex-col gap-4 lg:gap-6">
             {/* Quick Actions */}
-            <GlassCard delay={0.3} className="p-4 lg:p-5" data-tour="quick-actions">
+            <GlassCard delay={0.3} className="p-4 lg:p-5" data-tour="quick-actions" accentColor="var(--accent-primary)">
               <h3 className="section-header-lg font-display mb-3">
                 {t.dashboard.quickActions}
               </h3>
@@ -1001,7 +1023,7 @@ export default function DashboardPage() {
             </GlassCard>
 
             {/* Upcoming Tasks */}
-            <GlassCard delay={0.35} className="p-4 lg:p-5">
+            <GlassCard delay={0.35} className="p-4 lg:p-5" accentColor="var(--accent-primary)">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="section-header-lg font-display">{t.dashboard.upcomingTasks}</h3>
                 <Button

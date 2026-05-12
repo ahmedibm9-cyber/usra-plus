@@ -41,6 +41,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
 
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '🎉', '😢', '🙏']
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -1050,10 +1051,10 @@ export function ChatPage() {
     return (
       <div
         className={`
-          rounded-2xl px-4 py-2.5 inline-block
+          rounded-2xl px-4 py-2.5 inline-block shadow-sm
           ${
             isOwn
-              ? 'bg-[--accent-primary] text-white rounded-br-md'
+              ? 'bg-[--accent-primary] text-white rounded-br-md shadow-[--accent-primary]/20'
               : 'bg-[--bg-surface] border border-[--border-subtle] text-[--text-primary] rounded-bl-md'
           }
         `}
@@ -1475,11 +1476,23 @@ export function ChatPage() {
                           <span className="absolute bottom-0 right-0 rtl:right-auto rtl:left-0 size-2.5 rounded-full bg-green-400 ring-2 ring-[--bg-surface] online-dot-pulse" />
                         </div>
                       </div>
-                      <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-2">
-                        <div className="flex items-center gap-0.5">
-                          <span className="typing-dot-1 size-1.5 rounded-full bg-[--text-muted]" />
-                          <span className="typing-dot-2 size-1.5 rounded-full bg-[--text-muted]" />
-                          <span className="typing-dot-3 size-1.5 rounded-full bg-[--text-muted]" />
+                      <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-2 shadow-sm">
+                        <div className="flex items-center gap-1">
+                          <motion.span
+                            className="size-1.5 rounded-full bg-[--accent-primary]"
+                            animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1.1, 0.85] }}
+                            transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
+                          />
+                          <motion.span
+                            className="size-1.5 rounded-full bg-[--accent-primary]"
+                            animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1.1, 0.85] }}
+                            transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
+                          />
+                          <motion.span
+                            className="size-1.5 rounded-full bg-[--accent-primary]"
+                            animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1.1, 0.85] }}
+                            transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
+                          />
                         </div>
                         <span className="text-xs text-[--text-muted]">
                           {typingUsers[0].userName} {t.chat.isTyping}

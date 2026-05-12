@@ -103,7 +103,8 @@ export function AppHeader() {
         sticky top-0 z-40
         flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5
         border-b border-[--border-subtle]
-        bg-[--bg-primary]/80
+        bg-[--bg-primary]/70
+        transition-colors duration-200
       "
       style={{
         backdropFilter: 'blur(24px) saturate(180%)',
@@ -184,10 +185,10 @@ export function AppHeader() {
             {t.nav.search}
           </span>
           <kbd
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-[--text-muted] bg-[--bg-surface-2]/50 border border-[--border-subtle] rounded pointer-events-none font-display"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-[--text-muted] bg-[--bg-surface-2]/50 border border-[--border-subtle] rounded pointer-events-none font-display shadow-sm"
           >
-            <span className="text-[10px]">{kbdSymbol}</span>
-            <span>K</span>
+            <span className="text-[10px] font-semibold">{kbdSymbol}</span>
+            <span className="font-semibold">K</span>
           </kbd>
         </button>
 
@@ -256,7 +257,7 @@ export function AppHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="shrink-0 rounded-full ring-2 ring-[--border-subtle] hover:ring-[--accent-primary]/40 transition-all"
+            className="shrink-0 rounded-full ring-2 ring-[--border-subtle] hover:ring-[--accent-primary]/50 focus-visible:ring-[--accent-primary]/60 transition-all duration-200 hover:shadow-md hover:shadow-[--accent-primary]/10"
             aria-label="User menu"
           >
             <Avatar className="size-8">
@@ -269,7 +270,7 @@ export function AppHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-56 bg-[--bg-surface] border-[--border-subtle] text-[--text-secondary]"
+          className="w-56 bg-[--bg-surface]/95 border-[--border-subtle] text-[--text-secondary] shadow-xl backdrop-blur-xl"
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">

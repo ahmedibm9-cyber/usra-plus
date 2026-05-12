@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useI18n } from '@/i18n/use-translation'
 import { localSendVerificationCode, localVerifyCode, localUserToProfile } from '@/lib/local-auth'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LanguageSelector } from './language-selector'
 import { ThemeToggle } from './theme-toggle'
 import {
@@ -19,6 +20,7 @@ import {
   KeyRound,
   Copy,
   Check,
+  CircleAlert,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -67,6 +69,9 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
+
+  // Circular progress for countdown
+  const cooldownProgress = ((RESEND_COOLDOWN - cooldown) / RESEND_COOLDOWN) * 100
 
   // Auto-focus first input on mount
   useEffect(() => {
@@ -240,295 +245,334 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
   }
 
   return (
-    <div className="w-full max-w-md mx-auto bg-[--bg-surface] rounded-3xl p-8 relative z-10 border border-[--border-subtle] shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Language & Theme selector */}
-      <motion.div
-        className="flex items-center justify-between"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0 }}
-      >
-        <ThemeToggle />
-        <LanguageSelector />
-      </motion.div>
+    <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Decorative accent line at top */}
+      <div className="absolute -top-px inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-[#E50914] via-[#007AFF] to-[#007AFF]" />
 
-      {/* Header */}
-      <motion.div
-        className="space-y-2 text-center mt-4"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05 }}
-      >
-        <div className="flex justify-center mb-3">
-          <div className="relative">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors duration-500 ${
-              verified 
-                ? 'bg-[#34C759] shadow-[#34C759]/20' 
-                : 'bg-[#007AFF] shadow-[#007AFF]/20'
-            }`}>
-              {verified ? (
-                <CheckCircle2 className="w-7 h-7 text-white" />
-              ) : (
-                <KeyRound className="w-7 h-7 text-white" />
-              )}
-            </div>
-            <div className={`absolute -inset-1.5 rounded-2xl blur-sm transition-colors duration-500 ${
-              verified 
-                ? 'bg-[#34C759]/20' 
-                : 'bg-[#007AFF]/20'
-            }`} />
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold text-[--text-primary] tracking-tight font-display">
-          {verified 
-            ? (isRTL ? 'تم التحقق!' : 'Verified!') 
-            : (isRTL ? 'تحقق من بريدك الإلكتروني' : 'Verify Your Email')
-          }
-        </h1>
-        <p className="text-[--text-muted] text-sm">
-          {verified 
-            ? (isRTL ? 'جاري تسجيل الدخول...' : 'Signing you in...')
-            : (isRTL 
-              ? `أدخل الرمز المكون من 6 أرقام المرسل إلى` 
-              : `Enter the 6-digit code sent to`
-            )
-          }
-        </p>
-        {!verified && (
-          <p className="text-sm font-medium text-[#007AFF]">{email}</p>
-        )}
-      </motion.div>
+      <div className="bg-gradient-to-b from-[--bg-surface] to-[--bg-surface-2] rounded-3xl p-8 border border-[--border-subtle] shadow-2xl backdrop-blur-xl">
+        {/* Language & Theme selector */}
+        <motion.div
+          className="flex items-center justify-between"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0 }}
+        >
+          <ThemeToggle />
+          <LanguageSelector />
+        </motion.div>
 
-      {/* Success Animation */}
-      <AnimatePresence>
-        {verified && (
-          <motion.div
-            className="mt-6 flex justify-center"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-          >
+        {/* Header */}
+        <motion.div
+          className="space-y-2 text-center mt-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.05 }}
+        >
+          <div className="flex justify-center mb-3">
             <div className="relative">
-              <motion.div
-                className="w-24 h-24 rounded-full bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-center"
-                initial={{ scale: 0.5 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              >
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors duration-500 ${
+                verified 
+                  ? 'bg-[#34C759] shadow-[#34C759]/20' 
+                  : 'bg-[#007AFF] shadow-[#007AFF]/20'
+              }`}>
+                {verified ? (
+                  <CheckCircle2 className="w-7 h-7 text-white" />
+                ) : (
+                  <KeyRound className="w-7 h-7 text-white" />
+                )}
+              </div>
+              <div className={`absolute -inset-1.5 rounded-2xl blur-sm transition-colors duration-500 ${
+                verified 
+                  ? 'bg-[#34C759]/20' 
+                  : 'bg-[#007AFF]/20'
+              }`} />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-[--text-primary] tracking-tight font-display">
+            {verified 
+              ? (isRTL ? 'تم التحقق!' : 'Verified!') 
+              : (isRTL ? 'تحقق من بريدك الإلكتروني' : 'Verify Your Email')
+            }
+          </h1>
+          <p className="text-[--text-muted] text-sm">
+            {verified 
+              ? (isRTL ? 'جاري تسجيل الدخول...' : 'Signing you in...')
+              : (isRTL 
+                ? `أدخل الرمز المكون من 6 أرقام المرسل إلى` 
+                : `Enter the 6-digit code sent to`
+              )
+            }
+          </p>
+          {!verified && (
+            <p className="text-sm font-medium text-[#007AFF]">{email}</p>
+          )}
+        </motion.div>
+
+        {/* Success Animation */}
+        <AnimatePresence>
+          {verified && (
+            <motion.div
+              className="mt-6 flex justify-center"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+            >
+              <div className="relative">
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                  className="w-24 h-24 rounded-full bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-center"
+                  initial={{ scale: 0.5 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
-                  <CheckCircle2 className="w-12 h-12 text-[#34C759]" />
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                  >
+                    <CheckCircle2 className="w-12 h-12 text-[#34C759]" />
+                  </motion.div>
                 </motion.div>
+                {/* Confetti rings */}
+                {[1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute inset-0 rounded-full border border-[#34C759]/30"
+                    initial={{ scale: 1, opacity: 0.8 }}
+                    animate={{ scale: 2 + i * 0.5, opacity: 0 }}
+                    transition={{ duration: 1.2, delay: i * 0.15, ease: 'easeOut' }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* OTP Input (hidden when verified) */}
+        {!verified && (
+          <>
+            {/* Error Banner using Alert */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className="mt-4"
+              >
+                <Alert variant="destructive" className="border-[#FF3B30]/20 bg-[#FF3B30]/5 rounded-xl">
+                  <CircleAlert className="h-4 w-4 text-[#FF3B30]" />
+                  <AlertDescription className="text-sm text-[#FF3B30]">
+                    {error}
+                  </AlertDescription>
+                </Alert>
               </motion.div>
-              {/* Confetti rings */}
-              {[1, 2, 3].map((i) => (
-                <motion.div
-                  key={i}
-                  className="absolute inset-0 rounded-full border border-[#34C759]/30"
-                  initial={{ scale: 1, opacity: 0.8 }}
-                  animate={{ scale: 2 + i * 0.5, opacity: 0 }}
-                  transition={{ duration: 1.2, delay: i * 0.15, ease: 'easeOut' }}
+            )}
+
+            {/* 6-digit input boxes */}
+            <motion.div
+              className="mt-6 flex justify-center gap-2 sm:gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              {otp.map((digit, index) => (
+                <div key={index} className="relative">
+                  {/* Glow on filled state */}
+                  {digit && (
+                    <div className="absolute inset-0 rounded-xl bg-[#007AFF]/10 blur-sm" />
+                  )}
+                  <input
+                    ref={(el) => { inputRefs.current[index] = el }}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleInputChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
+                    disabled={isVerifying || verified}
+                    className={`
+                      relative w-11 h-14 sm:w-13 sm:h-16 
+                      text-center text-xl sm:text-2xl font-bold font-metric
+                      rounded-xl 
+                      bg-[--bg-surface-2]
+                      border-2 
+                      ${digit 
+                        ? 'border-[#007AFF]/50 text-[--text-primary] shadow-lg shadow-[#007AFF]/10' 
+                        : error 
+                          ? 'border-[#FF3B30]/30 text-[--text-primary]' 
+                          : 'border-[--border-subtle] text-[--text-primary]'
+                      }
+                      focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 
+                      focus:shadow-lg focus:shadow-[#007AFF]/10
+                      outline-none
+                      transition-all duration-200
+                      placeholder:text-[--text-muted]/30
+                      ${isVerifying ? 'opacity-50' : ''}
+                    `}
+                    aria-label={`Digit ${index + 1} of ${OTP_LENGTH}`}
+                  />
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Progress indicator dots */}
+            <div className="mt-3 flex justify-center gap-1.5">
+              {otp.map((digit, index) => (
+                <div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                    digit ? 'bg-[#007AFF]' : 'bg-[--border-subtle]'
+                  }`}
                 />
               ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* OTP Input (hidden when verified) */}
-      {!verified && (
-        <>
-          {/* Error Banner */}
-          {error && (
+            {/* Verify Button */}
             <motion.div
-              className="mt-4 rounded-xl border border-[#FF3B30]/20 bg-[#FF3B30]/5 p-3"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <p className="text-sm text-[#FF3B30]">{error}</p>
-            </motion.div>
-          )}
-
-          {/* 6-digit input boxes */}
-          <motion.div
-            className="mt-6 flex justify-center gap-2 sm:gap-3"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            {otp.map((digit, index) => (
-              <div key={index} className="relative">
-                {/* Glow on filled state */}
-                {digit && (
-                  <div className="absolute inset-0 rounded-xl bg-[#007AFF]/10 blur-sm" />
-                )}
-                <input
-                  ref={(el) => { inputRefs.current[index] = el }}
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleInputChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onPaste={handlePaste}
-                  disabled={isVerifying || verified}
-                  className={`
-                    relative w-11 h-14 sm:w-13 sm:h-16 
-                    text-center text-xl sm:text-2xl font-bold font-metric
-                    rounded-xl 
-                    bg-[--bg-surface-2]
-                    border-2 
-                    ${digit 
-                      ? 'border-[#007AFF]/50 text-[--text-primary] shadow-lg shadow-[#007AFF]/10' 
-                      : error 
-                        ? 'border-[#FF3B30]/30 text-[--text-primary]' 
-                        : 'border-[--border-subtle] text-[--text-primary]'
-                    }
-                    focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 
-                    focus:shadow-lg focus:shadow-[#007AFF]/10
-                    outline-none
-                    transition-all duration-200
-                    placeholder:text-[--text-muted]/30
-                    ${isVerifying ? 'opacity-50' : ''}
-                  `}
-                  aria-label={`Digit ${index + 1} of ${OTP_LENGTH}`}
-                />
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Progress indicator dots */}
-          <div className="mt-3 flex justify-center gap-1.5">
-            {otp.map((digit, index) => (
-              <div
-                key={index}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                  digit ? 'bg-[#007AFF]' : 'bg-[--border-subtle]'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Verify Button */}
-          <motion.div
-            className="mt-6"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-          >
-            <Button
-              type="button"
-              onClick={() => handleVerify()}
-              disabled={isVerifying || otp.join('').length !== OTP_LENGTH}
-              className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-[#007AFF]/20 hover:shadow-[0_0_20px_rgba(0,122,255,0.3)] hover:shadow-[#007AFF]/30 font-display"
-            >
-              {isVerifying ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <ShieldCheck className="w-4 h-4" />
-                  {isRTL ? 'تحقق' : 'Verify Code'}
-                </span>
-              )}
-            </Button>
-          </motion.div>
-
-          {/* Resend / Countdown */}
-          <motion.div
-            className="mt-4 text-center"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            {canResend ? (
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={isResending}
-                className="text-sm text-[#007AFF] hover:text-[#0066CC] font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 mx-auto"
-              >
-                {isResending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-3.5 h-3.5" />
-                )}
-                {isRTL ? 'إعادة إرسال الرمز' : 'Resend Code'}
-              </button>
-            ) : (
-              <p className="text-sm text-[--text-muted]">
-                {isRTL ? 'إعادة الإرسال خلال' : 'Resend code in'}{' '}
-                <span className="text-[#007AFF] font-mono font-medium tabular-nums">
-                  {formatCooldown(cooldown)}
-                </span>
-              </p>
-            )}
-          </motion.div>
-
-          {/* Dev Mode OTP Display */}
-          {devCode && (
-            <motion.div
-              className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3"
+              className="mt-6"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.25 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs text-amber-400/80 font-medium">
-                    {isRTL ? 'وضع التطوير - الرمز:' : 'Dev Mode — Code:'}
+              <Button
+                type="button"
+                onClick={() => handleVerify()}
+                disabled={isVerifying || otp.join('').length !== OTP_LENGTH}
+                className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-[#007AFF]/20 hover:shadow-[0_0_20px_rgba(0,122,255,0.3)] hover:shadow-[#007AFF]/30 font-display"
+              >
+                {isVerifying ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <ShieldCheck className="w-4 h-4" />
+                    {isRTL ? 'تحقق' : 'Verify Code'}
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-mono font-bold text-amber-300 tracking-widest">
-                    {devCode}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={copyDevCode}
-                    className="p-1 rounded-md hover:bg-amber-500/10 transition-colors"
-                    aria-label="Copy code"
-                  >
-                    {copied ? (
-                      <Check className="w-3.5 h-3.5 text-[#34C759]" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5 text-amber-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <p className="text-[10px] text-amber-400/50 mt-1">
-                {isRTL 
-                  ? 'سيتم دمج إرسال البريد الإلكتروني لاحقاً' 
-                  : 'Email integration will be added later'
-                }
-              </p>
+                )}
+              </Button>
             </motion.div>
-          )}
 
-          {/* Back to signup */}
-          <motion.div
-            className="mt-4 text-center"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <button
-              type="button"
-              onClick={onBack}
-              className="text-sm text-[--text-muted] hover:text-[--text-secondary] flex items-center justify-center gap-1.5 mx-auto transition-colors duration-200"
+            {/* Resend / Countdown with circular progress */}
+            <motion.div
+              className="mt-4 text-center"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
             >
-              <ArrowLeft className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
-              {isRTL ? 'العودة لتسجيل الدخول' : 'Back to login'}
-            </button>
-          </motion.div>
-        </>
-      )}
+              {canResend ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleResend}
+                  disabled={isResending}
+                  className="text-sm text-[#007AFF] hover:text-[#0066CC] font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 mx-auto h-auto p-0 hover:bg-transparent"
+                >
+                  {isResending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  )}
+                  {isRTL ? 'إعادة إرسال الرمز' : 'Resend Code'}
+                </Button>
+              ) : (
+                <div className="flex items-center justify-center gap-2.5">
+                  {/* Circular progress indicator */}
+                  <div className="relative w-6 h-6">
+                    <svg className="w-6 h-6 -rotate-90" viewBox="0 0 24 24">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        fill="none"
+                        stroke="var(--border-subtle)"
+                        strokeWidth="2"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        fill="none"
+                        stroke="#007AFF"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeDasharray={`${2 * Math.PI * 10}`}
+                        strokeDashoffset={`${2 * Math.PI * 10 * (1 - cooldownProgress / 100)}`}
+                        className="transition-all duration-1000 ease-linear"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-[--text-muted]">
+                    {isRTL ? 'إعادة الإرسال خلال' : 'Resend code in'}{' '}
+                    <span className="text-[#007AFF] font-mono font-medium tabular-nums">
+                      {formatCooldown(cooldown)}
+                    </span>
+                  </p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Dev Mode OTP Display */}
+            {devCode && (
+              <motion.div
+                className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.25 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs text-amber-400/80 font-medium">
+                      {isRTL ? 'وضع التطوير - الرمز:' : 'Dev Mode — Code:'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-mono font-bold text-amber-300 tracking-widest">
+                      {devCode}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={copyDevCode}
+                      className="p-1 rounded-md hover:bg-amber-500/10 transition-colors"
+                      aria-label="Copy code"
+                    >
+                      {copied ? (
+                        <Check className="w-3.5 h-3.5 text-[#34C759]" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5 text-amber-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[10px] text-amber-400/50 mt-1">
+                  {isRTL 
+                    ? 'سيتم دمج إرسال البريد الإلكتروني لاحقاً' 
+                    : 'Email integration will be added later'
+                  }
+                </p>
+              </motion.div>
+            )}
+
+            {/* Back to signup */}
+            <motion.div
+              className="mt-4 text-center"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onBack}
+                className="text-sm text-[--text-muted] hover:text-[--text-secondary] flex items-center justify-center gap-1.5 mx-auto h-auto p-0 hover:bg-transparent transition-colors duration-200"
+              >
+                <ArrowLeft className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
+                {isRTL ? 'العودة لتسجيل الدخول' : 'Back to login'}
+              </Button>
+            </motion.div>
+          </>
+        )}
+      </div>
     </div>
   )
 }

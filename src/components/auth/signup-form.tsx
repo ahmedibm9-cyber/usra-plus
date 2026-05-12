@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Select,
   SelectContent,
@@ -31,6 +32,8 @@ import {
   User,
   Phone,
   Sparkles,
+  CheckCircle2,
+  CircleAlert,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -55,6 +58,15 @@ interface FormErrors {
   password?: string
   confirmPassword?: string
   terms?: string
+}
+
+// Password strength calculation helper
+const getPasswordStrength = (pwd: string): { level: number; percent: number; color: string; label: string } => {
+  if (!pwd) return { level: 0, percent: 0, color: 'var(--border-subtle)', label: '' }
+  if (pwd.length < 6) return { level: 1, percent: 25, color: '#FF3B30', label: 'Weak' }
+  if (pwd.length < 8) return { level: 2, percent: 50, color: '#FF9500', label: 'Fair' }
+  if (pwd.length < 12) return { level: 3, percent: 75, color: '#FFCC00', label: 'Good' }
+  return { level: 4, percent: 100, color: '#34C759', label: 'Strong' }
 }
 
 export function SignupForm() {
@@ -127,6 +139,18 @@ export function SignupForm() {
   const clearError = (field: keyof FormErrors) => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  // Field validation status helpers
+  const isFieldValid = (field: string, value: string): boolean => {
+    if (!value.trim()) return false
+    switch (field) {
+      case 'email': return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      case 'phone': return /^\d{6,15}$/.test(value.replace(/[\s-]/g, ''))
+      case 'password': return value.length >= 8
+      case 'confirmPassword': return value === password && value.length > 0
+      default: return value.trim().length > 0
     }
   }
 
@@ -243,430 +267,462 @@ export function SignupForm() {
     )
   }
 
+  const passwordStrength = getPasswordStrength(password)
+
   return (
     <>
-      <div className="w-full max-w-md mx-auto bg-[--bg-surface] rounded-3xl p-8 relative z-10 border border-[--border-subtle] shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
-        {/* Language selector */}
-        <motion.div
-          className="flex items-center justify-between"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0 }}
-        >
-          <ThemeToggle />
-          <LanguageSelector />
-        </motion.div>
+      <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Decorative accent line at top */}
+        <div className="absolute -top-px inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-[#E50914] via-[#007AFF] to-[#007AFF]" />
 
-        {/* Header */}
-        <motion.div
-          className="space-y-2 text-center mt-4"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
-        >
-          <div className="flex justify-center mb-3">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-[#007AFF] flex items-center justify-center shadow-lg shadow-[#007AFF]/20">
-                <Sparkles className="w-7 h-7 text-white" />
-              </div>
-              <div className="absolute -inset-1.5 rounded-2xl bg-[#007AFF]/20 blur-sm" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-[--text-primary] tracking-tight font-display">
-            {t.auth.signup}
-          </h1>
-          <p className="text-[--text-muted] text-sm">
-            {t.app.tagline}
-          </p>
-        </motion.div>
-
-        {/* Auth Error Banner */}
-        {authError && (
+        <div className="bg-gradient-to-b from-[--bg-surface] to-[--bg-surface-2] rounded-3xl p-8 border border-[--border-subtle] shadow-2xl backdrop-blur-xl">
+          {/* Language selector */}
           <motion.div
-            className="mt-4 rounded-xl border border-[#FF3B30]/20 bg-[#FF3B30]/5 p-3"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            <p className="text-sm text-[#FF3B30]">{authError}</p>
-          </motion.div>
-        )}
-
-        {/* Signup Form */}
-        <>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-          {/* Name Row */}
-          <motion.div
-            className="grid grid-cols-2 gap-3"
+            className="flex items-center justify-between"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            transition={{ duration: 0.4, delay: 0 }}
           >
-            <div className="space-y-2">
-              <Label htmlFor="signup-firstName" className="text-[--text-secondary] text-sm font-medium">
-                {t.auth.firstName}
+            <ThemeToggle />
+            <LanguageSelector />
+          </motion.div>
+
+          {/* Header */}
+          <motion.div
+            className="space-y-2 text-center mt-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
+          >
+            <div className="flex justify-center mb-3">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-2xl bg-[#007AFF] flex items-center justify-center shadow-lg shadow-[#007AFF]/20">
+                  <Sparkles className="w-7 h-7 text-white" />
+                </div>
+                <div className="absolute -inset-1.5 rounded-2xl bg-[#007AFF]/20 blur-sm" />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-[--text-primary] tracking-tight font-display">
+              {t.auth.signup}
+            </h1>
+            <p className="text-[--text-muted] text-sm">
+              {t.app.tagline}
+            </p>
+          </motion.div>
+
+          {/* Auth Error Banner using Alert */}
+          {authError && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+              className="mt-4"
+            >
+              <Alert variant="destructive" className="border-[#FF3B30]/20 bg-[#FF3B30]/5 rounded-xl">
+                <CircleAlert className="h-4 w-4 text-[#FF3B30]" />
+                <AlertDescription className="text-sm text-[#FF3B30]">
+                  {authError}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+
+          {/* Signup Form */}
+          <>
+          <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+            {/* Name Row */}
+            <motion.div
+              className="grid grid-cols-2 gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="signup-firstName" className="text-[--text-secondary] text-sm font-medium">
+                  {t.auth.firstName}
+                </Label>
+                <div className="auth-input-wrapper">
+                  <User className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    id="signup-firstName"
+                    type="text"
+                    placeholder={isRTL ? 'الاسم الأول' : 'First name'}
+                    value={firstName}
+                    onChange={(e) => { setFirstName(e.target.value); clearError('firstName') }}
+                    className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.firstName ? 'border-[#FF3B30]/50' : ''} ${isFieldValid('firstName', firstName) ? 'border-[#34C759]/50' : ''}`}
+                    disabled={isLoading}
+                    autoComplete="given-name"
+                  />
+                  {isFieldValid('firstName', firstName) && (
+                    <CheckCircle2 className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#34C759] z-10 ${isRTL ? 'left-3' : 'right-3'}`} />
+                  )}
+                </div>
+                {errors.firstName && (
+                  <p className="text-xs text-[#FF3B30] flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
+                    {errors.firstName}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-lastName" className="text-[--text-secondary] text-sm font-medium">
+                  {t.auth.lastName}
+                </Label>
+                <div className="auth-input-wrapper">
+                  <User className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    id="signup-lastName"
+                    type="text"
+                    placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
+                    value={lastName}
+                    onChange={(e) => { setLastName(e.target.value); clearError('lastName') }}
+                    className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.lastName ? 'border-[#FF3B30]/50' : ''} ${isFieldValid('lastName', lastName) ? 'border-[#34C759]/50' : ''}`}
+                    disabled={isLoading}
+                    autoComplete="family-name"
+                  />
+                  {isFieldValid('lastName', lastName) && (
+                    <CheckCircle2 className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#34C759] z-10 ${isRTL ? 'left-3' : 'right-3'}`} />
+                  )}
+                </div>
+                {errors.lastName && (
+                  <p className="text-xs text-[#FF3B30] flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
+                    {errors.lastName}
+                  </p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Email */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+            >
+              <Label htmlFor="signup-email" className="text-[--text-secondary] text-sm font-medium">
+                {t.auth.email}
               </Label>
               <div className="auth-input-wrapper">
-                <User className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+                <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
                 <Input
-                  id="signup-firstName"
-                  type="text"
-                  placeholder={isRTL ? 'الاسم الأول' : 'First name'}
-                  value={firstName}
-                  onChange={(e) => { setFirstName(e.target.value); clearError('firstName') }}
-                  className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-[#007AFF]/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.firstName ? 'border-[#FF3B30]/50' : ''}`}
+                  id="signup-email"
+                  type="email"
+                  placeholder={isRTL ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); clearError('email') }}
+                  className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-[#FF3B30]/50' : ''} ${isFieldValid('email', email) ? 'border-[#34C759]/50' : ''}`}
                   disabled={isLoading}
-                  autoComplete="given-name"
+                  autoComplete="email"
                 />
+                {isFieldValid('email', email) && (
+                  <CheckCircle2 className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#34C759] z-10 ${isRTL ? 'left-3' : 'right-3'}`} />
+                )}
               </div>
-              {errors.firstName && (
+              {errors.email && (
                 <p className="text-xs text-[#FF3B30] flex items-center gap-1">
                   <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                  {errors.firstName}
+                  {errors.email}
                 </p>
               )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-lastName" className="text-[--text-secondary] text-sm font-medium">
-                {t.auth.lastName}
+            </motion.div>
+
+            {/* Phone with country code */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <Label htmlFor="signup-phone" className="text-[--text-secondary] text-sm font-medium">
+                {t.auth.phone}
+              </Label>
+              <div className="flex gap-2">
+                <Select value={countryCode} onValueChange={setCountryCode}>
+                  <SelectTrigger className="w-[110px] h-11 bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] rounded-xl focus:ring-2 focus:ring-[#007AFF]/20 shrink-0 transition-all duration-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-[--border-subtle] bg-[--bg-surface] text-[--text-primary] rounded-xl max-h-64">
+                    {countryCodes.map((cc) => (
+                      <SelectItem
+                        key={cc.code}
+                        value={cc.code}
+                        className="focus:bg-[#007AFF]/10 focus:text-[#007AFF] cursor-pointer rounded-lg"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-sm">{cc.flag}</span>
+                          <span className="text-[--text-muted] text-xs">{cc.code}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="auth-input-wrapper flex-1">
+                  <Phone className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    placeholder={isRTL ? '5XXXXXXXX' : '5XXXXXXXX'}
+                    value={phone}
+                    onChange={(e) => { setPhone(e.target.value); clearError('phone') }}
+                    className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.phone ? 'border-[#FF3B30]/50' : ''} ${isFieldValid('phone', phone) ? 'border-[#34C759]/50' : ''}`}
+                    disabled={isLoading}
+                    autoComplete="tel"
+                  />
+                  {isFieldValid('phone', phone) && (
+                    <CheckCircle2 className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#34C759] z-10 ${isRTL ? 'left-3' : 'right-3'}`} />
+                  )}
+                </div>
+              </div>
+              {errors.phone && (
+                <p className="text-xs text-[#FF3B30] flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
+                  {errors.phone}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Password */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.25 }}
+            >
+              <Label htmlFor="signup-password" className="text-[--text-secondary] text-sm font-medium">
+                {t.auth.password}
               </Label>
               <div className="auth-input-wrapper">
-                <User className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+                <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
                 <Input
-                  id="signup-lastName"
-                  type="text"
-                  placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
-                  value={lastName}
-                  onChange={(e) => { setLastName(e.target.value); clearError('lastName') }}
-                  className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-[#007AFF]/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.lastName ? 'border-[#FF3B30]/50' : ''}`}
+                  id="signup-password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={isRTL ? '٨ أحرف على الأقل' : 'At least 8 characters'}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); clearError('password') }}
+                  className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-[#FF3B30]/50' : ''}`}
                   disabled={isLoading}
-                  autoComplete="family-name"
+                  autoComplete="new-password"
                 />
-              </div>
-              {errors.lastName && (
-                <p className="text-xs text-[#FF3B30] flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Email */}
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-          >
-            <Label htmlFor="signup-email" className="text-[--text-secondary] text-sm font-medium">
-              {t.auth.email}
-            </Label>
-            <div className="auth-input-wrapper">
-              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
-              <Input
-                id="signup-email"
-                type="email"
-                placeholder={isRTL ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); clearError('email') }}
-                className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-[#007AFF]/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-[#FF3B30]/50' : ''}`}
-                disabled={isLoading}
-                autoComplete="email"
-              />
-            </div>
-            {errors.email && (
-              <p className="text-xs text-[#FF3B30] flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                {errors.email}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Phone with country code */}
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <Label htmlFor="signup-phone" className="text-[--text-secondary] text-sm font-medium">
-              {t.auth.phone}
-            </Label>
-            <div className="flex gap-2">
-              <Select value={countryCode} onValueChange={setCountryCode}>
-                <SelectTrigger className="w-[110px] h-11 bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] rounded-xl focus:ring-[#007AFF]/20 shrink-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-[--border-subtle] bg-[--bg-surface] text-[--text-primary] rounded-xl max-h-64">
-                  {countryCodes.map((cc) => (
-                    <SelectItem
-                      key={cc.code}
-                      value={cc.code}
-                      className="focus:bg-[#007AFF]/10 focus:text-[#007AFF] cursor-pointer rounded-lg"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <span className="text-sm">{cc.flag}</span>
-                        <span className="text-[--text-muted] text-xs">{cc.code}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="auth-input-wrapper flex-1">
-                <Phone className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
-                <Input
-                  id="signup-phone"
-                  type="tel"
-                  placeholder={isRTL ? '5XXXXXXXX' : '5XXXXXXXX'}
-                  value={phone}
-                  onChange={(e) => { setPhone(e.target.value); clearError('phone') }}
-                  className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-[#007AFF]/20 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.phone ? 'border-[#FF3B30]/50' : ''}`}
-                  disabled={isLoading}
-                  autoComplete="tel"
-                />
-              </div>
-            </div>
-            {errors.phone && (
-              <p className="text-xs text-[#FF3B30] flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                {errors.phone}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Password */}
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-          >
-            <Label htmlFor="signup-password" className="text-[--text-secondary] text-sm font-medium">
-              {t.auth.password}
-            </Label>
-            <div className="auth-input-wrapper">
-              <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
-              <Input
-                id="signup-password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder={isRTL ? '٨ أحرف على الأقل' : 'At least 8 characters'}
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); clearError('password') }}
-                className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-[#007AFF]/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-[#FF3B30]/50' : ''}`}
-                disabled={isLoading}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={`absolute top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-secondary] transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {/* Password strength indicator */}
-            {password && (
-              <div className="flex gap-1 mt-1">
-                {[1, 2, 3, 4].map((level) => {
-                  const strength = password.length < 6 ? 1 : password.length < 8 ? 2 : password.length < 12 ? 3 : 4
-                  const colors = ['bg-[#FF3B30]', 'bg-[#FF9500]', 'bg-[#FFCC00]', 'bg-[#34C759]']
-                  return (
-                    <div
-                      key={level}
-                      className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                        level <= strength ? colors[strength - 1] : 'bg-[--border-subtle]'
-                      }`}
-                    />
-                  )
-                })}
-              </div>
-            )}
-            {errors.password && (
-              <p className="text-xs text-[#FF3B30] flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                {errors.password}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Confirm Password */}
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <Label htmlFor="signup-confirmPassword" className="text-[--text-secondary] text-sm font-medium">
-              {t.auth.confirmPassword}
-            </Label>
-            <div className="auth-input-wrapper">
-              <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
-              <Input
-                id="signup-confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder={isRTL ? 'أعد إدخال كلمة المرور' : 'Re-enter your password'}
-                value={confirmPassword}
-                onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword') }}
-                className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-[#007AFF]/20 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.confirmPassword ? 'border-[#FF3B30]/50' : ''}`}
-                disabled={isLoading}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className={`absolute top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-secondary] transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-xs text-[#FF3B30] flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                {errors.confirmPassword}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Terms agreement */}
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.35 }}
-          >
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="signup-terms"
-                checked={agreedToTerms}
-                onCheckedChange={(checked) => {
-                  setAgreedToTerms(checked === true)
-                  clearError('terms')
-                }}
-                className="mt-0.5 data-[state=checked]:bg-[#007AFF] data-[state=checked]:border-[#007AFF]"
-                disabled={isLoading}
-              />
-              <label htmlFor="signup-terms" className="text-sm text-[--text-muted] leading-relaxed cursor-pointer">
-                {t.auth.termsAgreement}{' '}
                 <button
                   type="button"
-                  onClick={() => setShowTermsModal(true)}
-                  className="text-[#007AFF] hover:text-[#0066CC] underline underline-offset-2 transition-colors duration-200"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={`absolute top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-secondary] transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
+                  tabIndex={-1}
                 >
-                  {t.auth.termsOfService}
-                </button>{' '}
-                {t.auth.and}{' '}
-                <button
-                  type="button"
-                  onClick={() => setShowTermsModal(true)}
-                  className="text-[#007AFF] hover:text-[#0066CC] underline underline-offset-2 transition-colors duration-200"
-                >
-                  {t.auth.privacyPolicy}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
-              </label>
-            </div>
-            {errors.terms && (
-              <p className="text-xs text-[#FF3B30] flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
-                {errors.terms}
-              </p>
-            )}
-          </motion.div>
+              </div>
+              {/* Password strength indicator with Progress */}
+              {password && (
+                <div className="space-y-1.5">
+                  <div className="relative h-1.5 w-full overflow-hidden rounded-full" style={{ backgroundColor: 'var(--border-subtle)' }}>
+                    <motion.div
+                      className="h-full rounded-full transition-all duration-500 ease-out"
+                      style={{ backgroundColor: passwordStrength.color, width: `${passwordStrength.percent}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${passwordStrength.percent}%` }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] transition-colors duration-300" style={{ color: passwordStrength.color }}>
+                      {passwordStrength.label}
+                    </p>
+                    {isFieldValid('password', password) && (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#34C759]" />
+                    )}
+                  </div>
+                </div>
+              )}
+              {errors.password && (
+                <p className="text-xs text-[#FF3B30] flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
+                  {errors.password}
+                </p>
+              )}
+            </motion.div>
 
-          {/* Signup Button */}
+            {/* Confirm Password */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Label htmlFor="signup-confirmPassword" className="text-[--text-secondary] text-sm font-medium">
+                {t.auth.confirmPassword}
+              </Label>
+              <div className="auth-input-wrapper">
+                <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted] z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
+                <Input
+                  id="signup-confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder={isRTL ? 'أعد إدخال كلمة المرور' : 'Re-enter your password'}
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword') }}
+                  className={`h-11 premium-input bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.confirmPassword ? 'border-[#FF3B30]/50' : ''} ${isFieldValid('confirmPassword', confirmPassword) ? 'border-[#34C759]/50' : ''}`}
+                  disabled={isLoading}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className={`absolute top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-secondary] transition-colors z-10 ${isRTL ? 'left-3' : 'right-3'}`}
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+                {isFieldValid('confirmPassword', confirmPassword) && (
+                  <CheckCircle2 className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-[#34C759] z-10 ${isRTL ? 'left-8' : 'right-8'}`} />
+                )}
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-xs text-[#FF3B30] flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Terms agreement */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+            >
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="signup-terms"
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) => {
+                    setAgreedToTerms(checked === true)
+                    clearError('terms')
+                  }}
+                  className="mt-0.5 data-[state=checked]:bg-[#007AFF] data-[state=checked]:border-[#007AFF]"
+                  disabled={isLoading}
+                />
+                <label htmlFor="signup-terms" className="text-sm text-[--text-muted] leading-relaxed cursor-pointer">
+                  {t.auth.termsAgreement}{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-[#007AFF] hover:text-[#0066CC] underline underline-offset-2 transition-colors duration-200"
+                  >
+                    {t.auth.termsOfService}
+                  </button>{' '}
+                  {t.auth.and}{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-[#007AFF] hover:text-[#0066CC] underline underline-offset-2 transition-colors duration-200"
+                  >
+                    {t.auth.privacyPolicy}
+                  </button>
+                </label>
+              </div>
+              {errors.terms && (
+                <p className="text-xs text-[#FF3B30] flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-[#FF3B30]" />
+                  {errors.terms}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Signup Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+            >
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-[#007AFF]/20 hover:shadow-[0_0_20px_rgba(0,122,255,0.3)] hover:shadow-[#007AFF]/30 font-display"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  t.auth.signup
+                )}
+              </Button>
+            </motion.div>
+          </form>
+
+          {/* Divider */}
           <motion.div
+            className="relative mt-6"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.45 }}
+          >
+            <Separator className="bg-[--border-subtle]" />
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--bg-surface] px-3 text-xs text-[--text-muted]">
+              {t.auth.orContinueWith}
+            </span>
+          </motion.div>
+
+          {/* Google OAuth */}
+          <motion.div
+            className="mt-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
           >
             <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-[#007AFF]/20 hover:shadow-[0_0_20px_rgba(0,122,255,0.3)] hover:shadow-[#007AFF]/30 font-display"
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignup}
+              disabled={isGoogleLoading}
+              className="w-full border-[--border-subtle] bg-[--bg-surface] text-[--text-secondary] hover:bg-[--bg-surface-2] hover:text-[--text-primary] hover:border-[--border-medium] hover:scale-[1.01] rounded-xl h-11 font-medium transition-all duration-200"
             >
-              {isLoading ? (
+              {isGoogleLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                t.auth.signup
+                <svg className={`w-5 h-5 shrink-0 ${isRTL ? 'ml-2' : 'mr-2'}`} viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
               )}
+              {t.auth.googleLogin}
             </Button>
           </motion.div>
-        </form>
 
-        {/* Divider */}
-        <motion.div
-          className="relative mt-6"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.45 }}
-        >
-          <Separator className="bg-[--border-subtle]" />
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--bg-surface] px-3 text-xs text-[--text-muted]">
-            {t.auth.orContinueWith}
-          </span>
-        </motion.div>
-
-        {/* Google OAuth */}
-        <motion.div
-          className="mt-4"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-        >
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogleSignup}
-            disabled={isGoogleLoading}
-            className="w-full border-[--border-subtle] bg-[--bg-surface] text-[--text-secondary] hover:bg-[--bg-surface-2] hover:text-[--text-primary] hover:border-[--border-medium] hover:scale-[1.01] rounded-xl h-11 font-medium transition-all duration-200"
+          {/* Login link */}
+          <motion.div
+            className="text-center mt-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.55 }}
           >
-            {isGoogleLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
-            )}
-            {t.auth.googleLogin}
-          </Button>
-        </motion.div>
-
-        {/* Login link */}
-        <motion.div
-          className="text-center mt-4"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.55 }}
-        >
-          <p className="text-sm text-[--text-muted]">
-            {t.auth.hasAccount}{' '}
-            <button
-              type="button"
-              onClick={() => setAuthView('login')}
-              className="text-[#007AFF] hover:text-[#0066CC] font-medium transition-colors duration-200"
-            >
-              {t.auth.logInInstead}
-            </button>
-          </p>
-        </motion.div>
-        </>
+            <p className="text-sm text-[--text-muted]">
+              {t.auth.hasAccount}{' '}
+              <button
+                type="button"
+                onClick={() => setAuthView('login')}
+                className="text-[#007AFF] hover:text-[#0066CC] font-medium transition-colors duration-200"
+              >
+                {t.auth.logInInstead}
+              </button>
+            </p>
+          </motion.div>
+          </>
+        </div>
       </div>
 
       <TermsModal />
