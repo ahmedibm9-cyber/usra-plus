@@ -110,6 +110,11 @@ export function LoginForm() {
             // Non-critical — the API route already authenticated the user
           }
         }
+
+        // Force page reload to ensure the httpOnly cookie-based session is fully established
+        // This prevents stale state where the auth store shows authenticated but the 
+        // page component hasn't re-fetched the session from the API
+        window.location.reload()
       } else {
         setAuthError(t.auth.invalidCredentials)
       }
