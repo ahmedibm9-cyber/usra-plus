@@ -122,8 +122,56 @@ export async function POST(req: NextRequest) {
         .eq('id', authUser.id)
         .maybeSingle()
 
-      const token = authData.session?.access_token || crypto.randomUUID()
+      // Try to create a Prisma session with a long-lived UUID token.
+      // If Prisma is available, this gives us a session that doesn't expire like JWTs.
+      // If Prisma is unavailable, fall back to the Supabase JWT (which expires after ~1 hour).
+      let token: string
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      let _usedPrismaSession = false
+
+      try {
+        // Sync user to Prisma first
+        const placeholderHash = await bcrypt.hash(`supabase-sync-${authUser.id}-${Date.now()}`, 4)
+        const existingPrismaUser = await db.user.findUnique({ where: { id: authUser.id } })
+          .catch(() => db.user.findUnique({ where: { email: emailLower } }))
+          .catch(() => null)
+
+        if (existingPrismaUser) {
+          await db.user.update({
+            where: { id: existingPrismaUser.id },
+            data: { emailVerified: true, updatedAt: new Date() },
+          }).catch(() => {})
+        } else {
+          await db.user.create({
+            data: {
+              id: authUser.id,
+              email: emailLower,
+              passwordHash: placeholderHash,
+              firstName: profile?.first_name || authUser.user_metadata?.first_name || null,
+              lastName: profile?.last_name || authUser.user_metadata?.last_name || null,
+              phone: profile?.phone || null,
+              countryCode: profile?.country_code || '+966',
+              avatarUrl: profile?.avatar_url || null,
+              language: profile?.language || 'en',
+              theme: profile?.theme || 'dark',
+              emailVerified: true,
+            },
+          }).catch(() => {})
+        }
+
+        // Create Prisma session with UUID token
+        token = crypto.randomUUID()
+        await db.session.create({
+          data: { userId: authUser.id, token, expiresAt },
+        })
+        await db.session.deleteMany({
+          where: { userId: authUser.id, expiresAt: { lt: new Date() } },
+        }).catch(() => {})
+        _usedPrismaSession = true
+      } catch {
+        // Prisma unavailable — use Supabase JWT
+        token = authData.session?.access_token || crypto.randomUUID()
+      }
 
       user = {
         id: authUser.id,
