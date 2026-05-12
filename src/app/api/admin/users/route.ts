@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     ])
 
     // Build lookup maps
-    const subMap = new Map(subscriptions.map(s => [s.userId, s]))
+    const subMap = new Map<string, { userId: string; plan: string; status: string }>(subscriptions.map(s => [s.userId, s] as [string, { userId: string; plan: string; status: string }]))
     const familyCountMap = new Map<string, number>()
     for (const fm of familyMembers) {
       familyCountMap.set(fm.userId, (familyCountMap.get(fm.userId) || 0) + 1)
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     // Map to safe user records
     const safeUsers: SafeUserRecord[] = users.map(u => {
-      const sub = subMap.get(u.id)
+      const sub = subMap.get(u.id) as { plan?: string; status?: string } | undefined
       const plan = sub?.plan || 'free'
       return {
         id: u.id,
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
         beta_tester: false,
         trust_score: 100,
         fraud_score: 0,
-        trial_status: sub?.status === 'trialing' ? 'active' : 'none',
+        trial_status: (sub as { status?: string } | undefined)?.status === 'trialing' ? 'active' : 'none',
       }
     })
 

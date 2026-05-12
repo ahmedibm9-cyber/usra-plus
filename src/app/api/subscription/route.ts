@@ -38,7 +38,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch subscription from local database
-    let subscription = null
+    let subscription: {
+      plan?: string | null;
+      status?: string | null;
+      expirationDate?: Date | null;
+      periodType?: string | null;
+      currentPeriodEnd?: Date | null;
+    } | null = null
     try {
       const { db: dbClient } = await import('@/lib/db')
       subscription = await dbClient.userSubscription.findFirst({
