@@ -8,7 +8,6 @@ import { useI18n } from '@/i18n/use-translation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { LanguageSelector } from './language-selector'
 import { ThemeToggle } from './theme-toggle'
@@ -26,48 +25,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
-
-// ─── USRA PLUS Desert Oasis Hexagon Logo ──────────────────────────
-function HexLogo({ className, admin }: { className?: string; admin?: boolean }) {
-  const primaryColor = admin ? '#B8860B' : '#047857'
-  const goldColor = admin ? '#D4A843' : '#B8860B'
-  return (
-    <div className={`relative ${className}`}>
-      <svg
-        viewBox="0 0 40 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className={className}
-      >
-        <path
-          d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z"
-          fill={primaryColor}
-          fillOpacity="0.1"
-          stroke={primaryColor}
-          strokeWidth="1.5"
-        />
-        <path
-          d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z"
-          fill={primaryColor}
-          fillOpacity="0.4"
-        />
-        <path
-          d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z"
-          fill={primaryColor}
-          fillOpacity="0.8"
-        />
-        {/* Gold shimmer highlight */}
-        <path
-          d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z"
-          fill={goldColor}
-          fillOpacity="0.08"
-        />
-      </svg>
-      {/* Subtle gold glow ring */}
-      <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-br ${admin ? 'from-[#B8860B]/10 to-transparent' : 'from-[#047857]/10 to-[#B8860B]/5'} blur-sm -z-10`} />
-    </div>
-  )
-}
 
 // ─── Animation variants ───────────────────────────────────────────
 const fadeUp = {
@@ -135,7 +92,6 @@ export function LoginForm() {
         setIsAuthenticated(true)
         toast.success(t.auth.loginSuccess)
 
-        // Also sign in to Supabase client-side if available
         if (!isDemoMode()) {
           try {
             const supabase = createClient()
@@ -145,7 +101,6 @@ export function LoginForm() {
           }
         }
 
-        // Force page reload to ensure the httpOnly cookie-based session is fully established
         window.location.reload()
       } else {
         setAuthError(t.auth.invalidCredentials)
@@ -233,16 +188,16 @@ export function LoginForm() {
     <>
       <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
         <motion.div
-          className="glass rounded-2xl p-8 shadow-warm-lg"
-          initial={{ opacity: 0, y: 12 }}
+          className="bg-card rounded-3xl p-8 shadow-[var(--elevation-2)] border border-border"
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
         >
           {/* Top bar: Theme toggle + Language selector */}
           <motion.div
             className="flex items-center justify-between"
             {...fadeUp}
-            transition={{ duration: 0.35, delay: 0 }}
+            transition={{ duration: 0.3, delay: 0 }}
           >
             <ThemeToggle />
             <LanguageSelector />
@@ -252,7 +207,7 @@ export function LoginForm() {
           <motion.div
             className="space-y-2 text-center mt-6"
             {...fadeUp}
-            transition={{ duration: 0.35, delay: 0.05 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
           >
             <div className="flex justify-center mb-4">
               <motion.button
@@ -266,32 +221,27 @@ export function LoginForm() {
                     switchToAdmin()
                   }
                 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.92 }}
                 aria-label="USRA PLUS logo"
               >
-                <HexLogo className="w-14 h-14" admin={showAdminLogin} />
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${showAdminLogin ? 'bg-secondary-container' : 'bg-primary-container'}`}>
+                  <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                    <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className={showAdminLogin ? 'text-secondary' : 'text-primary'} fillOpacity="0.7" />
+                    <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className={showAdminLogin ? 'text-secondary' : 'text-primary'} />
+                  </svg>
+                </div>
               </motion.button>
             </div>
 
-            <motion.h1
-              className="text-2xl font-bold tracking-tight font-display"
-              style={{ color: showAdminLogin ? 'var(--accent)' : 'var(--foreground)' }}
-              layout
-            >
+            <h1 className="text-2xl font-bold tracking-tight font-display text-foreground">
               {showAdminLogin ? 'Control Center' : (isRTL ? 'مرحباً بعودتك' : 'Welcome Back')}
-            </motion.h1>
-            <motion.p
-              className="text-sm text-muted-foreground"
-              layout
-            >
+            </h1>
+            <p className="text-sm text-muted-foreground">
               {showAdminLogin
                 ? 'Authorized personnel only. All access is monitored.'
                 : (isRTL ? 'سجّل الدخول إلى عائلتك' : 'Sign in to your family')
               }
-            </motion.p>
-
-            {/* Gold accent line under heading */}
-            <div className="gold-line w-12 mx-auto mt-3" />
+            </p>
           </motion.div>
 
           {/* ─── Admin Mode Indicator ────────────────────────────────── */}
@@ -300,14 +250,14 @@ export function LoginForm() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 border border-accent/20"
+              className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl md-secondary-container"
             >
-              <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
-              <span className="text-xs text-accent font-medium">Admin Mode</span>
+              <Shield className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-xs font-medium">Admin Mode</span>
               <button
                 type="button"
                 onClick={switchToUser}
-                className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="ml-auto text-xs opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1"
               >
                 <ArrowLeft className={`w-3 h-3 ${isRTL ? 'rotate-180' : ''}`} />
                 Exit
@@ -318,7 +268,7 @@ export function LoginForm() {
           {/* ─── Unified Form ────────────────────────────────────────── */}
           <form onSubmit={showAdminLogin ? handleAdminSubmit : handleSubmit} className="space-y-4 mt-6">
             {/* Email / Access Identifier */}
-            <motion.div className="space-y-1.5" {...fadeUp} transition={{ duration: 0.35, delay: 0.1 }}>
+            <motion.div className="space-y-1.5" {...fadeUp} transition={{ duration: 0.3, delay: 0.1 }}>
               <Label className="text-sm font-medium text-muted-foreground">
                 {showAdminLogin ? 'Access Identifier' : t.auth.email}
               </Label>
@@ -338,7 +288,7 @@ export function LoginForm() {
                     if (authError) setAuthError('')
                     if (adminError) setAdminError(null)
                   }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${showAdminLogin ? 'focus:border-accent focus:ring-accent/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.15)]' : ''} ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
+                  className={`h-12 bg-muted/50 border-border rounded-xl text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
                   disabled={isLoading}
                   autoComplete="off"
                 />
@@ -349,7 +299,7 @@ export function LoginForm() {
             </motion.div>
 
             {/* Password / Access Key */}
-            <motion.div className="space-y-1.5" {...fadeUp} transition={{ duration: 0.35, delay: 0.15 }}>
+            <motion.div className="space-y-1.5" {...fadeUp} transition={{ duration: 0.3, delay: 0.15 }}>
               {!showAdminLogin && (
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-muted-foreground">
@@ -381,7 +331,7 @@ export function LoginForm() {
                     if (authError) setAuthError('')
                     if (adminError) setAdminError(null)
                   }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${showAdminLogin ? 'focus:border-accent focus:ring-accent/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.15)]' : ''} ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
+                  className={`h-12 bg-muted/50 border-border rounded-xl text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
                   disabled={isLoading}
                   autoComplete="off"
                 />
@@ -405,7 +355,7 @@ export function LoginForm() {
               <motion.div
                 className="flex items-center gap-2.5"
                 {...fadeUp}
-                transition={{ duration: 0.35, delay: 0.18 }}
+                transition={{ duration: 0.3, delay: 0.18 }}
               >
                 <Checkbox
                   id="remember-me"
@@ -445,15 +395,15 @@ export function LoginForm() {
               </motion.div>
             )}
 
-            {/* Submit Button — Emerald-to-Gold Gradient */}
-            <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
+            {/* Submit Button — Material Filled */}
+            <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0.2 }}>
               <Button
                 type="submit"
                 disabled={isLoading || (showAdminLogin && adminAttempts >= 5)}
-                className={`w-full h-11 rounded-xl font-semibold text-sm text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full h-12 rounded-xl font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                   showAdminLogin
-                    ? 'bg-gradient-to-r from-[#B8860B] to-[#D4A843] hover:from-[#D4A843] hover:to-[#B8860B] shadow-lg shadow-[#B8860B]/20'
-                    : 'btn-gradient shadow-lg shadow-primary/20'
+                    ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-[var(--elevation-1)]'
+                    : 'btn-material'
                 }`}
               >
                 {isLoading ? (
@@ -470,7 +420,6 @@ export function LoginForm() {
 
           {/* ─── Contextual sections below form ─────────────────────────── */}
           {showAdminLogin ? (
-            /* Admin footer */
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -484,13 +433,13 @@ export function LoginForm() {
             </motion.div>
           ) : (
             <>
-              {/* Divider with gold line */}
+              {/* Divider */}
               <motion.div
                 className="relative mt-6"
                 {...fadeUp}
-                transition={{ duration: 0.35, delay: 0.25 }}
+                transition={{ duration: 0.3, delay: 0.25 }}
               >
-                <div className="gold-line w-full" />
+                <div className="border-t border-border" />
                 <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
                   {t.auth.orContinueWith}
                 </span>
@@ -500,14 +449,14 @@ export function LoginForm() {
               <motion.div
                 className="mt-4"
                 {...fadeUp}
-                transition={{ duration: 0.35, delay: 0.3 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
               >
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full border-border bg-card/50 text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-[#B8860B]/20 rounded-xl h-11 font-medium transition-all duration-200"
+                  className="w-full border-border bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground rounded-xl h-12 font-medium transition-all duration-200 btn-outlined"
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -527,7 +476,7 @@ export function LoginForm() {
               <motion.div
                 className="mt-4"
                 {...fadeUp}
-                transition={{ duration: 0.35, delay: 0.35 }}
+                transition={{ duration: 0.3, delay: 0.35 }}
               >
                 <p className="text-center text-xs text-muted-foreground leading-relaxed">
                   {t.auth.termsAgreement}{' '}
@@ -541,15 +490,15 @@ export function LoginForm() {
                 </p>
               </motion.div>
 
-              {/* Sign up link — gold accent */}
+              {/* Sign up link */}
               <motion.div
                 className="text-center mt-4"
                 {...fadeUp}
-                transition={{ duration: 0.35, delay: 0.4 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
               >
                 <p className="text-sm text-muted-foreground">
                   {t.auth.noAccount}{' '}
-                  <button type="button" onClick={() => setAuthView('signup')} className="text-accent hover:text-accent/80 font-medium transition-colors duration-200">
+                  <button type="button" onClick={() => setAuthView('signup')} className="text-primary hover:text-primary/80 font-medium transition-colors duration-200">
                     {t.auth.signUpInstead}
                   </button>
                 </p>

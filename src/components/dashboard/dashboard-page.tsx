@@ -101,16 +101,16 @@ function CircularProgress({
  )
 }
 
-function GlassCard({
+function MaterialCard({
  children,
  className = '',
  delay = 0,
- accentColor,
+ variant = 'elevated',
 }: {
  children: React.ReactNode
  className?: string
  delay?: number
- accentColor?: string
+ variant?: 'elevated' | 'outlined' | 'filled'
 }) {
  return (
   <motion.div
@@ -119,15 +119,8 @@ function GlassCard({
    transition={{ duration: 0.25, delay: Math.min(delay, 0.15), ease: 'easeOut' }}
   >
    <Card
-    className={`card-hover rounded-2xl border border-border bg-card shadow-lg hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10 transition-all duration-200 overflow-hidden relative ${className}`}
-    style={accentColor ? { '--glass-accent': accentColor } as React.CSSProperties : undefined}
+    className={`rounded-2xl overflow-hidden transition-all duration-200 ${variant === 'elevated' ? 'card-elevated hover:-translate-y-0.5' : variant === 'outlined' ? 'card-outlined' : 'card-filled'} ${className}`}
    >
-    {accentColor && (
-     <div
-      className="absolute top-0 left-0 right-0 h-px opacity-60"
-      style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
-     />
-    )}
     <CardContent className="p-0">
      {children}
     </CardContent>
@@ -252,10 +245,10 @@ function StatCard({
  }, [value])
 
  return (
-  <GlassCard delay={delay} className="p-4 lg:p-5" accentColor={progressColor}>
+  <MaterialCard delay={delay} className="p-4 lg:p-5" variant="elevated">
    {isLoading ? (
     <div className="flex items-center gap-3">
-     <Skeleton className="size-10 rounded-full" />
+     <Skeleton className="size-10 rounded-2xl" />
      <div className="flex-1 space-y-1.5">
       <Skeleton className="h-5 w-12" />
       <Skeleton className="h-3 w-20" />
@@ -263,19 +256,12 @@ function StatCard({
     </div>
    ) : (
     <div className="flex items-center gap-3">
-     {/* Gradient icon circle with subtle ring */}
-     <div
-      className="flex size-10 shrink-0 items-center justify-center rounded-full ring-1"
-      style={{
-       background: `linear-gradient(135deg, ${progressColor}30, ${progressColor}10)`,
-       boxShadow: `0 0 12px ${progressColor}15`,
-       '--tw-ring-color': `${progressColor}20`,
-      } as React.CSSProperties}
-     >
-      <Icon className="size-[18px]" style={{ color: progressColor }} />
+     {/* Material icon container */}
+     <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary-container">
+      <Icon className="size-[18px] text-on-primary-container" />
      </div>
      <div className="min-w-0 flex-1">
-      <p className="text-xs text-muted-foreground truncate">{label}</p>
+      <p className="text-xs text-on-surface-variant truncate">{label}</p>
       <div className="flex items-center gap-1.5 mt-0.5">
        <motion.p
         className="text-xl font-bold text-foreground leading-tight"
@@ -289,8 +275,8 @@ function StatCard({
          variant="secondary"
          className={`gap-0.5 px-1.5 py-0 text-[9px] font-semibold ${
           trend === 'up'
-           ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15'
-           : 'bg-red-500/10 text-red-400 hover:bg-red-500/15'
+           ? 'bg-primary-container text-on-primary-container'
+           : 'bg-destructive/10 text-destructive'
          }`}
         >
          {trend === 'up' ? (
@@ -303,12 +289,12 @@ function StatCard({
        )}
       </div>
       {subValue && (
-       <p className="mt-0.5 text-[10px] text-muted-foreground/70 truncate">{subValue}</p>
+       <p className="mt-0.5 text-[10px] text-on-surface-variant/70 truncate">{subValue}</p>
       )}
      </div>
     </div>
    )}
-  </GlassCard>
+  </MaterialCard>
  )
 }
 
@@ -663,18 +649,18 @@ export default function DashboardPage() {
      transition={{ duration: 0.5 }}
      className="text-center max-w-md"
     >
-     <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
-      <Home className="size-10 text-primary" />
+     <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-3xl bg-primary-container">
+      <Home className="size-10 text-on-primary-container" />
      </div>
      <h2 className="text-2xl font-bold font-display text-foreground mb-2">{t.onboarding.welcome}</h2>
-     <p className="text-muted-foreground mb-8 leading-relaxed">
+     <p className="text-on-surface-variant mb-8 leading-relaxed">
       Create or join a family to start managing your household together. Track tasks, plan
       events, share grocery lists, and more.
      </p>
      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
       <Button
        onClick={() => setShowOnboarding(true)}
-       className="bg-primary hover:bg-primary/90 text-white rounded-xl h-11 px-6 font-display"
+       className="btn-material rounded-xl h-11 px-6 font-display"
       >
        <Plus className="size-4 mr-2" />
        {t.onboarding.createFamily}
@@ -682,7 +668,7 @@ export default function DashboardPage() {
       <Button
        variant="outline"
        onClick={() => setShowOnboarding(true)}
-       className="border-border bg-card hover:bg-muted text-foreground rounded-xl h-11 px-6"
+       className="btn-outlined rounded-xl h-11 px-6"
       >
        {t.onboarding.joinFamily}
       </Button>
@@ -702,14 +688,14 @@ export default function DashboardPage() {
      animate={{ opacity: 1, y: 0 }}
      className="text-center max-w-sm"
     >
-     <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-red-500/10 border border-red-500/20">
-      <AlertTriangle className="size-8 text-red-500" />
+     <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-destructive/10">
+      <AlertTriangle className="size-8 text-destructive" />
      </div>
      <p className="text-lg font-semibold text-foreground mb-2">{t.common.error}</p>
-     <p className="text-sm text-muted-foreground mb-6">{error}</p>
+     <p className="text-sm text-on-surface-variant mb-6">{error}</p>
      <Button
       onClick={fetchData}
-      className="bg-primary hover:bg-primary/90 text-white rounded-xl font-display"
+      className="btn-material rounded-xl font-display"
      >
       {t.common.retry}
      </Button>
@@ -723,15 +709,8 @@ export default function DashboardPage() {
  return (
   <div className="min-h-screen bg-background px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
    <div className="mx-auto max-w-7xl space-y-4 lg:space-y-6">
-    {/* ─── Welcome Section (Full Width, Gradient BG) ──────── */}
-    <section className="scroll-mt-20 relative overflow-hidden rounded-2xl">
-     {/* Animated gradient mesh blobs */}
-     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="animate-float-blob-1 absolute -left-20 -top-10 h-60 w-60 rounded-full bg-primary/[0.04] blur-3xl" />
-      <div className="animate-float-blob-2 absolute -right-16 top-5 h-48 w-48 rounded-full bg-primary/[0.05] blur-3xl" />
-      <div className="animate-float-blob-3 absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-primary/[0.03] blur-3xl" />
-     </div>
-
+    {/* ─── Welcome Section (Full Width) ──────── */}
+    <section className="scroll-mt-20 relative overflow-hidden rounded-2xl surface-tint-1">
      <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
@@ -743,14 +722,14 @@ export default function DashboardPage() {
         {greeting}
         {userName ? `, ` : ''}{userName && <span className="gradient-text">{userName}</span>} 👋
        </h1>
-       <p className="mt-1 text-sm text-muted-foreground">
-        {currentDate} &middot; ١٤٤٦ هـ &middot; <span className="text-primary font-medium">{currentFamily.name}</span>
+       <p className="mt-1 text-sm text-on-surface-variant">
+        {currentDate} &middot; <span className="text-primary font-medium">{currentFamily.name}</span>
        </p>
       </div>
       <Button
        variant="ghost"
        size="sm"
-       className="mt-2 self-start text-muted-foreground hover:text-foreground sm:mt-0"
+       className="mt-2 self-start text-on-surface-variant hover:text-foreground sm:mt-0 rounded-xl"
        onClick={() => setCurrentPage('settings')}
       >
        <Sparkles className="mr-1.5 size-4 text-primary" />
@@ -810,7 +789,7 @@ export default function DashboardPage() {
     {/* ─── Family Analytics (Full Width, Compact) ── Secondary ──── */}
     <section className="scroll-mt-20">
      {visibleWidgets === 'primary' ? (
-      <GlassCard className="p-4 lg:p-5">
+      <MaterialCard className="p-4 lg:p-5">
        <div className="space-y-3">
         <div className="flex items-center gap-2">
          <Skeleton className="size-5 rounded" />
@@ -818,7 +797,7 @@ export default function DashboardPage() {
         </div>
         <Skeleton className="h-20 w-full" />
        </div>
-      </GlassCard>
+      </MaterialCard>
      ) : (
       <AISummaryWidget tasks={tasks} groceryItems={groceryItems} events={events} members={familyMembers} isLoading={isLoading} />
      )}
@@ -827,7 +806,7 @@ export default function DashboardPage() {
     {/* ─── Weekly Chart (left) + Prayer Times + Weather (right) ── */}
     <section className="scroll-mt-20 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
      {/* Weekly Activity Bar Chart */}
-     <GlassCard delay={0.22} className="p-4 lg:p-5" accentColor="var(--primary)">
+     <MaterialCard delay={0.22} className="p-4 lg:p-5" variant="elevated">
       <div className="mb-3 flex items-center justify-between">
        <h3 className="text-sm font-semibold flex items-center gap-2">
         <BarChart3 className="size-4 text-primary" />
@@ -861,12 +840,12 @@ export default function DashboardPage() {
         </span>
        ))}
       </div>
-     </GlassCard>
+     </MaterialCard>
 
      {/* Prayer Times + Weather combined column */}
      <div className="flex flex-col gap-4 lg:gap-6">
       {/* Prayer Times Widget */}
-      <GlassCard delay={0.24} className="p-4 lg:p-5" data-tour="dashboard-prayer" accentColor="var(--accent)">
+      <MaterialCard delay={0.24} className="p-4 lg:p-5" data-tour="dashboard-prayer" variant="filled">
        <div className="mb-3 flex items-center gap-2">
         <Moon className="size-4 text-accent" />
         <h3 className="text-sm font-semibold font-display">
@@ -877,10 +856,10 @@ export default function DashboardPage() {
         {nextPrayers.map((prayer) => (
          <div
           key={prayer.name}
-          className={`flex items-center justify-between rounded-xl border p-2.5 transition-colors card-hover ${
+          className={`flex items-center justify-between rounded-2xl border p-2.5 transition-colors ${
            prayer.isNext
-            ? 'border-primary/30 bg-primary/10'
-            : 'border-border bg-muted'
+            ? 'border-primary/30 bg-primary-container'
+            : 'border-outline-variant bg-surface-variant/50 hover:bg-surface-variant'
           }`}
          >
           <div className="flex items-center gap-2">
@@ -925,17 +904,17 @@ export default function DashboardPage() {
        <p className="mt-2 text-[10px] text-muted-foreground/60 text-center">
         {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
        </p>
-      </GlassCard>
+      </MaterialCard>
 
       {/* Weather Widget ── Secondary */}
       {visibleWidgets === 'primary' ? (
-       <GlassCard className="p-4 lg:p-5">
+       <MaterialCard className="p-4 lg:p-5">
         <div className="space-y-3">
          <Skeleton className="h-4 w-24" />
          <Skeleton className="h-8 w-16" />
          <Skeleton className="h-4 w-full" />
         </div>
-       </GlassCard>
+       </MaterialCard>
       ) : (
        <WeatherWidget />
       )}
@@ -948,7 +927,7 @@ export default function DashboardPage() {
      {visibleWidgets === 'tertiary' ? (
       <ActivityTimelineWidget />
      ) : (
-      <GlassCard className="p-4 lg:p-5">
+      <MaterialCard className="p-4 lg:p-5">
        <div className="space-y-3">
         <Skeleton className="h-4 w-28" />
         {Array.from({ length: 4 }).map((_, i) => (
@@ -961,13 +940,13 @@ export default function DashboardPage() {
          </div>
         ))}
        </div>
-      </GlassCard>
+      </MaterialCard>
      )}
 
      {/* Right Column: Quick Actions + Upcoming Tasks/Events/Grocery */}
      <div className="flex flex-col gap-4 lg:gap-6">
       {/* Quick Actions */}
-      <GlassCard delay={0.3} className="p-4 lg:p-5" data-tour="quick-actions" accentColor="var(--primary)">
+      <MaterialCard delay={0.3} className="p-4 lg:p-5" data-tour="quick-actions" variant="outlined">
        <h3 className="text-sm font-semibold font-display mb-3">
         {t.dashboard.quickActions}
        </h3>
@@ -985,15 +964,14 @@ export default function DashboardPage() {
            whileHover={{ scale: 1.03 }}
            whileTap={{ scale: 0.97 }}
            onClick={action.onClick}
-           className="group flex flex-col items-center gap-1.5 rounded-xl border border-border bg-muted p-3 transition-colors hover:border-border"
+           className="group flex flex-col items-center gap-1.5 rounded-2xl border border-outline-variant bg-surface-variant/50 p-3 transition-colors hover:bg-primary-container"
           >
            <div
-            className="flex size-9 items-center justify-center rounded-lg transition-transform group-hover:scale-110"
-            style={{ backgroundColor: `${action.color}15` }}
+            className="flex size-9 items-center justify-center rounded-xl transition-transform group-hover:scale-110 bg-primary-container"
            >
-            <action.icon className="size-4" style={{ color: action.color }} />
+            <action.icon className="size-4 text-on-primary-container" />
            </div>
-           <span className="text-[11px] font-medium text-foreground">{action.label}</span>
+           <span className="text-[11px] font-medium text-on-surface-variant group-hover:text-on-primary-container">{action.label}</span>
           </motion.button>
          ))}
         </div>
@@ -1020,10 +998,10 @@ export default function DashboardPage() {
          </div>
         </div>
        )}
-      </GlassCard>
+      </MaterialCard>
 
       {/* Upcoming Tasks */}
-      <GlassCard delay={0.35} className="p-4 lg:p-5" accentColor="var(--primary)">
+      <MaterialCard delay={0.35} className="p-4 lg:p-5" variant="outlined">
        <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold font-display">{t.dashboard.upcomingTasks}</h3>
         <Button
@@ -1056,7 +1034,7 @@ export default function DashboardPage() {
              initial={{ opacity: 0, x: -8 }}
              animate={{ opacity: 1, x: 0 }}
              transition={{ delay: index * 0.05 }}
-             className="group flex items-center gap-2.5 rounded-xl border border-border bg-muted p-2.5 transition-colors hover:border-border card-hover"
+             className="group flex items-center gap-2.5 rounded-2xl border border-outline-variant bg-surface-variant/50 p-2.5 transition-colors hover:bg-primary-container"
             >
              <div
               className={`flex size-7 items-center justify-center rounded-lg shrink-0 ${
@@ -1099,10 +1077,10 @@ export default function DashboardPage() {
          </div>
         )}
        </ScrollArea>
-      </GlassCard>
+      </MaterialCard>
 
       {/* Upcoming Events */}
-      <GlassCard delay={0.4} className="p-4 lg:p-5">
+      <MaterialCard delay={0.4} className="p-4 lg:p-5">
        <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold font-display">
          {t.dashboard.upcomingEvents}
@@ -1144,7 +1122,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="flex items-center gap-3 rounded-xl border border-border bg-muted p-3 transition-colors hover:border-border hover:bg-muted card-hover"
+            className="flex items-center gap-3 rounded-2xl border border-outline-variant bg-surface-variant/50 p-3 transition-colors hover:bg-primary-container"
            >
             <div
              className="size-3 shrink-0 rounded-full"
@@ -1172,10 +1150,10 @@ export default function DashboardPage() {
          </AnimatePresence>
         </div>
        )}
-      </GlassCard>
+      </MaterialCard>
 
       {/* Grocery Reminders */}
-      <GlassCard delay={0.45} className="p-4 lg:p-5">
+      <MaterialCard delay={0.45} className="p-4 lg:p-5">
        <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold font-display">
          {t.dashboard.groceryReminders}
@@ -1237,7 +1215,7 @@ export default function DashboardPage() {
          )}
         </>
        )}
-      </GlassCard>
+      </MaterialCard>
      </div>
     </section>
    </div>

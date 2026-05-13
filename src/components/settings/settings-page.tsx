@@ -138,7 +138,7 @@ function SectionCard({
 }) {
  return (
   <Card
-   className={`bg-card border border-border rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 ${className ?? ''}`}
+   className={`bg-card border border-outline-variant rounded-2xl shadow-[var(--elevation-1)] transition-shadow duration-200 ${className ?? ''}`}
   >
    <CardContent className="p-6">
     {children}
@@ -399,7 +399,7 @@ function FamilyManagementTab() {
       {familyMembers.map((member: FamilyMember) => (
        <div
         key={member.id}
-        className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border hover:border-border hover:bg-muted/80 transition-all duration-150"
+        className="flex items-center gap-3 p-3 rounded-2xl bg-surface-variant/50 border border-outline-variant hover:bg-primary-container transition-all duration-150"
        >
         <Avatar className="size-9">
          <AvatarImage src={member.profiles?.avatar_url ?? ''} />
@@ -434,14 +434,14 @@ function FamilyManagementTab() {
           value={member.role}
           onValueChange={(v) => handleChangeRole(member.id, v as FamilyRole)}
          >
-          <SelectTrigger className="h-7 w-24 text-xs bg-muted border-border text-muted-foreground">
+          <SelectTrigger className="h-8 w-28 text-xs bg-surface-variant border-outline-variant text-on-surface-variant rounded-xl">
            <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-card border-border">
-           <SelectItem value="admin" className="text-foreground text-xs">
+          <SelectContent className="bg-card border-border rounded-xl shadow-[var(--elevation-2)]">
+           <SelectItem value="admin" className="text-foreground text-xs rounded-lg cursor-pointer">
             {t.settings.admin}
            </SelectItem>
-           <SelectItem value="member" className="text-foreground text-xs">
+           <SelectItem value="member" className="text-foreground text-xs rounded-lg cursor-pointer">
             {t.settings.member}
            </SelectItem>
           </SelectContent>
@@ -767,15 +767,15 @@ function UserManagementTab() {
        <Label className="text-foreground text-xs mb-1.5 block">{t.auth.phone}</Label>
        <div className="flex gap-2">
         <Select value={countryCode} onValueChange={setCountryCode}>
-         <SelectTrigger className="w-[120px] bg-background border-border text-foreground focus:ring-primary/20 focus:border-primary/50 shrink-0">
+         <SelectTrigger className="w-[120px] bg-surface-variant border-outline-variant text-foreground focus:ring-primary/20 focus:border-primary/50 shrink-0 rounded-xl">
           <SelectValue />
          </SelectTrigger>
-         <SelectContent className="bg-card border-border text-foreground max-h-64">
+         <SelectContent className="bg-card border-border text-foreground max-h-64 rounded-xl shadow-[var(--elevation-2)]">
           {countryCodes.map((cc) => (
            <SelectItem
             key={cc.code}
             value={cc.code}
-            className="focus:bg-primary/10 focus:text-accent cursor-pointer"
+            className="focus:bg-primary-container focus:text-on-primary-container cursor-pointer rounded-lg"
            >
             <span className="flex items-center gap-1.5">
              <span>{cc.flag}</span>
@@ -852,10 +852,10 @@ function UserManagementTab() {
       {families.map((family) => (
        <div
         key={family.id}
-        className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border hover:border-border transition-all duration-150 cursor-pointer"
+        className="flex items-center gap-3 p-3 rounded-2xl bg-surface-variant/50 border border-outline-variant hover:bg-primary-container transition-all duration-150 cursor-pointer"
        >
-        <div className="size-9 rounded-lg bg-primary/20 flex items-center justify-center">
-         <Users className="size-4 text-accent" />
+        <div className="size-9 rounded-xl bg-primary-container flex items-center justify-center">
+         <Users className="size-4 text-on-primary-container" />
         </div>
         <div className="flex-1 min-w-0">
          <p className="text-foreground text-sm font-medium truncate">{family.name}</p>

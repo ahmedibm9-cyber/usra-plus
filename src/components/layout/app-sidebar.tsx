@@ -85,27 +85,27 @@ function NavItemButton({
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5
-        text-sm font-medium transition-all duration-150
+        group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5
+        text-sm font-medium transition-all duration-200
         ${isActive
-          ? 'bg-primary/10 text-primary'
-          : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-primary/5'
+          ? 'bg-primary-container text-on-primary-container'
+          : 'text-on-surface-variant hover:bg-surface-variant hover:text-foreground'
         }
         ${collapsed ? 'justify-center px-2' : ''}
       `}
     >
-      {/* Active left border indicator */}
-      {isActive && (
+      {/* Active indicator pill */}
+      {isActive && !collapsed && (
         <motion.div
           layoutId="sidebar-active-indicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-primary to-[#B8860B]"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] rounded-r-full bg-primary"
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       )}
 
       <Icon
         className={`size-[18px] shrink-0 transition-colors duration-150 ${
-          isActive ? 'text-primary' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'
+          isActive ? 'text-primary' : 'text-on-surface-variant group-hover:text-foreground'
         }`}
       />
 
@@ -180,8 +180,8 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
       <div className={`flex flex-col gap-2 ${collapsed ? 'px-2' : 'px-4'} pt-5 pb-2`}>
         {/* Logo */}
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} mb-2`}>
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#047857]">
-            <span className="text-sm font-bold text-primary-foreground">U+</span>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <span className="text-sm font-bold">U+</span>
           </div>
           <AnimatePresence mode="wait">
             {!collapsed && (
@@ -204,9 +204,9 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         {!collapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted">
-                <div className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-primary/15 to-[#B8860B]/10">
-                  <Users className="size-3.5 text-primary" />
+              <button className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-surface-variant">
+                <div className="flex size-6 items-center justify-center rounded-lg bg-primary-container">
+                  <Users className="size-3.5 text-on-primary-container" />
                 </div>
                 <span className="flex-1 truncate text-sidebar-foreground/70">
                   {currentFamily?.name || t.nav.dashboard}
@@ -216,7 +216,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-56"
+              className="w-56 rounded-xl shadow-[var(--elevation-2)]"
             >
               <DropdownMenuLabel className="text-muted-foreground text-xs">
                 {t.settings.family}
@@ -225,7 +225,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                 <DropdownMenuItem
                   key={family.id}
                   onClick={() => handleFamilySwitch(family.id)}
-                  className={currentFamily?.id === family.id ? 'bg-primary/10 text-primary' : ''}
+                  className={`rounded-lg cursor-pointer ${currentFamily?.id === family.id ? 'bg-primary-container text-on-primary-container' : ''}`}
                 >
                   <Users className="size-4 mr-2" />
                   {family.name}
@@ -262,14 +262,14 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             <button
               aria-label="User menu"
               className={`
-                flex w-full items-center gap-3 rounded-lg px-2.5 py-2
-                transition-colors hover:bg-muted
+                flex w-full items-center gap-3 rounded-xl px-2.5 py-2
+                transition-colors hover:bg-surface-variant
                 ${collapsed ? 'justify-center' : ''}
               `}
             >
               <Avatar className="size-8 ring-2 ring-sidebar-border">
                 <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className="bg-gradient-to-br from-primary/15 to-[#B8860B]/10 text-primary text-xs font-semibold">
+                <AvatarFallback className="bg-primary-container text-on-primary-container text-xs font-semibold">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
@@ -294,7 +294,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56"
+            className="w-56 rounded-xl shadow-[var(--elevation-2)]"
           >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1">
@@ -303,14 +303,14 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleNavClick('settings')}>
+            <DropdownMenuItem onClick={() => handleNavClick('settings')} className="rounded-lg cursor-pointer">
               <Settings className="size-4 mr-2" />
               {t.nav.settings}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={logout}
-              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+              className="text-destructive focus:text-destructive focus:bg-destructive/10 rounded-lg cursor-pointer"
             >
               <LogOut className="size-4 mr-2" />
               {t.auth.logout}
@@ -339,7 +339,7 @@ export function AppSidebar() {
         {/* Collapse Toggle */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-all hover:bg-[#B8860B]/10 hover:text-[#B8860B] hover:border-[#B8860B]/30"
+          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-[var(--elevation-1)] transition-all hover:bg-primary-container hover:text-on-primary-container hover:border-primary/30"
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {sidebarCollapsed ? (

@@ -42,85 +42,127 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  /* Desert Oasis custom colors */
-  --color-gold: #B8860B;
-  --color-gold-light: #D4A843;
-  --color-emerald-deep: #047857;
-  --color-emerald-mid: #059669;
-  --color-warm-cream: #FFFBF5;
-  --color-warm-black: #0C0A09;
+  /* Material Design 3 custom tokens */
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-surface-variant: var(--surface-variant);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-elevation-1: var(--elevation-1);
+  --color-elevation-2: var(--elevation-2);
+  --color-elevation-3: var(--elevation-3);
 }
 
-/* ─── Light Theme — Desert Oasis ──────────────────────────────── */
+/* ─── Light Theme — Material Design 3 (Teal + Amber) ────────── */
 .light {
-  --radius: 0.75rem;
-  --background: #FFFBF5;
-  --foreground: #1C1917;
+  --radius: 0.875rem;
+  --background: #FEFCF9;
+  --foreground: #1C1B1F;
   --card: #FFFFFF;
-  --card-foreground: #1C1917;
+  --card-foreground: #1C1B1F;
   --popover: #FFFFFF;
-  --popover-foreground: #1C1917;
-  --primary: #047857;
+  --popover-foreground: #1C1B1F;
+  --primary: #0D6B58;
   --primary-foreground: #FFFFFF;
-  --secondary: #F5F0E8;
-  --secondary-foreground: #1C1917;
-  --muted: #F0EBE3;
-  --muted-foreground: #78716C;
-  --accent: #B8860B;
-  --accent-foreground: #FFFFFF;
-  --destructive: #B91C1C;
-  --border: rgba(120, 113, 108, 0.12);
-  --input: rgba(120, 113, 108, 0.15);
-  --ring: #047857;
-  --chart-1: #047857;
-  --chart-2: #B8860B;
-  --chart-3: #1C1917;
-  --chart-4: #78716C;
-  --chart-5: #A8A29E;
-  --sidebar: #FDF8F0;
-  --sidebar-foreground: #1C1917;
-  --sidebar-primary: #047857;
+  --primary-container: #A7F3D0;
+  --on-primary-container: #002118;
+  --secondary: #92400E;
+  --secondary-foreground: #FFFFFF;
+  --secondary-container: #FDE68A;
+  --on-secondary-container: #451A03;
+  --tertiary: #6B5CE7;
+  --tertiary-container: #E8E0FF;
+  --on-tertiary-container: #1E1060;
+  --muted: #F4F1ED;
+  --muted-foreground: #74746C;
+  --accent: #F59E0B;
+  --accent-foreground: #451A03;
+  --destructive: #BA1A1A;
+  --border: rgba(28, 27, 31, 0.12);
+  --input: rgba(28, 27, 31, 0.15);
+  --ring: #0D6B58;
+  --surface-variant: #E7E0DC;
+  --on-surface-variant: #49454F;
+  --outline: #79747E;
+  --outline-variant: #CAC4D0;
+  --inverse-surface: #313033;
+  --inverse-on-surface: #F4EFF4;
+  --elevation-1: 0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06);
+  --elevation-2: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06);
+  --elevation-3: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.06);
+  --chart-1: #0D6B58;
+  --chart-2: #F59E0B;
+  --chart-3: #6B5CE7;
+  --chart-4: #74746C;
+  --chart-5: #BA1A1A;
+  --sidebar: #F7F4F0;
+  --sidebar-foreground: #1C1B1F;
+  --sidebar-primary: #0D6B58;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F0EBE3;
-  --sidebar-accent-foreground: #1C1917;
-  --sidebar-border: rgba(120, 113, 108, 0.10);
-  --sidebar-ring: #047857;
+  --sidebar-accent: #E7E0DC;
+  --sidebar-accent-foreground: #49454F;
+  --sidebar-border: rgba(28, 27, 31, 0.08);
+  --sidebar-ring: #0D6B58;
 }
 
-/* ─── Dark Theme — Desert Oasis ───────────────────────────────── */
+/* ─── Dark Theme — Material Design 3 ────────────────────────── */
 .dark {
-  --radius: 0.75rem;
-  --background: #0C0A09;
-  --foreground: #F5F0E8;
-  --card: #1C1917;
-  --card-foreground: #F5F0E8;
-  --popover: #1C1917;
-  --popover-foreground: #F5F0E8;
-  --primary: #059669;
-  --primary-foreground: #FFFFFF;
-  --secondary: #292524;
-  --secondary-foreground: #F5F0E8;
-  --muted: #1C1917;
-  --muted-foreground: #A8A29E;
-  --accent: #D4A843;
-  --accent-foreground: #0C0A09;
-  --destructive: #F87171;
-  --border: rgba(168, 162, 158, 0.10);
-  --input: rgba(168, 162, 158, 0.14);
-  --ring: #059669;
-  --chart-1: #059669;
-  --chart-2: #D4A843;
-  --chart-3: #F5F0E8;
-  --chart-4: #A8A29E;
-  --chart-5: #78716C;
-  --sidebar: #0F0D0C;
-  --sidebar-foreground: #F5F0E8;
-  --sidebar-primary: #059669;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1C1917;
-  --sidebar-accent-foreground: #F5F0E8;
-  --sidebar-border: rgba(168, 162, 158, 0.08);
-  --sidebar-ring: #059669;
+  --radius: 0.875rem;
+  --background: #1C1B1F;
+  --foreground: #E6E1E5;
+  --card: #2B2930;
+  --card-foreground: #E6E1E5;
+  --popover: #2B2930;
+  --popover-foreground: #E6E1E5;
+  --primary: #6EE7B7;
+  --primary-foreground: #00382A;
+  --primary-container: #00513D;
+  --on-primary-container: #A7F3D0;
+  --secondary: #FBBF24;
+  --secondary-foreground: #451A03;
+  --secondary-container: #78350F;
+  --on-secondary-container: #FDE68A;
+  --tertiary: #C7BFFF;
+  --tertiary-container: #4F378B;
+  --on-tertiary-container: #E8E0FF;
+  --muted: #2B2930;
+  --muted-foreground: #9E9C94;
+  --accent: #FBBF24;
+  --accent-foreground: #451A03;
+  --destructive: #FFB4AB;
+  --border: rgba(230, 225, 229, 0.10);
+  --input: rgba(230, 225, 229, 0.15);
+  --ring: #6EE7B7;
+  --surface-variant: #49454F;
+  --on-surface-variant: #CAC4D0;
+  --outline: #938F99;
+  --outline-variant: #49454F;
+  --inverse-surface: #E6E1E5;
+  --inverse-on-surface: #313033;
+  --elevation-1: 0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.2);
+  --elevation-2: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+  --elevation-3: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2);
+  --chart-1: #6EE7B7;
+  --chart-2: #FBBF24;
+  --chart-3: #C7BFFF;
+  --chart-4: #9E9C94;
+  --chart-5: #FFB4AB;
+  --sidebar: #161518;
+  --sidebar-foreground: #E6E1E5;
+  --sidebar-primary: #6EE7B7;
+  --sidebar-primary-foreground: #00382A;
+  --sidebar-accent: #2B2930;
+  --sidebar-accent-foreground: #CAC4D0;
+  --sidebar-border: rgba(230, 225, 229, 0.06);
+  --sidebar-ring: #6EE7B7;
 }
 
 /* ─── Base Layer ──────────────────────────────────────────────── */
@@ -138,21 +180,6 @@
     font-family: 'IBM Plex Sans Arabic', 'Cairo', 'Inter', system-ui, sans-serif;
   }
 
-  /* Subtle geometric background pattern */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.025;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23047857' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  .dark body::before {
-    opacity: 0.04;
-  }
-
   /* Smooth theme transitions */
   .theme-transitioning,
   .theme-transitioning *,
@@ -163,7 +190,6 @@
     transition-timing-function: ease;
   }
 
-  /* Interactive element transitions */
   input, textarea, select {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.15s ease;
   }
@@ -171,7 +197,6 @@
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
   }
 
-  /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -182,7 +207,7 @@
   }
 }
 
-/* ─── Custom Scrollbar — Warm Tones ───────────────────────────── */
+/* ─── Custom Scrollbar ───────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -191,67 +216,59 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(120, 113, 108, 0.2);
+  background: rgba(28, 27, 31, 0.15);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 113, 108, 0.35);
+  background: rgba(28, 27, 31, 0.25);
 }
-
 .dark ::-webkit-scrollbar-thumb {
-  background: rgba(168, 162, 158, 0.15);
+  background: rgba(230, 225, 229, 0.12);
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 162, 158, 0.3);
+  background: rgba(230, 225, 229, 0.22);
 }
-
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(120, 113, 108, 0.2) transparent;
+  scrollbar-color: rgba(28, 27, 31, 0.15) transparent;
 }
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(120, 113, 108, 0.2); border-radius: 2px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(120, 113, 108, 0.35); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(28, 27, 31, 0.15); border-radius: 2px; }
 
-/* ─── Focus Rings — Emerald Glow ──────────────────────────────── */
+/* ─── Focus Rings — Material Design 3 ───────────────────────── */
 *:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(4, 120, 87, 0.35);
+  box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px var(--background);
   border-radius: inherit;
   transition: box-shadow 0.15s ease;
-}
-
-.dark *:focus-visible {
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.4);
 }
 
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  box-shadow: 0 0 0 2px rgba(4, 120, 87, 0.3), 0 0 12px -2px rgba(184, 134, 11, 0.15);
+  box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px var(--background);
   border-color: var(--ring);
-}
-
-.dark input:focus-visible,
-.dark textarea:focus-visible,
-.dark select:focus-visible {
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.4), 0 0 12px -2px rgba(212, 168, 67, 0.1);
 }
 
 *:focus {
   outline: none;
 }
 
-/* ─── Keyframes — Elegant Arabian Luxury ──────────────────────── */
+/* ─── Keyframes — Material Motion ────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes shimmer {
@@ -259,19 +276,9 @@ select:focus-visible {
   100% { transform: translateX(100%); }
 }
 
-@keyframes goldShimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-}
-
-@keyframes gentlePulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
 }
 
 @keyframes progressLine {
@@ -281,36 +288,37 @@ select:focus-visible {
   100% { width: 100%; }
 }
 
-@keyframes floatGeometric {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-8px) rotate(2deg); }
-  50% { transform: translateY(-4px) rotate(-1deg); }
-  75% { transform: translateY(-10px) rotate(1deg); }
+@keyframes logoReveal {
+  0% { opacity: 0; transform: scale(0.8) rotate(-10deg); }
+  50% { transform: scale(1.05) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-@keyframes hexGlow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(4, 120, 87, 0.2)); }
-  50% { filter: drop-shadow(0 0 12px rgba(184, 134, 11, 0.3)); }
+@keyframes textReveal {
+  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-@keyframes letterReveal {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.35; }
+  100% { transform: scale(4); opacity: 0; }
 }
 
-.animate-fade-in { animation: fadeIn 0.35s ease-out; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
 .animate-slide-up { animation: slideUp 0.4s ease-out; }
+.animate-scale-in { animation: scaleIn 0.3s ease-out; }
 .animate-pulse { animation: pulse 2s ease-in-out infinite; }
-.animate-gentle-pulse { animation: gentlePulse 3s ease-in-out infinite; }
-.animate-gold-shimmer { 
-  background-size: 200% auto;
-  animation: goldShimmer 3s linear infinite; 
-}
-.animate-float-geometric { animation: floatGeometric 8s ease-in-out infinite; }
-.animate-hex-glow { animation: hexGlow 3s ease-in-out infinite; }
-.animate-progress-line { animation: progressLine 2.5s ease-out forwards; }
+.animate-progress-line { animation: progressLine 2s ease-out forwards; }
+.animate-logo-reveal { animation: logoReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-text-reveal { animation: textReveal 0.5s ease-out forwards; }
+.animate-float { animation: float 4s ease-in-out infinite; }
 
-/* ─── Skeleton Loading — Warm Tones ───────────────────────────── */
+/* ─── Skeleton Loading — Material ────────────────────────────── */
 .skeleton-shimmer {
   position: relative;
   overflow: hidden;
@@ -319,146 +327,163 @@ select:focus-visible {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.06), transparent);
+  background: linear-gradient(90deg, transparent, rgba(13, 107, 88, 0.06), transparent);
+  animation: shimmer 2s infinite;
+}
+.dark .skeleton-shimmer::after {
+  background: linear-gradient(90deg, transparent, rgba(110, 231, 183, 0.04), transparent);
   animation: shimmer 2s infinite;
 }
 
 .skeleton-loading {
   background: var(--muted);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  border-radius: 0.375rem;
+  border-radius: 0.75rem;
 }
 
-/* ─── Card Hover Effects — Gold Glow ─────────────────────────── */
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ─── Card Styles — Material Elevation ───────────────────────── */
+.card-elevated {
+  box-shadow: var(--elevation-1);
+  border: 1px solid transparent;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px -4px rgba(120, 113, 108, 0.12),
-              0 2px 8px -2px rgba(120, 113, 108, 0.06),
-              0 0 0 1px rgba(184, 134, 11, 0.06);
-}
-
-.dark .card-hover:hover {
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4),
-              0 2px 8px -2px rgba(0, 0, 0, 0.3),
-              0 0 0 1px rgba(212, 168, 67, 0.06);
+.card-elevated:hover {
+  box-shadow: var(--elevation-2);
 }
 
-/* ─── Glass Morphism ──────────────────────────────────────────── */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(184, 134, 11, 0.08);
+.card-outlined {
+  border: 1px solid var(--outline-variant);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-outlined:hover {
+  border-color: var(--outline);
+  box-shadow: var(--elevation-1);
 }
 
-.dark .glass {
-  background: rgba(28, 25, 23, 0.75);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(212, 168, 67, 0.06);
+.card-filled {
+  background: var(--surface-variant);
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: background-color 0.2s ease;
+}
+.card-filled:hover {
+  background: var(--muted);
 }
 
-.glass-subtle {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+/* ─── Material Ripple Effect ─────────────────────────────────── */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, var(--primary) 10%, transparent 10%);
+  transform: scale(0);
+  opacity: 0;
+  transition: none;
+}
+.ripple:active::after {
+  animation: ripple 0.6s ease-out;
 }
 
-.dark .glass-subtle {
-  background: rgba(28, 25, 23, 0.55);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
+/* ─── Material Surface Tint ──────────────────────────────────── */
+.surface-tint-1 { background-color: color-mix(in srgb, var(--primary) 5%, var(--background)); }
+.surface-tint-2 { background-color: color-mix(in srgb, var(--primary) 8%, var(--background)); }
+.surface-tint-3 { background-color: color-mix(in srgb, var(--primary) 11%, var(--background)); }
+
+/* ─── Material Container Styles ──────────────────────────────── */
+.md-primary-container {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
 }
 
-/* ─── Gold Accent Utilities ───────────────────────────────────── */
-.gold-border {
-  border-color: rgba(184, 134, 11, 0.2);
-}
-.dark .gold-border {
-  border-color: rgba(212, 168, 67, 0.15);
+.md-secondary-container {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
 }
 
-.gold-glow {
-  box-shadow: 0 0 16px -4px rgba(184, 134, 11, 0.2);
-}
-.dark .gold-glow {
-  box-shadow: 0 0 16px -4px rgba(212, 168, 67, 0.15);
+.md-tertiary-container {
+  background: var(--tertiary-container);
+  color: var(--on-tertiary-container);
 }
 
-.gold-line {
-  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.3), transparent);
-  height: 1px;
+/* ─── Gradient Button — Material FAB Style ───────────────────── */
+.btn-material {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--elevation-1);
+  transition: box-shadow 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
 }
-.dark .gold-line {
-  background: linear-gradient(90deg, transparent, rgba(212, 168, 67, 0.2), transparent);
+.btn-material:hover {
+  box-shadow: var(--elevation-2);
+  background: color-mix(in srgb, var(--primary) 92%, var(--foreground));
 }
-
-/* ─── Warm Shadows ───────────────────────────────────────────── */
-.shadow-warm {
-  box-shadow: 0 4px 12px -2px rgba(120, 113, 108, 0.08),
-              0 2px 6px -1px rgba(120, 113, 108, 0.04);
-}
-.shadow-warm-lg {
-  box-shadow: 0 8px 32px -4px rgba(120, 113, 108, 0.1),
-              0 4px 12px -2px rgba(120, 113, 108, 0.06);
-}
-.dark .shadow-warm {
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2),
-              0 2px 6px -1px rgba(0, 0, 0, 0.12);
-}
-.dark .shadow-warm-lg {
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.3),
-              0 4px 12px -2px rgba(0, 0, 0, 0.2);
+.btn-material:active {
+  box-shadow: var(--elevation-1);
+  transform: scale(0.98);
 }
 
-/* ─── Toast Styling (Sonner) — Warm Gold Accents ──────────────── */
+.btn-tonal {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  box-shadow: none;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-tonal:hover {
+  box-shadow: var(--elevation-1);
+  background: color-mix(in srgb, var(--primary-container) 85%, var(--on-primary-container));
+}
+
+.btn-outlined {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--outline);
+  box-shadow: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.btn-outlined:hover {
+  background: var(--primary-container);
+  border-color: var(--primary);
+}
+
+/* ─── Toast Styling (Sonner) — Material ──────────────────────── */
 [data-sonner-toaster] [data-styled="true"] {
-  background: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--foreground) !important;
+  background: var(--inverse-surface) !important;
+  border: none !important;
+  color: var(--inverse-on-surface) !important;
   border-radius: 0.75rem !important;
-  box-shadow: 0 8px 32px rgba(120, 113, 108, 0.12) !important;
-  border-left: 3px solid var(--border) !important;
+  box-shadow: var(--elevation-3) !important;
 }
 
 [data-sonner-toaster] [data-styled="true"][data-type="success"] {
-  border-left-color: #047857 !important;
+  background: var(--primary-container) !important;
+  color: var(--on-primary-container) !important;
 }
 [data-sonner-toaster] [data-styled="true"][data-type="error"] {
-  border-left-color: #B91C1C !important;
+  background: var(--destructive) !important;
+  color: #FFFFFF !important;
 }
 [data-sonner-toaster] [data-styled="true"][data-type="info"] {
-  border-left-color: #047857 !important;
+  background: var(--tertiary-container) !important;
+  color: var(--on-tertiary-container) !important;
 }
 [data-sonner-toaster] [data-styled="true"][data-type="warning"] {
-  border-left-color: #B8860B !important;
-}
-
-.dark [data-sonner-toaster] [data-styled="true"][data-type="success"] {
-  border-left-color: #059669 !important;
-}
-.dark [data-sonner-toaster] [data-styled="true"][data-type="error"] {
-  border-left-color: #F87171 !important;
-}
-.dark [data-sonner-toaster] [data-styled="true"][data-type="info"] {
-  border-left-color: #059669 !important;
-}
-.dark [data-sonner-toaster] [data-styled="true"][data-type="warning"] {
-  border-left-color: #D4A843 !important;
+  background: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
 }
 
 [data-sonner-toaster] [data-title] {
-  color: var(--foreground) !important;
+  color: inherit !important;
   font-weight: 600 !important;
 }
 [data-sonner-toaster] [data-description] {
-  color: var(--muted-foreground) !important;
+  opacity: 0.8 !important;
 }
 
-/* ─── RTL Support ─────────────────────────────────────────────── */
+/* ─── RTL Support ────────────────────────────────────────────── */
 html[dir="rtl"] .sidebar-item-icon {
   margin-right: 0;
   margin-left: 0.75rem;
@@ -472,7 +497,7 @@ html[dir="rtl"] .sidebar-collapse-icon {
   padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
 }
 
-/* ─── Skip to Content (Accessibility) ─────────────────────────── */
+/* ─── Skip to Content (Accessibility) ────────────────────────── */
 .skip-to-content {
   position: absolute;
   left: -9999px;
@@ -500,62 +525,73 @@ html[dir="rtl"] .sidebar-collapse-icon {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* ─── Hover Reveal ────────────────────────────────────────────── */
-.hover-reveal { opacity: 0; transform: scale(0.95); transition: all 0.2s ease; }
-.hover-reveal-parent:hover .hover-reveal { opacity: 1; transform: scale(1); }
-
-/* ─── Gradient Text — Emerald to Gold ─────────────────────────── */
+/* ─── Gradient Text ──────────────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary), #B8860B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.dark .gradient-text {
-  background: linear-gradient(135deg, #059669, #D4A843);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ─── Emerald-to-Gold Gradient Button ─────────────────────────── */
-.btn-gradient {
-  background: linear-gradient(135deg, #047857 0%, #059669 50%, #B8860B 100%);
-  background-size: 200% auto;
-  transition: background-position 0.4s ease, box-shadow 0.2s ease;
-}
-.btn-gradient:hover {
-  background-position: right center;
-  box-shadow: 0 6px 20px -4px rgba(4, 120, 87, 0.3), 0 0 12px -2px rgba(184, 134, 11, 0.15);
-}
-
-.dark .btn-gradient {
-  background: linear-gradient(135deg, #059669 0%, #047857 50%, #D4A843 100%);
-  background-size: 200% auto;
-}
-.dark .btn-gradient:hover {
-  background-position: right center;
-  box-shadow: 0 6px 20px -4px rgba(5, 150, 105, 0.25), 0 0 12px -2px rgba(212, 168, 67, 0.12);
+/* ─── Navigation Rail Indicator ──────────────────────────────── */
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 56%;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
 }
 
-/* ─── Floating Blob Animations — Warm Emerald/Gold ────────────── */
-@keyframes float-blob-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(20px, -15px) scale(1.03); }
-  50% { transform: translate(-8px, 10px) scale(0.97); }
-  75% { transform: translate(-18px, -8px) scale(1.01); }
+html[dir="rtl"] .nav-indicator {
+  left: auto;
+  right: 0;
+  border-radius: 3px 0 0 3px;
 }
-@keyframes float-blob-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(-15px, 20px) scale(1.02); }
-  50% { transform: translate(10px, -10px) scale(0.98); }
-  75% { transform: translate(15px, 8px) scale(1.03); }
+
+/* ─── Bottom Navigation Active Indicator (Material 3 Pill) ──── */
+.bottom-nav-active {
+  position: relative;
 }
-@keyframes float-blob-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(10px, 15px) scale(1.04); }
-  66% { transform: translate(-15px, -8px) scale(0.96); }
+.bottom-nav-active::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--primary-container);
 }
-.animate-float-blob-1 { animation: float-blob-1 12s ease-in-out infinite; }
-.animate-float-blob-2 { animation: float-blob-2 15s ease-in-out infinite; }
-.animate-float-blob-3 { animation: float-blob-3 18s ease-in-out infinite; }
+html[dir="rtl"] .bottom-nav-active::before {
+  left: 50%;
+}
+
+/* ─── Material Chip Styles ────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface-variant);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  background: var(--surface-variant);
+}
+.chip-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border-color: transparent;
+}
+.chip-active:hover {
+  background: color-mix(in srgb, var(--primary-container) 85%, var(--on-primary-container));
+}

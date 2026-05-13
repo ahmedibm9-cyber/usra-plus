@@ -54,17 +54,16 @@ function safeCreateClient() {
   }
 }
 
-// ─── Chunk loader — Elegant emerald skeleton ──────────────────────
+// ─── Chunk loader — Material Design 3 ──────────────────────────
 function ChunkLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-5">
         <div className="relative">
-          <div className="size-10 rounded-full border-2 border-muted border-t-primary animate-spin" />
-          <div className="absolute inset-0 size-10 rounded-full border border-transparent border-t-[#B8860B]/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+          <div className="size-10 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
         </div>
-        <div className="h-1 w-20 rounded-full bg-muted overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#B8860B] animate-progress-line" />
+        <div className="h-1 w-24 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-primary animate-progress-line" />
         </div>
       </div>
     </div>
@@ -92,16 +91,13 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
           <div className="max-w-sm w-full text-center">
-            {/* Hexagon logo with gold glow */}
-            <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-primary/10 gold-glow">
+            <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-primary/10">
               <svg width="32" height="35" viewBox="0 0 40 44" fill="none">
                 <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
                 <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
               </svg>
             </div>
-            {/* Gold accent line */}
-            <div className="gold-line w-16 mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-foreground mb-2 font-display">
               Something went wrong
             </h2>
@@ -110,7 +106,7 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center justify-center rounded-xl btn-gradient px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200"
+              className="inline-flex items-center justify-center rounded-2xl btn-material px-6 py-2.5 text-sm font-semibold transition-all duration-200"
             >
               Refresh Page
             </button>
@@ -122,54 +118,52 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-// ─── Auth Screen — Desert Oasis Split Layout ────────────────────
+// ─── Auth Screen — Material Design 3 ────────────────────────────
 function AuthScreen() {
   const { authView } = useAuthStore()
 
   return (
     <div className="min-h-screen bg-background flex relative overflow-hidden">
       {/* LEFT: Decorative panel (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0C0A09]">
-        {/* Geometric pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23D4A843' stroke-width='0.5'%3E%3Crect x='10' y='10' width='60' height='60'/%3E%3Crect x='20' y='20' width='40' height='40'/%3E%3Cline x1='0' y1='0' x2='80' y2='80'/%3E%3Cline x1='80' y1='0' x2='0' y2='80'/%3E%3C/g%3E%3C/svg%3E")`,
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] relative overflow-hidden bg-gradient-to-br from-[#0D6B58] via-[#065F46] to-[#1C1B1F]">
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236EE7B7' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
 
-        {/* Floating geometric shapes */}
-        <div className="absolute top-[15%] left-[10%] w-24 h-24 border border-[#D4A843]/20 rounded-lg rotate-12 animate-float-geometric" />
-        <div className="absolute top-[60%] left-[20%] w-16 h-16 border border-[#D4A843]/15 rotate-45 animate-float-geometric" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-[20%] right-[15%] w-20 h-20 border border-[#D4A843]/20 rounded-full animate-float-geometric" style={{ animationDelay: '4s' }} />
-        <div className="absolute top-[35%] right-[10%] w-12 h-12 border border-white/10 rotate-12 animate-float-geometric" style={{ animationDelay: '1s' }} />
-
-        {/* Gradient orbs */}
-        <div className="absolute top-[20%] right-[10%] w-64 h-64 rounded-full bg-[#D4A843]/8 blur-[80px]" />
-        <div className="absolute bottom-[10%] left-[5%] w-48 h-48 rounded-full bg-[#059669]/10 blur-[60px]" />
+        {/* Floating blobs */}
+        <div className="absolute top-[15%] right-[10%] w-72 h-72 rounded-full bg-[#6EE7B7]/6 blur-[80px] animate-float" />
+        <div className="absolute bottom-[10%] left-[5%] w-56 h-56 rounded-full bg-[#FBBF24]/5 blur-[60px] animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[50%] left-[40%] w-40 h-40 rounded-full bg-[#C7BFFF]/4 blur-[50px] animate-float" style={{ animationDelay: '4s' }} />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center items-center px-12 w-full">
           {/* Logo */}
-          <div className="mb-8 animate-hex-glow">
-            <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-20 h-20">
-              <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#D4A843" fillOpacity="0.15" stroke="#D4A843" strokeWidth="1.5" />
-              <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#D4A843" fillOpacity="0.4" />
-              <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#D4A843" fillOpacity="0.8" />
-            </svg>
+          <div className="mb-8 animate-logo-reveal">
+            <div className="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+              <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#6EE7B7" fillOpacity="0.2" stroke="#6EE7B7" strokeWidth="1.5" />
+                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#6EE7B7" fillOpacity="0.5" />
+                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#6EE7B7" />
+              </svg>
+            </div>
           </div>
 
           {/* Tagline */}
-          <h1 className="text-4xl font-bold text-white tracking-tight font-display mb-3">
+          <h1 className="text-4xl font-bold text-white tracking-tight font-display mb-3 animate-text-reveal" style={{ animationDelay: '0.2s' }}>
             USRA PLUS
           </h1>
-          <div className="gold-line w-20 mx-auto mb-4" style={{ opacity: 0.4 }} />
-          <p className="text-lg text-white/60 font-light text-center max-w-xs">
+          <p className="text-lg text-white/50 font-light text-center max-w-xs animate-text-reveal" style={{ animationDelay: '0.4s' }}>
             Your Family Operating System
           </p>
 
-          {/* Decorative dots */}
-          <div className="flex items-center gap-2 mt-8">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/40" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/25" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/15" />
+          {/* Feature pills */}
+          <div className="flex flex-wrap justify-center gap-2 mt-10 animate-text-reveal" style={{ animationDelay: '0.6s' }}>
+            {['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat'].map((feature, i) => (
+              <span key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-white/8 text-white/40 border border-white/10">
+                {feature}
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -177,12 +171,8 @@ function AuthScreen() {
       {/* RIGHT: Auth form */}
       <div className="flex-1 flex items-center justify-center p-4 lg:p-8 relative">
         {/* Subtle background pattern for mobile */}
-        <div className="absolute inset-0 opacity-[0.015] lg:hidden" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23047857' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-        {/* Warm gradient blobs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#B8860B]/4 blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/3 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-accent/3 blur-[100px] pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-md">
           {authView === 'login' && <LoginForm />}
@@ -194,51 +184,32 @@ function AuthScreen() {
   )
 }
 
-// ─── Loading Screen — Desert Oasis Premium ──────────────────────────
+// ─── Loading Screen — Material Design 3 ──────────────────────────
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
-        {/* Animated hexagon logo with gold shimmer */}
-        <div className="inline-flex items-center justify-center w-16 h-16 mb-5 animate-hex-glow">
+        {/* Animated logo */}
+        <div className="inline-flex items-center justify-center w-16 h-16 mb-6 animate-logo-reveal">
           <div className="relative">
-            <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
-              <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="var(--primary)" fillOpacity="0.1" stroke="var(--primary)" strokeWidth="1.5" />
-              <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="var(--primary)" fillOpacity="0.4" />
-              <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="var(--primary)" />
-              {/* Gold shimmer overlay */}
-              <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="url(#goldShimmer)" fillOpacity="0.3" />
-              <defs>
-                <linearGradient id="goldShimmer" x1="0" y1="0" x2="40" y2="44" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#B8860B" stopOpacity="0" />
-                  <stop offset="45%" stopColor="#D4A843" stopOpacity="0.6" />
-                  <stop offset="55%" stopColor="#D4A843" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#B8860B" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-            </svg>
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
+                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
+                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
+              </svg>
+            </div>
           </div>
         </div>
 
-        {/* Letter-by-letter USRA PLUS */}
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display flex items-center justify-center gap-[2px]">
-          {'USRA PLUS'.split('').map((char, i) => (
-            <span
-              key={i}
-              className="inline-block"
-              style={{
-                animation: `letterReveal 0.4s ease-out ${i * 0.06}s both`,
-                color: char === ' ' ? undefined : undefined,
-              }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
+        {/* Brand name with reveal animation */}
+        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display animate-text-reveal" style={{ animationDelay: '0.3s' }}>
+          USRA PLUS
         </h1>
 
-        {/* Thin emerald progress line */}
+        {/* Progress indicator */}
         <div className="mt-5 mx-auto w-32 h-[2px] rounded-full bg-muted overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#B8860B] animate-progress-line" />
+          <div className="h-full rounded-full bg-primary animate-progress-line" />
         </div>
       </div>
     </div>
@@ -411,19 +382,21 @@ function MainApp() {
       {!demoDataReady && (
         <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-hex-glow inline-block mb-4">
-              <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
-                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="var(--primary)" fillOpacity="0.15" stroke="var(--primary)" strokeWidth="1.5" />
-                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="var(--primary)" fillOpacity="0.5" />
-                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="var(--primary)" />
-              </svg>
+            <div className="animate-logo-reveal inline-block mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
+                  <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
+                </svg>
+              </div>
             </div>
             <h1 className="text-xl font-bold text-foreground tracking-tight font-display">
               USRA PLUS
             </h1>
             <p className="text-sm text-muted-foreground mt-2">Loading demo data…</p>
             <div className="mt-4 mx-auto w-24 h-[2px] rounded-full bg-muted overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#B8860B] animate-progress-line" />
+              <div className="h-full rounded-full bg-primary animate-progress-line" />
             </div>
           </div>
         </div>
@@ -434,11 +407,11 @@ function MainApp() {
         <main id="main-content" ref={mainRef} role="main" className="flex-1 overflow-y-auto relative" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
           {swipeOffset !== 0 && (
             <>
-              <div className="fixed top-0 left-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-gradient-to-r from-primary/30 to-transparent" style={{ opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0 }} />
-              <div className="fixed top-0 right-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-gradient-to-l from-primary/30 to-transparent" style={{ opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0 }} />
+              <div className="fixed top-0 left-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-primary/20" style={{ opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0 }} />
+              <div className="fixed top-0 right-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-primary/20" style={{ opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0 }} />
             </>
           )}
-          <div className="p-4 md:p-6 pb-20 md:pb-6 transition-transform duration-100 ease-out" style={{ transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined }}>
+          <div className="p-4 md:p-6 pb-24 md:pb-6 transition-transform duration-100 ease-out" style={{ transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined }}>
             <h1 tabIndex={-1} className="sr-only">{currentPage}</h1>
             {renderPage()}
           </div>
@@ -509,9 +482,6 @@ export default function RootPage() {
               }
             } catch (profileErr) { console.error('Profile fetch error:', profileErr) }
             setIsAuthenticated(true)
-            // Ensure the API session cookie is also established when we
-            // authenticated via Supabase but don't have a usra-auth-token yet.
-            // This prevents subsequent API calls from failing with 401.
             try { await localGetMe() } catch {}
             try { await import('@/stores/subscription-store').then(m => m.useSubscriptionStore.getState().fetchPlanFromServer(session.user.id)) } catch {}
           }

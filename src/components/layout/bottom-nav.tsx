@@ -68,13 +68,12 @@ export function BottomNav() {
       aria-label="Mobile navigation"
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
-        border-t border-border bg-background/80 backdrop-blur-xl
+        bg-background/95 backdrop-blur-xl
         pb-[max(env(safe-area-inset-bottom),8px)]
-        shadow-[0_-1px_3px_rgba(120,113,108,0.05)]
-        relative after:absolute after:top-0 after:left-0 after:right-0 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[#B8860B]/15 after:to-transparent
+        border-t border-border
       "
     >
-      <div className="flex items-center justify-around px-1 pt-1.5 pb-1">
+      <div className="flex items-center justify-around px-2 pt-2 pb-1">
         {mainNavItems.map((item) => {
           const isActive = currentPage === item.page
           const Icon = item.icon
@@ -88,31 +87,29 @@ export function BottomNav() {
               aria-current={isActive ? 'page' : undefined}
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
-                min-w-[48px] min-h-[44px] rounded-lg px-2 py-1.5
-                transition-colors duration-150
-                ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground active:text-foreground'}
+                min-w-[56px] min-h-[44px] rounded-2xl px-3 py-1.5
+                transition-all duration-200
+                ${isActive ? '' : 'text-on-surface-variant hover:bg-surface-variant active:bg-surface-variant'}
               `}
             >
-              {/* Active indicator — gold dot above icon */}
+              {/* Material 3 Active Pill Background */}
               {isActive && (
                 <motion.div
-                  layoutId="bottom-nav-indicator"
-                  className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-gradient-to-r from-primary to-[#B8860B]"
+                  layoutId="bottom-nav-pill"
+                  className="absolute top-0.5 left-1/2 -translate-x-1/2 w-16 h-8 rounded-2xl bg-primary-container"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
 
               <Icon
                 className={`size-5 relative z-10 transition-colors duration-150 ${
-                  isActive ? 'text-primary' : ''
+                  isActive ? 'text-on-primary-container' : ''
                 }`}
-                fill={isActive ? 'currentColor' : 'none'}
-                fillOpacity={isActive ? 0.15 : 0}
               />
 
               <span
                 className={`text-[10px] font-medium relative z-10 transition-colors duration-150 ${
-                  isActive ? 'text-primary' : ''
+                  isActive ? 'text-on-primary-container' : ''
                 }`}
               >
                 {label}
@@ -130,28 +127,28 @@ export function BottomNav() {
               aria-current={isMoreItemActive ? 'page' : undefined}
               className={`
                 relative flex flex-col items-center justify-center gap-0.5
-                min-w-[48px] min-h-[44px] rounded-lg px-2 py-1.5
-                transition-colors duration-150
-                ${isMoreItemActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground active:text-foreground'}
+                min-w-[56px] min-h-[44px] rounded-2xl px-3 py-1.5
+                transition-all duration-200
+                ${isMoreItemActive ? '' : 'text-on-surface-variant hover:bg-surface-variant active:bg-surface-variant'}
               `}
             >
-              {/* Active indicator for More */}
+              {/* Active Pill for More */}
               {isMoreItemActive && (
                 <motion.div
-                  layoutId="bottom-nav-indicator"
-                  className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-gradient-to-r from-primary to-[#B8860B]"
+                  layoutId="bottom-nav-pill"
+                  className="absolute top-0.5 left-1/2 -translate-x-1/2 w-16 h-8 rounded-2xl bg-primary-container"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
 
               <MoreHorizontal
                 className={`size-5 relative z-10 transition-colors duration-150 ${
-                  isMoreItemActive ? 'text-primary' : ''
+                  isMoreItemActive ? 'text-on-primary-container' : ''
                 }`}
               />
               <span
                 className={`text-[10px] font-medium relative z-10 transition-colors duration-150 ${
-                  isMoreItemActive ? 'text-primary' : ''
+                  isMoreItemActive ? 'text-on-primary-container' : ''
                 }`}
               >
                 {isRTL ? 'المزيد' : 'More'}
@@ -160,7 +157,7 @@ export function BottomNav() {
           </SheetTrigger>
           <SheetContent
             side="bottom"
-            className="bg-card border-t border-border rounded-t-2xl px-0 pt-0 pb-[max(env(safe-area-inset-bottom),16px)]"
+            className="bg-card border-t border-border rounded-t-3xl px-0 pt-0 pb-[max(env(safe-area-inset-bottom),16px)]"
           >
             <SheetTitle className="sr-only">
               {isRTL ? 'المزيد من الخيارات' : 'More options'}
@@ -173,8 +170,8 @@ export function BottomNav() {
 
             {/* Header */}
             <div className="flex items-center gap-2 px-5 pt-2 pb-3">
-              <div className="flex items-center justify-center size-7 rounded-lg bg-gradient-to-br from-primary/10 to-[#B8860B]/10">
-                <MoreHorizontal className="size-4 text-primary" />
+              <div className="flex items-center justify-center size-7 rounded-xl bg-primary-container">
+                <MoreHorizontal className="size-4 text-on-primary-container" />
               </div>
               <h3 className="text-sm font-semibold text-foreground">
                 {isRTL ? 'المزيد' : 'More'}
@@ -196,18 +193,18 @@ export function BottomNav() {
                     key={item.page}
                     onClick={() => handleNavClick(item.page)}
                     className={`
-                      flex flex-col items-center gap-1.5 rounded-xl px-3 py-3
-                      text-xs font-medium transition-all duration-150
+                      flex flex-col items-center gap-1.5 rounded-2xl px-3 py-3
+                      text-xs font-medium transition-all duration-200
                       ${
                         isActive
-                          ? 'bg-primary/10 text-primary border border-primary/20'
-                          : 'text-muted-foreground hover:bg-primary/5 hover:text-foreground active:bg-muted border border-transparent'
+                          ? 'bg-primary-container text-on-primary-container'
+                          : 'text-on-surface-variant hover:bg-surface-variant active:bg-surface-variant'
                       }
                     `}
                   >
                     <div className={`
-                      flex items-center justify-center size-10 rounded-xl transition-colors duration-150
-                      ${isActive ? 'bg-gradient-to-br from-primary/15 to-[#B8860B]/10' : 'bg-muted'}
+                      flex items-center justify-center size-10 rounded-2xl transition-colors duration-150
+                      ${isActive ? 'bg-primary/10' : 'bg-muted'}
                     `}>
                       <Icon
                         className={`size-5 transition-colors duration-150 ${

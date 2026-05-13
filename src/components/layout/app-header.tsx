@@ -96,13 +96,13 @@ export function AppHeader() {
   return (
     <header
       role="banner"
-      className="sticky top-0 z-40 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 border-b border-border bg-background/80 backdrop-blur-xl relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[#B8860B]/15 after:to-transparent"
+      className="sticky top-0 z-40 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 border-b border-border bg-background/80 backdrop-blur-xl"
     >
       {/* Mobile Menu Toggle */}
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden shrink-0 text-muted-foreground hover:text-primary hover:bg-muted"
+        className="md:hidden shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
         onClick={() => setSidebarOpen(true)}
         aria-label="Open menu"
       >
@@ -113,7 +113,7 @@ export function AppHeader() {
       <Breadcrumb className="hidden sm:flex">
         <BreadcrumbList className="text-sm">
           <BreadcrumbItem>
-            <span className="text-[#B8860B] font-medium text-xs tracking-widest uppercase font-display">
+            <span className="text-primary font-semibold text-xs tracking-wide uppercase font-display">
               USRA
             </span>
           </BreadcrumbItem>
@@ -138,15 +138,14 @@ export function AppHeader() {
 
       {/* Search - Opens Command Palette */}
       <div data-tour="header-search" className="relative flex items-center">
-        {/* Desktop Search Bar (clickable trigger for command palette) */}
         <button
           type="button"
           onClick={() => setCommandPaletteOpen(true)}
           className="
-            hidden md:flex items-center relative w-56 lg:w-64 h-9
-            bg-muted/50 border border-border rounded-lg
-            hover:border-muted-foreground/30
-            focus:border-primary/40 focus:ring-1 focus:ring-primary/20
+            hidden md:flex items-center relative w-56 lg:w-64 h-10
+            bg-muted/50 border border-border rounded-2xl
+            hover:border-outline
+            focus:border-primary/40 focus:ring-2 focus:ring-primary/20
             transition-all duration-200
           "
           aria-label="Open search"
@@ -156,20 +155,20 @@ export function AppHeader() {
             {t.nav.search}
           </span>
           <kbd
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border rounded pointer-events-none shadow-sm"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border rounded-md pointer-events-none shadow-sm"
           >
             <span className="text-[10px] font-semibold">{kbdSymbol}</span>
             <span className="font-semibold">K</span>
           </kbd>
         </button>
 
-        {/* Mobile Search Button (opens command palette) */}
+        {/* Mobile Search Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden shrink-0 text-muted-foreground hover:text-primary hover:bg-muted"
+              className="md:hidden shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
               onClick={() => setCommandPaletteOpen(true)}
               aria-label="Open search"
             >
@@ -185,7 +184,7 @@ export function AppHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0 text-muted-foreground hover:text-primary hover:bg-muted"
+            className="shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
@@ -204,7 +203,7 @@ export function AppHeader() {
             data-tour="language-switch"
             variant="ghost"
             size="icon"
-            className="shrink-0 text-muted-foreground hover:text-primary hover:bg-muted"
+            className="shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
             onClick={toggleLanguage}
             aria-label="Switch language"
           >
@@ -219,7 +218,7 @@ export function AppHeader() {
         </TooltipContent>
       </Tooltip>
 
-      {/* Notification Bell with Count Badge */}
+      {/* Notification Bell */}
       <div data-tour="header-notifications">
         <NotificationPanel />
       </div>
@@ -228,12 +227,12 @@ export function AppHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="shrink-0 rounded-full ring-2 ring-border hover:ring-[#B8860B]/40 focus-visible:ring-primary/60 transition-all duration-200"
+            className="shrink-0 rounded-full ring-2 ring-border hover:ring-primary/30 focus-visible:ring-primary/60 transition-all duration-200"
             aria-label="User menu"
           >
-            <Avatar className="size-8">
+            <Avatar className="size-9">
               <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-              <AvatarFallback className="bg-gradient-to-br from-primary/15 to-[#B8860B]/10 text-primary text-xs font-semibold">
+              <AvatarFallback className="bg-primary-container text-on-primary-container text-xs font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
@@ -241,7 +240,7 @@ export function AppHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-56"
+          className="w-56 rounded-xl shadow-[var(--elevation-2)]"
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
@@ -250,12 +249,12 @@ export function AppHeader() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="focus:bg-muted focus:text-foreground">
+          <DropdownMenuItem className="focus:bg-muted focus:text-foreground rounded-lg cursor-pointer">
             <User className="size-4 mr-2" />
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="focus:bg-muted focus:text-foreground"
+            className="focus:bg-muted focus:text-foreground rounded-lg cursor-pointer"
             onClick={() => useAppStore.getState().setCurrentPage('settings')}
           >
             <Settings className="size-4 mr-2" />
@@ -264,7 +263,7 @@ export function AppHeader() {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={logout}
-            className="text-primary focus:text-primary focus:bg-primary/10"
+            className="text-destructive focus:text-destructive focus:bg-destructive/10 rounded-lg cursor-pointer"
           >
             <LogOut className="size-4 mr-2" />
             {t.auth.logout}
