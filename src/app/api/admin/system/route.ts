@@ -72,6 +72,8 @@ const SUPABASE_TABLE_MAP: Array<{ model: string; table: string }> = [
 
 // ─── GET: Database stats, backup list, schema info, feature flags ────
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -241,6 +243,21 @@ export async function GET(request: NextRequest) {
       },
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.system] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // ─── Prisma Fallback Helpers ─────────────────────────────────────────
@@ -337,6 +354,8 @@ async function getPrismaSystemSettings(): Promise<Array<{
 
 // ─── POST: Actions (seed, purge, feature flags, settings) ────
 export async function POST(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -811,6 +830,21 @@ export async function POST(request: NextRequest) {
       details: err instanceof Error ? err.message : 'Unknown error',
     }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.system] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // ─── Table count helper (for POST actions that need Prisma) ────────

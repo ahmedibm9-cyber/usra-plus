@@ -11,6 +11,8 @@ import { verifySignedAdminAuth } from '@/lib/admin-session';
  * Requires admin authentication.
  */
 export async function GET(req: NextRequest) {
+
+  try {
   // Verify admin authentication
   const adminAuth = verifySignedAdminAuth(req)
   if (!adminAuth.authenticated) {
@@ -83,4 +85,19 @@ export async function GET(req: NextRequest) {
         supabaseUrl.replace('https://', '').replace('.supabase.co', '') +
         '/sql',
   });
+
+  } catch (error) {
+
+    console.error('[src.app.api.migrate] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

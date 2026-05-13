@@ -106,6 +106,8 @@ const DEFAULT_CONTENT: Record<string, string> = {
 
 // GET: Retrieve all content settings
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -151,10 +153,27 @@ export async function GET(request: NextRequest) {
       ),
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.content] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // PUT: Update content settings
 export async function PUT(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -208,4 +227,19 @@ export async function PUT(request: NextRequest) {
     console.error('[Admin Content API] Update error:', error)
     return NextResponse.json({ error: 'Failed to update content' }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.content] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

@@ -6,6 +6,8 @@ import type { TrialStatus } from '@/types/admin'
 
 // ─── GET: List all user trials with filtering ────────────────────────────
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -83,10 +85,27 @@ export async function GET(request: NextRequest) {
       error: err instanceof Error ? err.message : 'Unknown error',
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.trials] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // ─── POST: Manually start/extend a trial for a user ─────────────────────
 export async function POST(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -195,4 +214,19 @@ export async function POST(request: NextRequest) {
       details: err instanceof Error ? err.message : 'Unknown error',
     }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.trials] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

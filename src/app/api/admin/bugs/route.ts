@@ -212,6 +212,8 @@ async function checkAuthViaPrisma(): Promise<HealthCheckResult> {
 
 // ─── GET: System Health Report ──────────────────────────────────────────
 export async function GET(request: NextRequest) {
+
+  try {
   // Rate limit check
   try {
     const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
@@ -532,10 +534,27 @@ export async function GET(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     }, { status: 200 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.bugs] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // ─── POST: Create Bug Report ────────────────────────────────────────────
 export async function POST(request: NextRequest) {
+
+  try {
   // Rate limit check
   try {
     const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
@@ -636,4 +655,19 @@ export async function POST(request: NextRequest) {
       details: err instanceof Error ? err.message : 'Unknown error',
     }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.bugs] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

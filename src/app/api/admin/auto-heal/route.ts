@@ -34,6 +34,8 @@ const VALID_ACTIONS = [
 type HealAction = typeof VALID_ACTIONS[number]
 
 export async function POST(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -88,6 +90,21 @@ export async function POST(request: NextRequest) {
     ...result,
     timestamp: new Date().toISOString(),
   })
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.auto-heal] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 async function executeAction(action: HealAction, supabase: ReturnType<typeof getSupabaseAdmin>): Promise<HealActionResult> {

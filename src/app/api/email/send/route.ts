@@ -20,6 +20,8 @@ import type { EmailTemplate } from '@/lib/email/send'
  * }
  */
 export async function POST(request: NextRequest) {
+
+  try {
   // Rate limit (stricter for email sending)
   const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_WRITE)
   if (!rateLimitResult.allowed) {
@@ -112,6 +114,21 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.email.send] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // Reject other methods

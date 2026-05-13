@@ -22,6 +22,8 @@ function getEmptyAnalytics() {
 }
 
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -141,4 +143,19 @@ export async function GET(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.analytics] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

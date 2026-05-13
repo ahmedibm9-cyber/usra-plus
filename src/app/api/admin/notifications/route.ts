@@ -8,6 +8,8 @@ import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 // Returns latest items for the notification bell dropdown
 
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -139,4 +141,19 @@ export async function GET(request: NextRequest) {
       error: err instanceof Error ? err.message : 'Unknown error',
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.notifications] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

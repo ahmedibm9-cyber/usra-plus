@@ -7,6 +7,8 @@ import { db } from '@/lib/db'
 
 // GET: Retrieve all feature flags
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -37,10 +39,27 @@ export async function GET(request: NextRequest) {
     console.error('[Admin Feature Flags API] Error:', error)
     return NextResponse.json({ source: 'live', flags: [], total: 0 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.feature-flags] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // PUT: Update a feature flag (toggle, change rollout, etc.)
 export async function PUT(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -141,10 +160,27 @@ export async function PUT(request: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Either id (to update) or key+name (to create) is required' }, { status: 400 })
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.feature-flags] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // DELETE: Remove a feature flag
 export async function DELETE(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -166,4 +202,19 @@ export async function DELETE(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Feature flag not found' }, { status: 404 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.feature-flags] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

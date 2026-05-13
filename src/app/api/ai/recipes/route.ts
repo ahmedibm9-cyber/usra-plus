@@ -191,6 +191,8 @@ function generateFallbackRecipes(items: string[], language: 'en' | 'ar'): Recipe
 }
 
 export async function POST(request: NextRequest) {
+
+  try {
   // Verify authentication
   const auth = await requireAuth(request)
   if (auth.error) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
@@ -272,4 +274,19 @@ export async function POST(request: NextRequest) {
       recipes: generateFallbackRecipes([], 'en'),
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.ai.recipes] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

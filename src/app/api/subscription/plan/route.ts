@@ -14,6 +14,8 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
  * The server validates the Supabase auth session before returning data.
  */
 export async function GET(request: NextRequest) {
+
+  try {
   // Rate limit
   const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_READ)
   if (!rateLimitResult.allowed) {
@@ -75,4 +77,19 @@ export async function GET(request: NextRequest) {
     console.error('[SubscriptionPlanAPI] Error:', error)
     return NextResponse.json({ plan: 'free', source: 'error' }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.subscription.plan] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

@@ -8,6 +8,8 @@ import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 // ─── GET: List all bans ──────────────────────────────────────────────
 export async function GET(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -56,10 +58,27 @@ export async function GET(request: NextRequest) {
       error: err instanceof Error ? err.message : 'Unknown error',
     })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.bans] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // ─── POST: Issue a new ban ───────────────────────────────────────────
 export async function POST(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -133,10 +152,27 @@ export async function POST(request: NextRequest) {
       details: err instanceof Error ? err.message : 'Unknown error',
     }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.bans] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 // ─── PATCH: Update ban (approve, revoke, resolve appeal) ─────────────
 export async function PATCH(request: NextRequest) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -217,4 +253,19 @@ export async function PATCH(request: NextRequest) {
       details: err instanceof Error ? err.message : 'Unknown error',
     }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.bans] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }

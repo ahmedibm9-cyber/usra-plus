@@ -236,141 +236,146 @@ export async function POST(request: NextRequest) {
 // ─── GET: Retrieve Error Logs & Health Checks ────────────────────────
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const action = searchParams.get('action')
+  try {
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
 
-  // ── Health Check Action ────────────────────────────────────────────
-  if (action === 'health') {
-    const [supabaseCheck, tablesCheck, authCheck, apiCheck] = await Promise.all([
-      checkSupabaseConnection(),
-      checkDatabaseTables(),
-      checkAuthService(),
-      checkApiRoutes(),
-    ])
+    // ── Health Check Action ────────────────────────────────────────────
+    if (action === 'health') {
+      const [supabaseCheck, tablesCheck, authCheck, apiCheck] = await Promise.all([
+        checkSupabaseConnection(),
+        checkDatabaseTables(),
+        checkAuthService(),
+        checkApiRoutes(),
+      ])
 
-    return NextResponse.json({
-      healthChecks: [
-        {
-          id: 'supabase-connection',
-          name: 'Supabase Connection',
-          status: supabaseCheck.status,
-          responseTime: supabaseCheck.responseTime,
-          lastChecked: new Date().toISOString(),
-          message: supabaseCheck.message,
-        },
-        {
-          id: 'database-tables',
-          name: 'Database Tables',
-          status: tablesCheck.status,
-          responseTime: tablesCheck.responseTime,
-          lastChecked: new Date().toISOString(),
-          message: tablesCheck.message,
-          details: tablesCheck.tables,
-        },
-        {
-          id: 'auth-service',
-          name: 'Auth Service',
-          status: authCheck.status,
-          responseTime: authCheck.responseTime,
-          lastChecked: new Date().toISOString(),
-          message: authCheck.message,
-        },
-        {
-          id: 'api-health',
-          name: 'API Routes',
-          status: apiCheck.status,
-          responseTime: apiCheck.responseTime,
-          lastChecked: new Date().toISOString(),
-          message: apiCheck.message,
-        },
-      ],
-      lastUpdated: new Date().toISOString(),
-    })
-  }
-
-  // ── Performance Check Action ───────────────────────────────────────
-  if (action === 'performance') {
-    const start = Date.now()
-    // Measure API response time by hitting a lightweight endpoint
-    const supabase = getSupabaseAdmin()
-    let apiResponseTime = 0
-    let dbResponseTime = 0
-
-    if (supabase) {
-      const dbStart = Date.now()
-      await supabase.from('profiles').select('*', { count: 'exact', head: true })
-      dbResponseTime = Date.now() - dbStart
+      return NextResponse.json({
+        healthChecks: [
+          {
+            id: 'supabase-connection',
+            name: 'Supabase Connection',
+            status: supabaseCheck.status,
+            responseTime: supabaseCheck.responseTime,
+            lastChecked: new Date().toISOString(),
+            message: supabaseCheck.message,
+          },
+          {
+            id: 'database-tables',
+            name: 'Database Tables',
+            status: tablesCheck.status,
+            responseTime: tablesCheck.responseTime,
+            lastChecked: new Date().toISOString(),
+            message: tablesCheck.message,
+            details: tablesCheck.tables,
+          },
+          {
+            id: 'auth-service',
+            name: 'Auth Service',
+            status: authCheck.status,
+            responseTime: authCheck.responseTime,
+            lastChecked: new Date().toISOString(),
+            message: authCheck.message,
+          },
+          {
+            id: 'api-health',
+            name: 'API Routes',
+            status: apiCheck.status,
+            responseTime: apiCheck.responseTime,
+            lastChecked: new Date().toISOString(),
+            message: apiCheck.message,
+          },
+        ],
+        lastUpdated: new Date().toISOString(),
+      })
     }
 
-    apiResponseTime = Date.now() - start
+    // ── Performance Check Action ───────────────────────────────────────
+    if (action === 'performance') {
+      const start = Date.now()
+      // Measure API response time by hitting a lightweight endpoint
+      const supabase = getSupabaseAdmin()
+      let apiResponseTime = 0
+      let dbResponseTime = 0
 
-    return NextResponse.json({
-      performance: {
-        apiResponseTime,
-        dbResponseTime,
-        timestamp: new Date().toISOString(),
-      },
-      lastUpdated: new Date().toISOString(),
-    })
-  }
-
-  // ── Default: Return Error Logs ─────────────────────────────────────
-  const severity = searchParams.get('severity')
-  const type = searchParams.get('type')
-  const limit = parseInt(searchParams.get('limit') || '100')
-
-  // Try to fetch from Supabase first
-  const supabase = getSupabaseAdmin()
-  if (supabase) {
-    try {
-      let query = supabase
-        .from('bug_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit)
-
-      if (severity) query = query.eq('severity', severity)
-      if (type) query = query.eq('type', type)
-
-      const { data, error } = await query
-
-      if (!error && data) {
-        return NextResponse.json({
-          errors: data.map((row: Record<string, unknown>) => ({
-            id: row.id,
-            timestamp: row.created_at,
-            type: row.type,
-            severity: row.severity,
-            status: 'active',
-            message: row.message,
-            stack: row.stack,
-            source: row.source,
-            lineNumber: row.line_number,
-            columnNumber: row.column_number,
-            url: row.url,
-            occurrenceCount: row.occurrence_count || 1,
-            firstSeen: row.created_at,
-            lastSeen: row.created_at,
-            userAgent: row.user_agent,
-          })),
-          source: 'database',
-          total: data.length,
-        })
+      if (supabase) {
+        const dbStart = Date.now()
+        await supabase.from('profiles').select('*', { count: 'exact', head: true })
+        dbResponseTime = Date.now() - dbStart
       }
-    } catch {
-      // Fall through to in-memory
+
+      apiResponseTime = Date.now() - start
+
+      return NextResponse.json({
+        performance: {
+          apiResponseTime,
+          dbResponseTime,
+          timestamp: new Date().toISOString(),
+        },
+        lastUpdated: new Date().toISOString(),
+      })
     }
+
+    // ── Default: Return Error Logs ─────────────────────────────────────
+    const severity = searchParams.get('severity')
+    const type = searchParams.get('type')
+    const limit = parseInt(searchParams.get('limit') || '100')
+
+    // Try to fetch from Supabase first
+    const supabase = getSupabaseAdmin()
+    if (supabase) {
+      try {
+        let query = supabase
+          .from('bug_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(limit)
+
+        if (severity) query = query.eq('severity', severity)
+        if (type) query = query.eq('type', type)
+
+        const { data, error } = await query
+
+        if (!error && data) {
+          return NextResponse.json({
+            errors: data.map((row: Record<string, unknown>) => ({
+              id: row.id,
+              timestamp: row.created_at,
+              type: row.type,
+              severity: row.severity,
+              status: 'active',
+              message: row.message,
+              stack: row.stack,
+              source: row.source,
+              lineNumber: row.line_number,
+              columnNumber: row.column_number,
+              url: row.url,
+              occurrenceCount: row.occurrence_count || 1,
+              firstSeen: row.created_at,
+              lastSeen: row.created_at,
+              userAgent: row.user_agent,
+            })),
+            source: 'database',
+            total: data.length,
+          })
+        }
+      } catch {
+        // Fall through to in-memory
+      }
+    }
+
+    // Fallback: return in-memory errors
+    let filtered = [...inMemoryErrors]
+    if (severity) filtered = filtered.filter(e => e.severity === severity)
+    if (type) filtered = filtered.filter(e => e.type === type)
+    filtered = filtered.slice(0, limit)
+
+    return NextResponse.json({
+      errors: filtered,
+      source: 'memory',
+      total: filtered.length,
+    })
+  } catch (error) {
+    console.error('[Error Log API] GET Error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  // Fallback: return in-memory errors
-  let filtered = [...inMemoryErrors]
-  if (severity) filtered = filtered.filter(e => e.severity === severity)
-  if (type) filtered = filtered.filter(e => e.type === type)
-  filtered = filtered.slice(0, limit)
-
-  return NextResponse.json({
-    errors: filtered,
-    source: 'memory',
-    total: filtered.length,
-  })
 }

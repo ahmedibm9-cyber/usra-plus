@@ -12,6 +12,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -92,12 +94,29 @@ export async function GET(
     console.error('[Admin User Detail API] Error:', error)
     return NextResponse.json({ error: 'Failed to fetch user details' }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.users.userId] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
+
+  try {
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
@@ -303,4 +322,19 @@ export async function PUT(
     console.error('[Admin User Edit API] Error:', error)
     return NextResponse.json({ error: 'Failed to process user action' }, { status: 500 })
   }
+
+  } catch (error) {
+
+    console.error('[src.app.api.admin.users.userId] Error:', error)
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+  }
+
 }
