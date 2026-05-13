@@ -21,7 +21,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="w-9 h-9 rounded-xl border border-border bg-card flex items-center justify-center"
+        className="w-9 h-9 rounded-xl border border-border bg-card/50 flex items-center justify-center"
         aria-label="Toggle theme"
       >
         <Moon className="w-4 h-4 text-muted-foreground" />
@@ -38,7 +38,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="relative w-9 h-9 rounded-xl border border-border bg-card hover:bg-secondary hover:border-border transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring/30"
+      className="relative w-9 h-9 rounded-xl border border-border bg-card/50 hover:bg-secondary hover:border-[#B8860B]/15 transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring/30"
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
@@ -51,7 +51,7 @@ export function ThemeToggle() {
             exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
           >
-            <Sun className="w-4 h-4 text-amber-400" />
+            <Sun className="w-4 h-4 text-[#D4A843]" />
           </motion.div>
         ) : (
           <motion.div
@@ -61,7 +61,7 @@ export function ThemeToggle() {
             exit={{ rotate: -90, scale: 0.5, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
           >
-            <Moon className="w-4 h-4 text-emerald-600" />
+            <Moon className="w-4 h-4 text-[#047857]" />
           </motion.div>
         )}
       </AnimatePresence>

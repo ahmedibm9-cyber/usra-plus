@@ -27,32 +27,45 @@ import {
 import { toast } from 'sonner'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
 
-// ─── USRA PLUS Emerald Hexagon Logo SVG ──────────────────────────
+// ─── USRA PLUS Desert Oasis Hexagon Logo ──────────────────────────
 function HexLogo({ className, admin }: { className?: string; admin?: boolean }) {
+  const primaryColor = admin ? '#B8860B' : '#047857'
+  const goldColor = admin ? '#D4A843' : '#B8860B'
   return (
-    <svg
-      viewBox="0 0 40 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <path
-        d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z"
-        fill={admin ? '#D97706' : '#059669'}
-        fillOpacity="0.15"
-        stroke={admin ? '#D97706' : '#059669'}
-        strokeWidth="1.5"
-      />
-      <path
-        d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z"
-        fill={admin ? '#D97706' : '#059669'}
-        fillOpacity="0.6"
-      />
-      <path
-        d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z"
-        fill={admin ? '#D97706' : '#059669'}
-      />
-    </svg>
+    <div className={`relative ${className}`}>
+      <svg
+        viewBox="0 0 40 44"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+      >
+        <path
+          d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z"
+          fill={primaryColor}
+          fillOpacity="0.1"
+          stroke={primaryColor}
+          strokeWidth="1.5"
+        />
+        <path
+          d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z"
+          fill={primaryColor}
+          fillOpacity="0.4"
+        />
+        <path
+          d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z"
+          fill={primaryColor}
+          fillOpacity="0.8"
+        />
+        {/* Gold shimmer highlight */}
+        <path
+          d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z"
+          fill={goldColor}
+          fillOpacity="0.08"
+        />
+      </svg>
+      {/* Subtle gold glow ring */}
+      <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-br ${admin ? 'from-[#B8860B]/10 to-transparent' : 'from-[#047857]/10 to-[#B8860B]/5'} blur-sm -z-10`} />
+    </div>
   )
 }
 
@@ -220,12 +233,12 @@ export function LoginForm() {
     <>
       <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
         <motion.div
-          className="bg-card rounded-2xl p-8 border border-border shadow-xl backdrop-blur-sm"
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="glass rounded-2xl p-8 shadow-warm-lg"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          {/* Top bar: Theme toggle (left) + Language selector (right) */}
+          {/* Top bar: Theme toggle + Language selector */}
           <motion.div
             className="flex items-center justify-between"
             {...fadeUp}
@@ -276,6 +289,9 @@ export function LoginForm() {
                 : (isRTL ? 'سجّل الدخول إلى عائلتك' : 'Sign in to your family')
               }
             </motion.p>
+
+            {/* Gold accent line under heading */}
+            <div className="gold-line w-12 mx-auto mt-3" />
           </motion.div>
 
           {/* ─── Admin Mode Indicator ────────────────────────────────── */}
@@ -322,7 +338,7 @@ export function LoginForm() {
                     if (authError) setAuthError('')
                     if (adminError) setAdminError(null)
                   }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${showAdminLogin ? 'focus:border-accent focus:ring-accent/20' : ''} ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
+                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${showAdminLogin ? 'focus:border-accent focus:ring-accent/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.15)]' : ''} ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
                   disabled={isLoading}
                   autoComplete="off"
                 />
@@ -365,7 +381,7 @@ export function LoginForm() {
                     if (authError) setAuthError('')
                     if (adminError) setAdminError(null)
                   }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${showAdminLogin ? 'focus:border-accent focus:ring-accent/20' : ''} ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
+                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${showAdminLogin ? 'focus:border-accent focus:ring-accent/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.15)]' : ''} ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20' : ''}`}
                   disabled={isLoading}
                   autoComplete="off"
                 />
@@ -429,15 +445,15 @@ export function LoginForm() {
               </motion.div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit Button — Emerald-to-Gold Gradient */}
             <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
               <Button
                 type="submit"
                 disabled={isLoading || (showAdminLogin && adminAttempts >= 5)}
-                className={`w-full h-11 rounded-xl font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full h-11 rounded-xl font-semibold text-sm text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                   showAdminLogin
-                    ? 'bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20'
-                    : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20'
+                    ? 'bg-gradient-to-r from-[#B8860B] to-[#D4A843] hover:from-[#D4A843] hover:to-[#B8860B] shadow-lg shadow-[#B8860B]/20'
+                    : 'btn-gradient shadow-lg shadow-primary/20'
                 }`}
               >
                 {isLoading ? (
@@ -468,18 +484,19 @@ export function LoginForm() {
             </motion.div>
           ) : (
             <>
-              {/* Divider + Google OAuth */}
+              {/* Divider with gold line */}
               <motion.div
                 className="relative mt-6"
                 {...fadeUp}
                 transition={{ duration: 0.35, delay: 0.25 }}
               >
-                <Separator className="bg-border" />
+                <div className="gold-line w-full" />
                 <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
                   {t.auth.orContinueWith}
                 </span>
               </motion.div>
 
+              {/* Google OAuth */}
               <motion.div
                 className="mt-4"
                 {...fadeUp}
@@ -490,7 +507,7 @@ export function LoginForm() {
                   variant="outline"
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-border rounded-xl h-11 font-medium transition-all duration-200"
+                  className="w-full border-border bg-card/50 text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-[#B8860B]/20 rounded-xl h-11 font-medium transition-all duration-200"
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -524,7 +541,7 @@ export function LoginForm() {
                 </p>
               </motion.div>
 
-              {/* Sign up link */}
+              {/* Sign up link — gold accent */}
               <motion.div
                 className="text-center mt-4"
                 {...fadeUp}
@@ -532,7 +549,7 @@ export function LoginForm() {
               >
                 <p className="text-sm text-muted-foreground">
                   {t.auth.noAccount}{' '}
-                  <button type="button" onClick={() => setAuthView('signup')} className="text-primary hover:text-primary/80 font-medium transition-colors duration-200">
+                  <button type="button" onClick={() => setAuthView('signup')} className="text-accent hover:text-accent/80 font-medium transition-colors duration-200">
                     {t.auth.signUpInstead}
                   </button>
                 </p>

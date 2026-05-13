@@ -96,7 +96,7 @@ export function AppHeader() {
   return (
     <header
       role="banner"
-      className="sticky top-0 z-40 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 border-b border-border bg-background/80 backdrop-blur-xl"
+      className="sticky top-0 z-40 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 border-b border-border bg-background/80 backdrop-blur-xl relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[#B8860B]/15 after:to-transparent"
     >
       {/* Mobile Menu Toggle */}
       <Button
@@ -113,7 +113,7 @@ export function AppHeader() {
       <Breadcrumb className="hidden sm:flex">
         <BreadcrumbList className="text-sm">
           <BreadcrumbItem>
-            <span className="text-muted-foreground font-medium text-xs tracking-widest uppercase">
+            <span className="text-[#B8860B] font-medium text-xs tracking-widest uppercase font-display">
               USRA
             </span>
           </BreadcrumbItem>
@@ -228,12 +228,12 @@ export function AppHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="shrink-0 rounded-full ring-2 ring-border hover:ring-primary/50 focus-visible:ring-primary/60 transition-all duration-200"
+            className="shrink-0 rounded-full ring-2 ring-border hover:ring-[#B8860B]/40 focus-visible:ring-primary/60 transition-all duration-200"
             aria-label="User menu"
           >
             <Avatar className="size-8">
               <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              <AvatarFallback className="bg-gradient-to-br from-primary/15 to-[#B8860B]/10 text-primary text-xs font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>

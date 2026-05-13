@@ -1,8 +1,7 @@
 {
   "framework": "nextjs",
   "buildCommand": "bash scripts/prebuild.sh && next build",
-  "devCommand": "next dev",
-  "installCommand": "npm install",
+  "installCommand": "bun install",
   "outputDirectory": ".next",
   "regions": ["iad1"]
 }

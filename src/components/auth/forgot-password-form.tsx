@@ -12,17 +12,6 @@ import { ArrowLeft, Mail, Loader2, CheckCircle2 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { toast } from 'sonner'
 
-// ─── USRA PLUS Emerald Hexagon Logo SVG ──────────────────────────
-function HexLogo({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#059669" fillOpacity="0.15" stroke="#059669" strokeWidth="1.5" />
-      <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#059669" fillOpacity="0.6" />
-      <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#059669" />
-    </svg>
-  )
-}
-
 // ─── Animation variants ───────────────────────────────────────────
 const fadeUp = {
   initial: { opacity: 0, y: 12 },
@@ -84,32 +73,33 @@ export function ForgotPasswordForm() {
     }
   }
 
-  // ─── Success State ──────────────────────────────────────────────
+  // ─── Success State — Gold Checkmark Animation ──────────────────
   if (isSent) {
     return (
       <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
         <motion.div
-          className="bg-card rounded-2xl p-8 border border-border shadow-xl backdrop-blur-sm text-center space-y-6"
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="glass rounded-2xl p-8 shadow-warm-lg text-center space-y-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           {/* Theme toggle */}
           <div className="flex justify-start">
             <ThemeToggle />
           </div>
 
-          {/* Success illustration */}
+          {/* Success illustration — gold checkmark */}
           <motion.div
             className="flex justify-center"
             {...fadeUp}
             transition={{ duration: 0.35, delay: 0 }}
           >
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-[#B8860B]/10 border border-primary/20 flex items-center justify-center">
                 <CheckCircle2 className="w-10 h-10 text-primary" />
               </div>
-              <div className="absolute -inset-2 rounded-full bg-primary/5 animate-pulse" />
+              {/* Gold glow ring */}
+              <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/5 to-[#B8860B]/5 animate-gentle-pulse" />
             </div>
           </motion.div>
 
@@ -121,6 +111,7 @@ export function ForgotPasswordForm() {
             <h2 className="text-2xl font-bold text-foreground font-display">
               {t.auth.resetPassword}
             </h2>
+            <div className="gold-line w-12 mx-auto my-2" />
             <p className="text-muted-foreground text-sm">
               {t.auth.verificationSent}
             </p>
@@ -134,7 +125,7 @@ export function ForgotPasswordForm() {
             <Button
               onClick={() => setAuthView('login')}
               variant="outline"
-              className="w-full border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground rounded-xl h-11 transition-all duration-200"
+              className="w-full border-border bg-card/50 text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-[#B8860B]/20 rounded-xl h-11 transition-all duration-200"
             >
               <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
               {t.auth.backToLogin}
@@ -145,14 +136,14 @@ export function ForgotPasswordForm() {
     )
   }
 
-  // ─── Default State ──────────────────────────────────────────────
+  // ─── Default State — Minimal Elegant Form ──────────────────────
   return (
     <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
       <motion.div
-        className="bg-card rounded-2xl p-8 border border-border shadow-xl backdrop-blur-sm space-y-6"
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="glass rounded-2xl p-8 shadow-warm-lg space-y-6"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         {/* Theme toggle */}
         <div className="flex justify-start">
@@ -166,7 +157,7 @@ export function ForgotPasswordForm() {
           transition={{ duration: 0.35, delay: 0 }}
         >
           <div className="flex justify-center mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-[#B8860B]/10 border border-primary/20 flex items-center justify-center">
               <Mail className="w-7 h-7 text-primary" />
             </div>
           </div>
@@ -176,6 +167,7 @@ export function ForgotPasswordForm() {
           <p className="text-muted-foreground text-sm">
             {isRTL ? 'أدخل بريدك الإلكتروني وسنرسل لك رابط الإعادة' : "Enter your email and we'll send you a reset link"}
           </p>
+          <div className="gold-line w-12 mx-auto mt-3" />
         </motion.div>
 
         {/* Form */}
@@ -199,7 +191,7 @@ export function ForgotPasswordForm() {
                   setEmail(e.target.value)
                   if (error) setError('')
                 }}
-                className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
+                className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
                 disabled={isLoading}
               />
             </div>
@@ -212,7 +204,7 @@ export function ForgotPasswordForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-primary/20 font-display"
+              className="w-full btn-gradient text-white rounded-xl h-11 font-semibold transition-all duration-300 disabled:opacity-50 shadow-lg shadow-primary/20 font-display"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

@@ -186,11 +186,11 @@ export function TermsModal() {
           className="border-border bg-card text-card-foreground sm:max-w-2xl rounded-2xl p-0 overflow-hidden gap-0 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] duration-200"
         >
           {/* Header with emerald gradient accent */}
-          <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 px-6 pt-6 pb-4">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+          <div className="relative bg-gradient-to-r from-primary/10 via-[#B8860B]/5 to-primary/10 px-6 pt-6 pb-4">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-[#B8860B]/3 to-transparent" />
             <DialogHeader className="relative">
               <div className="flex items-center gap-3 mb-2">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/20">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-[#B8860B]/10 border border-primary/20">
                   <Scale className="w-6 h-6 text-primary" />
                 </div>
                 <div>
@@ -207,11 +207,11 @@ export function TermsModal() {
             {/* Trust badges */}
             <div className="relative flex items-center gap-4 mt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border">
-                <Shield className="w-3.5 h-3.5 text-primary" />
+                <Shield className="w-3.5 h-3.5 text-[#B8860B]" />
                 PDPL Compliant
               </span>
               <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border">
-                <FileText className="w-3.5 h-3.5 text-primary" />
+                <FileText className="w-3.5 h-3.5 text-[#B8860B]" />
                 KSA Governed
               </span>
             </div>
@@ -343,7 +343,7 @@ export function TermsModal() {
               <Button
                 onClick={handleAccept}
                 disabled={!hasScrolledToBottom}
-                className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 font-semibold transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:saturate-0 shadow-lg shadow-primary/20 font-display"
+                className="flex-1 sm:flex-none btn-gradient text-white rounded-xl h-10 font-semibold transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:saturate-0 shadow-lg shadow-primary/20 font-display"
               >
                 {hasScrolledToBottom
                   ? (isRTL ? 'قبول الشروط ✓' : 'Accept Terms ✓')

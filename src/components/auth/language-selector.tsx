@@ -24,7 +24,7 @@ export function LanguageSelector() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border bg-card hover:bg-secondary hover:border-border transition-all duration-200 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30"
+          className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border bg-card/50 hover:bg-secondary hover:border-[#B8860B]/15 transition-all duration-200 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30"
           aria-label="Select language"
         >
           <Globe className="w-4 h-4" />
@@ -33,7 +33,7 @@ export function LanguageSelector() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align={isRTL ? 'start' : 'end'}
-        className="rounded-xl border-border bg-card text-card-foreground shadow-lg min-w-[140px]"
+        className="rounded-xl border-border bg-card text-card-foreground shadow-warm-lg min-w-[140px]"
       >
         {languages.map((lang) => (
           <DropdownMenuItem

@@ -89,7 +89,7 @@ function NavItemButton({
         text-sm font-medium transition-all duration-150
         ${isActive
           ? 'bg-primary/10 text-primary'
-          : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-muted'
+          : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-primary/5'
         }
         ${collapsed ? 'justify-center px-2' : ''}
       `}
@@ -98,7 +98,7 @@ function NavItemButton({
       {isActive && (
         <motion.div
           layoutId="sidebar-active-indicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-primary"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-primary to-[#B8860B]"
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       )}
@@ -180,7 +180,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
       <div className={`flex flex-col gap-2 ${collapsed ? 'px-2' : 'px-4'} pt-5 pb-2`}>
         {/* Logo */}
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} mb-2`}>
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#047857]">
             <span className="text-sm font-bold text-primary-foreground">U+</span>
           </div>
           <AnimatePresence mode="wait">
@@ -205,7 +205,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted">
-                <div className="flex size-6 items-center justify-center rounded-md bg-primary/15">
+                <div className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-primary/15 to-[#B8860B]/10">
                   <Users className="size-3.5 text-primary" />
                 </div>
                 <span className="flex-1 truncate text-sidebar-foreground/70">
@@ -269,7 +269,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             >
               <Avatar className="size-8 ring-2 ring-sidebar-border">
                 <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                <AvatarFallback className="bg-gradient-to-br from-primary/15 to-[#B8860B]/10 text-primary text-xs font-semibold">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
@@ -339,7 +339,7 @@ export function AppSidebar() {
         {/* Collapse Toggle */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-all hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-all hover:bg-[#B8860B]/10 hover:text-[#B8860B] hover:border-[#B8860B]/30"
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {sidebarCollapsed ? (

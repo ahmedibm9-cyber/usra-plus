@@ -56,23 +56,27 @@ interface FormErrors {
   terms?: string
 }
 
-// Password strength calculation with emerald/amber/red colors
+// Password strength calculation with emerald/gold/crimson colors
 const getPasswordStrength = (pwd: string): { level: number; percent: number; color: string; label: string } => {
   if (!pwd) return { level: 0, percent: 0, color: '', label: '' }
-  if (pwd.length < 6) return { level: 1, percent: 25, color: '#DC2626', label: 'Weak' } // red
-  if (pwd.length < 8) return { level: 2, percent: 50, color: '#D97706', label: 'Fair' } // amber
-  if (pwd.length < 12) return { level: 3, percent: 75, color: '#059669', label: 'Good' } // emerald
-  return { level: 4, percent: 100, color: '#059669', label: 'Strong' } // emerald
+  if (pwd.length < 6) return { level: 1, percent: 25, color: '#B91C1C', label: 'Weak' } // crimson
+  if (pwd.length < 8) return { level: 2, percent: 50, color: '#B8860B', label: 'Fair' } // gold
+  if (pwd.length < 12) return { level: 3, percent: 75, color: '#047857', label: 'Good' } // emerald
+  return { level: 4, percent: 100, color: '#047857', label: 'Strong' } // emerald
 }
 
-// ─── USRA PLUS Emerald Hexagon Logo SVG ──────────────────────────
+// ─── USRA PLUS Desert Oasis Hexagon Logo ──────────────────────────
 function HexLogo({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#059669" fillOpacity="0.15" stroke="#059669" strokeWidth="1.5" />
-      <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#059669" fillOpacity="0.6" />
-      <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#059669" />
-    </svg>
+    <div className={`relative ${className}`}>
+      <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#047857" fillOpacity="0.1" stroke="#047857" strokeWidth="1.5" />
+        <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#047857" fillOpacity="0.4" />
+        <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#047857" fillOpacity="0.8" />
+        <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#B8860B" fillOpacity="0.08" />
+      </svg>
+      <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-[#047857]/10 to-[#B8860B]/5 blur-sm -z-10" />
+    </div>
   )
 }
 
@@ -267,10 +271,10 @@ export function SignupForm() {
     <>
       <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
         <motion.div
-          className="bg-card rounded-2xl p-8 border border-border shadow-xl backdrop-blur-sm"
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="glass rounded-2xl p-8 shadow-warm-lg"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           {/* Top bar */}
           <motion.div
@@ -297,6 +301,7 @@ export function SignupForm() {
             <p className="text-sm text-muted-foreground">
               {isRTL ? 'ابدأ بإدارة عائلتك' : 'Start managing your family'}
             </p>
+            <div className="gold-line w-12 mx-auto mt-3" />
           </motion.div>
 
           {/* Auth Error */}
@@ -330,7 +335,7 @@ export function SignupForm() {
                     placeholder={isRTL ? 'الاسم الأول' : 'First name'}
                     value={firstName}
                     onChange={(e) => { setFirstName(e.target.value); clearError('firstName') }}
-                    className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.firstName ? 'border-destructive/50' : ''}`}
+                    className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.firstName ? 'border-destructive/50' : ''}`}
                     disabled={isLoading}
                     autoComplete="given-name"
                   />
@@ -351,7 +356,7 @@ export function SignupForm() {
                     placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
                     value={lastName}
                     onChange={(e) => { setLastName(e.target.value); clearError('lastName') }}
-                    className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.lastName ? 'border-destructive/50' : ''}`}
+                    className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.lastName ? 'border-destructive/50' : ''}`}
                     disabled={isLoading}
                     autoComplete="family-name"
                   />
@@ -379,7 +384,7 @@ export function SignupForm() {
                   placeholder={isRTL ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); clearError('email') }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-destructive/50' : ''}`}
+                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.email ? 'border-destructive/50' : ''}`}
                   disabled={isLoading}
                   autoComplete="email"
                 />
@@ -426,7 +431,7 @@ export function SignupForm() {
                     placeholder="5XXXXXXXX"
                     value={phone}
                     onChange={(e) => { setPhone(e.target.value); clearError('phone') }}
-                    className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.phone ? 'border-destructive/50' : ''}`}
+                    className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} ${errors.phone ? 'border-destructive/50' : ''}`}
                     disabled={isLoading}
                     autoComplete="tel"
                   />
@@ -437,7 +442,7 @@ export function SignupForm() {
               )}
             </motion.div>
 
-            {/* Password */}
+            {/* Password with strength indicator */}
             <motion.div
               className="space-y-1.5"
               {...fadeUp}
@@ -454,7 +459,7 @@ export function SignupForm() {
                   placeholder={isRTL ? '٨ أحرف على الأقل' : 'At least 8 characters'}
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); clearError('password') }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-destructive/50' : ''}`}
+                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.password ? 'border-destructive/50' : ''}`}
                   disabled={isLoading}
                   autoComplete="new-password"
                 />
@@ -507,7 +512,7 @@ export function SignupForm() {
                   placeholder={isRTL ? 'أعد إدخال كلمة المرور' : 'Re-enter your password'}
                   value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword') }}
-                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.confirmPassword ? 'border-destructive/50' : ''}`}
+                  className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} ${errors.confirmPassword ? 'border-destructive/50' : ''}`}
                   disabled={isLoading}
                   autoComplete="new-password"
                 />
@@ -567,12 +572,12 @@ export function SignupForm() {
               )}
             </motion.div>
 
-            {/* Signup Button */}
+            {/* Signup Button — Emerald-to-Gold Gradient */}
             <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.4 }}>
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-11 font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg shadow-primary/20 font-display"
+                className="w-full btn-gradient text-white rounded-xl h-11 font-semibold transition-all duration-300 disabled:opacity-50 shadow-lg shadow-primary/20 font-display"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -583,13 +588,13 @@ export function SignupForm() {
             </motion.div>
           </form>
 
-          {/* Divider */}
+          {/* Divider with gold line */}
           <motion.div
             className="relative mt-6"
             {...fadeUp}
             transition={{ duration: 0.35, delay: 0.45 }}
           >
-            <Separator className="bg-border" />
+            <div className="gold-line w-full" />
             <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
               {t.auth.orContinueWith}
             </span>
@@ -606,7 +611,7 @@ export function SignupForm() {
               variant="outline"
               onClick={handleGoogleSignup}
               disabled={isGoogleLoading}
-              className="w-full border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-border rounded-xl h-11 font-medium transition-all duration-200"
+              className="w-full border-border bg-card/50 text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-[#B8860B]/20 rounded-xl h-11 font-medium transition-all duration-200"
             >
               {isGoogleLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -622,7 +627,7 @@ export function SignupForm() {
             </Button>
           </motion.div>
 
-          {/* Login link */}
+          {/* Login link — gold accent */}
           <motion.div
             className="text-center mt-4"
             {...fadeUp}
@@ -633,7 +638,7 @@ export function SignupForm() {
               <button
                 type="button"
                 onClick={() => setAuthView('login')}
-                className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+                className="text-accent hover:text-accent/80 font-medium transition-colors duration-200"
               >
                 {t.auth.logInInstead}
               </button>

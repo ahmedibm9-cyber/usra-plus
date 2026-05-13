@@ -54,11 +54,19 @@ function safeCreateClient() {
   }
 }
 
-// Chunk loader — clean emerald spinner
+// ─── Chunk loader — Elegant emerald skeleton ──────────────────────
 function ChunkLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="size-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <div className="size-10 rounded-full border-2 border-muted border-t-primary animate-spin" />
+          <div className="absolute inset-0 size-10 rounded-full border border-transparent border-t-[#B8860B]/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+        </div>
+        <div className="h-1 w-20 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#B8860B] animate-progress-line" />
+        </div>
+      </div>
     </div>
   )
 }
@@ -84,21 +92,25 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
           <div className="max-w-sm w-full text-center">
-            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                <path d="M8 6L16 2L24 6V14L16 18L8 14V6Z" fill="currentColor" className="text-primary" fillOpacity="0.9"/>
-                <path d="M4 16L16 22L28 16V24L16 30L4 24V16Z" fill="currentColor" className="text-primary" fillOpacity="0.5"/>
+            {/* Hexagon logo with gold glow */}
+            <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-primary/10 gold-glow">
+              <svg width="32" height="35" viewBox="0 0 40 44" fill="none">
+                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
+                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2 font-[family-name:var(--font-sans)]">
+            {/* Gold accent line */}
+            <div className="gold-line w-16 mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-foreground mb-2 font-display">
               Something went wrong
             </h2>
-            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
               A rendering error occurred. Please try refreshing the page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center justify-center rounded-xl btn-gradient px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200"
             >
               Refresh Page
             </button>
@@ -110,46 +122,123 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-// ─── Auth Screen — USRA PLUS Premium ───────────────────────────
+// ─── Auth Screen — Desert Oasis Split Layout ────────────────────
 function AuthScreen() {
   const { authView } = useAuthStore()
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Subtle background image overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.06] dark:opacity-[0.04] pointer-events-none"
-        style={{ backgroundImage: 'url(/auth-bg.png)' }}
-      />
-      {/* Emerald gradient accent blobs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
-      <div className="relative z-10 w-full max-w-md">
-        {authView === 'login' && <LoginForm />}
-        {authView === 'signup' && <SignupForm />}
-        {authView === 'forgot-password' && <ForgotPasswordForm />}
+    <div className="min-h-screen bg-background flex relative overflow-hidden">
+      {/* LEFT: Decorative panel (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0C0A09]">
+        {/* Geometric pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.06]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23D4A843' stroke-width='0.5'%3E%3Crect x='10' y='10' width='60' height='60'/%3E%3Crect x='20' y='20' width='40' height='40'/%3E%3Cline x1='0' y1='0' x2='80' y2='80'/%3E%3Cline x1='80' y1='0' x2='0' y2='80'/%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        {/* Floating geometric shapes */}
+        <div className="absolute top-[15%] left-[10%] w-24 h-24 border border-[#D4A843]/20 rounded-lg rotate-12 animate-float-geometric" />
+        <div className="absolute top-[60%] left-[20%] w-16 h-16 border border-[#D4A843]/15 rotate-45 animate-float-geometric" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-[20%] right-[15%] w-20 h-20 border border-[#D4A843]/20 rounded-full animate-float-geometric" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-[35%] right-[10%] w-12 h-12 border border-white/10 rotate-12 animate-float-geometric" style={{ animationDelay: '1s' }} />
+
+        {/* Gradient orbs */}
+        <div className="absolute top-[20%] right-[10%] w-64 h-64 rounded-full bg-[#D4A843]/8 blur-[80px]" />
+        <div className="absolute bottom-[10%] left-[5%] w-48 h-48 rounded-full bg-[#059669]/10 blur-[60px]" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center items-center px-12 w-full">
+          {/* Logo */}
+          <div className="mb-8 animate-hex-glow">
+            <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-20 h-20">
+              <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#D4A843" fillOpacity="0.15" stroke="#D4A843" strokeWidth="1.5" />
+              <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#D4A843" fillOpacity="0.4" />
+              <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#D4A843" fillOpacity="0.8" />
+            </svg>
+          </div>
+
+          {/* Tagline */}
+          <h1 className="text-4xl font-bold text-white tracking-tight font-display mb-3">
+            USRA PLUS
+          </h1>
+          <div className="gold-line w-20 mx-auto mb-4" style={{ opacity: 0.4 }} />
+          <p className="text-lg text-white/60 font-light text-center max-w-xs">
+            Your Family Operating System
+          </p>
+
+          {/* Decorative dots */}
+          <div className="flex items-center gap-2 mt-8">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/40" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/25" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/15" />
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT: Auth form */}
+      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 relative">
+        {/* Subtle background pattern for mobile */}
+        <div className="absolute inset-0 opacity-[0.015] lg:hidden" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23047857' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        {/* Warm gradient blobs */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#B8860B]/4 blur-[100px] pointer-events-none" />
+
+        <div className="relative z-10 w-full max-w-md">
+          {authView === 'login' && <LoginForm />}
+          {authView === 'signup' && <SignupForm />}
+          {authView === 'forgot-password' && <ForgotPasswordForm />}
+        </div>
       </div>
     </div>
   )
 }
 
-// ─── Loading Screen — USRA PLUS Premium ───────────────────────────────
+// ─── Loading Screen — Desert Oasis Premium ──────────────────────────
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 mb-4">
-          <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-14 h-14">
-            <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="var(--primary)" fillOpacity="0.15" stroke="var(--primary)" strokeWidth="1.5" />
-            <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="var(--primary)" fillOpacity="0.6" />
-            <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="var(--primary)" />
-          </svg>
+        {/* Animated hexagon logo with gold shimmer */}
+        <div className="inline-flex items-center justify-center w-16 h-16 mb-5 animate-hex-glow">
+          <div className="relative">
+            <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
+              <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="var(--primary)" fillOpacity="0.1" stroke="var(--primary)" strokeWidth="1.5" />
+              <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="var(--primary)" fillOpacity="0.4" />
+              <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="var(--primary)" />
+              {/* Gold shimmer overlay */}
+              <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="url(#goldShimmer)" fillOpacity="0.3" />
+              <defs>
+                <linearGradient id="goldShimmer" x1="0" y1="0" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#B8860B" stopOpacity="0" />
+                  <stop offset="45%" stopColor="#D4A843" stopOpacity="0.6" />
+                  <stop offset="55%" stopColor="#D4A843" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#B8860B" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">
-          USRA PLUS
+
+        {/* Letter-by-letter USRA PLUS */}
+        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display flex items-center justify-center gap-[2px]">
+          {'USRA PLUS'.split('').map((char, i) => (
+            <span
+              key={i}
+              className="inline-block"
+              style={{
+                animation: `letterReveal 0.4s ease-out ${i * 0.06}s both`,
+                color: char === ' ' ? undefined : undefined,
+              }}
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
         </h1>
-        <div className="mt-4 flex justify-center">
-          <div className="size-5 border-2 border-muted border-t-primary rounded-full animate-spin" />
+
+        {/* Thin emerald progress line */}
+        <div className="mt-5 mx-auto w-32 h-[2px] rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#B8860B] animate-progress-line" />
         </div>
       </div>
     </div>
@@ -322,12 +411,19 @@ function MainApp() {
       {!demoDataReady && (
         <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight font-[family-name:var(--font-sans)]">
+            <div className="animate-hex-glow inline-block mb-4">
+              <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="var(--primary)" fillOpacity="0.15" stroke="var(--primary)" strokeWidth="1.5" />
+                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="var(--primary)" fillOpacity="0.5" />
+                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="var(--primary)" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-foreground tracking-tight font-display">
               USRA PLUS
             </h1>
             <p className="text-sm text-muted-foreground mt-2">Loading demo data…</p>
-            <div className="mt-4 flex justify-center">
-              <div className="size-5 border-2 border-muted border-t-primary rounded-full animate-spin" />
+            <div className="mt-4 mx-auto w-24 h-[2px] rounded-full bg-muted overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#B8860B] animate-progress-line" />
             </div>
           </div>
         </div>

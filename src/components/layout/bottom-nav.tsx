@@ -70,7 +70,8 @@ export function BottomNav() {
         fixed bottom-0 left-0 right-0 z-50 md:hidden
         border-t border-border bg-background/80 backdrop-blur-xl
         pb-[max(env(safe-area-inset-bottom),8px)]
-        shadow-[0_-1px_3px_rgba(0,0,0,0.05)]
+        shadow-[0_-1px_3px_rgba(120,113,108,0.05)]
+        relative after:absolute after:top-0 after:left-0 after:right-0 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[#B8860B]/15 after:to-transparent
       "
     >
       <div className="flex items-center justify-around px-1 pt-1.5 pb-1">
@@ -92,11 +93,11 @@ export function BottomNav() {
                 ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground active:text-foreground'}
               `}
             >
-              {/* Active indicator — small emerald line above icon */}
+              {/* Active indicator — gold dot above icon */}
               {isActive && (
                 <motion.div
                   layoutId="bottom-nav-indicator"
-                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full bg-primary"
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-gradient-to-r from-primary to-[#B8860B]"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -138,7 +139,7 @@ export function BottomNav() {
               {isMoreItemActive && (
                 <motion.div
                   layoutId="bottom-nav-indicator"
-                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full bg-primary"
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-gradient-to-r from-primary to-[#B8860B]"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -172,7 +173,7 @@ export function BottomNav() {
 
             {/* Header */}
             <div className="flex items-center gap-2 px-5 pt-2 pb-3">
-              <div className="flex items-center justify-center size-7 rounded-lg bg-primary/10">
+              <div className="flex items-center justify-center size-7 rounded-lg bg-gradient-to-br from-primary/10 to-[#B8860B]/10">
                 <MoreHorizontal className="size-4 text-primary" />
               </div>
               <h3 className="text-sm font-semibold text-foreground">
@@ -200,13 +201,13 @@ export function BottomNav() {
                       ${
                         isActive
                           ? 'bg-primary/10 text-primary border border-primary/20'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted border border-transparent'
+                          : 'text-muted-foreground hover:bg-primary/5 hover:text-foreground active:bg-muted border border-transparent'
                       }
                     `}
                   >
                     <div className={`
                       flex items-center justify-center size-10 rounded-xl transition-colors duration-150
-                      ${isActive ? 'bg-primary/15' : 'bg-muted'}
+                      ${isActive ? 'bg-gradient-to-br from-primary/15 to-[#B8860B]/10' : 'bg-muted'}
                     `}>
                       <Icon
                         className={`size-5 transition-colors duration-150 ${
