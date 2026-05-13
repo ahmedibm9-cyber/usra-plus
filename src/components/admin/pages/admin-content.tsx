@@ -1077,7 +1077,6 @@ export function AdminContent() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="text-xs text-[--text-muted] mb-1.5 block flex items-center gap-1.5">
-                            {/* eslint-disable-next-line jsx-a11y/alt-text */}
                             <Image className="w-3 h-3" aria-hidden="true" /> Logo URL
                           </label>
                           <Input
@@ -1089,7 +1088,6 @@ export function AdminContent() {
                         </div>
                         <div>
                           <label className="text-xs text-[--text-muted] mb-1.5 block flex items-center gap-1.5">
-                            {/* eslint-disable-next-line jsx-a11y/alt-text */}
                             <Image className="w-3 h-3" aria-hidden="true" /> Favicon URL
                           </label>
                           <Input
