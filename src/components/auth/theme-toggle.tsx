@@ -2,7 +2,8 @@
 
 import { useSyncExternalStore } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Sun, Moon } from 'lucide-react'
+import { IconButton, Tooltip } from '@mui/material'
+import { LightMode, DarkMode } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 
 const emptySubscribe = () => () => {}
@@ -20,12 +21,20 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button
-        className="w-9 h-9 rounded-xl border border-border bg-card/50 flex items-center justify-center"
+      <IconButton
         aria-label="Toggle theme"
+        size="small"
+        sx={{
+          width: 36,
+          height: 36,
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'action.hover',
+        }}
       >
-        <Moon className="w-4 h-4 text-muted-foreground" />
-      </button>
+        <DarkMode sx={{ fontSize: 18, color: 'text.secondary' }} />
+      </IconButton>
     )
   }
 
@@ -36,35 +45,48 @@ export function ThemeToggle() {
   }
 
   return (
-    <button
-      onClick={toggle}
-      className="relative w-9 h-9 rounded-xl border border-border bg-card/50 hover:bg-secondary hover:border-[#B8860B]/15 transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring/30"
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        {isDark ? (
-          <motion.div
-            key="sun"
-            initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
-            animate={{ rotate: 0, scale: 1, opacity: 1 }}
-            exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
-          >
-            <Sun className="w-4 h-4 text-[#D4A843]" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="moon"
-            initial={{ rotate: 90, scale: 0.5, opacity: 0 }}
-            animate={{ rotate: 0, scale: 1, opacity: 1 }}
-            exit={{ rotate: -90, scale: 0.5, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
-          >
-            <Moon className="w-4 h-4 text-[#047857]" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </button>
+    <Tooltip title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}>
+      <IconButton
+        onClick={toggle}
+        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        size="small"
+        sx={{
+          width: 36,
+          height: 36,
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'action.hover',
+          '&:hover': {
+            bgcolor: 'action.selected',
+            borderColor: 'primary.main',
+          },
+        }}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {isDark ? (
+            <motion.div
+              key="sun"
+              initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
+            >
+              <LightMode sx={{ fontSize: 18, color: '#FBBF24' }} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="moon"
+              initial={{ rotate: 90, scale: 0.5, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              exit={{ rotate: -90, scale: 0.5, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
+            >
+              <DarkMode sx={{ fontSize: 18, color: '#0D6B58' }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </IconButton>
+    </Tooltip>
   )
 }

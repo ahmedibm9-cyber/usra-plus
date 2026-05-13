@@ -3,21 +3,29 @@
 import { useState, useRef, useCallback } from 'react'
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogOverlay,
-  DialogPortal,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Shield, FileText, Scale, ChevronDown, CheckCircle2, AlertCircle } from 'lucide-react'
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+  Stack,
+  Divider,
+  LinearProgress,
+  IconButton,
+  Tooltip,
+} from '@mui/material'
+import {
+  Shield,
+  Description,
+  Balance,
+  ExpandMore,
+  CheckCircle,
+  Error as ErrorOutline,
+} from '@mui/icons-material'
 import { useI18n } from '@/i18n/use-translation'
 import { useAuthStore } from '@/stores/auth-store'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
 
 export function TermsModal() {
   const { showTermsModal, setShowTermsModal } = useAuthStore()
@@ -177,183 +185,341 @@ export function TermsModal() {
   };
 
   return (
-    <Dialog open={showTermsModal} onOpenChange={handleOpenChange}>
-      <DialogPortal data-slot="dialog-portal">
-        <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
-        <DialogPrimitive.Content
-          data-slot="dialog-content"
-          key={modalKey}
-          className="border-border bg-card text-card-foreground sm:max-w-2xl rounded-2xl p-0 overflow-hidden gap-0 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] duration-200"
-        >
-          {/* Header with emerald gradient accent */}
-          <div className="relative bg-gradient-to-r from-primary/10 via-[#B8860B]/5 to-primary/10 px-6 pt-6 pb-4">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-[#B8860B]/3 to-transparent" />
-            <DialogHeader className="relative">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-[#B8860B]/10 border border-primary/20">
-                  <Scale className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <DialogTitle className="text-xl font-bold text-foreground font-display">
-                    {termsContent.title}
-                  </DialogTitle>
-                  <DialogDescription className="text-sm text-muted-foreground mt-0.5">
-                    {termsContent.subtitle}
-                  </DialogDescription>
-                </div>
-              </div>
-            </DialogHeader>
-
-            {/* Trust badges */}
-            <div className="relative flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border">
-                <Shield className="w-3.5 h-3.5 text-[#B8860B]" />
-                PDPL Compliant
-              </span>
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border">
-                <FileText className="w-3.5 h-3.5 text-[#B8860B]" />
-                KSA Governed
-              </span>
-            </div>
-          </div>
-
-          <Separator className="bg-border" />
-
-          {/* Scroll progress indicator */}
-          <div className="px-6 pt-3 flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-              <motion.div
-                className="h-full rounded-full"
-                style={{
-                  background: hasScrolledToBottom
-                    ? 'var(--primary)'
-                    : 'linear-gradient(90deg, var(--primary), var(--accent))',
-                }}
-                animate={{ width: `${scrollPercent}%` }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-              />
-            </div>
-            <span className="text-xs font-medium tabular-nums text-muted-foreground min-w-[36px] text-right font-mono">
-              {scrollPercent}%
-            </span>
-          </div>
-
-          {/* Mandatory reading notice */}
-          <AnimatePresence mode="wait">
-            {!hasScrolledToBottom ? (
-              <motion.div
-                key="scroll-notice"
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                className="mx-6 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 border border-accent/20"
-              >
-                <AlertCircle className="w-4 h-4 text-accent shrink-0" />
-                <p className="text-xs text-accent/90">
-                  {isRTL
-                    ? 'يرجى قراءة جميع الشروط بالكامل حتى تتمكن من قبولها'
-                    : 'Please read all terms in full before you can accept'}
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="ready-notice"
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                className="mx-6 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20"
-              >
-                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                <p className="text-xs text-primary/90">
-                  {isRTL
-                    ? 'يمكنك الآن قبول الشروط'
-                    : 'You have read all terms — you may now accept'}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Scrollable content */}
-          <div
-            ref={scrollRef}
-            onScroll={handleScroll}
-            className="h-[400px] overflow-y-auto px-6 scroll-smooth custom-scrollbar"
+    <Dialog
+      open={showTermsModal}
+      onClose={() => handleOpenChange(false)}
+      key={modalKey}
+      maxWidth="md"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 4,
+            overflow: 'hidden',
+            m: { xs: 1, sm: 2 },
+            maxHeight: '90vh',
+          },
+        },
+      }}
+    >
+      {/* Header with teal/amber gradient accent */}
+      <DialogTitle
+        sx={{
+          m: 0,
+          p: 3,
+          pb: 2,
+          bgcolor: 'primary.light',
+          background: 'linear-gradient(90deg, rgba(13,107,88,0.08), rgba(217,119,6,0.04), rgba(13,107,88,0.08))',
+        }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'primary.light',
+              border: '1px solid',
+              borderColor: 'rgba(13,107,88,0.2)',
+              flexShrink: 0,
+            }}
           >
-            <div className="py-4 space-y-5" dir={isRTL ? 'rtl' : 'ltr'}>
-              {termsContent.sections.map((section, index) => (
-                <div key={index} className="group">
-                  <h3 className="text-sm font-bold text-primary mb-1.5 flex items-center gap-2 font-display">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-primary/15 text-[10px] font-bold text-primary shrink-0">
-                      {index + 1}
-                    </span>
-                    {section.title.replace(/^\d+\.\s*/, '')}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line pl-7">
-                    {section.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+            <Balance sx={{ fontSize: 24, color: 'primary.main' }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
+              {termsContent.title}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
+              {termsContent.subtitle}
+            </Typography>
+          </Box>
+        </Stack>
 
-          {/* Scroll down hint */}
-          <AnimatePresence>
-            {!hasScrolledToBottom && scrollPercent < 10 && (
-              <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 4 }}
-                className="flex items-center justify-center gap-1.5 py-1 text-muted-foreground"
-              >
-                <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
-                <span className="text-xs">
-                  {isRTL ? 'مرر للأسفل لقراءة المزيد' : 'Scroll down to read more'}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Trust badges */}
+        <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+          <Stack
+            direction="row"
+            spacing={0.75}
+            sx={{
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1,
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              alignItems: 'center',
+            }}
+          >
+            <Shield sx={{ fontSize: 14, color: 'secondary.main' }} />
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>PDPL Compliant</Typography>
+          </Stack>
+          <Stack
+            direction="row"
+            spacing={0.75}
+            sx={{
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1,
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              alignItems: 'center',
+            }}
+          >
+            <Description sx={{ fontSize: 14, color: 'secondary.main' }} />
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>KSA Governed</Typography>
+          </Stack>
+        </Stack>
+      </DialogTitle>
 
-          <Separator className="bg-border" />
+      <Divider />
 
-          {/* Footer with actions */}
-          <DialogFooter className="px-6 py-4 flex-row items-center justify-between gap-3 sm:justify-between">
-            <div className="flex items-center gap-2">
-              {hasScrolledToBottom ? (
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-              ) : (
-                <div className="w-4 h-4 rounded-full border-2 border-border" />
-              )}
-              <p className="text-xs text-muted-foreground hidden sm:block">
-                {hasScrolledToBottom
-                  ? (isRTL ? 'تمت قراءة جميع الشروط' : 'All terms read')
-                  : (isRTL
-                    ? `${Math.min(scrollPercent, 99)}% مقروء — يجب قراءة الكل للقبول`
-                    : `${Math.min(scrollPercent, 99)}% read — must read all to accept`)
-                }
-              </p>
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <Button
-                variant="ghost"
-                onClick={handleDecline}
-                className="flex-1 sm:flex-none text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl h-10"
+      {/* Scroll progress indicator */}
+      <Box sx={{ px: 3, pt: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ flex: 1 }}>
+          <LinearProgress
+            variant="determinate"
+            value={scrollPercent}
+            sx={{
+              height: 6,
+              borderRadius: 3,
+              bgcolor: 'action.hover',
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 3,
+                bgcolor: hasScrolledToBottom ? 'primary.main' : undefined,
+                backgroundImage: hasScrolledToBottom
+                  ? undefined
+                  : 'linear-gradient(90deg, #0D6B58, #F59E0B)',
+              },
+            }}
+          />
+        </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+            fontWeight: 500,
+            minWidth: 36,
+            textAlign: 'right',
+            fontFamily: '"JetBrains Mono", monospace',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {scrollPercent}%
+        </Typography>
+      </Box>
+
+      {/* Mandatory reading notice */}
+      <AnimatePresence mode="wait">
+        {!hasScrolledToBottom ? (
+          <motion.div
+            key="scroll-notice"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+          >
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                mx: 3,
+                mt: 1,
+                px: 1.5,
+                py: 1,
+                borderRadius: 2,
+                bgcolor: 'secondary.light',
+                border: '1px solid',
+                borderColor: 'rgba(217,119,6,0.2)',
+                alignItems: 'center',
+              }}
+            >
+              <ErrorOutline sx={{ fontSize: 16, color: 'secondary.main', flexShrink: 0 }} />
+              <Typography variant="caption" sx={{ color: 'secondary.dark' }}>
+                {isRTL
+                  ? 'يرجى قراءة جميع الشروط بالكامل حتى تتمكن من قبولها'
+                  : 'Please read all terms in full before you can accept'}
+              </Typography>
+            </Stack>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="ready-notice"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+          >
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                mx: 3,
+                mt: 1,
+                px: 1.5,
+                py: 1,
+                borderRadius: 2,
+                bgcolor: 'primary.light',
+                border: '1px solid',
+                borderColor: 'rgba(13,107,88,0.2)',
+                alignItems: 'center',
+              }}
+            >
+              <CheckCircle sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
+              <Typography variant="caption" sx={{ color: 'primary.dark' }}>
+                {isRTL
+                  ? 'يمكنك الآن قبول الشروط'
+                  : 'You have read all terms — you may now accept'}
+              </Typography>
+            </Stack>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Scrollable content */}
+      <DialogContent
+        ref={scrollRef}
+        onScroll={handleScroll}
+        sx={{
+          height: 400,
+          overflowY: 'auto',
+          scrollBehavior: 'smooth',
+          px: 3,
+          py: 2,
+          '&::-webkit-scrollbar': {
+            width: 6,
+          },
+          '&::-webkit-scrollbar-track': {
+            bgcolor: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            bgcolor: 'action.disabled',
+            borderRadius: 3,
+          },
+        }}
+      >
+        <Box sx={{ py: 1 }} dir={isRTL ? 'rtl' : 'ltr'}>
+          {termsContent.sections.map((section, index) => (
+            <Box key={index} sx={{ mb: 2.5 }}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.75 }}>
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 1,
+                    bgcolor: 'primary.light',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 700, color: 'primary.main' }}>
+                    {index + 1}
+                  </Typography>
+                </Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  {section.title.replace(/^\d+\.\s*/, '')}
+                </Typography>
+              </Stack>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  lineHeight: 1.8,
+                  whiteSpace: 'pre-line',
+                  pl: 3.5,
+                }}
               >
-                {isRTL ? 'رفض' : 'Decline'}
-              </Button>
-              <Button
-                onClick={handleAccept}
-                disabled={!hasScrolledToBottom}
-                className="flex-1 sm:flex-none btn-gradient text-white rounded-xl h-10 font-semibold transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:saturate-0 shadow-lg shadow-primary/20 font-display"
-              >
-                {hasScrolledToBottom
-                  ? (isRTL ? 'قبول الشروط ✓' : 'Accept Terms ✓')
-                  : (isRTL ? 'اقرأ الكل أولاً' : 'Read All First')
-                }
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogPrimitive.Content>
-      </DialogPortal>
+                {section.content}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </DialogContent>
+
+      {/* Scroll down hint */}
+      <AnimatePresence>
+        {!hasScrolledToBottom && scrollPercent < 10 && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+          >
+            <Stack
+              direction="row"
+              spacing={0.75}
+              sx={{ py: 0.5, color: 'text.secondary', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <ExpandMore sx={{ fontSize: 14, animation: 'bounce 1s infinite' }} />
+              <Typography variant="caption">
+                {isRTL ? 'مرر للأسفل لقراءة المزيد' : 'Scroll down to read more'}
+              </Typography>
+            </Stack>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Divider />
+
+      {/* Footer with actions */}
+      <DialogActions
+        sx={{
+          px: 3,
+          py: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1.5,
+        }}
+      >
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {hasScrolledToBottom ? (
+            <CheckCircle sx={{ fontSize: 16, color: 'primary.main' }} />
+          ) : (
+            <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: 2, borderColor: 'divider' }} />
+          )}
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} className="hidden sm:block">
+            {hasScrolledToBottom
+              ? (isRTL ? 'تمت قراءة جميع الشروط' : 'All terms read')
+              : (isRTL
+                ? `${Math.min(scrollPercent, 99)}% مقروء — يجب قراءة الكل للقبول`
+                : `${Math.min(scrollPercent, 99)}% read — must read all to accept`)
+            }
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={1.5}>
+          <Button
+            onClick={handleDecline}
+            sx={{
+              color: 'text.secondary',
+              borderRadius: 2,
+              '&:hover': { bgcolor: 'action.hover' },
+            }}
+          >
+            {isRTL ? 'رفض' : 'Decline'}
+          </Button>
+          <Button
+            onClick={handleAccept}
+            variant="contained"
+            disabled={!hasScrolledToBottom}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              '&.Mui-disabled': {
+                opacity: 0.3,
+              },
+            }}
+          >
+            {hasScrolledToBottom
+              ? (isRTL ? 'قبول الشروط ✓' : 'Accept Terms ✓')
+              : (isRTL ? 'اقرأ الكل أولاً' : 'Read All First')
+            }
+          </Button>
+        </Stack>
+      </DialogActions>
     </Dialog>
   )
 }

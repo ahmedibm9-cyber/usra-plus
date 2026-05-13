@@ -1,43 +1,51 @@
 'use client'
 
-import { useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { useCallback, useState, type ElementType } from 'react'
 import {
-  LayoutDashboard,
-  CheckSquare,
-  CalendarDays,
-  MessageSquare,
-  MoreHorizontal,
-  Wallet,
-  UtensilsCrossed,
+  Drawer,
+  IconButton,
+  Box,
+  Typography,
+  Paper,
+  ButtonBase,
+  Divider,
+} from '@mui/material'
+import {
+  Dashboard,
+  CheckBox,
+  CalendarMonth,
+  Chat,
+  MoreHoriz,
+  AccountBalanceWallet,
+  Restaurant,
   Cake,
   Brush,
   FolderOpen,
   Settings,
   ShoppingCart,
-} from 'lucide-react'
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+} from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
+import { MuiLayoutProvider } from './mui-layout-provider'
 import type { AppPage } from '@/types'
 
 interface BottomNavItem {
   page: AppPage
-  icon: React.ElementType
+  icon: ElementType
   labelKey: 'dashboard' | 'tasks' | 'chat' | 'calendar' | 'budget'
 }
 
 const mainNavItems: BottomNavItem[] = [
-  { page: 'dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
-  { page: 'tasks', icon: CheckSquare, labelKey: 'tasks' },
-  { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
-  { page: 'calendar', icon: CalendarDays, labelKey: 'calendar' },
-  { page: 'budget', icon: Wallet, labelKey: 'budget' },
+  { page: 'dashboard', icon: Dashboard, labelKey: 'dashboard' },
+  { page: 'tasks', icon: CheckBox, labelKey: 'tasks' },
+  { page: 'chat', icon: Chat, labelKey: 'chat' },
+  { page: 'calendar', icon: CalendarMonth, labelKey: 'calendar' },
+  { page: 'budget', icon: AccountBalanceWallet, labelKey: 'budget' },
 ]
 
 interface MoreNavItem {
   page: AppPage
-  icon: React.ElementType
+  icon: ElementType
   labelKey: 'grocery' | 'files' | 'settings' | 'mealPlan' | 'milestones' | 'chores'
 }
 
@@ -45,14 +53,15 @@ const moreNavItems: MoreNavItem[] = [
   { page: 'milestones', icon: Cake, labelKey: 'milestones' },
   { page: 'chores', icon: Brush, labelKey: 'chores' },
   { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery' },
-  { page: 'meal-plan', icon: UtensilsCrossed, labelKey: 'mealPlan' },
+  { page: 'meal-plan', icon: Restaurant, labelKey: 'mealPlan' },
   { page: 'files', icon: FolderOpen, labelKey: 'files' },
   { page: 'settings', icon: Settings, labelKey: 'settings' },
 ]
 
-export function BottomNav() {
+function BottomNavInner() {
   const { currentPage, setCurrentPage } = useAppStore()
   const { t, isRTL } = useI18n()
+  const [moreDrawerOpen, setMoreDrawerOpen] = useState(false)
 
   const handleNavClick = useCallback(
     (page: AppPage) => {
@@ -64,162 +73,249 @@ export function BottomNav() {
   const isMoreItemActive = moreNavItems.some((item) => item.page === currentPage)
 
   return (
-    <nav
-      aria-label="Mobile navigation"
-      className="
-        fixed bottom-0 left-0 right-0 z-50 md:hidden
-        bg-background/95 backdrop-blur-xl
-        pb-[max(env(safe-area-inset-bottom),8px)]
-        border-t border-border
-      "
-    >
-      <div className="flex items-center justify-around px-2 pt-2 pb-1">
-        {mainNavItems.map((item) => {
-          const isActive = currentPage === item.page
-          const Icon = item.icon
-          const label = t.nav[item.labelKey]
+    <>
+      <Paper
+        component="nav"
+        aria-label="Mobile navigation"
+        elevation={0}
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1300,
+          display: { xs: 'block', md: 'none' },
+          bgcolor: 'background.paper',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          pb: 'max(env(safe-area-inset-bottom), 8px)',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', px: 1, pt: 1.5, pb: 0.5 }}>
+          {mainNavItems.map((item) => {
+            const isActive = currentPage === item.page
+            const Icon = item.icon
+            const label = t.nav[item.labelKey]
 
-          return (
-            <button
-              key={item.page}
-              onClick={() => handleNavClick(item.page)}
-              aria-label={label}
-              aria-current={isActive ? 'page' : undefined}
-              className={`
-                relative flex flex-col items-center justify-center gap-0.5
-                min-w-[56px] min-h-[44px] rounded-2xl px-3 py-1.5
-                transition-all duration-200
-                ${isActive ? '' : 'text-on-surface-variant hover:bg-surface-variant active:bg-surface-variant'}
-              `}
-            >
-              {/* Material 3 Active Pill Background */}
-              {isActive && (
-                <motion.div
-                  layoutId="bottom-nav-pill"
-                  className="absolute top-0.5 left-1/2 -translate-x-1/2 w-16 h-8 rounded-2xl bg-primary-container"
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              )}
-
-              <Icon
-                className={`size-5 relative z-10 transition-colors duration-150 ${
-                  isActive ? 'text-on-primary-container' : ''
-                }`}
-              />
-
-              <span
-                className={`text-[10px] font-medium relative z-10 transition-colors duration-150 ${
-                  isActive ? 'text-on-primary-container' : ''
-                }`}
+            return (
+              <ButtonBase
+                key={item.page}
+                onClick={() => handleNavClick(item.page)}
+                aria-label={label}
+                aria-current={isActive ? 'page' : undefined}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 0.25,
+                  minWidth: 56,
+                  minHeight: 44,
+                  borderRadius: 3,
+                  px: 1.5,
+                  py: 0.75,
+                  position: 'relative',
+                  color: isActive ? 'primary.dark' : 'text.secondary',
+                  '&:hover': { bgcolor: isActive ? 'transparent' : 'action.hover' },
+                  transition: 'color 0.15s',
+                }}
               >
-                {label}
-              </span>
-            </button>
-          )
-        })}
+                {/* Active Pill Background */}
+                {isActive && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 2,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 56,
+                      height: 32,
+                      borderRadius: 3,
+                      bgcolor: 'primary.light',
+                      zIndex: 0,
+                    }}
+                  />
+                )}
 
-        {/* More Button */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <button
-              onClick={() => {}}
-              aria-label={isRTL ? 'المزيد' : 'More'}
-              aria-current={isMoreItemActive ? 'page' : undefined}
-              className={`
-                relative flex flex-col items-center justify-center gap-0.5
-                min-w-[56px] min-h-[44px] rounded-2xl px-3 py-1.5
-                transition-all duration-200
-                ${isMoreItemActive ? '' : 'text-on-surface-variant hover:bg-surface-variant active:bg-surface-variant'}
-              `}
-            >
-              {/* Active Pill for More */}
-              {isMoreItemActive && (
-                <motion.div
-                  layoutId="bottom-nav-pill"
-                  className="absolute top-0.5 left-1/2 -translate-x-1/2 w-16 h-8 rounded-2xl bg-primary-container"
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              )}
+                <Icon sx={{ fontSize: 20, position: 'relative', zIndex: 1, transition: 'color 0.15s' }} />
 
-              <MoreHorizontal
-                className={`size-5 relative z-10 transition-colors duration-150 ${
-                  isMoreItemActive ? 'text-on-primary-container' : ''
-                }`}
-              />
-              <span
-                className={`text-[10px] font-medium relative z-10 transition-colors duration-150 ${
-                  isMoreItemActive ? 'text-on-primary-container' : ''
-                }`}
-              >
-                {isRTL ? 'المزيد' : 'More'}
-              </span>
-            </button>
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            className="bg-card border-t border-border rounded-t-3xl px-0 pt-0 pb-[max(env(safe-area-inset-bottom),16px)]"
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontSize: '0.625rem',
+                    fontWeight: 500,
+                    position: 'relative',
+                    zIndex: 1,
+                    transition: 'color 0.15s',
+                    lineHeight: 1,
+                  }}
+                >
+                  {label}
+                </Typography>
+              </ButtonBase>
+            )
+          })}
+
+          {/* More Button */}
+          <ButtonBase
+            onClick={() => setMoreDrawerOpen(true)}
+            aria-label={isRTL ? 'المزيد' : 'More'}
+            aria-current={isMoreItemActive ? 'page' : undefined}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.25,
+              minWidth: 56,
+              minHeight: 44,
+              borderRadius: 3,
+              px: 1.5,
+              py: 0.75,
+              position: 'relative',
+              color: isMoreItemActive ? 'primary.dark' : 'text.secondary',
+              '&:hover': { bgcolor: isMoreItemActive ? 'transparent' : 'action.hover' },
+              transition: 'color 0.15s',
+            }}
           >
-            <SheetTitle className="sr-only">
-              {isRTL ? 'المزيد من الخيارات' : 'More options'}
-            </SheetTitle>
+            {/* Active Pill for More */}
+            {isMoreItemActive && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 2,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 56,
+                  height: 32,
+                  borderRadius: 3,
+                  bgcolor: 'primary.light',
+                  zIndex: 0,
+                }}
+              />
+            )}
 
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
-            </div>
+            <MoreHoriz sx={{ fontSize: 20, position: 'relative', zIndex: 1, transition: 'color 0.15s' }} />
 
-            {/* Header */}
-            <div className="flex items-center gap-2 px-5 pt-2 pb-3">
-              <div className="flex items-center justify-center size-7 rounded-xl bg-primary-container">
-                <MoreHorizontal className="size-4 text-on-primary-container" />
-              </div>
-              <h3 className="text-sm font-semibold text-foreground">
-                {isRTL ? 'المزيد' : 'More'}
-              </h3>
-            </div>
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: '0.625rem',
+                fontWeight: 500,
+                position: 'relative',
+                zIndex: 1,
+                transition: 'color 0.15s',
+                lineHeight: 1,
+              }}
+            >
+              {isRTL ? 'المزيد' : 'More'}
+            </Typography>
+          </ButtonBase>
+        </Box>
+      </Paper>
 
-            {/* Divider */}
-            <div className="h-px mx-5 bg-border" />
+      {/* More Menu Drawer */}
+      <Drawer
+        anchor="bottom"
+        open={moreDrawerOpen}
+        onClose={() => setMoreDrawerOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              pb: 'max(env(safe-area-inset-bottom), 16px)',
+            },
+          },
+        }}
+      >
+        {/* Screen reader title */}
+        <Box sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+          {isRTL ? 'المزيد من الخيارات' : 'More options'}
+        </Box>
 
-            {/* Navigation items - 2 column grid */}
-            <div className="grid grid-cols-2 gap-2 px-4 py-3">
-              {moreNavItems.map((item) => {
-                const isActive = currentPage === item.page
-                const Icon = item.icon
-                const label = t.nav[item.labelKey as keyof typeof t.nav] || item.labelKey
+        {/* Drag handle */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1.5, pb: 0.5 }}>
+          <Box sx={{ width: 40, height: 4, borderRadius: 2, bgcolor: 'action.selected' }} />
+        </Box>
 
-                return (
-                  <button
-                    key={item.page}
-                    onClick={() => handleNavClick(item.page)}
-                    className={`
-                      flex flex-col items-center gap-1.5 rounded-2xl px-3 py-3
-                      text-xs font-medium transition-all duration-200
-                      ${
-                        isActive
-                          ? 'bg-primary-container text-on-primary-container'
-                          : 'text-on-surface-variant hover:bg-surface-variant active:bg-surface-variant'
-                      }
-                    `}
-                  >
-                    <div className={`
-                      flex items-center justify-center size-10 rounded-2xl transition-colors duration-150
-                      ${isActive ? 'bg-primary/10' : 'bg-muted'}
-                    `}>
-                      <Icon
-                        className={`size-5 transition-colors duration-150 ${
-                          isActive ? 'text-primary' : ''
-                        }`}
-                      />
-                    </div>
-                    <span>{label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </nav>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2.5, pt: 1.5, pb: 1.5 }}>
+          <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 2, bgcolor: 'primary.light' }}>
+            <MoreHoriz sx={{ fontSize: 14, color: 'primary.dark' }} />
+          </Box>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+            {isRTL ? 'المزيد' : 'More'}
+          </Typography>
+        </Box>
+
+        <Divider />
+
+        {/* Navigation items - 2 column grid */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, px: 2, py: 1.5 }}>
+          {moreNavItems.map((item) => {
+            const isActive = currentPage === item.page
+            const Icon = item.icon
+            const label = (t.nav as Record<string, string>)[item.labelKey] || item.labelKey
+
+            return (
+              <ButtonBase
+                key={item.page}
+                onClick={() => {
+                  handleNavClick(item.page)
+                  setMoreDrawerOpen(false)
+                }}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 0.75,
+                  borderRadius: 3,
+                  px: 1.5,
+                  py: 1.5,
+                  fontSize: '0.6875rem',
+                  fontWeight: 500,
+                  color: isActive ? 'primary.dark' : 'text.secondary',
+                  bgcolor: isActive ? 'primary.light' : 'transparent',
+                  '&:hover': { bgcolor: isActive ? 'primary.light' : 'action.hover' },
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 3,
+                    bgcolor: isActive ? 'primary.main' : 'action.hover',
+                    color: isActive ? 'primary.contrastText' : 'text.secondary',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <Icon sx={{ fontSize: 20 }} />
+                </Box>
+                <Typography variant="caption" sx={{ fontSize: '0.6875rem', fontWeight: 500, color: 'inherit' }}>
+                  {label}
+                </Typography>
+              </ButtonBase>
+            )
+          })}
+        </Box>
+      </Drawer>
+    </>
+  )
+}
+
+export function BottomNav() {
+  return (
+    <MuiLayoutProvider>
+      <BottomNavInner />
+    </MuiLayoutProvider>
   )
 }

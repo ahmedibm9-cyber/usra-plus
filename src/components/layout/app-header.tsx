@@ -1,44 +1,37 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, type ElementType } from 'react'
 import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Avatar,
   Menu,
-  Search,
-  LogOut,
-  Settings,
-  User,
-  ChevronRight,
-  Sun,
-  Moon,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu'
-import {
+  MenuItem,
   Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip'
+  InputBase,
+  Divider,
+  Box,
+  Breadcrumbs,
+  Chip,
+} from '@mui/material'
+import {
+  Menu as MenuIcon,
+  Search,
+  Logout,
+  Settings,
+  Person,
+  ChevronRight,
+  LightMode,
+  DarkMode,
+} from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { useNotificationStore } from '@/stores/notification-store'
 import { useI18n } from '@/i18n/use-translation'
-import type { AppPage } from '@/types'
+import { MuiLayoutProvider } from './mui-layout-provider'
 import { NotificationPanel } from './notification-panel'
+import type { AppPage } from '@/types'
 
 const pageTitles: Record<AppPage, keyof import('@/i18n/en').TranslationKeys['nav']> = {
   dashboard: 'dashboard',
@@ -54,11 +47,12 @@ const pageTitles: Record<AppPage, keyof import('@/i18n/en').TranslationKeys['nav
   budget: 'budget',
 }
 
-export function AppHeader() {
+function AppHeaderInner() {
   const { currentPage, setSidebarOpen, setCommandPaletteOpen, theme, setTheme } = useAppStore()
   const { user, logout } = useAuthStore()
-  const { unreadCount } = useNotificationStore()
   const { t, language, setLanguage, isRTL } = useI18n()
+  const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
+
   const [isMac] = useState(() => {
     if (typeof navigator !== 'undefined') {
       return navigator.platform.toUpperCase().indexOf('MAC') >= 0
@@ -94,182 +88,301 @@ export function AppHeader() {
   const kbdSymbol = isMac ? '⌘' : 'Ctrl'
 
   return (
-    <header
-      role="banner"
-      className="sticky top-0 z-40 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 border-b border-border bg-background/80 backdrop-blur-xl"
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        top: 0,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        bgcolor: 'background.paper',
+        color: 'text.primary',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        backdropFilter: 'blur(20px)',
+      }}
     >
-      {/* Mobile Menu Toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Open menu"
-      >
-        <Menu className="size-5" />
-      </Button>
-
-      {/* Breadcrumb Page Title */}
-      <Breadcrumb className="hidden sm:flex">
-        <BreadcrumbList className="text-sm">
-          <BreadcrumbItem>
-            <span className="text-primary font-semibold text-xs tracking-wide uppercase font-display">
-              USRA
-            </span>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator className="text-muted-foreground">
-            <ChevronRight className="size-3" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage className="text-foreground font-semibold">
-              {pageTitle}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      {/* Mobile-only simple page title */}
-      <h2 className="sm:hidden text-base font-semibold text-foreground shrink-0 truncate">
-        {pageTitle}
-      </h2>
-
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Search - Opens Command Palette */}
-      <div data-tour="header-search" className="relative flex items-center">
-        <button
-          type="button"
-          onClick={() => setCommandPaletteOpen(true)}
-          className="
-            hidden md:flex items-center relative w-56 lg:w-64 h-10
-            bg-muted/50 border border-border rounded-2xl
-            hover:border-outline
-            focus:border-primary/40 focus:ring-2 focus:ring-primary/20
-            transition-all duration-200
-          "
-          aria-label="Open search"
+      <Toolbar sx={{ gap: 1.5, minHeight: { xs: 52, sm: 56 }, px: { xs: 1.5, sm: 2 } }}>
+        {/* Mobile Menu Toggle */}
+        <IconButton
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open menu"
+          sx={{
+            display: { md: 'none' },
+            color: 'text.secondary',
+            '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
+            borderRadius: 2,
+          }}
         >
-          <Search className="absolute left-3 size-3.5 text-muted-foreground pointer-events-none" />
-          <span className="pl-8 pr-14 text-xs text-muted-foreground truncate">
-            {t.nav.search}
-          </span>
-          <kbd
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border rounded-md pointer-events-none shadow-sm"
+          <MenuIcon />
+        </IconButton>
+
+        {/* Breadcrumb Page Title */}
+        <Breadcrumbs
+          separator={<ChevronRight sx={{ fontSize: 12, color: 'text.disabled' }} />}
+          sx={{ display: { xs: 'none', sm: 'flex' }, '& .MuiBreadcrumbs-ol': { alignItems: 'center' } }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+              color: 'primary.main',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: '0.6875rem',
+            }}
           >
-            <span className="text-[10px] font-semibold">{kbdSymbol}</span>
-            <span className="font-semibold">K</span>
-          </kbd>
-        </button>
+            USRA
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+            {pageTitle}
+          </Typography>
+        </Breadcrumbs>
+
+        {/* Mobile-only simple page title */}
+        <Typography
+          variant="body1"
+          sx={{
+            display: { sm: 'none' },
+            fontWeight: 600,
+            color: 'text.primary',
+            flexShrink: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {pageTitle}
+        </Typography>
+
+        {/* Spacer */}
+        <Box sx={{ flex: 1 }} />
+
+        {/* Search - Opens Command Palette */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }} data-tour="header-search">
+          <Box
+            onClick={() => setCommandPaletteOpen(true)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              position: 'relative',
+              width: { lg: 256, md: 224 },
+              height: 40,
+              bgcolor: 'action.hover',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 3,
+              cursor: 'pointer',
+              '&:hover': { borderColor: 'text.disabled' },
+              '&:focus-within': { borderColor: 'primary.main', boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}20` },
+              transition: 'all 0.2s',
+            }}
+          >
+            <Search sx={{ position: 'absolute', left: 12, fontSize: 14, color: 'text.disabled', pointerEvents: 'none' }} />
+            <InputBase
+              readOnly
+              placeholder={t.nav.search}
+              sx={{
+                pl: 5,
+                pr: 10,
+                width: '100%',
+                fontSize: '0.75rem',
+                color: 'text.disabled',
+                '& input': { cursor: 'pointer' },
+              }}
+              inputProps={{ 'aria-label': 'Open search' }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.25,
+                px: 0.75,
+                py: 0.25,
+                fontSize: '0.625rem',
+                fontWeight: 500,
+                color: 'text.disabled',
+                bgcolor: 'action.selected',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+              }}
+            >
+              <span style={{ fontWeight: 700 }}>{kbdSymbol}</span>
+              <span style={{ fontWeight: 700 }}>K</span>
+            </Box>
+          </Box>
+        </Box>
 
         {/* Mobile Search Button */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
-              onClick={() => setCommandPaletteOpen(true)}
-              aria-label="Open search"
-            >
-              <Search className="size-5" />
-            </Button>
-          </TooltipTrigger>
+        <Tooltip title={t.nav.search}>
+          <IconButton
+            onClick={() => setCommandPaletteOpen(true)}
+            aria-label="Open search"
+            sx={{
+              display: { md: 'none' },
+              color: 'text.secondary',
+              '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
+              borderRadius: 2,
+            }}
+          >
+            <Search sx={{ fontSize: 20 }} />
+          </IconButton>
         </Tooltip>
-      </div>
 
-      {/* Theme Toggle */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
+        {/* Theme Toggle */}
+        <Tooltip title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+          <IconButton
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            sx={{
+              color: 'text.secondary',
+              '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
+              borderRadius: 2,
+            }}
           >
-            {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-        </TooltipContent>
-      </Tooltip>
+            {theme === 'dark' ? <LightMode sx={{ fontSize: 18 }} /> : <DarkMode sx={{ fontSize: 18 }} />}
+          </IconButton>
+        </Tooltip>
 
-      {/* Language Switcher */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
+        {/* Language Switcher */}
+        <Tooltip title={language === 'en' ? 'العربية' : 'English'}>
+          <IconButton
             data-tour="language-switch"
-            variant="ghost"
-            size="icon"
-            className="shrink-0 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl"
             onClick={toggleLanguage}
             aria-label="Switch language"
+            sx={{
+              color: 'text.secondary',
+              '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
+              borderRadius: 2,
+              fontSize: '1rem',
+            }}
           >
-            <span className="text-base leading-none">{language === 'en' ? '🇬🇧' : '🇸🇦'}</span>
-            <span className="sr-only">
-              {language === 'en' ? 'Switch to Arabic' : 'Switch to English'}
-            </span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {language === 'en' ? 'العربية' : 'English'}
-        </TooltipContent>
-      </Tooltip>
+            {language === 'en' ? '🇬🇧' : '🇸🇦'}
+          </IconButton>
+        </Tooltip>
 
-      {/* Notification Bell */}
-      <div data-tour="header-notifications">
-        <NotificationPanel />
-      </div>
+        {/* Notification Bell */}
+        <Box data-tour="header-notifications">
+          <NotificationPanel />
+        </Box>
 
-      {/* User Avatar Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className="shrink-0 rounded-full ring-2 ring-border hover:ring-primary/30 focus-visible:ring-primary/60 transition-all duration-200"
-            aria-label="User menu"
-          >
-            <Avatar className="size-9">
-              <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-              <AvatarFallback className="bg-primary-container text-on-primary-container text-xs font-semibold">
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 rounded-xl shadow-[var(--elevation-2)]"
+        {/* User Avatar Dropdown */}
+        <IconButton
+          onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+          aria-label="User menu"
+          sx={{
+            p: 0,
+            borderRadius: '50%',
+            border: '2px solid',
+            borderColor: 'divider',
+            '&:hover': { borderColor: 'primary.main' },
+            transition: 'border-color 0.2s',
+          }}
         >
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-foreground">{displayName}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="focus:bg-muted focus:text-foreground rounded-lg cursor-pointer">
-            <User className="size-4 mr-2" />
+          <Avatar
+            src={user?.avatar_url || undefined}
+            alt={displayName}
+            sx={{
+              width: 36,
+              height: 36,
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              bgcolor: 'primary.light',
+              color: 'primary.dark',
+            }}
+          >
+            {userInitials}
+          </Avatar>
+        </IconButton>
+
+        {/* User Dropdown Menu — OPAQUE background */}
+        <Menu
+          anchorEl={userMenuAnchor}
+          open={Boolean(userMenuAnchor)}
+          onClose={() => setUserMenuAnchor(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          slotProps={{
+            paper: {
+              sx: {
+                width: 224,
+                mt: 1,
+                borderRadius: 3,
+                bgcolor: 'background.paper',
+                backgroundImage: 'none',
+                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+                border: '1px solid',
+                borderColor: 'divider',
+                overflow: 'hidden',
+                '& .MuiList-root': { py: 0.5 },
+              },
+            },
+          }}
+        >
+          {/* User Info */}
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+              {displayName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {user?.email}
+            </Typography>
+          </Box>
+          <Divider />
+          <MenuItem
+            sx={{
+              borderRadius: 1.5,
+              mx: 0.5,
+              '&:hover': { bgcolor: 'action.hover' },
+            }}
+          >
+            <Person sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
             Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="focus:bg-muted focus:text-foreground rounded-lg cursor-pointer"
-            onClick={() => useAppStore.getState().setCurrentPage('settings')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              useAppStore.getState().setCurrentPage('settings')
+              setUserMenuAnchor(null)
+            }}
+            sx={{
+              borderRadius: 1.5,
+              mx: 0.5,
+              '&:hover': { bgcolor: 'action.hover' },
+            }}
           >
-            <Settings className="size-4 mr-2" />
+            <Settings sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
             {t.nav.settings}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={logout}
-            className="text-destructive focus:text-destructive focus:bg-destructive/10 rounded-lg cursor-pointer"
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={() => {
+              logout()
+              setUserMenuAnchor(null)
+            }}
+            sx={{
+              borderRadius: 1.5,
+              mx: 0.5,
+              color: 'error.main',
+              '&:hover': { bgcolor: 'error.light' },
+            }}
           >
-            <LogOut className="size-4 mr-2" />
+            <Logout sx={{ fontSize: 16, mr: 1.5 }} />
             {t.auth.logout}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </header>
+          </MenuItem>
+        </Menu>
+      </Toolbar>
+    </AppBar>
+  )
+}
+
+export function AppHeader() {
+  return (
+    <MuiLayoutProvider>
+      <AppHeaderInner />
+    </MuiLayoutProvider>
   )
 }

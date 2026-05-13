@@ -5,12 +5,26 @@ import { motion } from 'framer-motion'
 import { createClient, isDemoMode } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useI18n } from '@/i18n/use-translation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ArrowLeft, Mail, Loader2, CheckCircle2 } from 'lucide-react'
+import { ThemeProvider } from '@mui/material/styles'
+import { getAppTheme } from '@/lib/mui-theme'
+import {
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  InputAdornment,
+  Divider,
+} from '@mui/material'
+import {
+  Mail,
+  ArrowBack,
+  CheckCircle,
+} from '@mui/icons-material'
 import { ThemeToggle } from './theme-toggle'
 import { toast } from 'sonner'
+import { useAppStore } from '@/stores/app-store'
 
 // ─── Animation variants ───────────────────────────────────────────
 const fadeUp = {
@@ -21,6 +35,9 @@ const fadeUp = {
 export function ForgotPasswordForm() {
   const { setAuthView } = useAuthStore()
   const { t, isRTL } = useI18n()
+  const { theme } = useAppStore()
+  const muiTheme = getAppTheme(theme)
+
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSent, setIsSent] = useState(false)
@@ -73,165 +90,223 @@ export function ForgotPasswordForm() {
     }
   }
 
-  // ─── Success State — Gold Checkmark Animation ──────────────────
+  // ─── Success State ──────────────────────────────────────────────
   if (isSent) {
     return (
-      <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+      <ThemeProvider theme={muiTheme}>
+        <Box sx={{ width: '100%', maxWidth: 448, mx: 'auto', position: 'relative', zIndex: 10 }} dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <Card
+              sx={{
+                borderRadius: 4,
+                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06)',
+                border: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                {/* Theme toggle */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+                  <ThemeToggle />
+                </Box>
+
+                {/* Success illustration */}
+                <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                    <Box sx={{ position: 'relative' }}>
+                      <Box
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
+                          bgcolor: 'primary.light',
+                          border: '1px solid',
+                          borderColor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <CheckCircle sx={{ fontSize: 40, color: 'primary.main' }} />
+                      </Box>
+                    </Box>
+                  </Box>
+                </motion.div>
+
+                <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                    {t.auth.resetPassword}
+                  </Typography>
+                  <Divider sx={{ width: 48, mx: 'auto', my: 1.5, borderColor: 'secondary.main', borderBottomWidth: 2 }} />
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {t.auth.verificationSent}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500, mt: 0.5 }}>
+                    {email}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
+                    {t.auth.checkInbox}
+                  </Typography>
+                </motion.div>
+
+                <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
+                  <Button
+                    onClick={() => setAuthView('login')}
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<ArrowBack sx={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
+                    sx={{
+                      mt: 4,
+                      height: 44,
+                      borderRadius: 2,
+                      borderColor: 'divider',
+                      color: 'text.secondary',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    {t.auth.backToLogin}
+                  </Button>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Box>
+      </ThemeProvider>
+    )
+  }
+
+  // ─── Default State ──────────────────────────────────────────────
+  return (
+    <ThemeProvider theme={muiTheme}>
+      <Box sx={{ width: '100%', maxWidth: 448, mx: 'auto', position: 'relative', zIndex: 10 }} dir={isRTL ? 'rtl' : 'ltr'}>
         <motion.div
-          className="glass rounded-2xl p-8 shadow-warm-lg text-center space-y-6"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          {/* Theme toggle */}
-          <div className="flex justify-start">
-            <ThemeToggle />
-          </div>
-
-          {/* Success illustration — gold checkmark */}
-          <motion.div
-            className="flex justify-center"
-            {...fadeUp}
-            transition={{ duration: 0.35, delay: 0 }}
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06)',
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
           >
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-[#B8860B]/10 border border-primary/20 flex items-center justify-center">
-                <CheckCircle2 className="w-10 h-10 text-primary" />
-              </div>
-              {/* Gold glow ring */}
-              <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/5 to-[#B8860B]/5 animate-gentle-pulse" />
-            </div>
-          </motion.div>
+            <CardContent sx={{ p: 4 }}>
+              {/* Theme toggle */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+                <ThemeToggle />
+              </Box>
 
-          <motion.div
-            className="space-y-2"
-            {...fadeUp}
-            transition={{ duration: 0.35, delay: 0.1 }}
-          >
-            <h2 className="text-2xl font-bold text-foreground font-display">
-              {t.auth.resetPassword}
-            </h2>
-            <div className="gold-line w-12 mx-auto my-2" />
-            <p className="text-muted-foreground text-sm">
-              {t.auth.verificationSent}
-            </p>
-            <p className="text-primary font-medium text-sm">{email}</p>
-            <p className="text-muted-foreground text-sm mt-2">
-              {t.auth.checkInbox}
-            </p>
-          </motion.div>
+              {/* Header */}
+              <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0 }}>
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 3,
+                        bgcolor: 'primary.light',
+                        border: '1px solid',
+                        borderColor: 'rgba(13,107,88,0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Mail sx={{ fontSize: 28, color: 'primary.main' }} />
+                    </Box>
+                  </Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                    {isRTL ? 'إعادة تعيين كلمة المرور' : 'Reset Password'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {isRTL ? 'أدخل بريدك الإلكتروني وسنرسل لك رابط الإعادة' : "Enter your email and we'll send you a reset link"}
+                  </Typography>
+                  <Divider sx={{ width: 48, mx: 'auto', mt: 2, borderColor: 'secondary.main', borderBottomWidth: 2 }} />
+                </Box>
+              </motion.div>
 
-          <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
-            <Button
-              onClick={() => setAuthView('login')}
-              variant="outline"
-              className="w-full border-border bg-card/50 text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-[#B8860B]/20 rounded-xl h-11 transition-all duration-200"
-            >
-              <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-              {t.auth.backToLogin}
-            </Button>
-          </motion.div>
+              {/* Form */}
+              <Box component="form" onSubmit={handleSubmit}>
+                <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.1 }}>
+                  <TextField
+                    fullWidth
+                    id="reset-email"
+                    type="email"
+                    label={t.auth.email}
+                    placeholder={isRTL ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (error) setError('')
+                    }}
+                    disabled={isLoading}
+                    error={!!error}
+                    helperText={error || ''}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Mail sx={{ fontSize: 18, color: 'text.secondary' }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                  />
+                </motion.div>
+
+                <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.15 }}>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    disabled={isLoading}
+                    sx={{
+                      mt: 2,
+                      height: 44,
+                      borderRadius: 2,
+                      fontSize: 14,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isLoading ? '...' : (isRTL ? 'إرسال رابط الإعادة' : 'Send Reset Link')}
+                  </Button>
+                </motion.div>
+              </Box>
+
+              {/* Back to login */}
+              <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Button
+                    type="button"
+                    onClick={() => setAuthView('login')}
+                    size="small"
+                    startIcon={<ArrowBack sx={{ fontSize: 14, transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
+                    sx={{
+                      color: 'text.secondary',
+                      fontSize: 13,
+                      '&:hover': { bgcolor: 'transparent', color: 'primary.main' },
+                    }}
+                  >
+                    {t.auth.backToLogin}
+                  </Button>
+                </Box>
+              </motion.div>
+            </CardContent>
+          </Card>
         </motion.div>
-      </div>
-    )
-  }
-
-  // ─── Default State — Minimal Elegant Form ──────────────────────
-  return (
-    <div className="w-full max-w-md mx-auto relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
-      <motion.div
-        className="glass rounded-2xl p-8 shadow-warm-lg space-y-6"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        {/* Theme toggle */}
-        <div className="flex justify-start">
-          <ThemeToggle />
-        </div>
-
-        {/* Header */}
-        <motion.div
-          className="space-y-2 text-center"
-          {...fadeUp}
-          transition={{ duration: 0.35, delay: 0 }}
-        >
-          <div className="flex justify-center mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-[#B8860B]/10 border border-primary/20 flex items-center justify-center">
-              <Mail className="w-7 h-7 text-primary" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-foreground font-display">
-            {isRTL ? 'إعادة تعيين كلمة المرور' : 'Reset Password'}
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            {isRTL ? 'أدخل بريدك الإلكتروني وسنرسل لك رابط الإعادة' : "Enter your email and we'll send you a reset link"}
-          </p>
-          <div className="gold-line w-12 mx-auto mt-3" />
-        </motion.div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <motion.div
-            className="space-y-1.5"
-            {...fadeUp}
-            transition={{ duration: 0.35, delay: 0.1 }}
-          >
-            <Label htmlFor="reset-email" className="text-sm font-medium text-muted-foreground">
-              {t.auth.email}
-            </Label>
-            <div className="relative">
-              <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 ${isRTL ? 'right-3' : 'left-3'}`} />
-              <Input
-                id="reset-email"
-                type="email"
-                placeholder={isRTL ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                  if (error) setError('')
-                }}
-                className={`h-11 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_-2px_rgba(184,134,11,0.1)] transition-all duration-200 ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
-                disabled={isLoading}
-              />
-            </div>
-            {error && (
-              <p className="text-xs text-destructive mt-1">{error}</p>
-            )}
-          </motion.div>
-
-          <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.15 }}>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-gradient text-white rounded-xl h-11 font-semibold transition-all duration-300 disabled:opacity-50 shadow-lg shadow-primary/20 font-display"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                isRTL ? 'إرسال رابط الإعادة' : 'Send Reset Link'
-              )}
-            </Button>
-          </motion.div>
-        </form>
-
-        {/* Back to login */}
-        <motion.div
-          className="text-center"
-          {...fadeUp}
-          transition={{ duration: 0.35, delay: 0.2 }}
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setAuthView('login')}
-            className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200 inline-flex items-center gap-1.5 h-auto p-0 hover:bg-transparent"
-          >
-            <ArrowLeft className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
-            {t.auth.backToLogin}
-          </Button>
-        </motion.div>
-      </motion.div>
-    </div>
+      </Box>
+    </ThemeProvider>
   )
 }
+

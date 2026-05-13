@@ -1,69 +1,100 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useCallback, useMemo, useState, type ElementType } from 'react'
 import {
-  LayoutDashboard,
-  CheckSquare,
-  CalendarDays,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider,
+  Box,
+  Typography,
+  Tooltip,
+  ButtonBase,
+} from '@mui/material'
+import {
+  Dashboard,
+  CheckBox,
+  CalendarMonth,
   ShoppingCart,
-  MessageSquare,
+  Chat,
   FolderOpen,
   Settings,
   ChevronLeft,
   ChevronRight,
-  LogOut,
-  Users,
-  ChevronsUpDown,
-  Wallet,
-  UtensilsCrossed,
+  Logout,
+  Group,
+  UnfoldMore,
+  AccountBalanceWallet,
+  Restaurant,
   Cake,
   Brush,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu'
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
+} from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSubscriptionStore } from '@/stores/subscription-store'
-import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
+import { MuiLayoutProvider } from './mui-layout-provider'
 import type { AppPage } from '@/types'
 
 interface NavItem {
   page: AppPage
-  icon: React.ElementType
+  icon: ElementType
   labelKey: keyof typeof import('@/i18n/en').en.nav
 }
 
 const navItems: NavItem[] = [
-  { page: 'dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
-  { page: 'tasks', icon: CheckSquare, labelKey: 'tasks' },
-  { page: 'calendar', icon: CalendarDays, labelKey: 'calendar' },
+  { page: 'dashboard', icon: Dashboard, labelKey: 'dashboard' },
+  { page: 'tasks', icon: CheckBox, labelKey: 'tasks' },
+  { page: 'calendar', icon: CalendarMonth, labelKey: 'calendar' },
   { page: 'milestones', icon: Cake, labelKey: 'milestones' },
   { page: 'chores', icon: Brush, labelKey: 'chores' },
   { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery' },
-  { page: 'meal-plan', icon: UtensilsCrossed, labelKey: 'mealPlan' },
-  { page: 'chat', icon: MessageSquare, labelKey: 'chat' },
+  { page: 'meal-plan', icon: Restaurant, labelKey: 'mealPlan' },
+  { page: 'chat', icon: Chat, labelKey: 'chat' },
   { page: 'files', icon: FolderOpen, labelKey: 'files' },
-  { page: 'budget', icon: Wallet, labelKey: 'budget' },
+  { page: 'budget', icon: AccountBalanceWallet, labelKey: 'budget' },
   { page: 'settings', icon: Settings, labelKey: 'settings' },
 ]
+
+function PlanBadgeMUI() {
+  const { plan } = useSubscriptionStore()
+
+  const config: Record<string, { label: string; color: string; bgcolor: string }> = {
+    free: { label: 'Free', color: 'text.disabled', bgcolor: 'action.hover' },
+    pro: { label: 'Pro', color: 'secondary.main', bgcolor: 'secondary.light' },
+    family_plus: { label: 'Family+', color: 'secondary.main', bgcolor: 'secondary.light' },
+  }
+
+  const { label, color, bgcolor } = config[plan] || config.free
+
+  return (
+    <Box
+      sx={{
+        px: 1,
+        py: 0,
+        height: 20,
+        display: 'inline-flex',
+        alignItems: 'center',
+        borderRadius: 1,
+        fontSize: '0.625rem',
+        fontWeight: 600,
+        color,
+        bgcolor,
+        border: '1px solid',
+        borderColor: 'divider',
+      }}
+    >
+      {label}
+    </Box>
+  )
+}
 
 function NavItemButton({
   item,
@@ -81,57 +112,69 @@ function NavItemButton({
   const Icon = item.icon
 
   const button = (
-    <button
-      onClick={onClick}
-      aria-current={isActive ? 'page' : undefined}
-      className={`
-        group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5
-        text-sm font-medium transition-all duration-200
-        ${isActive
-          ? 'bg-primary-container text-on-primary-container'
-          : 'text-on-surface-variant hover:bg-surface-variant hover:text-foreground'
-        }
-        ${collapsed ? 'justify-center px-2' : ''}
-      `}
-    >
-      {/* Active indicator pill */}
-      {isActive && !collapsed && (
-        <motion.div
-          layoutId="sidebar-active-indicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] rounded-r-full bg-primary"
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        />
-      )}
-
-      <Icon
-        className={`size-[18px] shrink-0 transition-colors duration-150 ${
-          isActive ? 'text-primary' : 'text-on-surface-variant group-hover:text-foreground'
-        }`}
-      />
-
-      <AnimatePresence mode="wait">
+    <ListItem disablePadding sx={{ display: 'block' }}>
+      <ListItemButton
+        onClick={onClick}
+        selected={isActive}
+        sx={{
+          minHeight: 40,
+          justifyContent: collapsed ? 'center' : 'initial',
+          px: collapsed ? 1.5 : 2,
+          borderRadius: 3,
+          mx: 0.5,
+          mb: 0.25,
+          '&.Mui-selected': {
+            bgcolor: 'primary.light',
+            color: 'primary.dark',
+            '&:hover': { bgcolor: 'primary.light' },
+            '& .MuiListItemIcon-root': { color: 'primary.main' },
+          },
+          '&.Mui-selected::before': isActive && !collapsed ? {
+            content: '""',
+            position: 'absolute',
+            left: -4,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 3,
+            height: 32,
+            borderRadius: '0 4px 4px 0',
+            bgcolor: 'primary.main',
+          } : {},
+          position: 'relative',
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: collapsed ? 0 : 36,
+            justifyContent: 'center',
+            color: isActive ? 'primary.main' : 'text.secondary',
+            '& .MuiSvgIcon-root': { fontSize: 18 },
+          }}
+        >
+          <Icon />
+        </ListItemIcon>
         {!collapsed && (
-          <motion.span
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.15 }}
-            className="truncate overflow-hidden whitespace-nowrap"
-          >
-            {label}
-          </motion.span>
+          <ListItemText
+            primary={label}
+            sx={{
+              opacity: 1,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              '& .MuiListItemText-primary': {
+                fontSize: '0.8125rem',
+                fontWeight: isActive ? 600 : 500,
+              },
+            }}
+          />
         )}
-      </AnimatePresence>
-    </button>
+      </ListItemButton>
+    </ListItem>
   )
 
   if (collapsed) {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent side="right" sideOffset={12}>
-          {label}
-        </TooltipContent>
+      <Tooltip title={label} placement="right" arrow>
+        {button}
       </Tooltip>
     )
   }
@@ -142,8 +185,9 @@ function NavItemButton({
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const { currentPage, setCurrentPage, currentFamily, families, setCurrentFamily } = useAppStore()
   const { user, logout } = useAuthStore()
-  const { plan } = useSubscriptionStore()
   const { t } = useI18n()
+  const [familyMenuAnchor, setFamilyMenuAnchor] = useState<HTMLElement | null>(null)
+  const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
 
   const handleNavClick = useCallback(
     (page: AppPage) => {
@@ -157,6 +201,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
     (familyId: string) => {
       const family = families.find((f) => f.id === familyId)
       if (family) setCurrentFamily(family)
+      setFamilyMenuAnchor(null)
     },
     [families, setCurrentFamily]
   )
@@ -175,194 +220,367 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
   }, [user])
 
   return (
-    <div className="flex h-full flex-col bg-sidebar">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        bgcolor: 'background.paper',
+        overflow: 'hidden',
+      }}
+    >
       {/* Logo & Family Selector */}
-      <div className={`flex flex-col gap-2 ${collapsed ? 'px-2' : 'px-4'} pt-5 pb-2`}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, px: collapsed ? 1.5 : 2, pt: 2.5, pb: 1.5 }}>
         {/* Logo */}
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} mb-2`}>
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <span className="text-sm font-bold">U+</span>
-          </div>
-          <AnimatePresence mode="wait">
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.15 }}
-                className="overflow-hidden"
-              >
-                <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight whitespace-nowrap">
-                  USRA PLUS
-                </h1>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <Box sx={{ display: 'flex', alignItems: collapsed ? 'center' : 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: 1.5, mb: 1 }}>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 3,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              flexShrink: 0,
+            }}
+          >
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1 }}>U+</Typography>
+          </Box>
+          {!collapsed && (
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                color: 'text.primary',
+                letterSpacing: '-0.02em',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                fontSize: '1rem',
+              }}
+            >
+              USRA PLUS
+            </Typography>
+          )}
+        </Box>
 
         {/* Family Selector */}
         {!collapsed && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-surface-variant">
-                <div className="flex size-6 items-center justify-center rounded-lg bg-primary-container">
-                  <Users className="size-3.5 text-on-primary-container" />
-                </div>
-                <span className="flex-1 truncate text-sidebar-foreground/70">
-                  {currentFamily?.name || t.nav.dashboard}
-                </span>
-                <ChevronsUpDown className="size-3.5 text-sidebar-foreground/30" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-56 rounded-xl shadow-[var(--elevation-2)]"
+          <>
+            <ButtonBase
+              onClick={(e) => setFamilyMenuAnchor(e.currentTarget)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                borderRadius: 2,
+                px: 1.5,
+                py: 0.75,
+                textAlign: 'left',
+                '&:hover': { bgcolor: 'action.hover' },
+                transition: 'background-color 0.15s',
+                width: '100%',
+              }}
             >
-              <DropdownMenuLabel className="text-muted-foreground text-xs">
+              <Box
+                sx={{
+                  width: 24,
+                  height: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 1.5,
+                  bgcolor: 'primary.light',
+                }}
+              >
+                <Group sx={{ fontSize: 12, color: 'primary.dark' }} />
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: 'text.secondary',
+                }}
+              >
+                {currentFamily?.name || t.nav.dashboard}
+              </Typography>
+              <UnfoldMore sx={{ fontSize: 12, color: 'text.disabled' }} />
+            </ButtonBase>
+
+            <Menu
+              anchorEl={familyMenuAnchor}
+              open={Boolean(familyMenuAnchor)}
+              onClose={() => setFamilyMenuAnchor(null)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    width: 224,
+                    mt: 0.5,
+                    borderRadius: 3,
+                    bgcolor: 'background.paper',
+                    backgroundImage: 'none',
+                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    overflow: 'hidden',
+                  },
+                },
+              }}
+            >
+              <Typography variant="caption" sx={{ px: 2, py: 0.75, display: 'block', color: 'text.disabled', fontWeight: 600 }}>
                 {t.settings.family}
-              </DropdownMenuLabel>
+              </Typography>
               {families.map((family) => (
-                <DropdownMenuItem
+                <MenuItem
                   key={family.id}
                   onClick={() => handleFamilySwitch(family.id)}
-                  className={`rounded-lg cursor-pointer ${currentFamily?.id === family.id ? 'bg-primary-container text-on-primary-container' : ''}`}
+                  selected={currentFamily?.id === family.id}
+                  sx={{
+                    borderRadius: 1.5,
+                    mx: 0.5,
+                    '&.Mui-selected': {
+                      bgcolor: 'primary.light',
+                      color: 'primary.dark',
+                      '&:hover': { bgcolor: 'primary.light' },
+                    },
+                  }}
                 >
-                  <Users className="size-4 mr-2" />
+                  <Group sx={{ fontSize: 16, mr: 1.5, color: 'inherit' }} />
                   {family.name}
-                </DropdownMenuItem>
+                </MenuItem>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Menu>
+          </>
         )}
-      </div>
+      </Box>
 
-      <Separator className="mx-3" />
+      <Divider sx={{ mx: 1.5 }} />
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 px-2 py-3">
-        <nav role="navigation" aria-label="Main navigation" data-tour="sidebar" className="flex flex-col gap-0.5">
-          {navItems.map((item) => (
-            <NavItemButton
-              key={item.page}
-              item={item}
-              isActive={currentPage === item.page}
-              collapsed={collapsed}
-              onClick={() => handleNavClick(item.page)}
-            />
-          ))}
+      <Box sx={{ flex: 1, overflowY: 'auto', py: 1.5, px: 0.5 }}>
+        <nav role="navigation" aria-label="Main navigation" data-tour="sidebar">
+          <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+            {navItems.map((item) => (
+              <NavItemButton
+                key={item.page}
+                item={item}
+                isActive={currentPage === item.page}
+                collapsed={collapsed}
+                onClick={() => handleNavClick(item.page)}
+              />
+            ))}
+          </List>
         </nav>
-      </ScrollArea>
+      </Box>
 
-      <Separator className="mx-3" />
+      <Divider sx={{ mx: 1.5 }} />
 
       {/* User Profile */}
-      <div className={`p-3 ${collapsed ? 'px-2' : ''}`}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              aria-label="User menu"
-              className={`
-                flex w-full items-center gap-3 rounded-xl px-2.5 py-2
-                transition-colors hover:bg-surface-variant
-                ${collapsed ? 'justify-center' : ''}
-              `}
-            >
-              <Avatar className="size-8 ring-2 ring-sidebar-border">
-                <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className="bg-primary-container text-on-primary-container text-xs font-semibold">
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
-              <AnimatePresence mode="wait">
-                {!collapsed && (
-                  <motion.div
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex-1 overflow-hidden text-left"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <p className="truncate text-sm font-medium text-sidebar-foreground">{displayName}</p>
-                      <PlanBadge />
-                    </div>
-                    <p className="truncate text-xs text-sidebar-foreground/40">{user?.email}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-56 rounded-xl shadow-[var(--elevation-2)]"
+      <Box sx={{ p: 1.5 }}>
+        <Box
+          onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            borderRadius: 3,
+            px: 1.5,
+            py: 1,
+            cursor: 'pointer',
+            '&:hover': { bgcolor: 'action.hover' },
+            transition: 'background-color 0.15s',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+          }}
+        >
+          <Avatar
+            src={user?.avatar_url || undefined}
+            alt={displayName}
+            sx={{
+              width: 32,
+              height: 32,
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              bgcolor: 'primary.light',
+              color: 'primary.dark',
+              border: '2px solid',
+              borderColor: 'divider',
+            }}
           >
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-foreground">{displayName}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleNavClick('settings')} className="rounded-lg cursor-pointer">
-              <Settings className="size-4 mr-2" />
-              {t.nav.settings}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={logout}
-              className="text-destructive focus:text-destructive focus:bg-destructive/10 rounded-lg cursor-pointer"
-            >
-              <LogOut className="size-4 mr-2" />
-              {t.auth.logout}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+            {userInitials}
+          </Avatar>
+          {!collapsed && (
+            <Box sx={{ flex: 1, overflow: 'hidden' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.8125rem',
+                  }}
+                >
+                  {displayName}
+                </Typography>
+                <PlanBadgeMUI />
+              </Box>
+              <Typography
+                variant="caption"
+                sx={{ color: 'text.disabled', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {user?.email}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        {/* User Menu */}
+        <Menu
+          anchorEl={userMenuAnchor}
+          open={Boolean(userMenuAnchor)}
+          onClose={() => setUserMenuAnchor(null)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          slotProps={{
+            paper: {
+              sx: {
+                width: 224,
+                mb: 1,
+                borderRadius: 3,
+                bgcolor: 'background.paper',
+                backgroundImage: 'none',
+                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+                border: '1px solid',
+                borderColor: 'divider',
+                overflow: 'hidden',
+              },
+            },
+          }}
+        >
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+              {displayName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {user?.email}
+            </Typography>
+          </Box>
+          <Divider />
+          <MenuItem
+            onClick={() => { handleNavClick('settings'); setUserMenuAnchor(null) }}
+            sx={{ borderRadius: 1.5, mx: 0.5, '&:hover': { bgcolor: 'action.hover' } }}
+          >
+            <Settings sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
+            {t.nav.settings}
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={() => { logout(); setUserMenuAnchor(null) }}
+            sx={{ borderRadius: 1.5, mx: 0.5, color: 'error.main', '&:hover': { bgcolor: 'error.light' } }}
+          >
+            <Logout sx={{ fontSize: 16, mr: 1.5 }} />
+            {t.auth.logout}
+          </MenuItem>
+        </Menu>
+      </Box>
+    </Box>
   )
 }
 
-export function AppSidebar() {
-  const { sidebarCollapsed, sidebarOpen, setSidebarCollapsed, setSidebarOpen, toggleSidebar } = useAppStore()
+function AppSidebarInner() {
+  const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar } = useAppStore()
   const { t } = useI18n()
+
+  const drawerWidth = sidebarCollapsed ? 72 : 256
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <motion.aside
-        className="hidden md:flex relative h-screen border-r border-sidebar-border bg-sidebar z-30"
-        animate={{ width: sidebarCollapsed ? 72 : 256 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      {/* Desktop Sidebar — FIXED position */}
+      <Box
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: drawerWidth,
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          zIndex: (theme) => theme.zIndex.drawer,
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          overflow: 'hidden',
+        }}
       >
         <SidebarContent collapsed={sidebarCollapsed} />
 
         {/* Collapse Toggle */}
-        <button
+        <IconButton
           onClick={toggleSidebar}
-          className="absolute -right-3 top-7 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-[var(--elevation-1)] transition-all hover:bg-primary-container hover:text-on-primary-container hover:border-primary/30"
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          sx={{
+            position: 'absolute',
+            right: -12,
+            top: 28,
+            width: 24,
+            height: 24,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: '0 1px 3px 0 rgba(0,0,0,0.08)',
+            zIndex: 1300,
+            '&:hover': {
+              bgcolor: 'primary.light',
+              color: 'primary.dark',
+              borderColor: 'primary.main',
+            },
+            transition: 'all 0.2s',
+          }}
         >
-          {sidebarCollapsed ? (
-            <ChevronRight className="size-3" />
-          ) : (
-            <ChevronLeft className="size-3" />
-          )}
-        </button>
-      </motion.aside>
+          {sidebarCollapsed ? <ChevronRight sx={{ fontSize: 12 }} /> : <ChevronLeft sx={{ fontSize: 12 }} />}
+        </IconButton>
+      </Box>
 
-      {/* Mobile Sidebar (Sheet) */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent
-          side="left"
-          className="w-72 border-r border-sidebar-border bg-sidebar p-0"
-        >
-          <SheetTitle className="sr-only">{t.app.name}</SheetTitle>
-          <SidebarContent
-            collapsed={false}
-            onNavigate={() => setSidebarOpen(false)}
-          />
-        </SheetContent>
-      </Sheet>
+      {/* Mobile Sidebar (Drawer) */}
+      <Drawer
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 288,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              borderRight: '1px solid',
+              borderColor: 'divider',
+            },
+          },
+        }}
+      >
+        <Box sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+          <Typography variant="caption" sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>{t.app?.name || 'USRA PLUS'}</Typography>
+        </Box>
+        <SidebarContent
+          collapsed={false}
+          onNavigate={() => setSidebarOpen(false)}
+        />
+      </Drawer>
     </>
+  )
+}
+
+export function AppSidebar() {
+  return (
+    <MuiLayoutProvider>
+      <AppSidebarInner />
+    </MuiLayoutProvider>
   )
 }

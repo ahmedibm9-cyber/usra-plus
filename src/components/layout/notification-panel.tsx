@@ -1,32 +1,39 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Bell,
-  CheckSquare,
-  CalendarDays,
-  ShoppingCart,
-  MessageSquare,
-  Users,
-  AlertCircle,
-  Check,
-  Trash2,
-  Wifi,
-  WifiOff,
-  Volume2,
-  VolumeX,
-} from 'lucide-react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+import { useState, useEffect, useCallback, useRef, type ElementType } from 'react'
 import {
   Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+  IconButton,
+  Badge,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Button,
+  Divider,
+  Box,
+  Chip,
+  Paper,
+  Tooltip,
+} from '@mui/material'
+import {
+  Notifications as BellIcon,
+  CheckBox,
+  CalendarMonth,
+  ShoppingCart,
+  Chat,
+  Group,
+  Error as ErrorIcon,
+  Check,
+  Delete,
+  Wifi,
+  WifiOff,
+  VolumeUp,
+  VolumeOff,
+} from '@mui/icons-material'
+import { toast } from 'sonner'
 import { useNotificationStore } from '@/stores/notification-store'
 import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -34,25 +41,26 @@ import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
 import { playNotificationSound, initAudioContext } from '@/lib/notification-sound'
 import { createClient } from '@/lib/supabase/client'
+import { MuiLayoutProvider } from './mui-layout-provider'
 import type { Notification } from '@/types'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
-const typeIcons: Record<Notification['type'], React.ElementType> = {
-  task: CheckSquare,
-  calendar: CalendarDays,
+const typeIcons: Record<Notification['type'], ElementType> = {
+  task: CheckBox,
+  calendar: CalendarMonth,
   grocery: ShoppingCart,
-  chat: MessageSquare,
-  family: Users,
-  system: AlertCircle,
+  chat: Chat,
+  family: Group,
+  system: ErrorIcon,
 }
 
 const typeColors: Record<Notification['type'], string> = {
-  task: 'text-[#22C55E] bg-[#22C55E]/10',
-  calendar: 'text-[#E50914] bg-[#E50914]/10',
-  grocery: 'text-amber-400 bg-amber-500/10',
-  chat: 'text-[#E50914] bg-[#E50914]/10',
-  family: 'text-pink-400 bg-pink-500/10',
-  system: 'text-[--text-muted] bg-gray-500/10',
+  task: '#22C55E',
+  calendar: '#0D6B58',
+  grocery: '#0D6B58',
+  chat: '#0D6B58',
+  family: '#EC4899',
+  system: '#79747E',
 }
 
 function formatTimeAgo(dateStr: string, isRTL: boolean): string {
@@ -70,7 +78,6 @@ function formatTimeAgo(dateStr: string, isRTL: boolean): string {
   return new Date(dateStr).toLocaleDateString()
 }
 
-/** Categorize notifications into Today / Yesterday / Earlier */
 function categorizeNotifications(notifications: Notification[]) {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -96,7 +103,6 @@ function categorizeNotifications(notifications: Notification[]) {
   return { today: todayNotifs, yesterday: yesterdayNotifs, earlier: earlierNotifs }
 }
 
-/** Single notification item component */
 function NotificationItem({
   notification,
   onMarkRead,
@@ -109,78 +115,106 @@ function NotificationItem({
   isRTL: boolean
 }) {
   const Icon = typeIcons[notification.type]
-  const colorClass = typeColors[notification.type]
+  const iconColor = typeColors[notification.type]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.2 }}
-      layout
+    <ListItem
+      disablePadding
+      secondaryAction={
+        <Tooltip title="Delete">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(notification.id)
+            }}
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.15s',
+              '.MuiListItem-root:hover &': { opacity: 1 },
+              color: 'text.secondary',
+              '&:hover': { color: 'error.main', bgcolor: 'error.light' },
+            }}
+          >
+            <Delete sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Tooltip>
+      }
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        cursor: 'pointer',
+        bgcolor: notification.read ? 'transparent' : 'action.hover',
+        '&:hover': { bgcolor: 'action.hover' },
+        transition: 'background-color 0.15s',
+      }}
+      onClick={() => onMarkRead(notification.id)}
     >
-      <div
-        className={`
-          group flex gap-3 px-4 py-3 transition-colors cursor-pointer
-          hover:bg-[--border-subtle]
-          ${!notification.read ? 'bg-[--border-subtle]' : ''}
-        `}
-        onClick={() => onMarkRead(notification.id)}
+      {/* Icon */}
+      <Box
+        sx={{
+          width: 32,
+          height: 32,
+          borderRadius: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          bgcolor: `${iconColor}14`,
+          color: iconColor,
+        }}
       >
-        {/* Icon */}
-        <div
-          className={`shrink-0 flex size-8 items-center justify-center rounded-lg ${colorClass}`}
-        >
-          <Icon className="size-4" />
-        </div>
+        <Icon sx={{ fontSize: 16 }} />
+      </Box>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <p
-              className={`text-sm leading-tight ${
-                !notification.read
-                  ? 'font-semibold text-[--text-primary]'
-                  : 'font-medium text-[--text-secondary]'
-              }`}
+      {/* Content */}
+      <ListItemText
+        primary={
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: notification.read ? 500 : 600,
+                color: notification.read ? 'text.secondary' : 'text.primary',
+                lineHeight: 1.3,
+                flex: 1,
+              }}
             >
               {notification.title}
-            </p>
+            </Typography>
             {!notification.read && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="shrink-0 size-2 rounded-full bg-[#E50914] mt-1.5"
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: 'primary.main',
+                  mt: 0.5,
+                  flexShrink: 0,
+                }}
               />
             )}
-          </div>
-          <p className="text-xs text-[--text-muted] mt-0.5 line-clamp-2">
-            {notification.message}
-          </p>
-          <p className="text-[10px] text-[--text-muted] mt-1">
-            {formatTimeAgo(notification.created_at, isRTL)}
-          </p>
-        </div>
-
-        {/* Delete */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 size-6 text-[--text-muted] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove(notification.id)
-          }}
-        >
-          <Trash2 className="size-3" />
-        </Button>
-      </div>
-      <Separator className="bg-[--border-subtle] last:hidden" />
-    </motion.div>
+          </Box>
+        }
+        secondary={
+          <>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4, mt: 0.25 }} component="span">
+              {notification.message}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mt: 0.5, fontSize: '0.625rem' }} component="span">
+              {formatTimeAgo(notification.created_at, isRTL)}
+            </Typography>
+          </>
+        }
+        sx={{ m: 0 }}
+      />
+    </ListItem>
   )
 }
 
-/** Notification section (Today / Yesterday / Earlier) */
 function NotificationSection({
   title,
   count,
@@ -199,19 +233,14 @@ function NotificationSection({
   if (notifications.length === 0) return null
 
   return (
-    <div>
-      <div className="flex items-center justify-between px-4 py-2">
-        <span className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1 }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.6875rem' }}>
           {title}
-        </span>
-        <Badge
-          variant="secondary"
-          className="text-[10px] bg-[--bg-surface-2] text-[--text-muted] border-0 h-5 px-1.5"
-        >
-          {count}
-        </Badge>
-      </div>
-      <AnimatePresence initial={false}>
+        </Typography>
+        <Chip label={count} size="small" sx={{ height: 20, fontSize: '0.625rem', bgcolor: 'action.hover', color: 'text.secondary' }} />
+      </Box>
+      <List disablePadding>
         {notifications.map((notification) => (
           <NotificationItem
             key={notification.id}
@@ -221,15 +250,14 @@ function NotificationSection({
             isRTL={isRTL}
           />
         ))}
-      </AnimatePresence>
-    </div>
+      </List>
+    </Box>
   )
 }
 
-// Deduplication set for Realtime events
 const seenNotifIds = new Set<string>()
 
-export function NotificationPanel() {
+function NotificationPanelInner() {
   const notifications = useNotificationStore((s) => s.notifications)
   const unreadCount = useNotificationStore((s) => s.unreadCount)
   const addNotification = useNotificationStore((s) => s.addNotification)
@@ -243,28 +271,25 @@ export function NotificationPanel() {
   const { t, isRTL } = useI18n()
 
   const [isConnected, setIsConnected] = useState(false)
-  const [panelOpen, setPanelOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [newNotifArrived, setNewNotifArrived] = useState(false)
   const channelRef = useRef<RealtimeChannel | null>(null)
 
-  // Use refs for values accessed inside realtime handlers to avoid stale closures
   const isRTLRef = useRef(isRTL)
   const soundEnabledRef = useRef(soundEnabled)
-  const panelOpenRef = useRef(panelOpen)
+  const panelOpenRef = useRef(!!anchorEl)
   const userIdRef = useRef(user?.id)
   const familyIdRef = useRef(currentFamily?.id)
   const mountedRef = useRef(true)
 
-  // Keep refs in sync with latest props/state
   useEffect(() => {
     isRTLRef.current = isRTL
     soundEnabledRef.current = soundEnabled
-    panelOpenRef.current = panelOpen
+    panelOpenRef.current = !!anchorEl
     userIdRef.current = user?.id
     familyIdRef.current = currentFamily?.id
   })
 
-  // Connect to Supabase Realtime for notifications
   useEffect(() => {
     mountedRef.current = true
     const bellTimerIds: ReturnType<typeof setTimeout>[] = []
@@ -273,7 +298,6 @@ export function NotificationPanel() {
     const userId = user?.id
 
     if (!familyId || !userId) {
-      // Use queueMicrotask to avoid synchronous setState in effect body
       queueMicrotask(() => {
         if (mountedRef.current) setIsConnected(false)
       })
@@ -282,7 +306,6 @@ export function NotificationPanel() {
 
     const supabase = createClient()
 
-    // Subscribe to family-specific notification channel
     const channel = supabase.channel(`notifications-${familyId}`, {
       config: {
         broadcast: { self: true },
@@ -290,7 +313,6 @@ export function NotificationPanel() {
       },
     })
 
-    // Listen for new notifications broadcast by other family members or server
     channel.on('broadcast', { event: 'new-notification' }, (payload) => {
       if (!mountedRef.current) return
 
@@ -304,10 +326,8 @@ export function NotificationPanel() {
         created_at: string
       }
 
-      // Deduplicate by notification ID
       if (seenNotifIds.has(data.id)) return
       seenNotifIds.add(data.id)
-      // Clean up dedup set after 5 minutes
       setTimeout(() => seenNotifIds.delete(data.id), 5 * 60 * 1000)
 
       const useRTL = isRTLRef.current
@@ -327,19 +347,16 @@ export function NotificationPanel() {
 
       addNotification(newNotif)
 
-      // Trigger bell shake animation
       setNewNotifArrived(true)
       const timerId = setTimeout(() => {
         if (mountedRef.current) setNewNotifArrived(false)
       }, 600)
       bellTimerIds.push(timerId)
 
-      // Play sound if enabled
       if (soundEnabledRef.current) {
         playNotificationSound('default', 0.5)
       }
 
-      // Show toast when panel is closed
       if (!panelOpenRef.current) {
         toast(useRTL ? 'إشعار جديد' : t.notifications.newNotification, {
           description: newNotif.title,
@@ -348,12 +365,10 @@ export function NotificationPanel() {
       }
     })
 
-    // Subscribe and track presence
     channel.subscribe((status) => {
       if (!mountedRef.current) return
       if (status === 'SUBSCRIBED') {
         setIsConnected(true)
-        // Track presence with user info
         channel.track({ userId, familyId, onlineAt: new Date().toISOString() })
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         setIsConnected(false)
@@ -372,189 +387,224 @@ export function NotificationPanel() {
     }
   }, [currentFamily?.id, user?.id, addNotification, t.notifications.newNotification])
 
-  // Mark as read — update via Supabase (client-side store handles UI)
   const handleMarkAsRead = useCallback((id: string) => {
     markAsRead(id)
-    // Server-side mark as read is handled by the notification store or API
   }, [markAsRead])
 
-  // Mark all as read
   const handleMarkAllAsRead = useCallback(() => {
     markAllAsRead()
   }, [markAllAsRead])
 
-  // Toggle sound
   const toggleSound = useCallback(() => {
     setPreference('soundEnabled', !soundEnabled)
     if (!soundEnabled) {
-      // Init audio context on user gesture
       initAudioContext()
     }
   }, [soundEnabled, setPreference])
 
-  // Categorize notifications
   const { today, yesterday, earlier } = categorizeNotifications(notifications)
 
+  const panelOpen = Boolean(anchorEl)
+
   return (
-    <Popover open={panelOpen} onOpenChange={setPanelOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 relative text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
+    <>
+      <Tooltip title={t.notifications.notifications}>
+        <IconButton
+          onClick={(e) => {
+            setAnchorEl(e.currentTarget)
+            initAudioContext()
+          }}
+          sx={{
+            position: 'relative',
+            color: 'text.secondary',
+            '&:hover': { color: 'text.primary', bgcolor: 'action.hover' },
+            animation: newNotifArrived ? 'shake 0.5s ease-in-out' : 'none',
+            '@keyframes shake': {
+              '0%, 100%': { transform: 'rotate(0deg)' },
+              '15%': { transform: 'rotate(-15deg)' },
+              '30%': { transform: 'rotate(15deg)' },
+              '45%': { transform: 'rotate(-10deg)' },
+              '60%': { transform: 'rotate(10deg)' },
+            },
+          }}
           aria-label={`Notifications, ${unreadCount} unread`}
-          onClick={() => initAudioContext()}
         >
-          <motion.div
-            animate={newNotifArrived ? {
-              rotate: [0, -15, 15, -10, 10, 0],
-              transition: { duration: 0.5 }
-            } : {}}
+          <Badge
+            badgeContent={unreadCount > 9 ? '9+' : unreadCount}
+            color="primary"
+            sx={{
+              '& .MuiBadge-badge': {
+                fontSize: '0.5625rem',
+                fontWeight: 700,
+                minWidth: 16,
+                height: 16,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+              },
+            }}
           >
-            <Bell className="size-5" />
-          </motion.div>
-          <AnimatePresence>
-            {unreadCount > 0 && (
-              <motion.div
-                key="notification-badge"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              >
-                <Badge
-                  className="absolute -top-0.5 -right-0.5 min-w-4 size-4 p-0 flex items-center justify-center bg-[#E50914] text-white text-[9px] font-bold border-0 rounded-full"
-                >
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </Badge>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {/* Pulse glow for new notifications */}
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 size-4 rounded-full bg-[#E50914]/30 animate-ping" />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        className="w-80 sm:w-96 p-0 bg-[--bg-surface] border-[--border-subtle] rounded-2xl shadow-2xl shadow-black/50"
+            <BellIcon sx={{ fontSize: 20 }} />
+          </Badge>
+        </IconButton>
+      </Tooltip>
+
+      <Popover
+        open={panelOpen}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: { xs: 320, sm: 384 },
+              mt: 1,
+              borderRadius: 3,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+              border: '1px solid',
+              borderColor: 'divider',
+              overflow: 'hidden',
+            },
+          },
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-[--text-primary]">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
               {t.notifications.notifications}
-            </h3>
+            </Typography>
             {/* Live / Offline Indicator */}
-            <motion.div
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider"
-              style={{
-                backgroundColor: isConnected ? 'rgba(34,197,94,0.1)' : 'rgba(107,114,128,0.1)',
-                color: isConnected ? '#22c55e' : '#6b7280',
+            <Chip
+              icon={isConnected ? <Wifi sx={{ fontSize: 10 }} /> : <WifiOff sx={{ fontSize: 10 }} />}
+              label={isConnected ? t.notifications.live : t.notifications.offline}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.5625rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+                bgcolor: isConnected ? 'success.light' : 'action.hover',
+                color: isConnected ? 'success.dark' : 'text.secondary',
+                '& .MuiChip-icon': { color: 'inherit', fontSize: 10 },
+                animation: isConnected ? 'pulse 2s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.7 },
+                },
               }}
-              animate={{ opacity: [1, 0.7, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              {isConnected ? (
-                <Wifi className="size-2.5" />
-              ) : (
-                <WifiOff className="size-2.5" />
-              )}
-              {isConnected ? t.notifications.live : t.notifications.offline}
-            </motion.div>
-          </div>
-          <div className="flex items-center gap-1">
+            />
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             {/* Sound Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
-              onClick={toggleSound}
-              aria-label={t.notifications.soundEnabled}
-            >
-              {soundEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
-            </Button>
+            <Tooltip title={t.notifications.soundEnabled}>
+              <IconButton size="small" onClick={toggleSound} sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}>
+                {soundEnabled ? <VolumeUp sx={{ fontSize: 14 }} /> : <VolumeOff sx={{ fontSize: 14 }} />}
+              </IconButton>
+            </Tooltip>
             {/* Mark All Read */}
             {unreadCount > 0 && (
               <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-[#E50914] hover:text-[#C40812] hover:bg-[#E50914]/10 h-7 px-2"
+                size="small"
                 onClick={handleMarkAllAsRead}
+                startIcon={<Check sx={{ fontSize: 12 }} />}
+                sx={{
+                  fontSize: '0.6875rem',
+                  color: 'primary.main',
+                  '&:hover': { color: 'primary.dark', bgcolor: 'primary.light' },
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  minWidth: 0,
+                  px: 1,
+                }}
               >
-                <Check className="size-3 mr-1" />
                 {t.notifications.markAllRead}
               </Button>
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {/* Realtime status bar */}
         {isConnected && (
-          <div className="px-4 pb-2">
-            <p className="text-[10px] text-[#22C55E]/70 flex items-center gap-1">
-              <span className="inline-block size-1.5 rounded-full bg-[#22C55E] animate-pulse" />
+          <Box sx={{ px: 2, pb: 1 }}>
+            <Typography variant="caption" sx={{ color: 'success.main', opacity: 0.7, display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.625rem' }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'success.main', animation: 'pulse 2s ease-in-out infinite', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.4 } } }} />
               {t.notifications.realtimeConnected}
-            </p>
-          </div>
+            </Typography>
+          </Box>
         )}
 
-        <Separator className="bg-[--border-subtle]" />
+        <Divider />
 
-        {/* Notification List - Categorized */}
+        {/* Notification List */}
         {notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4">
-            <Bell className="size-8 text-[--text-muted] mb-2" />
-            <p className="text-sm text-[--text-muted]">{t.notifications.noNotifications}</p>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 6, px: 2 }}>
+            <BellIcon sx={{ fontSize: 32, color: 'text.disabled', mb: 1 }} />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {t.notifications.noNotifications}
+            </Typography>
+          </Box>
         ) : (
-          <ScrollArea className="max-h-[28rem]">
-            <div className="flex flex-col">
-              <NotificationSection
-                title={t.notifications.today}
-                count={today.length}
-                notifications={today}
-                onMarkRead={handleMarkAsRead}
-                onRemove={removeNotification}
-                isRTL={isRTL}
-              />
-              <NotificationSection
-                title={t.notifications.yesterday}
-                count={yesterday.length}
-                notifications={yesterday}
-                onMarkRead={handleMarkAsRead}
-                onRemove={removeNotification}
-                isRTL={isRTL}
-              />
-              <NotificationSection
-                title={t.notifications.earlier}
-                count={earlier.length}
-                notifications={earlier}
-                onMarkRead={handleMarkAsRead}
-                onRemove={removeNotification}
-                isRTL={isRTL}
-              />
-            </div>
-          </ScrollArea>
+          <Box sx={{ maxHeight: '28rem', overflowY: 'auto' }}>
+            <NotificationSection
+              title={t.notifications.today}
+              count={today.length}
+              notifications={today}
+              onMarkRead={handleMarkAsRead}
+              onRemove={removeNotification}
+              isRTL={isRTL}
+            />
+            <NotificationSection
+              title={t.notifications.yesterday}
+              count={yesterday.length}
+              notifications={yesterday}
+              onMarkRead={handleMarkAsRead}
+              onRemove={removeNotification}
+              isRTL={isRTL}
+            />
+            <NotificationSection
+              title={t.notifications.earlier}
+              count={earlier.length}
+              notifications={earlier}
+              onMarkRead={handleMarkAsRead}
+              onRemove={removeNotification}
+              isRTL={isRTL}
+            />
+          </Box>
         )}
 
         {/* Footer */}
         {notifications.length > 0 && (
           <>
-            <Separator className="bg-[--border-subtle]" />
-            <div className="px-4 py-2">
+            <Divider />
+            <Box sx={{ px: 2, py: 1 }}>
               <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-xs text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]"
+                fullWidth
+                size="small"
+                sx={{
+                  fontSize: '0.6875rem',
+                  color: 'text.secondary',
+                  '&:hover': { color: 'text.primary', bgcolor: 'action.hover' },
+                  textTransform: 'none',
+                }}
               >
                 {isRTL ? 'عرض جميع الإشعارات' : 'View all notifications'}
               </Button>
-            </div>
+            </Box>
           </>
         )}
-      </PopoverContent>
-    </Popover>
+      </Popover>
+    </>
+  )
+}
+
+export function NotificationPanel() {
+  return (
+    <MuiLayoutProvider>
+      <NotificationPanelInner />
+    </MuiLayoutProvider>
   )
 }

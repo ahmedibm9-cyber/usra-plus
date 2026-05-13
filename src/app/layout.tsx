@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, IBM_Plex_Sans_Arabic, JetBrains_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
+import MuiThemeWrapper from "@/components/providers/mui-theme-wrapper";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -30,7 +29,6 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-
 
 export const metadata: Metadata = {
   title: "USRA PLUS — Your Family Operating System",
@@ -66,6 +64,7 @@ export default function RootLayout({
     <html lang="en" dir="ltr" className="light" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/logo.svg" />
+        {/* Theme flash prevention — apply class before paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('usra-theme');if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light')}else{document.documentElement.classList.add('light');document.documentElement.classList.remove('dark')}}catch(e){document.documentElement.classList.add('light')}})()`,
@@ -78,19 +77,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexSansArabic.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground`} suppressHydrationWarning>
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-primary)",
-            },
-          }}
-        />
-        <Analytics />
+      <body
+        className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexSansArabic.variable} ${jetbrainsMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
+        <MuiThemeWrapper>{children}</MuiThemeWrapper>
       </body>
     </html>
   );

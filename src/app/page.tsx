@@ -10,6 +10,17 @@ import { useI18n } from '@/i18n/use-translation'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
 import { initErrorCapture } from '@/lib/error-capture'
 
+// MUI Components
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
+import LinearProgress from '@mui/material/LinearProgress'
+import Paper from '@mui/material/Paper'
+import Chip from '@mui/material/Chip'
+import { keyframes } from '@mui/system'
+
 // Layout Components
 const AppSidebar = dynamic(() => import('@/components/layout/app-sidebar').then(m => ({ default: m.AppSidebar })), { ssr: false })
 const AppHeader = dynamic(() => import('@/components/layout/app-header').then(m => ({ default: m.AppHeader })), { ssr: false })
@@ -44,6 +55,47 @@ const AdminLayout = dynamic(() => import('@/components/admin/admin-layout').then
 
 import type { AppPage } from '@/types'
 
+// ─── Keyframe Animations ──────────────────────────────────────────
+const logoReveal = keyframes`
+  0% { opacity: 0; transform: scale(0.8) rotate(-10deg); }
+  50% { transform: scale(1.05) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+`
+
+const textReveal = keyframes`
+  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+`
+
+const floatAnim = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+`
+
+const progressLine = keyframes`
+  0% { width: 0%; }
+  50% { width: 65%; }
+  90% { width: 90%; }
+  100% { width: 100%; }
+`
+
+// ─── Hexagon Logo SVG ─────────────────────────────────────────────
+function HexLogo({ size = 40, color }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size * 1.1} viewBox="0 0 40 44" fill="none">
+      <path
+        d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z"
+        fill="currentColor"
+        fillOpacity={0.15}
+        stroke="currentColor"
+        strokeWidth={1.5}
+      />
+      <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" fillOpacity={0.5} />
+      <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" />
+    </svg>
+  )
+}
+
 // ─── Safe Supabase client creation ────────────────────────────────
 function safeCreateClient() {
   try {
@@ -54,19 +106,24 @@ function safeCreateClient() {
   }
 }
 
-// ─── Chunk loader — Material Design 3 ──────────────────────────
+// ─── Chunk loader — MUI CircularProgress ──────────────────────────
 function ChunkLoader() {
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-5">
-        <div className="relative">
-          <div className="size-10 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
-        </div>
-        <div className="h-1 w-24 rounded-full bg-muted overflow-hidden">
-          <div className="h-full rounded-full bg-primary animate-progress-line" />
-        </div>
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <Stack direction="column" spacing={2.5} sx={{ alignItems: 'center' }}>
+        <CircularProgress size={40} thickness={3} />
+        <Box sx={{ width: 96, height: 2, borderRadius: 1, bgcolor: 'action.hover', overflow: 'hidden' }}>
+          <Box
+            sx={{
+              height: '100%',
+              borderRadius: 1,
+              bgcolor: 'primary.main',
+              animation: `${progressLine} 2s ease-out forwards`,
+            }}
+          />
+        </Box>
+      </Stack>
+    </Box>
   )
 }
 
@@ -89,130 +146,210 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback
       return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
-          <div className="max-w-sm w-full text-center">
-            <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-primary/10">
-              <svg width="32" height="35" viewBox="0 0 40 44" fill="none">
-                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
-                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2 font-display">
+        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+          <Box sx={{ maxWidth: 384, width: '100%', textAlign: 'center' }}>
+            <Box sx={{ mx: 'auto', mb: 2.5, width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 3, bgcolor: 'primary.main', opacity: 0.1 }}>
+              <Box sx={{ color: 'primary.main' }}>
+                <HexLogo size={32} />
+              </Box>
+            </Box>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
               Something went wrong
-            </h2>
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
               A rendering error occurred. Please try refreshing the page.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="inline-flex items-center justify-center rounded-2xl btn-material px-6 py-2.5 text-sm font-semibold transition-all duration-200"
-            >
+            </Typography>
+            <Button variant="contained" onClick={() => window.location.reload()} sx={{ borderRadius: 3, px: 3, py: 1 }}>
               Refresh Page
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Box>
+        </Box>
       )
     }
     return this.props.children
   }
 }
 
-// ─── Auth Screen — Material Design 3 ────────────────────────────
+// ─── Auth Screen — MUI ────────────────────────────────────────────
 function AuthScreen() {
   const { authView } = useAuthStore()
 
+  const features = ['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat']
+
   return (
-    <div className="min-h-screen bg-background flex relative overflow-hidden">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', position: 'relative', overflow: 'hidden' }}>
       {/* LEFT: Decorative panel (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] relative overflow-hidden bg-gradient-to-br from-[#0D6B58] via-[#065F46] to-[#1C1B1F]">
+      <Box
+        sx={{
+          display: { xs: 'none', lg: 'flex' },
+          width: { lg: '45%', xl: '50%' },
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #0D6B58, #065F46, #1C1B1F)',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          px: 5,
+        }}
+      >
         {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236EE7B7' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            opacity: 0.04,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236EE7B7' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
 
         {/* Floating blobs */}
-        <div className="absolute top-[15%] right-[10%] w-72 h-72 rounded-full bg-[#6EE7B7]/6 blur-[80px] animate-float" />
-        <div className="absolute bottom-[10%] left-[5%] w-56 h-56 rounded-full bg-[#FBBF24]/5 blur-[60px] animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[50%] left-[40%] w-40 h-40 rounded-full bg-[#C7BFFF]/4 blur-[50px] animate-float" style={{ animationDelay: '4s' }} />
+        <Box sx={{ position: 'absolute', top: '15%', right: '10%', width: 288, height: 288, borderRadius: '50%', bgcolor: '#6EE7B7', opacity: 0.06, filter: 'blur(80px)', animation: `${floatAnim} 4s ease-in-out infinite` }} />
+        <Box sx={{ position: 'absolute', bottom: '10%', left: '5%', width: 224, height: 224, borderRadius: '50%', bgcolor: '#FBBF24', opacity: 0.05, filter: 'blur(60px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '2s' }} />
+        <Box sx={{ position: 'absolute', top: '50%', left: '40%', width: 160, height: 160, borderRadius: '50%', bgcolor: '#C7BFFF', opacity: 0.04, filter: 'blur(50px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '4s' }} />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center px-12 w-full">
+        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', px: 5, width: '100%' }}>
           {/* Logo */}
-          <div className="mb-8 animate-logo-reveal">
-            <div className="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-              <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
-                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="#6EE7B7" fillOpacity="0.2" stroke="#6EE7B7" strokeWidth="1.5" />
-                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="#6EE7B7" fillOpacity="0.5" />
-                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="#6EE7B7" />
-              </svg>
-            </div>
-          </div>
+          <Box sx={{ mb: 3, animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` }}>
+            <Box sx={{ width: 80, height: 80, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box sx={{ color: '#6EE7B7' }}>
+                <HexLogo size={48} />
+              </Box>
+            </Box>
+          </Box>
 
           {/* Tagline */}
-          <h1 className="text-4xl font-bold text-white tracking-tight font-display mb-3 animate-text-reveal" style={{ animationDelay: '0.2s' }}>
+          <Typography
+            variant="h3"
+            sx={{
+              color: '#FFFFFF',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              animation: `${textReveal} 0.5s ease-out forwards`,
+              animationDelay: '0.2s',
+              opacity: 0,
+            }}
+          >
             USRA PLUS
-          </h1>
-          <p className="text-lg text-white/50 font-light text-center max-w-xs animate-text-reveal" style={{ animationDelay: '0.4s' }}>
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'rgba(255,255,255,0.5)',
+              fontWeight: 300,
+              textAlign: 'center',
+              maxWidth: 320,
+              mt: 1.5,
+              animation: `${textReveal} 0.5s ease-out forwards`,
+              animationDelay: '0.4s',
+              opacity: 0,
+            }}
+          >
             Your Family Operating System
-          </p>
+          </Typography>
 
           {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-2 mt-10 animate-text-reveal" style={{ animationDelay: '0.6s' }}>
-            {['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat'].map((feature, i) => (
-              <span key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-white/8 text-white/40 border border-white/10">
-                {feature}
-              </span>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              mt: 4,
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              animation: `${textReveal} 0.5s ease-out forwards`,
+              animationDelay: '0.6s',
+              opacity: 0,
+            }}
+          >
+            {features.map((feature) => (
+              <Chip
+                key={feature}
+                label={feature}
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.08)',
+                  color: 'rgba(255,255,255,0.4)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' },
+                }}
+              />
             ))}
-          </div>
-        </div>
-      </div>
+          </Stack>
+        </Box>
+      </Box>
 
       {/* RIGHT: Auth form */}
-      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 relative">
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 2, lg: 4 }, position: 'relative' }}>
         {/* Subtle background pattern for mobile */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/3 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-accent/3 blur-[100px] pointer-events-none" />
+        <Box sx={{ position: 'absolute', top: 0, right: 0, width: 500, height: 500, borderRadius: '50%', bgcolor: 'primary.main', opacity: 0.03, filter: 'blur(100px)', pointerEvents: 'none' }} />
+        <Box sx={{ position: 'absolute', bottom: 0, left: 0, width: 400, height: 400, borderRadius: '50%', bgcolor: 'secondary.main', opacity: 0.03, filter: 'blur(100px)', pointerEvents: 'none' }} />
 
-        <div className="relative z-10 w-full max-w-md">
+        <Box sx={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 448 }}>
           {authView === 'login' && <LoginForm />}
           {authView === 'signup' && <SignupForm />}
           {authView === 'forgot-password' && <ForgotPasswordForm />}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
-// ─── Loading Screen — Material Design 3 ──────────────────────────
+// ─── Loading Screen — MUI ─────────────────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ textAlign: 'center' }}>
         {/* Animated logo */}
-        <div className="inline-flex items-center justify-center w-16 h-16 mb-6 animate-logo-reveal">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
-                <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
-                <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 64,
+            height: 64,
+            mb: 3,
+            animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
+          }}
+        >
+          <Box sx={{ width: 64, height: 64, borderRadius: 3, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{ color: 'primary.main' }}>
+              <HexLogo size={40} />
+            </Box>
+          </Box>
+        </Box>
 
-        {/* Brand name with reveal animation */}
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display animate-text-reveal" style={{ animationDelay: '0.3s' }}>
+        {/* Brand name */}
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            animation: `${textReveal} 0.5s ease-out forwards`,
+            animationDelay: '0.3s',
+            opacity: 0,
+          }}
+        >
           USRA PLUS
-        </h1>
+        </Typography>
 
         {/* Progress indicator */}
-        <div className="mt-5 mx-auto w-32 h-[2px] rounded-full bg-muted overflow-hidden">
-          <div className="h-full rounded-full bg-primary animate-progress-line" />
-        </div>
-      </div>
-    </div>
+        <Box sx={{ mt: 3, mx: 'auto', width: 128 }}>
+          <LinearProgress
+            sx={{
+              height: 2,
+              borderRadius: 1,
+              bgcolor: 'action.hover',
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 1,
+              },
+            }}
+          />
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
@@ -221,7 +358,7 @@ const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'milestones', '
 const SWIPE_MIN_DISTANCE = 80
 const SWIPE_MIN_VELOCITY = 0.3
 
-// ─── Main App Layout ──────────────────────────────────────────────
+// ─── Main App Layout — MUI ────────────────────────────────────────
 function MainApp() {
   const { currentPage, currentFamily, showOnboarding, setCurrentPage, demoDataReady } = useAppStore()
   const { user, setUser } = useAuthStore()
@@ -374,53 +511,139 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground" tabIndex={0}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex' }}>
+      {/* Skip to content (accessibility) */}
+      <a
+        href="#main-content"
+        tabIndex={0}
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 0,
+          zIndex: 9999,
+          padding: '0.75rem 1.5rem',
+          background: 'var(--primary)',
+          color: '#fff',
+          fontWeight: 600,
+          fontSize: '0.875rem',
+          textDecoration: 'none',
+          borderRadius: '0 0 0.5rem 0',
+        }}
+        onFocus={(e) => { e.currentTarget.style.left = '0' }}
+        onBlur={(e) => { e.currentTarget.style.left = '-9999px' }}
+      >
         Skip to main content
       </a>
+
       {/* Demo data loading overlay */}
       {!demoDataReady && (
-        <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-logo-reveal inline-block mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <svg viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                  <path d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z" fill="currentColor" className="text-primary" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M20 8L30.3923 14V26L20 32L9.6077 26V14L20 8Z" fill="currentColor" className="text-primary" fillOpacity="0.5" />
-                  <path d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z" fill="currentColor" className="text-primary" />
-                </svg>
-              </div>
-            </div>
-            <h1 className="text-xl font-bold text-foreground tracking-tight font-display">
+        <Box sx={{ position: 'fixed', inset: 0, zIndex: 9999, bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'inline-block', mb: 2, animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` }}>
+              <Box sx={{ width: 48, height: 48, borderRadius: 3, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ color: 'primary.main' }}>
+                  <HexLogo size={32} />
+                </Box>
+              </Box>
+            </Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
               USRA PLUS
-            </h1>
-            <p className="text-sm text-muted-foreground mt-2">Loading demo data…</p>
-            <div className="mt-4 mx-auto w-24 h-[2px] rounded-full bg-muted overflow-hidden">
-              <div className="h-full rounded-full bg-primary animate-progress-line" />
-            </div>
-          </div>
-        </div>
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Loading demo data…
+            </Typography>
+            <Box sx={{ mt: 2, mx: 'auto', width: 96 }}>
+              <LinearProgress
+                sx={{
+                  height: 2,
+                  borderRadius: 1,
+                  bgcolor: 'action.hover',
+                  '& .MuiLinearProgress-bar': { borderRadius: 1 },
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
       )}
-      <div className="hidden md:block"><AppSidebar /></div>
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+
+      {/* Sidebar — FIXED position so it does NOT scroll with content */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          height: '100vh',
+          zIndex: 30,
+          display: { xs: 'none', md: 'block' },
+        }}
+      >
+        <AppSidebar />
+      </Box>
+
+      {/* Main content area — offset by sidebar width on desktop */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          overflow: 'hidden',
+          ml: { md: 0 }, /* Sidebar handles its own width offset */
+        }}
+      >
         <AppHeader />
-        <main id="main-content" ref={mainRef} role="main" className="flex-1 overflow-y-auto relative" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+        <Box
+          component="main"
+          id="main-content"
+          ref={mainRef}
+          role="main"
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            position: 'relative',
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Swipe indicators */}
           {swipeOffset !== 0 && (
             <>
-              <div className="fixed top-0 left-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-primary/20" style={{ opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0 }} />
-              <div className="fixed top-0 right-0 bottom-0 w-1 z-40 md:hidden transition-opacity duration-150 bg-primary/20" style={{ opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0 }} />
+              <Box sx={{
+                position: 'fixed', top: 0, left: 0, bottom: 0, width: 4, zIndex: 40,
+                display: { xs: 'block', md: 'none' },
+                bgcolor: 'primary.main',
+                opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0,
+                transition: 'opacity 0.15s',
+              }} />
+              <Box sx={{
+                position: 'fixed', top: 0, right: 0, bottom: 0, width: 4, zIndex: 40,
+                display: { xs: 'block', md: 'none' },
+                bgcolor: 'primary.main',
+                opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0,
+                transition: 'opacity 0.15s',
+              }} />
             </>
           )}
-          <div className="p-4 md:p-6 pb-24 md:pb-6 transition-transform duration-100 ease-out" style={{ transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined }}>
-            <h1 tabIndex={-1} className="sr-only">{currentPage}</h1>
+          <Box
+            sx={{
+              p: { xs: 2, md: 3 },
+              pb: { xs: 10, md: 3 },
+              transition: swipeOffset !== 0 ? 'transform 0.1s ease-out' : undefined,
+              transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined,
+            }}
+          >
+            <h1 tabIndex={-1} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+              {currentPage}
+            </h1>
             {renderPage()}
-          </div>
-        </main>
-      </div>
+          </Box>
+        </Box>
+      </Box>
       <BottomNav />
       <CommandPalette />
       <GuidedTour />
-    </div>
+    </Box>
   )
 }
 
