@@ -367,35 +367,38 @@ async function handleSync(request: NextRequest, body: Record<string, unknown>) {
 // ─── Webhook Handler ────────────────────────────────────────────────────────
 
 async function handleWebhook(rawBody: string, request: NextRequest) {
-  // Verify webhook signature
+  // Verify webhook signature — mandatory
   const signature = request.headers.get('x-revenuecat-signature')
   const secret = process.env.REVENUECAT_WEBHOOK_SECRET
 
-  if (secret) {
-    if (!signature) {
-      return NextResponse.json({ error: 'Missing webhook signature' }, { status: 401 })
+  if (!secret) {
+    console.error('[SubscriptionAPI] REVENUECAT_WEBHOOK_SECRET env var is not set — webhook rejected')
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
+  }
+
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing webhook signature' }, { status: 401 })
+  }
+
+  try {
+    const expectedSignature = createHmac('sha256', secret)
+      .update(rawBody)
+      .digest('hex')
+
+    if (expectedSignature.length !== signature.length) {
+      return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
     }
 
-    try {
-      const expectedSignature = createHmac('sha256', secret)
-        .update(rawBody)
-        .digest('hex')
-
-      if (expectedSignature.length !== signature.length) {
-        return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
-      }
-
-      let mismatch = 0
-      for (let i = 0; i < expectedSignature.length; i++) {
-        mismatch |= expectedSignature.charCodeAt(i) ^ signature.charCodeAt(i)
-      }
-
-      if (mismatch !== 0) {
-        return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
-      }
-    } catch {
-      return NextResponse.json({ error: 'Signature verification failed' }, { status: 401 })
+    let mismatch = 0
+    for (let i = 0; i < expectedSignature.length; i++) {
+      mismatch |= expectedSignature.charCodeAt(i) ^ signature.charCodeAt(i)
     }
+
+    if (mismatch !== 0) {
+      return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
+    }
+  } catch {
+    return NextResponse.json({ error: 'Signature verification failed' }, { status: 401 })
   }
 
   let webhookData: { event: { type: string; app_user_id: string; product_id: string; store: string; price: number | null; currency: string | null; purchased_at_ms: number | null; expiration_at_ms: number | null; is_sandbox: boolean | null; cancellation_reason: string | null; period_type: string | null; new_product_id: string | null; transaction_id: string | null } }
@@ -502,7 +505,7 @@ function mapProductToPlan(productId: string): string {
   if (id.includes('family') || id.includes('family_plus')) return 'family_plus'
   if (id.includes('max')) return 'max'
   if (id.includes('pro')) return 'pro'
-  return 'pro'
+  return 'free'
 }
 
 function mapStore(store: string): string {

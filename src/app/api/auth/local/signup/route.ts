@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit signup attempts
+    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_SIGNUP)
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = await req.json()
     const { firstName, lastName, email, password, phone, countryCode } = body
 
@@ -83,8 +89,8 @@ export async function POST(req: NextRequest) {
         data: { usedAt: new Date() },
       })
 
-      // Generate 6-digit OTP
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+      // Generate 6-digit OTP using cryptographically secure random
+      const otpCode = crypto.randomInt(100000, 1000000).toString()
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
       // Store the verification code
@@ -179,8 +185,8 @@ export async function POST(req: NextRequest) {
         theme: 'dark',
       })
 
-      // Store OTP in Supabase verification_codes table
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+      // Store OTP in Supabase verification_codes table using cryptographically secure random
+      const otpCode = crypto.randomInt(100000, 1000000).toString()
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
       await supabase.from('verification_codes').insert({

@@ -1,7 +1,58 @@
 'use client'
 
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { SubscriptionPlan } from '@/types'
+
+// ─── AI Suggestion Daily Tracking (in-memory) ────────────────────────────────
+
+interface AIUsageEntry {
+  date: string // YYYY-MM-DD
+  count: number
+}
+
+const AI_SUGGESTION_FREE_DAILY_LIMIT = 3
+
+// In-memory tracking for AI suggestion usage today
+let aiSuggestionUsage: AIUsageEntry = { date: '', count: 0 }
+
+function getTodayDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+// ─── Plan Limits ─────────────────────────────────────────────────────────────
+
+const PLAN_LIMITS: Record<SubscriptionPlan, Record<string, number | null>> = {
+  free: { tasks: 10, families: 1, storage: 100 * 1024 * 1024, members: 5 },
+  pro: { tasks: null, families: 3, storage: 1024 * 1024 * 1024, members: 15 },
+  family_plus: { tasks: null, families: null, storage: 10 * 1024 * 1024 * 1024, members: null },
+  max: { tasks: null, families: 10, storage: 20 * 1024 * 1024 * 1024, members: 25 },
+  ultimate: { tasks: null, families: null, storage: null, members: null },
+}
+
+// ─── Effective Plan Resolution ───────────────────────────────────────────────
+
+/**
+ * Resolve the effective plan tier, using the `plan` field as the source of truth.
+ * `isRevenueCatPro` is only a supplementary flag — if RevenueCat says the user
+ * has a pro entitlement but the server-side plan is free, we upgrade to 'pro'
+ * (the lowest paid tier). We do NOT bypass all plan limits anymore.
+ */
+function resolveEffectivePlan(state: SubscriptionState): SubscriptionPlan {
+  // The server-fetched `plan` field is the source of truth
+  const serverPlan = state.plan
+
+  // If server already says non-free, trust it completely
+  if (serverPlan !== 'free') return serverPlan
+
+  // If RevenueCat reports pro but server says free, the user at least has 'pro'
+  // (the lowest paid tier). We do NOT assume ultimate/max.
+  if (state.isRevenueCatPro) return 'pro'
+
+  return 'free'
+}
+
+// ─── Store Interface ─────────────────────────────────────────────────────────
 
 interface SubscriptionState {
   plan: SubscriptionPlan
@@ -18,147 +69,237 @@ interface SubscriptionState {
   setRevenueCatPro: (isPro: boolean) => void
   setRevenueCatEntitlements: (entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>) => void
   syncWithRevenueCat: (isPro: boolean, entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>, plan?: SubscriptionPlan) => void
+  // Tier checks — use resolveEffectivePlan instead of raw isRevenueCatPro bypass
   isPro: () => boolean
   isPremium: () => boolean
   isFamilyPlus: () => boolean
   isTrialActive: () => boolean
   trialTimeRemaining: () => number | null
+  // Feature limit checks — use effective plan, not bypass
   canCreateTask: (currentTaskCount: number) => boolean
   canCreateFamily: (currentFamilyCount: number) => boolean
   canUploadFile: (currentStorageBytes: number) => boolean
   getFeatureLimit: (feature: string) => number | null
+  // Feature gates for "limited" features
+  canUseAISuggestion: () => boolean
+  canAccessMealPlan: () => boolean
+  canCustomizeAvatar: () => boolean
+  getAISuggestionUsageToday: () => number
+  incrementAISuggestionUsage: () => void
 }
 
-const PLAN_LIMITS: Record<SubscriptionPlan, Record<string, number | null>> = {
-  free: { tasks: 10, families: 1, storage: 100 * 1024 * 1024, members: 5 },
-  pro: { tasks: null, families: 1, storage: 1024 * 1024 * 1024, members: 15 },
-  family_plus: { tasks: null, families: null, storage: 10 * 1024 * 1024 * 1024, members: null },
-  max: { tasks: null, families: 3, storage: 5 * 1024 * 1024 * 1024, members: 25 },
-  ultimate: { tasks: null, families: null, storage: null, members: null },
-}
+// ─── Cache Duration ──────────────────────────────────────────────────────────
 
 // Cache duration: 5 minutes before re-fetching from server
 const PLAN_CACHE_DURATION = 5 * 60 * 1000
 
+// Persist TTL: 5 minutes — after this, persisted state is considered stale
+const PERSIST_TTL = 5 * 60 * 1000
+
 // Subscription plan is fetched from the server via /api/subscription/plan.
 // Client-side checks are for UX ONLY — real enforcement is in Supabase RLS policies.
-// RevenueCat entitlements can override the server-fetched plan for real-time updates.
+// RevenueCat entitlements are supplementary — the `plan` field (from server data)
+// is always the source of truth for tier resolution.
 export const useSubscriptionStore = create<SubscriptionState>()(
-  (set, get) => ({
-    plan: 'free',
-    isTrial: false,
-    trialEnd: null,
-    isLoading: false,
-    lastFetched: null,
-    isRevenueCatPro: false,
-    revenuecatEntitlements: {},
+  persist(
+    (set, get) => ({
+      plan: 'free',
+      isTrial: false,
+      trialEnd: null,
+      isLoading: false,
+      lastFetched: null,
+      isRevenueCatPro: false,
+      revenuecatEntitlements: {},
 
-    setPlan: (plan) => set({ plan }),
+      setPlan: (plan) => set({ plan }),
 
-    fetchPlanFromServer: async (userId: string) => {
-      const { lastFetched } = get()
-      if (lastFetched && Date.now() - lastFetched < PLAN_CACHE_DURATION) {
-        return
-      }
-
-      set({ isLoading: true })
-      try {
-        const response = await fetch(`/api/subscription/plan?userId=${encodeURIComponent(userId)}`)
-        
-        if (response.ok) {
-          const data = await response.json()
-          if (data.plan) {
-            set({ 
-              plan: data.plan as SubscriptionPlan, 
-              isTrial: data.isTrial === true,
-              trialEnd: data.trialEnd || null,
-              lastFetched: Date.now() 
-            })
-          }
-        } else if (response.status === 401) {
-          set({ plan: 'free', isTrial: false, trialEnd: null, lastFetched: null })
+      fetchPlanFromServer: async (userId: string) => {
+        const { lastFetched } = get()
+        if (lastFetched && Date.now() - lastFetched < PLAN_CACHE_DURATION) {
+          return
         }
-      } catch {
-        console.warn('[SubscriptionStore] Failed to fetch plan from server')
-      } finally {
-        set({ isLoading: false })
-      }
-    },
 
-    // RevenueCat integration methods
-    setRevenueCatPro: (isPro) => set({ isRevenueCatPro: isPro }),
+        set({ isLoading: true })
+        try {
+          const response = await fetch(`/api/subscription/plan?userId=${encodeURIComponent(userId)}`)
+          
+          if (response.ok) {
+            const data = await response.json()
+            if (data.plan) {
+              set({ 
+                plan: data.plan as SubscriptionPlan, 
+                isTrial: data.isTrial === true,
+                trialEnd: data.trialEnd || null,
+                lastFetched: Date.now() 
+              })
+            }
+          } else if (response.status === 401) {
+            set({ plan: 'free', isTrial: false, trialEnd: null, lastFetched: null })
+          }
+        } catch {
+          console.warn('[SubscriptionStore] Failed to fetch plan from server')
+        } finally {
+          set({ isLoading: false })
+        }
+      },
 
-    setRevenueCatEntitlements: (entitlements) => set({ revenuecatEntitlements: entitlements }),
+      // RevenueCat integration methods
+      setRevenueCatPro: (isPro) => set({ isRevenueCatPro: isPro }),
 
-    syncWithRevenueCat: (isPro, entitlements, plan) => {
-      const updates: Partial<SubscriptionState> = {
-        isRevenueCatPro: isPro,
-        revenuecatEntitlements: entitlements,
-      }
-      // If RevenueCat says user is pro, update the plan
-      if (isPro && plan) {
-        updates.plan = plan
-      } else if (isPro) {
-        // Default to pro if no specific plan provided
-        updates.plan = 'pro'
-      }
-      // If RevenueCat says user is not pro, and the current plan is pro-level,
-      // the RevenueCat data is the source of truth
-      if (!isPro && ['pro', 'family_plus', 'max', 'ultimate'].includes(get().plan)) {
-        updates.plan = 'free'
-      }
-      set(updates)
-    },
+      setRevenueCatEntitlements: (entitlements) => set({ revenuecatEntitlements: entitlements }),
 
-    isPro: () => {
-      const state = get()
-      // RevenueCat entitlement takes priority
-      if (state.isRevenueCatPro) return true
-      return ['pro', 'family_plus', 'max', 'ultimate'].includes(state.plan)
-    },
-    isPremium: () => {
-      const state = get()
-      if (state.isRevenueCatPro) return true
-      return state.plan !== 'free'
-    },
-    isFamilyPlus: () => {
-      const state = get()
-      if (state.isRevenueCatPro) return true
-      return ['family_plus', 'max', 'ultimate'].includes(state.plan)
-    },
-    isTrialActive: () => {
-      const { isTrial, trialEnd } = get()
-      if (!isTrial || !trialEnd) return false
-      return new Date(trialEnd).getTime() > Date.now()
-    },
-    trialTimeRemaining: () => {
-      const { isTrial, trialEnd } = get()
-      if (!isTrial || !trialEnd) return null
-      const remaining = new Date(trialEnd).getTime() - Date.now()
-      return remaining > 0 ? remaining : 0
-    },
-    canCreateTask: (currentTaskCount) => {
-      const state = get()
-      if (state.isRevenueCatPro) return true
-      const limit = PLAN_LIMITS[state.plan]?.tasks
-      return limit === null || limit === undefined || currentTaskCount < limit
-    },
-    canCreateFamily: (currentFamilyCount) => {
-      const state = get()
-      if (state.isRevenueCatPro) return true
-      const limit = PLAN_LIMITS[state.plan]?.families
-      return limit === null || limit === undefined || currentFamilyCount < limit
-    },
-    canUploadFile: (currentStorageBytes) => {
-      const state = get()
-      if (state.isRevenueCatPro) return true
-      const limit = PLAN_LIMITS[state.plan]?.storage
-      return limit === null || limit === undefined || currentStorageBytes < limit
-    },
-    getFeatureLimit: (feature) => {
-      const state = get()
-      if (state.isRevenueCatPro) return null // No limits for pro
-      return PLAN_LIMITS[state.plan]?.[feature] ?? null
-    },
-  })
+      syncWithRevenueCat: (isPro, entitlements, plan) => {
+        const updates: Partial<SubscriptionState> = {
+          isRevenueCatPro: isPro,
+          revenuecatEntitlements: entitlements,
+        }
+        // If RevenueCat provides a specific plan (mapped from product identifier), use it
+        if (isPro && plan) {
+          updates.plan = plan
+        } else if (isPro) {
+          // If RevenueCat says user is pro but no specific plan is given,
+          // only upgrade to 'pro' (the lowest paid tier), NOT to ultimate/max.
+          // This prevents the old bug where isRevenueCatPro bypassed all limits.
+          const currentPlan = get().plan
+          if (currentPlan === 'free') {
+            updates.plan = 'pro'
+          }
+          // If the user already has a higher plan from server data, keep it
+        }
+        // If RevenueCat says user is not pro, and the current plan is pro-level,
+        // the RevenueCat data is the source of truth for revocation
+        if (!isPro && ['pro', 'family_plus', 'max', 'ultimate'].includes(get().plan)) {
+          updates.plan = 'free'
+        }
+        set(updates)
+      },
+
+      // ─── Tier Checks ──────────────────────────────────────────────────────
+      // These use resolveEffectivePlan instead of raw isRevenueCatPro bypass
+
+      isPro: () => {
+        const effectivePlan = resolveEffectivePlan(get())
+        return ['pro', 'family_plus', 'max', 'ultimate'].includes(effectivePlan)
+      },
+
+      isPremium: () => {
+        const effectivePlan = resolveEffectivePlan(get())
+        return effectivePlan !== 'free'
+      },
+
+      isFamilyPlus: () => {
+        const effectivePlan = resolveEffectivePlan(get())
+        return ['family_plus', 'max', 'ultimate'].includes(effectivePlan)
+      },
+
+      isTrialActive: () => {
+        const { isTrial, trialEnd } = get()
+        if (!isTrial || !trialEnd) return false
+        return new Date(trialEnd).getTime() > Date.now()
+      },
+
+      trialTimeRemaining: () => {
+        const { isTrial, trialEnd } = get()
+        if (!isTrial || !trialEnd) return null
+        const remaining = new Date(trialEnd).getTime() - Date.now()
+        return remaining > 0 ? remaining : 0
+      },
+
+      // ─── Feature Limit Checks ──────────────────────────────────────────────
+      // Use effective plan for limit lookups — no more bypass
+
+      canCreateTask: (currentTaskCount) => {
+        const effectivePlan = resolveEffectivePlan(get())
+        const limit = PLAN_LIMITS[effectivePlan]?.tasks
+        return limit === null || limit === undefined || currentTaskCount < limit
+      },
+
+      canCreateFamily: (currentFamilyCount) => {
+        const effectivePlan = resolveEffectivePlan(get())
+        const limit = PLAN_LIMITS[effectivePlan]?.families
+        return limit === null || limit === undefined || currentFamilyCount < limit
+      },
+
+      canUploadFile: (currentStorageBytes) => {
+        const effectivePlan = resolveEffectivePlan(get())
+        const limit = PLAN_LIMITS[effectivePlan]?.storage
+        return limit === null || limit === undefined || currentStorageBytes < limit
+      },
+
+      getFeatureLimit: (feature) => {
+        const effectivePlan = resolveEffectivePlan(get())
+        return PLAN_LIMITS[effectivePlan]?.[feature] ?? null
+      },
+
+      // ─── Feature Gates for "Limited" Features ──────────────────────────────
+
+      canUseAISuggestion: () => {
+        const effectivePlan = resolveEffectivePlan(get())
+        // Free: limited to 3/day, Pro+: unlimited
+        if (effectivePlan === 'free') {
+          const today = getTodayDate()
+          // Reset counter if day changed
+          if (aiSuggestionUsage.date !== today) {
+            aiSuggestionUsage = { date: today, count: 0 }
+          }
+          return aiSuggestionUsage.count < AI_SUGGESTION_FREE_DAILY_LIMIT
+        }
+        return true // Pro+ has unlimited
+      },
+
+      canAccessMealPlan: () => {
+        const effectivePlan = resolveEffectivePlan(get())
+        // Free: view only (returns false for edit/create actions)
+        // Pro+: full access
+        return effectivePlan !== 'free'
+      },
+
+      canCustomizeAvatar: () => {
+        const effectivePlan = resolveEffectivePlan(get())
+        // Free: no avatar customization, Pro+: yes
+        return effectivePlan !== 'free'
+      },
+
+      getAISuggestionUsageToday: () => {
+        const today = getTodayDate()
+        if (aiSuggestionUsage.date !== today) {
+          return 0
+        }
+        return aiSuggestionUsage.count
+      },
+
+      incrementAISuggestionUsage: () => {
+        const today = getTodayDate()
+        if (aiSuggestionUsage.date !== today) {
+          aiSuggestionUsage = { date: today, count: 1 }
+        } else {
+          aiSuggestionUsage.count++
+        }
+      },
+    }),
+    {
+      name: 'usra-subscription-store',
+      // Only persist essential plan state, not loading flags or usage counters
+      partialize: (state) => ({
+        plan: state.plan,
+        isTrial: state.isTrial,
+        trialEnd: state.trialEnd,
+        lastFetched: state.lastFetched,
+        isRevenueCatPro: state.isRevenueCatPro,
+      }),
+      // On hydration, check if cache is expired and trigger refetch
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (state?.lastFetched) {
+            const age = Date.now() - state.lastFetched
+            if (age > PERSIST_TTL) {
+              // Cache is stale — mark for refetch by clearing lastFetched
+              // The next fetchPlanFromServer call will bypass cache and refetch
+              state.lastFetched = null
+            }
+          }
+        }
+      },
+    }
+  )
 )

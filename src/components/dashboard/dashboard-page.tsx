@@ -65,30 +65,58 @@ import { AISummaryWidget } from '@/components/dashboard/ai-summary-widget'
 import { WeatherWidget } from '@/components/dashboard/weather-widget'
 import { ActivityTimelineWidget } from '@/components/dashboard/activity-timeline-widget'
 
-// ─── Teal Theme for Dashboard ────────────────────────────────────
+// ─── Teal Theme for Dashboard (mode-aware) ──────────────────────
 
-const tealTheme = createTheme({
-  palette: {
-    primary: {
-      main: '#0D6B58',
-      light: '#4E9C8C',
-      dark: '#003D30',
-      contrastText: '#FFFFFF',
+function getDashboardTheme(mode: 'light' | 'dark') {
+  return createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: mode === 'dark' ? '#6EE7B7' : '#0D6B58',
+        light: mode === 'dark' ? '#A7F3D0' : '#4E9C8C',
+        dark: mode === 'dark' ? '#00513D' : '#003D30',
+        contrastText: mode === 'dark' ? '#00382A' : '#FFFFFF',
+      },
+      secondary: {
+        main: mode === 'dark' ? '#FBBF24' : '#F59E0B',
+        light: mode === 'dark' ? '#FDE68A' : '#FBBF24',
+        dark: mode === 'dark' ? '#78350F' : '#B45309',
+        contrastText: mode === 'dark' ? '#451A03' : '#000000',
+      },
+      background: {
+        default: mode === 'dark' ? '#1C1B1F' : '#FEFCF9',
+        paper: mode === 'dark' ? '#2B2930' : '#FFFFFF',
+      },
+      text: {
+        primary: mode === 'dark' ? '#E6E1E5' : '#1C1B1F',
+        secondary: mode === 'dark' ? '#9E9C94' : '#79747E',
+      },
+      divider: mode === 'dark' ? 'rgba(230, 225, 229, 0.10)' : 'rgba(28, 27, 31, 0.12)',
     },
-    secondary: {
-      main: '#F59E0B',
-      light: '#FBBF24',
-      dark: '#B45309',
-      contrastText: '#000000',
+    typography: {
+      fontFamily: 'inherit',
     },
-  },
-  typography: {
-    fontFamily: 'inherit',
-  },
-  shape: {
-    borderRadius: 16,
-  },
-})
+    shape: {
+      borderRadius: 16,
+    },
+    components: {
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+    },
+  })
+}
 
 // ─── Prayer Times Interface ──────────────────────────────────────
 
@@ -305,10 +333,11 @@ function StatCard({
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 3,
-              bgcolor: alpha('#0D6B58', 0.12),
+              bgcolor: 'primary.light',
+              opacity: 0.85,
             }}
           >
-            <Icon sx={{ fontSize: 18, color: '#0D6B58' }} />
+            <Icon sx={{ fontSize: 18, color: 'primary.dark' }} />
           </Box>
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -747,9 +776,12 @@ export default function DashboardPage() {
 
   // ─── No Family Onboarding ───────────────────────────────────
 
+  const { theme: appTheme } = useAppStore()
+  const dashboardTheme = useMemo(() => getDashboardTheme(appTheme === 'dark' ? 'dark' : 'light'), [appTheme])
+
   if (!currentFamily) {
     return (
-      <ThemeProvider theme={tealTheme}>
+      <ThemeProvider theme={dashboardTheme}>
         <Box sx={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center', px: 2 }}>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -793,7 +825,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <ThemeProvider theme={tealTheme}>
+      <ThemeProvider theme={dashboardTheme}>
         <Box sx={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center', px: 2 }}>
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
             <Box sx={{ textAlign: 'center', maxWidth: 360 }}>
@@ -815,9 +847,9 @@ export default function DashboardPage() {
   // ─── Dashboard Layout ───────────────────────────────────────
 
   return (
-    <ThemeProvider theme={tealTheme}>
-      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', px: { xs: 2, sm: 3, lg: 4 }, py: { xs: 2, lg: 3 } }}>
-        <Box sx={{ mx: 'auto', maxWidth: 1280, display: 'flex', flexDirection: 'column', gap: { xs: 2, lg: 3 } }}>
+    <ThemeProvider theme={dashboardTheme}>
+      <Box sx={{ bgcolor: 'background.default', overflow: 'hidden' }}>
+        <Box sx={{ mx: 'auto', maxWidth: 1280, display: 'flex', flexDirection: 'column', gap: { xs: 1.5, lg: 2.5 } }}>
 
           {/* ─── Welcome Section ──────── */}
           <Box sx={{

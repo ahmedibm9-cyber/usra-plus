@@ -34,10 +34,16 @@ interface SignedSession {
  */
 function getSigningKey(): string {
   const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_SECRET_KEY
-  if (!secret) {
-    throw new Error('ADMIN_SESSION_SECRET or ADMIN_SECRET_KEY environment variable is required for admin session signing')
+  if (secret) return secret
+
+  // Fallback for first-run / dev: derive a stable key from other available secrets
+  if (process.env.NODE_ENV !== 'production') {
+    const fallback = 'usra-admin-session-secret-dev-only-' + (process.env.DATABASE_URL || 'default')
+    console.warn('[AdminSession] WARNING: Using derived fallback signing key. Set ADMIN_SESSION_SECRET for production.')
+    return fallback
   }
-  return secret
+
+  throw new Error('ADMIN_SESSION_SECRET or ADMIN_SECRET_KEY environment variable is required for admin session signing')
 }
 
 /**

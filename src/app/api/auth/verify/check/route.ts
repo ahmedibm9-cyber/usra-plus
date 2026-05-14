@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { db } from '@/lib/db'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+
+// In-memory OTP attempt tracking for brute-force protection
+const otpAttempts = new Map<string, { count: number; lockedUntil: number }>()
+const MAX_OTP_ATTEMPTS = 5
+const OTP_LOCKOUT_DURATION = 10 * 60 * 1000 // 10 minutes
+
+// Cleanup expired OTP attempt entries every 5 minutes
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
+    for (const [key, entry] of otpAttempts.entries()) {
+      if (now > entry.lockedUntil) {
+        otpAttempts.delete(key)
+      }
+    }
+  }, 5 * 60 * 1000)
+}
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit verification attempts
+    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_VERIFY)
+    if (rateLimitResponse) return rateLimitResponse
+
     const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Service not configured' }, { status: 503 })
@@ -28,6 +50,15 @@ export async function POST(req: NextRequest) {
 
     const emailLower = email.toLowerCase()
 
+    // Check brute-force lockout for this email
+    const attemptEntry = otpAttempts.get(emailLower)
+    if (attemptEntry && attemptEntry.count >= MAX_OTP_ATTEMPTS && Date.now() < attemptEntry.lockedUntil) {
+      return NextResponse.json(
+        { error: 'Too many verification attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     // Find a valid (unused, not expired) code for this email
     const verificationCode = await db.verificationCode.findFirst({
       where: {
@@ -40,6 +71,17 @@ export async function POST(req: NextRequest) {
     })
 
     if (!verificationCode) {
+      // Record failed attempt for brute-force protection
+      const existing = otpAttempts.get(emailLower)
+      if (existing) {
+        existing.count++
+        if (existing.count >= MAX_OTP_ATTEMPTS) {
+          existing.lockedUntil = Date.now() + OTP_LOCKOUT_DURATION
+        }
+      } else {
+        otpAttempts.set(emailLower, { count: 1, lockedUntil: 0 })
+      }
+
       // Check if code exists but is expired
       const expiredCode = await db.verificationCode.findFirst({
         where: {
@@ -68,6 +110,9 @@ export async function POST(req: NextRequest) {
       where: { id: verificationCode.id },
       data: { usedAt: new Date() },
     })
+
+    // Clear brute-force attempts on successful verification
+    otpAttempts.delete(emailLower)
 
     // Mark user as verified
     const user = await db.user.update({

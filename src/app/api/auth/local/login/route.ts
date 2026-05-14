@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit login attempts
+    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_LOGIN)
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = await req.json()
     const { email, password } = body
 

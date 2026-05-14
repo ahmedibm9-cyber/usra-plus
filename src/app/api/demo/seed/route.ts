@@ -89,7 +89,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}))
     const secret = body.secret || ''
-    const expectedSecret = process.env.DEMO_SEED_SECRET || 'usra-demo-2024'
+    const expectedSecret = process.env.DEMO_SEED_SECRET
+
+    if (!expectedSecret) {
+      console.error('[Demo Seed] DEMO_SEED_SECRET env var is not set — endpoint disabled')
+      return NextResponse.json({ error: 'Demo seed secret not configured' }, { status: 500 })
+    }
 
     if (secret !== expectedSecret) {
       return NextResponse.json({ error: 'Invalid secret' }, { status: 403 })
@@ -409,7 +414,6 @@ export async function POST(req: NextRequest) {
       success: true,
       message: 'Demo data seeded',
       results,
-      demoCredentials: { email: DEMO_EMAIL, password: DEMO_PASSWORD },
     })
   } catch (error) {
     console.error('[Demo Seed] Error:', error)
@@ -424,9 +428,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const secret = new URL(req.url).searchParams.get('secret') || ''
-  const expectedSecret = process.env.DEMO_SEED_SECRET || 'usra-demo-2024'
+  const expectedSecret = process.env.DEMO_SEED_SECRET
+  if (!expectedSecret) {
+    return NextResponse.json({ error: 'Demo seed secret not configured' }, { status: 500 })
+  }
   if (secret !== expectedSecret) {
-    return NextResponse.json({ error: 'Invalid secret. Use ?secret=usra-demo-2024' }, { status: 403 })
+    return NextResponse.json({ error: 'Invalid secret' }, { status: 403 })
   }
   const postReq = new NextRequest(req.url, {
     method: 'POST',

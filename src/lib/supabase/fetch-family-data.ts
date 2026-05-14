@@ -129,13 +129,28 @@ export async function fetchFamilyData(
 /**
  * Sets up Supabase Realtime subscriptions for live data updates.
  * Returns cleanup function to unsubscribe all channels.
+ *
+ * Includes a guard to prevent duplicate subscriptions for the same
+ * familyId/userId combo, which caused EventEmitter memory leaks.
  */
+// Track active subscriptions to prevent duplicates (keyed by "familyId:userId")
+const activeSubscriptions = new Map<string, () => void>()
+
 export function subscribeToRealtimeUpdates(
   supabase: SupabaseClient,
   familyId: string,
   userId: string
 ): () => void {
   if (isDemoMode()) return () => {} // No subscriptions in demo mode
+
+  const subKey = `${familyId}:${userId}`
+
+  // If there's already an active subscription for this key, clean it up first
+  const existingCleanup = activeSubscriptions.get(subKey)
+  if (existingCleanup) {
+    existingCleanup()
+    activeSubscriptions.delete(subKey)
+  }
 
   const channels: ReturnType<typeof supabase.channel>[] = []
 
@@ -237,11 +252,17 @@ export function subscribeToRealtimeUpdates(
   channels.push(calendarChannel)
 
   // Return cleanup function
-  return () => {
+  const cleanup = () => {
     channels.forEach(channel => {
       supabase.removeChannel(channel)
     })
+    activeSubscriptions.delete(subKey)
   }
+
+  // Register this subscription so duplicates can be cleaned up
+  activeSubscriptions.set(subKey, cleanup)
+
+  return cleanup
 }
 
 /**

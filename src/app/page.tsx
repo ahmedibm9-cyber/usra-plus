@@ -204,7 +204,7 @@ function AuthScreen() {
 
         {/* Floating blobs */}
         <Box sx={{ position: 'absolute', top: '15%', right: '10%', width: 288, height: 288, borderRadius: '50%', bgcolor: '#6EE7B7', opacity: 0.06, filter: 'blur(80px)', animation: `${floatAnim} 4s ease-in-out infinite` }} />
-        <Box sx={{ position: 'absolute', bottom: '10%', left: '5%', width: 224, height: 224, borderRadius: '50%', bgcolor: '#FBBF24', opacity: 0.05, filter: 'blur(60px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '2s' }} />
+        <Box sx={{ position: 'absolute', bottom: '10%', left: '5%', width: 224, height: 224, borderRadius: '50%', bgcolor: '#5EEAD4', opacity: 0.05, filter: 'blur(60px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '2s' }} />
         <Box sx={{ position: 'absolute', top: '50%', left: '40%', width: 160, height: 160, borderRadius: '50%', bgcolor: '#C7BFFF', opacity: 0.04, filter: 'blur(50px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '4s' }} />
 
         {/* Content */}
@@ -360,8 +360,9 @@ const SWIPE_MIN_VELOCITY = 0.3
 
 // ─── Main App Layout — MUI ────────────────────────────────────────
 function MainApp() {
-  const { currentPage, currentFamily, showOnboarding, setCurrentPage, demoDataReady } = useAppStore()
+  const { currentPage, currentFamily, showOnboarding, setCurrentPage, demoDataReady, sidebarCollapsed } = useAppStore()
   const { user, setUser } = useAuthStore()
+  const { isRTL } = useI18n()
   const supabase = useMemo(() => safeCreateClient(), [])
 
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
@@ -438,10 +439,16 @@ function MainApp() {
   useEffect(() => {
     if (isDemoMode() || !user?.id || !supabase || !currentFamily) return
     let unsubscribe: (() => void) | undefined
+    let cancelled = false
     import('@/lib/supabase/fetch-family-data').then(({ subscribeToRealtimeUpdates }) => {
+      // If the effect was already cleaned up before the import resolved, skip subscription
+      if (cancelled) return
       unsubscribe = subscribeToRealtimeUpdates(supabase, currentFamily.id, user.id)
     }).catch(err => console.warn('[USRA PLUS] Realtime subscription failed:', err))
-    return () => { if (unsubscribe) unsubscribe() }
+    return () => {
+      cancelled = true
+      if (unsubscribe) unsubscribe()
+    }
   }, [user?.id, supabase, currentFamily?.id])
 
   useEffect(() => {
@@ -511,7 +518,7 @@ function MainApp() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', overflow: 'hidden' }}>
       {/* Skip to content (accessibility) */}
       <a
         href="#main-content"
@@ -571,7 +578,8 @@ function MainApp() {
         sx={{
           position: 'fixed',
           top: 0,
-          left: 0,
+          left: isRTL ? 'auto' : 0,
+          right: isRTL ? 0 : 'auto',
           height: '100vh',
           zIndex: 30,
           display: { xs: 'none', md: 'block' },
@@ -588,7 +596,9 @@ function MainApp() {
           flexDirection: 'column',
           minHeight: '100vh',
           overflow: 'hidden',
-          ml: { md: 0 }, /* Sidebar handles its own width offset */
+          marginLeft: isRTL ? 0 : { md: sidebarCollapsed ? 72 : 256 },
+          marginRight: isRTL ? { md: sidebarCollapsed ? 72 : 256 } : 0,
+          transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
         <AppHeader />
@@ -631,6 +641,7 @@ function MainApp() {
               pb: { xs: 10, md: 3 },
               transition: swipeOffset !== 0 ? 'transform 0.1s ease-out' : undefined,
               transform: swipeOffset !== 0 ? `translateX(${swipeOffset * 0.5}px)` : undefined,
+              overflowX: 'hidden',
             }}
           >
             <h1 tabIndex={-1} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
@@ -665,7 +676,10 @@ export default function RootPage() {
         if (localUser) {
           const profile = localUserToProfile(localUser)
           setUser(profile)
-          if (profile.language) useI18n.getState().setLanguage(profile.language)
+          if (profile.language) {
+            // Defer to next tick to avoid "state update before mount" warning
+            setTimeout(() => useI18n.getState().setLanguage(profile.language), 0)
+          }
           setIsAuthenticated(true)
           setIsLoading(false)
           return
@@ -685,7 +699,9 @@ export default function RootPage() {
               const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
               if (profile) {
                 setUser(profile)
-                if (profile.language) useI18n.getState().setLanguage(profile.language)
+                if (profile.language) {
+                  setTimeout(() => useI18n.getState().setLanguage(profile.language), 0)
+                }
               } else {
                 const newProfile = {
                   id: session.user.id,

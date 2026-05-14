@@ -152,6 +152,16 @@ export const lightTheme = createTheme({
           borderRadius: 14,
           boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
           border: '1px solid rgba(28, 27, 31, 0.08)',
+          bgcolor: '#FFFFFF',
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          bgcolor: '#FFFFFF',
+          backgroundImage: 'none',
         },
       },
     },
@@ -334,6 +344,16 @@ export const darkTheme = createTheme({
           borderRadius: 14,
           boxShadow: '0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3)',
           border: '1px solid rgba(230, 225, 229, 0.06)',
+          bgcolor: '#2B2930',
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          bgcolor: '#2B2930',
+          backgroundImage: 'none',
         },
       },
     },

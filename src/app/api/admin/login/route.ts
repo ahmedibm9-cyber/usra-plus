@@ -6,6 +6,7 @@ import {
   getAdminCookieName,
   getAdminCookieOptions,
 } from '@/lib/admin-session'
+import { db } from '@/lib/db'
 
 // ─── Server-Side Admin Authentication ──────────────────────────────────────
 // Single admin credential with role selector.
@@ -24,7 +25,9 @@ const ROLE_NAMES: Record<AllowedRole, string> = {
 
 // Single admin account — one credential, role selected at login
 const ADMIN_EMAIL = 'admin@usraplus.com'
-const ADMIN_PASSWORD: string = process.env.ADMIN_PASSWORD ?? 'usra2024admin'
+// Default password for first run — should be changed via ADMIN_PASSWORD env var
+const DEFAULT_ADMIN_PASSWORD = 'usra2024admin'
+const ADMIN_PASSWORD: string = process.env.ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD
 
 // Bcrypt hash — computed on first request from ADMIN_PASSWORD env var
 let cachedHash: string | null = null
@@ -36,8 +39,8 @@ async function getPasswordHash(): Promise<string> {
     cachedHash = envHash
     return envHash
   }
-  // Generate hash on first use
-  cachedHash = await bcrypt.hash(ADMIN_PASSWORD, 12)
+  // Generate hash on first use (ADMIN_PASSWORD is guaranteed defined when this is called)
+  cachedHash = await bcrypt.hash(ADMIN_PASSWORD!, 12)
   return cachedHash
 }
 
@@ -51,6 +54,11 @@ export async function POST(request: NextRequest) {
     const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_LOGIN)
     if (rateLimitResponse) return rateLimitResponse
 
+    // Warn if using default password (not configured via env var)
+    if (!process.env.ADMIN_PASSWORD) {
+      console.warn('[AdminLogin] Using default ADMIN_PASSWORD — set the ADMIN_PASSWORD env var for production')
+    }
+
     const { email, password, role } = await request.json()
 
     if (!email || !password) {
@@ -58,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate role
-    const selectedRole: AllowedRole = role || 'super_admin'
+    const selectedRole: AllowedRole = role || 'support_admin'
     if (!ALLOWED_ROLES.includes(selectedRole)) {
       return NextResponse.json({ success: false, error: 'Invalid role selected' }, { status: 400 })
     }
@@ -96,6 +104,30 @@ export async function POST(request: NextRequest) {
 
     // Clear failed attempts on successful login
     failedAttempts.delete(clientKey)
+
+    // ─── First-run seed: ensure admin user exists in DB ───────────────────
+    // The admin panel uses its own HMAC-signed session system (not the User model),
+    // but we create a DB record for audit trails and future features.
+    try {
+      const existingAdmin = await db.user.findUnique({ where: { email: ADMIN_EMAIL } }).catch(() => null)
+      if (!existingAdmin) {
+        const hash = await getPasswordHash()
+        await db.user.create({
+          data: {
+            email: ADMIN_EMAIL,
+            passwordHash: hash,
+            firstName: 'USRA',
+            lastName: 'Admin',
+            language: 'en',
+            theme: 'dark',
+            emailVerified: true,
+          },
+        }).catch(() => {})
+        console.log('[AdminLogin] Seeded initial admin user in database')
+      }
+    } catch {
+      // Non-critical: DB seed failure should not block login
+    }
 
     // Use the selected role for this session
     const sessionRole = selectedRole

@@ -84,14 +84,14 @@ function BottomNavInner() {
           left: 0,
           right: 0,
           zIndex: 1300,
-          display: { xs: 'block', md: 'none' },
+          display: { xs: 'flex', md: 'none' },
           bgcolor: 'background.paper',
           borderTop: '1px solid',
           borderColor: 'divider',
           pb: 'max(env(safe-area-inset-bottom), 8px)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', px: 1, pt: 1.5, pb: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', px: 0.5, pt: 1, pb: 0.5, width: '100%' }}>
           {mainNavItems.map((item) => {
             const isActive = currentPage === item.page
             const Icon = item.icon
@@ -256,7 +256,7 @@ function BottomNavInner() {
         <Divider />
 
         {/* Navigation items - 2 column grid */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, px: 2, py: 1.5 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, px: 2, py: 1.5, maxWidth: '100%', overflow: 'hidden' }}>
           {moreNavItems.map((item) => {
             const isActive = currentPage === item.page
             const Icon = item.icon

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/i18n/use-translation'
 import type { TranslationKeys } from '@/i18n/en'
@@ -28,6 +28,7 @@ import {
   Palette,
   ChevronRight,
   X,
+  Tag,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,6 +69,14 @@ export function Paywall({ open, onClose, context = 'general' }: PaywallProps) {
   const [purchasing, setPurchasing] = useState<string | null>(null)
   const [purchaseError, setPurchaseError] = useState<string | null>(null)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
+
+  // Coupon state
+  const [showCouponInput, setShowCouponInput] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null)
+  const couponInputRef = useRef<HTMLInputElement>(null)
 
   // Get packages from offerings
   const packages = offerings?.current?.packages || []
@@ -115,6 +124,43 @@ export function Paywall({ open, onClose, context = 'general' }: PaywallProps) {
   const handleRestore = useCallback(async () => {
     await refresh()
   }, [refresh])
+
+  const handleApplyCoupon = useCallback(async () => {
+    if (!couponCode.trim() || !user?.id) return
+
+    setCouponLoading(true)
+    setCouponError(null)
+    setCouponSuccess(null)
+
+    try {
+      const response = await fetch('/api/coupons/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim(), userId: user.id }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setCouponError(data.error || 'Failed to apply coupon')
+        return
+      }
+
+      if (data.success) {
+        const discountLabel = data.coupon.discountType === 'percentage'
+          ? `${data.coupon.discountValue}% off`
+          : `$${data.coupon.discountValue} off`
+        setCouponSuccess(`Coupon applied: ${discountLabel}`)
+        setCouponCode('')
+        // Refresh subscription state to pick up any plan changes
+        await refresh()
+      }
+    } catch {
+      setCouponError('Network error. Please try again.')
+    } finally {
+      setCouponLoading(false)
+    }
+  }, [couponCode, user, refresh])
 
   // ─── Render ─────────────────────────────────────────────────────────────
 
@@ -396,6 +442,104 @@ export function Paywall({ open, onClose, context = 'general' }: PaywallProps) {
                   })}
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Promo Code Section */}
+            <div className="px-6 pb-4">
+              {/* "Have a promo code?" link */}
+              {!showCouponInput && (
+                <button
+                  onClick={() => {
+                    setShowCouponInput(true)
+                    setTimeout(() => couponInputRef.current?.focus(), 100)
+                  }}
+                  className="flex items-center justify-center gap-1.5 w-full text-white/40 text-xs hover:text-white/60 transition-colors py-2"
+                >
+                  <Tag className="w-3.5 h-3.5" />
+                  <span>Have a promo code?</span>
+                </button>
+              )}
+
+              {/* Coupon input field */}
+              <AnimatePresence>
+                {showCouponInput && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex gap-2">
+                      <input
+                        ref={couponInputRef}
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase())
+                          setCouponError(null)
+                          setCouponSuccess(null)
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleApplyCoupon()
+                        }}
+                        placeholder="Enter promo code"
+                        maxLength={30}
+                        className="flex-1 h-9 px-3 rounded-lg text-sm text-white placeholder-white/30 outline-none"
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          direction: isRTL ? 'rtl' : 'ltr',
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="h-9 px-4 text-xs font-medium"
+                        style={{
+                          background: couponLoading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                          color: 'white',
+                          border: 'none',
+                        }}
+                      >
+                        {couponLoading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          'Apply'
+                        )}
+                      </Button>
+                      <button
+                        onClick={() => {
+                          setShowCouponInput(false)
+                          setCouponCode('')
+                          setCouponError(null)
+                          setCouponSuccess(null)
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                        aria-label="Close coupon input"
+                      >
+                        <X className="w-4 h-4 text-white/40" />
+                      </button>
+                    </div>
+
+                    {/* Coupon success message */}
+                    {couponSuccess && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                        <Check className="w-3.5 h-3.5 text-[#22C55E] shrink-0" />
+                        <p className="text-[#22C55E] text-xs font-medium">{couponSuccess}</p>
+                      </div>
+                    )}
+
+                    {/* Coupon error message */}
+                    {couponError && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                        <p className="text-red-400 text-xs">{couponError}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Footer */}

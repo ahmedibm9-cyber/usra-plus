@@ -25,6 +25,7 @@ export const RATE_LIMITS = {
   AUTH_LOGIN: { maxRequests: 5, windowMs: 60 * 1000, key: 'auth:login' },           // 5/min
   AUTH_SIGNUP: { maxRequests: 3, windowMs: 60 * 60 * 1000, key: 'auth:signup' },    // 3/hour
   AUTH_RESET: { maxRequests: 3, windowMs: 60 * 60 * 1000, key: 'auth:reset' },      // 3/hour
+  AUTH_VERIFY: { maxRequests: 10, windowMs: 60 * 60 * 1000, key: 'auth:verify' },    // 10/hour
   
   // Admin endpoints - very strict
   ADMIN_LOGIN: { maxRequests: 5, windowMs: 15 * 60 * 1000, key: 'admin:login' },    // 5/15min

@@ -177,7 +177,7 @@ function AppHeaderInner() {
               transition: 'all 0.2s',
             }}
           >
-            <Search sx={{ position: 'absolute', left: 12, fontSize: 14, color: 'text.disabled', pointerEvents: 'none' }} />
+            <Search sx={{ position: 'absolute', [isRTL ? 'right' : 'left']: 12, fontSize: 14, color: 'text.disabled', pointerEvents: 'none' }} />
             <InputBase
               readOnly
               placeholder={t.nav.search}
@@ -194,7 +194,7 @@ function AppHeaderInner() {
             <Box
               sx={{
                 position: 'absolute',
-                right: 10,
+                [isRTL ? 'left' : 'right']: 10,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 display: 'inline-flex',

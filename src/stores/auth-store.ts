@@ -14,7 +14,32 @@ interface AuthState {
   setIsLoading: (value: boolean) => void
   setAuthView: (view: AuthView) => void
   setShowTermsModal: (show: boolean) => void
-  logout: () => void
+  logout: () => Promise<void>
+}
+
+/**
+ * Clear auth-related items from localStorage to prevent data leakage.
+ */
+function clearAuthLocalStorage() {
+  if (typeof window === 'undefined') return
+  try {
+    const keysToRemove = [
+      'usra-auth-token',
+      'usra-user',
+      'usra-session',
+      'usra-last-email',
+    ]
+    keysToRemove.forEach(key => {
+      try { localStorage.removeItem(key) } catch { /* ignore */ }
+    })
+    // Also clear any keys that start with 'usra-auth' or 'usra-session'
+    const allKeys = Object.keys(localStorage)
+    allKeys.forEach(key => {
+      if (key.startsWith('usra-auth') || key.startsWith('usra-session')) {
+        try { localStorage.removeItem(key) } catch { /* ignore */ }
+      }
+    })
+  } catch { /* localStorage not available */ }
 }
 
 /**
@@ -64,18 +89,31 @@ export const useAuthStore = create<AuthState>((set) => ({
   setIsLoading: (value) => set({ isLoading: value }),
   setAuthView: (view) => set({ authView: view }),
   setShowTermsModal: (show) => set({ showTermsModal: show }),
-  logout: () => {
-    // Call local auth logout API (clears cookie)
-    import('@/lib/local-auth').then(({ localLogout }) => {
-      localLogout().catch(console.error)
-    }).catch(() => {})
-    // Also try Supabase logout if available
-    import('@/lib/supabase/client').then(({ createClient }) => {
+  logout: async () => {
+    // Step 1: Call logout API FIRST to clear the httpOnly cookie before re-render
+    try {
+      const { localLogout } = await import('@/lib/local-auth')
+      await localLogout()
+    } catch (err) {
+      console.error('[AuthStore] Local logout API error:', err)
+    }
+
+    // Step 2: Also sign out from Supabase if available
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
-      if (supabase?.auth?.signOut) supabase.auth.signOut().catch(() => {})
-    }).catch(() => {})
-    // Clear all stores to prevent data leakage between sessions
-    resetAllStores().catch(console.error)
+      if (supabase?.auth?.signOut) {
+        await supabase.auth.signOut()
+      }
+    } catch { /* Supabase not available or already signed out */ }
+
+    // Step 3: Clear auth-related localStorage items
+    clearAuthLocalStorage()
+
+    // Step 4: Reset all domain stores to prevent data leakage
+    await resetAllStores()
+
+    // Step 5: Finally set auth state to logged out
     set({ user: null, isAuthenticated: false, authView: 'login' })
   },
 }))

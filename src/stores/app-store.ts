@@ -81,7 +81,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   showJoinFamily: false,
   familyAvatar: '🏠',
   familyColor: 'red',
-  theme: getInitialTheme(),
+  theme: 'light', // Default to 'light' to avoid hydration mismatch; hydrateTheme() sets the real value in useEffect
   demoDataReady: true, // true by default for non-demo users; set to false during demo seeding
   setCurrentPage: (page) => set({ currentPage: page }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
@@ -114,8 +114,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 }))
 
-// Initialize theme on load
-if (typeof window !== 'undefined') {
-  const initialTheme = getInitialTheme()
-  applyThemeToDOM(initialTheme)
-}
+// NOTE: Do NOT apply theme during module initialization (e.g., IIFE at bottom).
+// Calling applyThemeToDOM() at module scope causes "state update before mount"
+// hydration warnings because it mutates the DOM before React has hydrated.
+// Instead, call useAppStore.getState().hydrateTheme() inside a useEffect.

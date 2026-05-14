@@ -107,7 +107,7 @@ function NavItemButton({
   collapsed: boolean
   onClick: () => void
 }) {
-  const { t } = useI18n()
+  const { t, isRTL: isRTLActive } = useI18n()
   const label = t.nav[item.labelKey]
   const Icon = item.icon
 
@@ -132,12 +132,13 @@ function NavItemButton({
           '&.Mui-selected::before': isActive && !collapsed ? {
             content: '""',
             position: 'absolute',
-            left: -4,
+            left: isRTLActive ? 'auto' : -4,
+            right: isRTLActive ? -4 : 'auto',
             top: '50%',
             transform: 'translateY(-50%)',
             width: 3,
             height: 32,
-            borderRadius: '0 4px 4px 0',
+            borderRadius: isRTLActive ? '4px 0 0 4px' : '0 4px 4px 0',
             bgcolor: 'primary.main',
           } : {},
           position: 'relative',
@@ -173,7 +174,7 @@ function NavItemButton({
 
   if (collapsed) {
     return (
-      <Tooltip title={label} placement="right" arrow>
+      <Tooltip title={label} placement={isRTLActive ? 'left' : 'right'} arrow>
         {button}
       </Tooltip>
     )
@@ -497,7 +498,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
 function AppSidebarInner() {
   const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar } = useAppStore()
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
 
   const drawerWidth = sidebarCollapsed ? 72 : 256
 
@@ -508,11 +509,13 @@ function AppSidebarInner() {
         sx={{
           display: { xs: 'none', md: 'block' },
           position: 'fixed',
-          left: 0,
+          left: isRTL ? 'auto' : 0,
+          right: isRTL ? 0 : 'auto',
           top: 0,
           bottom: 0,
           width: drawerWidth,
-          borderRight: '1px solid',
+          borderRight: isRTL ? 'none' : '1px solid',
+          borderLeft: isRTL ? '1px solid' : 'none',
           borderColor: 'divider',
           bgcolor: 'background.paper',
           zIndex: (theme) => theme.zIndex.drawer,
@@ -528,10 +531,11 @@ function AppSidebarInner() {
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           sx={{
             position: 'absolute',
-            right: -12,
+            right: isRTL ? 'auto' : -13,
+            left: isRTL ? -13 : 'auto',
             top: 28,
-            width: 24,
-            height: 24,
+            width: 26,
+            height: 26,
             bgcolor: 'background.paper',
             border: '1px solid',
             borderColor: 'divider',
@@ -545,7 +549,7 @@ function AppSidebarInner() {
             transition: 'all 0.2s',
           }}
         >
-          {sidebarCollapsed ? <ChevronRight sx={{ fontSize: 12 }} /> : <ChevronLeft sx={{ fontSize: 12 }} />}
+          {(sidebarCollapsed && !isRTL) ? <ChevronRight sx={{ fontSize: 12 }} /> : (sidebarCollapsed && isRTL) ? <ChevronLeft sx={{ fontSize: 12 }} /> : (!sidebarCollapsed && !isRTL) ? <ChevronLeft sx={{ fontSize: 12 }} /> : <ChevronRight sx={{ fontSize: 12 }} />}
         </IconButton>
       </Box>
 
@@ -553,13 +557,15 @@ function AppSidebarInner() {
       <Drawer
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        anchor={isRTL ? 'right' : 'left'}
         slotProps={{
           paper: {
             sx: {
               width: 288,
               bgcolor: 'background.paper',
               backgroundImage: 'none',
-              borderRight: '1px solid',
+              borderRight: isRTL ? 'none' : '1px solid',
+              borderLeft: isRTL ? '1px solid' : 'none',
               borderColor: 'divider',
             },
           },
