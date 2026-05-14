@@ -66,11 +66,22 @@ export async function proxy(request: NextRequest) {
       })
     }
 
-    // ─── Non-admin routes: refresh Supabase session ─────────────────────
+    // ─── Non-admin routes: refresh Supabase session + security headers ───
     // 1. Refresh the Supabase session (sets/auth cookies, validates token)
     const response = await updateSession(request)
 
-    // 2. Check for the usra-auth-token cookie — if it exists, the user is
+    // 2. Apply security headers to all non-API, non-static responses
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.set('X-XSS-Protection', '1; mode=block')
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://api.aladhan.com;"
+    )
+
+    // 3. Check for the usra-auth-token cookie — if it exists, the user is
     //    authenticated via our API-route-based session system.
     const hasAuthToken = request.cookies.has('usra-auth-token')
 
