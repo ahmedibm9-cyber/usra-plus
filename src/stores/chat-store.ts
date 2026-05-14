@@ -3,6 +3,8 @@
 import { create } from 'zustand'
 import type { ChatMessage } from '@/types'
 
+const MAX_MESSAGES = 200
+
 interface ChatState {
   messages: ChatMessage[]
   isLoading: boolean
@@ -26,7 +28,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   addMessage: (message) => set((s) => {
     // Deduplicate by message ID to prevent duplicates from socket + realtime
     if (s.messages.some(m => m.id === message.id)) return s
-    return { messages: [...s.messages, message] }
+    // Cap messages to prevent unbounded memory growth
+    const updated = [...s.messages, message]
+    return { messages: updated.length > MAX_MESSAGES ? updated.slice(-MAX_MESSAGES) : updated }
   }),
   setIsLoading: (loading) => set({ isLoading: loading }),
   setSearchQuery: (query) => set({ searchQuery: query }),

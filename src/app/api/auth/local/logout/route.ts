@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { validateCSRF } from '@/lib/csrf'
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF protection
+    const csrfError = validateCSRF(req)
+    if (csrfError) return csrfError
+
     const token = req.cookies.get('usra-auth-token')?.value
 
     // Also invalidate Supabase session if Supabase is configured.

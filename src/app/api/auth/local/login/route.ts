@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { validateCSRF } from '@/lib/csrf'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF protection
+    const csrfError = validateCSRF(req)
+    if (csrfError) return csrfError
+
     // Rate limit login attempts
     const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_LOGIN)
     if (rateLimitResponse) return rateLimitResponse
@@ -16,6 +21,14 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
+        { status: 400 }
+      )
+    }
+
+    // Input length validation — prevent bcrypt DoS from very long passwords
+    if (email.length > 254 || password.length > 128) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
         { status: 400 }
       )
     }

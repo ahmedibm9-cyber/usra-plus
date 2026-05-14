@@ -13,6 +13,7 @@
  */
 
 import { verifyAdminSessionToken } from '@/lib/admin-session'
+import { timingSafeEqual } from 'crypto'
 
 interface AdminAuthResult {
   authenticated: boolean
@@ -48,10 +49,15 @@ export function verifyAdminAuth(request: Request): AdminAuthResult {
   const authHeader = request.headers.get('authorization')
   if (authHeader) {
     const match = authHeader.match(/^Bearer\s+(.+)$/i)
-    if (match && secretKey && match[1] === secretKey) {
-      return {
-        authenticated: true,
-        admin: { email: 'api-key', role: 'super_admin' },
+    if (match && secretKey) {
+      // Use timing-safe comparison to prevent timing attacks
+      const tokenBuf = Buffer.from(match[1])
+      const keyBuf = Buffer.from(secretKey)
+      if (tokenBuf.length === keyBuf.length && timingSafeEqual(tokenBuf, keyBuf)) {
+        return {
+          authenticated: true,
+          admin: { email: 'api-key', role: 'super_admin' },
+        }
       }
     }
   }

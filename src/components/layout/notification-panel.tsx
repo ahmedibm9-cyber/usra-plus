@@ -55,11 +55,11 @@ const typeIcons: Record<Notification['type'], ElementType> = {
 }
 
 const typeColors: Record<Notification['type'], string> = {
-  task: '#22C55E',
+  task: '#059669',
   calendar: '#0D6B58',
-  grocery: '#0D6B58',
-  chat: '#0D6B58',
-  family: '#EC4899',
+  grocery: '#047857',
+  chat: '#065F46',
+  family: '#10B981',
   system: '#79747E',
 }
 

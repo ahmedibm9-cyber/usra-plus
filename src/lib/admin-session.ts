@@ -9,7 +9,7 @@
  * Role is selected at login and embedded in the session token.
  */
 
-import { createHmac, timingSafeEqual } from 'crypto'
+import { createHmac, timingSafeEqual, randomBytes } from 'crypto'
 
 // Session duration: 4 hours
 const SESSION_DURATION_MS = 4 * 60 * 60 * 1000
@@ -62,7 +62,7 @@ export function createAdminSessionToken(email: string, role: string): string {
   const issuedAt = Date.now()
   const expiresAt = issuedAt + SESSION_DURATION_MS
   const nonce = createHmac('sha256', getSigningKey())
-    .update(`${email}:${role}:${issuedAt}:${Math.random()}`)
+    .update(`${email}:${role}:${issuedAt}:${randomBytes(16).toString('hex')}`)
     .digest('hex')
     .slice(0, 16)
 
@@ -177,10 +177,15 @@ export function verifySignedAdminAuth(request: Request): {
   const authHeader = request.headers.get('authorization')
   if (authHeader) {
     const match = authHeader.match(/^Bearer\s+(.+)$/i)
-    if (match && secretKey && match[1] === secretKey) {
-      return {
-        authenticated: true,
-        admin: { email: 'api-key', role: 'super_admin' },
+    if (match && secretKey) {
+      // Use timing-safe comparison to prevent timing attacks
+      const tokenBuf = Buffer.from(match[1])
+      const keyBuf = Buffer.from(secretKey)
+      if (tokenBuf.length === keyBuf.length && timingSafeEqual(tokenBuf, keyBuf)) {
+        return {
+          authenticated: true,
+          admin: { email: 'api-key', role: 'super_admin' },
+        }
       }
     }
   }

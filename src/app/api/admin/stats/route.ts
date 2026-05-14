@@ -1,75 +1,63 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
-import { subHours, startOfDay } from 'date-fns'
+import { startOfDay } from 'date-fns'
 
 export async function GET() {
   try {
     const now = new Date()
-    const last24h = subHours(now, 24)
     const todayStart = startOfDay(now)
 
-    // User stats
-    const [totalUsers, activeUsersLast24h, newUsersToday] = await Promise.all([
+    // User stats — using only existing User model fields
+    const [totalUsers, newUsersToday] = await Promise.all([
       db.user.count(),
-      db.user.count({ where: { lastLoginAt: { gte: last24h } } }),
       db.user.count({ where: { createdAt: { gte: todayStart } } }),
     ])
 
-    // Device stats
-    const [totalDevices, activeDevices] = await Promise.all([
-      db.device.count(),
-      db.device.count({ where: { isActive: true, lastSeenAt: { gte: last24h } } }),
-    ])
+    // Active sessions (expiresAt > now means session is still valid)
+    const activeSessions = await db.session.findMany({
+      where: { expiresAt: { gt: now } },
+      select: { userId: true },
+      distinct: ['userId'],
+    })
+    const activeUsersLast24h = activeSessions.length
 
-    // Alert stats
-    const [totalAlerts, criticalAlerts] = await Promise.all([
-      db.activityLog.count({ where: { category: 'alert' } }),
-      db.activityLog.count({ where: { severity: 'critical' } }),
-    ])
+    // Family stats
+    const totalFamilies = await db.family.count()
 
-    // Plan distribution
-    const subscriptions = await db.subscription.findMany({
-      select: { plan: true },
+    // Subscription plan distribution from UserSubscription
+    const subscriptions = await db.userSubscription.findMany({
+      select: { plan: true, status: true },
     })
 
     const planDistribution: Record<string, number> = {
       free: 0,
-      basic: 0,
-      premium: 0,
-      enterprise: 0,
+      pro: 0,
+      family_plus: 0,
     }
     for (const sub of subscriptions) {
-      if (planDistribution[sub.plan] !== undefined) {
-        planDistribution[sub.plan]++
+      const plan = sub.plan || 'free'
+      if (planDistribution[plan] !== undefined) {
+        planDistribution[plan]++
       }
     }
 
-    // Also count users without subscriptions as "free"
+    // Count users without subscriptions as "free"
     const usersWithoutSub = totalUsers - subscriptions.length
-    planDistribution.free += usersWithoutSub
+    planDistribution.free += Math.max(0, usersWithoutSub)
 
-    // Revenue this month — derive from subscriptions
+    // MRR calculation from subscriptions (using plan prices: free=0, pro=4.99, family_plus=9.99)
     const planPricing: Record<string, number> = {
       free: 0,
-      basic: 9.99,
-      premium: 19.99,
-      enterprise: 49.99,
+      pro: 4.99,
+      family_plus: 9.99,
     }
 
     const monthlyRevenue = subscriptions
-      .filter(s => s.plan !== 'free')
+      .filter(s => s.status === 'active' || !s.status)
       .reduce((sum, s) => sum + (planPricing[s.plan] || 0), 0)
 
-    // Activity breakdown by category
-    const activityByCategory = await db.activityLog.groupBy({
-      by: ['category'],
-      _count: { category: true },
-    })
-
-    const activityBreakdown: Record<string, number> = {}
-    for (const entry of activityByCategory) {
-      activityBreakdown[entry.category] = entry._count.category
-    }
+    // Session stats
+    const totalSessions = await db.session.count()
 
     return NextResponse.json({
       users: {
@@ -77,19 +65,17 @@ export async function GET() {
         activeLast24h: activeUsersLast24h,
         newToday: newUsersToday,
       },
-      devices: {
-        total: totalDevices,
-        active: activeDevices,
+      sessions: {
+        total: totalSessions,
+        active: activeSessions.length,
       },
-      alerts: {
-        total: totalAlerts,
-        critical: criticalAlerts,
+      families: {
+        total: totalFamilies,
       },
       revenue: {
         thisMonth: Math.round(monthlyRevenue * 100) / 100,
       },
       planDistribution,
-      activityBreakdown,
     })
   } catch (error) {
     console.error('Stats API error:', error)

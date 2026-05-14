@@ -118,7 +118,7 @@ function AppHeaderInner() {
 
         {/* Breadcrumb Page Title */}
         <Breadcrumbs
-          separator={<ChevronRight sx={{ fontSize: 12, color: 'text.disabled' }} />}
+          separator={<ChevronRight sx={{ fontSize: 12, color: 'text.disabled', transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
           sx={{ display: { xs: 'none', sm: 'flex' }, '& .MuiBreadcrumbs-ol': { alignItems: 'center' } }}
         >
           <Typography
@@ -182,8 +182,8 @@ function AppHeaderInner() {
               readOnly
               placeholder={t.nav.search}
               sx={{
-                pl: 5,
-                pr: 10,
+                pl: isRTL ? 10 : 5,
+                pr: isRTL ? 5 : 10,
                 width: '100%',
                 fontSize: '0.75rem',
                 color: 'text.disabled',
@@ -340,7 +340,7 @@ function AppHeaderInner() {
               '&:hover': { bgcolor: 'action.hover' },
             }}
           >
-            <Person sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
+            <Person sx={{ fontSize: 16, ml: isRTL ? 1.5 : 0, mr: isRTL ? 0 : 1.5, color: 'text.secondary' }} />
             Profile
           </MenuItem>
           <MenuItem
@@ -354,7 +354,7 @@ function AppHeaderInner() {
               '&:hover': { bgcolor: 'action.hover' },
             }}
           >
-            <Settings sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
+            <Settings sx={{ fontSize: 16, ml: isRTL ? 1.5 : 0, mr: isRTL ? 0 : 1.5, color: 'text.secondary' }} />
             {t.nav.settings}
           </MenuItem>
           <Divider />
@@ -370,7 +370,7 @@ function AppHeaderInner() {
               '&:hover': { bgcolor: 'error.light' },
             }}
           >
-            <Logout sx={{ fontSize: 16, mr: 1.5 }} />
+            <Logout sx={{ fontSize: 16, ml: isRTL ? 1.5 : 0, mr: isRTL ? 0 : 1.5 }} />
             {t.auth.logout}
           </MenuItem>
         </Menu>

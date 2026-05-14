@@ -171,10 +171,10 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
 }
 
 // ─── Auth Screen — MUI ────────────────────────────────────────────
+const AUTH_FEATURES = ['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat'] as const
+
 function AuthScreen() {
   const { authView } = useAuthStore()
-
-  const features = ['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat']
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', position: 'relative', overflow: 'hidden' }}>
@@ -261,7 +261,7 @@ function AuthScreen() {
               opacity: 0,
             }}
           >
-            {features.map((feature) => (
+            {AUTH_FEATURES.map((feature) => (
               <Chip
                 key={feature}
                 label={feature}
@@ -500,7 +500,7 @@ function MainApp() {
 
   if (showOnboarding && !currentFamily) return <OnboardingFlow />
 
-  const renderPage = () => {
+  const pageContent = useMemo(() => {
     switch (currentPage) {
       case 'dashboard': return <PageWrapper><DashboardPage /></PageWrapper>
       case 'tasks': return <PageWrapper><TasksPage /></PageWrapper>
@@ -515,7 +515,7 @@ function MainApp() {
       case 'settings': return <PageWrapper><SettingsPage /></PageWrapper>
       default: return <PageWrapper><DashboardPage /></PageWrapper>
     }
-  }
+  }, [currentPage])
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', overflow: 'hidden' }}>
@@ -647,7 +647,7 @@ function MainApp() {
             <h1 tabIndex={-1} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
               {currentPage}
             </h1>
-            {renderPage()}
+            {pageContent}
           </Box>
         </Box>
       </Box>

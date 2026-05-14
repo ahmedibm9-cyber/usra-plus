@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { verifyAdminSessionToken, getAdminCookieName } from '@/lib/admin-session'
+import { timingSafeEqual } from 'crypto'
 
 // Routes that are public (no auth required) even under /api/admin/
 const ADMIN_PUBLIC_ROUTES = ['/api/admin/login', '/api/admin/logout']
@@ -26,8 +27,13 @@ export async function proxy(request: NextRequest) {
         const secretKey = process.env.ADMIN_SECRET_KEY
         if (authHeader) {
           const match = authHeader.match(/^Bearer\s+(.+)$/i)
-          if (match && secretKey && match[1] === secretKey) {
-            return NextResponse.next()
+          if (match && secretKey) {
+            // Use timing-safe comparison to prevent timing attacks
+            const tokenBuf = Buffer.from(match[1])
+            const keyBuf = Buffer.from(secretKey)
+            if (tokenBuf.length === keyBuf.length && timingSafeEqual(tokenBuf, keyBuf)) {
+              return NextResponse.next()
+            }
           }
         }
 

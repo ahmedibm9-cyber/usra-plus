@@ -2,6 +2,9 @@
 
 import { create } from 'zustand'
 
+const TYPING_TIMEOUT = 5000 // Auto-clear typing after 5 seconds
+const typingTimers = new Map<string, ReturnType<typeof setTimeout>>()
+
 interface PresenceState {
   onlineUsers: Record<string, boolean>
   typingUsers: Record<string, string> // userId -> userName (who is typing)
@@ -31,15 +34,29 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
     }),
 
   setTyping: (userId, userName) =>
-    set((state) => ({
-      typingUsers: { ...state.typingUsers, [userId]: userName },
-    })),
-
-  clearTyping: (userId) =>
     set((state) => {
+      // Clear any existing timer for this user
+      const existing = typingTimers.get(userId)
+      if (existing) clearTimeout(existing)
+
+      // Auto-clear typing status after timeout
+      const timer = setTimeout(() => {
+        usePresenceStore.getState().clearTyping(userId)
+        typingTimers.delete(userId)
+      }, TYPING_TIMEOUT)
+      typingTimers.set(userId, timer)
+
+      return { typingUsers: { ...state.typingUsers, [userId]: userName } }
+    }),
+
+  clearTyping: (userId) => {
+    const existing = typingTimers.get(userId)
+    if (existing) { clearTimeout(existing); typingTimers.delete(userId) }
+    return set((state) => {
       const { [userId]: _, ...rest } = state.typingUsers
       return { typingUsers: rest }
-    }),
+    })
+  },
 
   isUserOnline: (userId) => !!get().onlineUsers[userId],
 

@@ -78,10 +78,10 @@ function getDashboardTheme(mode: 'light' | 'dark') {
         contrastText: mode === 'dark' ? '#00382A' : '#FFFFFF',
       },
       secondary: {
-        main: mode === 'dark' ? '#FBBF24' : '#F59E0B',
-        light: mode === 'dark' ? '#FDE68A' : '#FBBF24',
-        dark: mode === 'dark' ? '#78350F' : '#B45309',
-        contrastText: mode === 'dark' ? '#451A03' : '#000000',
+        main: mode === 'dark' ? '#34D399' : '#065F46',
+        light: mode === 'dark' ? '#6EE7B7' : '#34D399',
+        dark: mode === 'dark' ? '#065F46' : '#064E3B',
+        contrastText: mode === 'dark' ? '#064E3B' : '#FFFFFF',
       },
       background: {
         default: mode === 'dark' ? '#1C1B1F' : '#FEFCF9',
@@ -89,7 +89,7 @@ function getDashboardTheme(mode: 'light' | 'dark') {
       },
       text: {
         primary: mode === 'dark' ? '#E6E1E5' : '#1C1B1F',
-        secondary: mode === 'dark' ? '#9E9C94' : '#79747E',
+        secondary: mode === 'dark' ? '#B8B5BC' : '#49454F',
       },
       divider: mode === 'dark' ? 'rgba(230, 225, 229, 0.10)' : 'rgba(28, 27, 31, 0.12)',
     },
@@ -848,7 +848,7 @@ export default function DashboardPage() {
 
   return (
     <ThemeProvider theme={dashboardTheme}>
-      <Box sx={{ bgcolor: 'background.default', overflow: 'hidden' }}>
+      <Box sx={{ bgcolor: 'background.default', overflowX: 'hidden' }}>
         <Box sx={{ mx: 'auto', maxWidth: 1280, display: 'flex', flexDirection: 'column', gap: { xs: 1.5, lg: 2.5 } }}>
 
           {/* ─── Welcome Section ──────── */}

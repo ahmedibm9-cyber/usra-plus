@@ -104,8 +104,8 @@ function mapProductToPlan(productId: string): string {
   if (id.includes('family') || id.includes('family_plus')) return 'family_plus'
   if (id.includes('max')) return 'max'
   if (id.includes('pro')) return 'pro'
-  // Default to pro if it's a paid product
-  return 'pro'
+  // Unknown products default to 'free' — prevents privilege escalation via unknown product IDs
+  return 'free'
 }
 
 /**

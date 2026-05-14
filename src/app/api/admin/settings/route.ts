@@ -1,9 +1,19 @@
 import { db } from '@/lib/db'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdminAuth } from '@/lib/admin-auth'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 // GET: Return all system settings grouped by category
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    if (rateLimitResponse) return rateLimitResponse
+
+    const auth = verifyAdminAuth(request)
+    if (!auth.authenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const settings = await db.systemSetting.findMany({
       orderBy: [{ category: 'asc' }, { key: 'asc' }],
     })
@@ -31,9 +41,21 @@ export async function GET() {
   }
 }
 
-// PUT: Update a setting by key
-export async function PUT(request: Request) {
+// PUT: Update a setting by key (super_admin only)
+export async function PUT(request: NextRequest) {
   try {
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    if (rateLimitResponse) return rateLimitResponse
+
+    const auth = verifyAdminAuth(request)
+    if (!auth.authenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (auth.admin?.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Forbidden — super_admin role required' }, { status: 403 })
+    }
+
     const body = await request.json()
     const { key, value } = body
 

@@ -76,13 +76,13 @@ function UsraLogo({ isAdmin }: { isAdmin: boolean }) {
         <path
           d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z"
           fill="currentColor"
-          style={{ color: isAdmin ? '#D97706' : '#0D6B58' }}
+          style={{ color: isAdmin ? '#065F46' : '#0D6B58' }}
           fillOpacity="0.7"
         />
         <path
           d="M20 14L25.5885 17.5V24.5L20 28L14.4115 24.5V17.5L20 14Z"
           fill="currentColor"
-          style={{ color: isAdmin ? '#D97706' : '#0D6B58' }}
+          style={{ color: isAdmin ? '#065F46' : '#0D6B58' }}
         />
       </svg>
     </Box>

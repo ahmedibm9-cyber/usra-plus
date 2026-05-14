@@ -132,8 +132,8 @@ export async function GET(request: Request) {
 
     const planColorMap: Record<string, string> = {
       free: '#9CA3AF',
-      pro: '#E50914',
-      family_plus: '#F4C430',
+      pro: '#0D9488',
+      family_plus: '#10B981',
     }
     const planNameMap: Record<string, string> = {
       free: 'Free',

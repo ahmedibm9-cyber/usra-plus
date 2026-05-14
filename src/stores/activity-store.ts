@@ -45,6 +45,9 @@ export interface GroupedTimelineItems {
   thisWeek: TimelineItem[]
 }
 
+const MAX_ACTIVITIES = 100
+const MAX_TIMELINE_ITEMS = 100
+
 interface ActivityState {
   activities: ActivityItem[]
   timelineItems: TimelineItem[]
@@ -78,9 +81,10 @@ export const useActivityStore = create<ActivityState>((set, get) => ({
     set({ activities }),
 
   addActivity: (activity) =>
-    set((state) => ({
-      activities: [activity, ...state.activities],
-    })),
+    set((state) => {
+      const updated = [activity, ...state.activities]
+      return { activities: updated.length > MAX_ACTIVITIES ? updated.slice(0, MAX_ACTIVITIES) : updated }
+    }),
 
   getRecentActivities: (count) => {
     return get().activities.slice(0, count)
@@ -90,9 +94,10 @@ export const useActivityStore = create<ActivityState>((set, get) => ({
     set({ timelineItems: items }),
 
   addTimelineItem: (item) =>
-    set((state) => ({
-      timelineItems: [item, ...state.timelineItems],
-    })),
+    set((state) => {
+      const updated = [item, ...state.timelineItems]
+      return { timelineItems: updated.length > MAX_TIMELINE_ITEMS ? updated.slice(0, MAX_TIMELINE_ITEMS) : updated }
+    }),
 
   filterByType: (type) => {
     const items = get().timelineItems

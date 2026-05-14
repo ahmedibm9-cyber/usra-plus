@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState, type ElementType } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Drawer,
   List,
@@ -155,6 +156,13 @@ function NavItemButton({
           <Icon />
         </ListItemIcon>
         {!collapsed && (
+          <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
+            exit={{ opacity: 0, width: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            style={{ overflow: 'hidden' }}
+          >
           <ListItemText
             primary={label}
             sx={{
@@ -167,6 +175,7 @@ function NavItemButton({
               },
             }}
           />
+          </motion.div>
         )}
       </ListItemButton>
     </ListItem>
@@ -352,7 +361,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                     },
                   }}
                 >
-                  <Group sx={{ fontSize: 16, mr: 1.5, color: 'inherit' }} />
+                  <Group sx={{ fontSize: 16, ml: isRTL ? 1.5 : 0, mr: isRTL ? 0 : 1.5, color: 'inherit' }} />
                   {family.name}
                 </MenuItem>
               ))}
@@ -479,7 +488,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             onClick={() => { handleNavClick('settings'); setUserMenuAnchor(null) }}
             sx={{ borderRadius: 1.5, mx: 0.5, '&:hover': { bgcolor: 'action.hover' } }}
           >
-            <Settings sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
+            <Settings sx={{ fontSize: 16, ml: isRTL ? 1.5 : 0, mr: isRTL ? 0 : 1.5, color: 'text.secondary' }} />
             {t.nav.settings}
           </MenuItem>
           <Divider />
@@ -487,7 +496,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             onClick={() => { logout(); setUserMenuAnchor(null) }}
             sx={{ borderRadius: 1.5, mx: 0.5, color: 'error.main', '&:hover': { bgcolor: 'error.light' } }}
           >
-            <Logout sx={{ fontSize: 16, mr: 1.5 }} />
+            <Logout sx={{ fontSize: 16, ml: isRTL ? 1.5 : 0, mr: isRTL ? 0 : 1.5 }} />
             {t.auth.logout}
           </MenuItem>
         </Menu>
@@ -549,7 +558,7 @@ function AppSidebarInner() {
             transition: 'all 0.2s',
           }}
         >
-          {(sidebarCollapsed && !isRTL) ? <ChevronRight sx={{ fontSize: 12 }} /> : (sidebarCollapsed && isRTL) ? <ChevronLeft sx={{ fontSize: 12 }} /> : (!sidebarCollapsed && !isRTL) ? <ChevronLeft sx={{ fontSize: 12 }} /> : <ChevronRight sx={{ fontSize: 12 }} />}
+          {(sidebarCollapsed && !isRTL) ? <ChevronRight sx={{ fontSize: 14, transition: 'transform 0.2s' }} /> : (sidebarCollapsed && isRTL) ? <ChevronLeft sx={{ fontSize: 14, transition: 'transform 0.2s' }} /> : (!sidebarCollapsed && !isRTL) ? <ChevronLeft sx={{ fontSize: 14, transition: 'transform 0.2s' }} /> : <ChevronRight sx={{ fontSize: 14, transition: 'transform 0.2s' }} />}
         </IconButton>
       </Box>
 

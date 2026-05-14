@@ -27,6 +27,8 @@ export interface ChoreLog {
   note?: string
 }
 
+const MAX_CHORE_LOGS = 200
+
 interface ChoreState {
   chores: Chore[]
   choreLogs: ChoreLog[]
@@ -71,7 +73,10 @@ export const useChoreStore = create<ChoreState>((set, get) => ({
   removeChore: (id) =>
     set((s) => ({ chores: s.chores.filter((c) => c.id !== id) })),
 
-  logCompletion: (log) => set((s) => ({ choreLogs: [...s.choreLogs, log] })),
+  logCompletion: (log) => set((s) => {
+    const updated = [...s.choreLogs, log]
+    return { choreLogs: updated.length > MAX_CHORE_LOGS ? updated.slice(-MAX_CHORE_LOGS) : updated }
+  }),
 
   rotateChore: (choreId) =>
     set((s) => ({

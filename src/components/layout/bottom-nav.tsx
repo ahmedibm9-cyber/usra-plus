@@ -91,7 +91,7 @@ function BottomNavInner() {
           pb: 'max(env(safe-area-inset-bottom), 8px)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', px: 0.5, pt: 1, pb: 0.5, width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', px: 0.25, pt: 1, pb: 0.5, width: '100%' }}>
           {mainNavItems.map((item) => {
             const isActive = currentPage === item.page
             const Icon = item.icon
@@ -109,10 +109,10 @@ function BottomNavInner() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 0.25,
-                  minWidth: 56,
+                  minWidth: 48,
                   minHeight: 44,
                   borderRadius: 3,
-                  px: 1.5,
+                  px: 1,
                   py: 0.75,
                   position: 'relative',
                   color: isActive ? 'primary.dark' : 'text.secondary',
@@ -142,7 +142,7 @@ function BottomNavInner() {
                 <Typography
                   variant="caption"
                   sx={{
-                    fontSize: '0.625rem',
+                    fontSize: '0.5625rem',
                     fontWeight: 500,
                     position: 'relative',
                     zIndex: 1,
@@ -167,10 +167,10 @@ function BottomNavInner() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: 0.25,
-              minWidth: 56,
+              minWidth: 48,
               minHeight: 44,
               borderRadius: 3,
-              px: 1.5,
+              px: 1,
               py: 0.75,
               position: 'relative',
               color: isMoreItemActive ? 'primary.dark' : 'text.secondary',
@@ -200,7 +200,7 @@ function BottomNavInner() {
             <Typography
               variant="caption"
               sx={{
-                fontSize: '0.625rem',
+                fontSize: '0.5625rem',
                 fontWeight: 500,
                 position: 'relative',
                 zIndex: 1,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { db } from '@/lib/db'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { validateCSRF } from '@/lib/csrf'
 
 // In-memory OTP attempt tracking for brute-force protection
 const otpAttempts = new Map<string, { count: number; lockedUntil: number }>()
@@ -22,6 +23,10 @@ if (typeof setInterval !== 'undefined') {
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF protection
+    const csrfError = validateCSRF(req)
+    if (csrfError) return csrfError
+
     // Rate limit verification attempts
     const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_VERIFY)
     if (rateLimitResponse) return rateLimitResponse

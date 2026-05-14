@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { validateCSRF } from '@/lib/csrf'
 import {
   createAdminSessionToken,
   getAdminCookieName,
@@ -25,7 +26,7 @@ const ROLE_NAMES: Record<AllowedRole, string> = {
 
 // Single admin account — one credential, role selected at login
 const ADMIN_EMAIL = 'admin@usraplus.com'
-// Default password for first run — should be changed via ADMIN_PASSWORD env var
+// Default password for first run — MUST be changed via ADMIN_PASSWORD env var in production
 const DEFAULT_ADMIN_PASSWORD = 'usra2024admin'
 const ADMIN_PASSWORD: string = process.env.ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD
 
@@ -51,8 +52,18 @@ const LOCKOUT_DURATION = 30 * 60 * 1000 // 30 minutes
 
 export async function POST(request: NextRequest) {
   try {
+    // CSRF protection
+    const csrfError = validateCSRF(request)
+    if (csrfError) return csrfError
+
     const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_LOGIN)
     if (rateLimitResponse) return rateLimitResponse
+
+    // Refuse default password in production
+    if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+      console.error('[AdminLogin] ADMIN_PASSWORD env var is not set — admin login is disabled in production')
+      return NextResponse.json({ success: false, error: 'Admin login is disabled — set ADMIN_PASSWORD env var' }, { status: 403 })
+    }
 
     // Warn if using default password (not configured via env var)
     if (!process.env.ADMIN_PASSWORD) {

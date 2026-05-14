@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import crypto from 'crypto'
 
 const DEMO_EMAIL = 'demo@usra.plus'
 const DEMO_PASSWORD = 'Demo2024!'
@@ -11,7 +12,7 @@ function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let code = ''
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
+    code += chars.charAt(crypto.randomInt(chars.length))
   }
   return code
 }
@@ -87,6 +88,11 @@ async function findSubscription(userId: string): Promise<string | null> {
 
 export async function POST(req: NextRequest) {
   try {
+    // Block in production — demo seed is for development/staging only
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ error: 'Demo seed endpoint is disabled in production' }, { status: 403 })
+    }
+
     const body = await req.json().catch(() => ({}))
     const secret = body.secret || ''
     const expectedSecret = process.env.DEMO_SEED_SECRET
@@ -96,7 +102,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Demo seed secret not configured' }, { status: 500 })
     }
 
-    if (secret !== expectedSecret) {
+    // Use timing-safe comparison to prevent timing attacks
+    const secretBuf = Buffer.from(String(secret))
+    const expectedBuf = Buffer.from(expectedSecret)
+    if (secretBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(secretBuf, expectedBuf)) {
       return NextResponse.json({ error: 'Invalid secret' }, { status: 403 })
     }
 
@@ -417,9 +426,9 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Demo Seed] Error:', error)
+    // Don't leak error details to client
     return NextResponse.json({
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : String(error),
     }, { status: 500 })
   }
 }
@@ -427,12 +436,20 @@ export async function POST(req: NextRequest) {
 // ─── GET: Seed via query param ─────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Demo seed endpoint is disabled in production' }, { status: 403 })
+  }
+
   const secret = new URL(req.url).searchParams.get('secret') || ''
   const expectedSecret = process.env.DEMO_SEED_SECRET
   if (!expectedSecret) {
     return NextResponse.json({ error: 'Demo seed secret not configured' }, { status: 500 })
   }
-  if (secret !== expectedSecret) {
+  // Use timing-safe comparison
+  const secretBuf = Buffer.from(String(secret))
+  const expectedBuf = Buffer.from(expectedSecret)
+  if (secretBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(secretBuf, expectedBuf)) {
     return NextResponse.json({ error: 'Invalid secret' }, { status: 403 })
   }
   const postReq = new NextRequest(req.url, {

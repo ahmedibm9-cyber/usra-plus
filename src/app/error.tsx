@@ -7,9 +7,29 @@ interface ErrorProps {
   reset: () => void
 }
 
+function isChunkLoadError(err: Error): boolean {
+  return (
+    err.name === 'ChunkLoadError' ||
+    /loading css chunk/i.test(err.message) ||
+    /loading chunk/i.test(err.message) ||
+    /failed to fetch dynamically imported module/i.test(err.message)
+  )
+}
+
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     console.error('[USRA PLUS] Page error caught:', error)
+
+    // Auto-recover from ChunkLoadError: this happens when a new deployment
+    // invalidates old JS/CSS chunks. A simple page reload fetches the new assets.
+    if (isChunkLoadError(error)) {
+      console.warn('[USRA PLUS] ChunkLoadError detected — auto-reloading to fetch updated assets')
+      // Short delay so the user sees a brief flash before reload
+      const timer = setTimeout(() => {
+        window.location.reload()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
   }, [error])
 
   return (

@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { validateCSRF } from '@/lib/csrf'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF protection
+    const csrfError = validateCSRF(req)
+    if (csrfError) return csrfError
+
     // Rate limit signup attempts
     const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_SIGNUP)
     if (rateLimitResponse) return rateLimitResponse
@@ -36,6 +41,20 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Input length limits — prevent bcrypt DoS
+    if (email.length > 254 || password.length > 128) {
+      return NextResponse.json(
+        { error: 'Input too long' },
+        { status: 400 }
+      )
+    }
+
+    // Sanitize string inputs — strip HTML tags
+    const sanitize = (str: string) => str.replace(/<[^>]*>/g, '').trim()
+    const sanitizedFirstName = firstName ? sanitize(String(firstName)).slice(0, 100) : null
+    const sanitizedLastName = lastName ? sanitize(String(lastName)).slice(0, 100) : null
+    const sanitizedPhone = phone ? sanitize(String(phone)).slice(0, 20) : null
 
     const emailLower = email.toLowerCase()
     const passwordHash = await bcrypt.hash(password, 12)
@@ -71,9 +90,9 @@ export async function POST(req: NextRequest) {
         data: {
           email: emailLower,
           passwordHash,
-          firstName: firstName || null,
-          lastName: lastName || null,
-          phone: phone || null,
+          firstName: sanitizedFirstName,
+          lastName: sanitizedLastName,
+          phone: sanitizedPhone,
           countryCode: countryCode || '+966',
           emailVerified: false,
         },
@@ -156,9 +175,9 @@ export async function POST(req: NextRequest) {
         password,
         email_confirm: false, // Don't auto-confirm — user needs to verify
         user_metadata: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone || null,
+          first_name: sanitizedFirstName,
+          last_name: sanitizedLastName,
+          phone: sanitizedPhone,
           country_code: countryCode || '+966',
         },
       })
@@ -177,9 +196,9 @@ export async function POST(req: NextRequest) {
       await supabase.from('profiles').insert({
         id: authUser.id,
         email: emailLower,
-        first_name: firstName || null,
-        last_name: lastName || null,
-        phone: phone || null,
+        first_name: sanitizedFirstName,
+        last_name: sanitizedLastName,
+        phone: sanitizedPhone,
         country_code: countryCode || '+966',
         language: 'en',
         theme: 'dark',

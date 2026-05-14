@@ -16,17 +16,17 @@ const TEAL = {
   900: '#03271F',
 }
 
-const AMBER = {
-  50: '#FFF8E1',
-  100: '#FFECB3',
-  200: '#FFE082',
-  300: '#FFD54F',
-  400: '#FFCA28',
-  500: '#F59E0B',
-  600: '#D97706',
-  700: '#B45309',
-  800: '#92400E',
-  900: '#78350F',
+const EMERALD = {
+  50: '#ECFDF5',
+  100: '#D1FAE5',
+  200: '#A7F3D0',
+  300: '#6EE7B7',
+  400: '#34D399',
+  500: '#10B981',
+  600: '#059669',
+  700: '#047857',
+  800: '#065F46',
+  900: '#064E3B',
 }
 
 const NEUTRAL = {
@@ -52,9 +52,9 @@ export const lightTheme = createTheme({
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: AMBER[500],
-      light: AMBER[300],
-      dark: AMBER[800],
+      main: EMERALD[800],
+      light: EMERALD[400],
+      dark: EMERALD[900],
       contrastText: '#FFFFFF',
     },
     background: {
@@ -63,7 +63,7 @@ export const lightTheme = createTheme({
     },
     text: {
       primary: NEUTRAL[900],
-      secondary: NEUTRAL[500],
+      secondary: NEUTRAL[700],
     },
     divider: 'rgba(28, 27, 31, 0.12)',
     error: {
@@ -78,9 +78,9 @@ export const lightTheme = createTheme({
       dark: TEAL[800],
     },
     warning: {
-      main: AMBER[600],
-      light: AMBER[100],
-      dark: AMBER[900],
+      main: EMERALD[600],
+      light: EMERALD[100],
+      dark: EMERALD[900],
     },
     info: {
       main: '#3B82F6',
@@ -225,7 +225,7 @@ export const lightTheme = createTheme({
           '&.Mui-selected': {
             backgroundColor: 'rgba(13, 107, 88, 0.08)',
             '&:hover': {
-              backgroundColor: 'rgba(13, 107, 88, 0.12)',
+              backgroundColor: 'rgba(13, 107, 88, 0.14)',
             },
           },
         },
@@ -244,10 +244,10 @@ export const darkTheme = createTheme({
       contrastText: '#00382A',
     },
     secondary: {
-      main: '#FBBF24',
-      light: '#FDE68A',
-      dark: '#78350F',
-      contrastText: '#451A03',
+      main: EMERALD[400],
+      light: EMERALD[300],
+      dark: EMERALD[800],
+      contrastText: EMERALD[900],
     },
     background: {
       default: '#1C1B1F',
@@ -255,7 +255,7 @@ export const darkTheme = createTheme({
     },
     text: {
       primary: '#E6E1E5',
-      secondary: '#9E9C94',
+      secondary: '#B8B5BC',
     },
     divider: 'rgba(230, 225, 229, 0.10)',
     error: {
@@ -270,9 +270,9 @@ export const darkTheme = createTheme({
       dark: '#A7F3D0',
     },
     warning: {
-      main: '#FBBF24',
-      light: '#78350F',
-      dark: '#FDE68A',
+      main: EMERALD[400],
+      light: EMERALD[800],
+      dark: EMERALD[200],
     },
     info: {
       main: '#93C5FD',
@@ -417,7 +417,7 @@ export const darkTheme = createTheme({
           '&.Mui-selected': {
             backgroundColor: 'rgba(110, 231, 183, 0.08)',
             '&:hover': {
-              backgroundColor: 'rgba(110, 231, 183, 0.12)',
+              backgroundColor: 'rgba(110, 231, 183, 0.14)',
             },
           },
         },

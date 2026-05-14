@@ -79,6 +79,8 @@ export interface ActivityEvent {
   details?: string
 }
 
+const MAX_ERRORS_IN_MEMORY = 200
+
 interface BugDetectionState {
   errors: CapturedError[]
   healthChecks: HealthCheck[]
@@ -226,9 +228,10 @@ export const useBugDetectionStore = create<BugDetectionState>((set, get) => {
           lastSeen: now,
           browserInfo: getBrowserInfo(),
         }
-        set((state) => ({
-          errors: [newError, ...state.errors],
-        }))
+        set((state) => {
+          const updated = [newError, ...state.errors]
+          return { errors: updated.length > MAX_ERRORS_IN_MEMORY ? updated.slice(0, MAX_ERRORS_IN_MEMORY) : updated }
+        })
 
         // Add to activity feed
         get().addActivityEvent({
