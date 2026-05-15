@@ -89,12 +89,12 @@ function PlanBadge({ plan }: { plan: string }) {
 
 function ActivityScoreBar({ score }: { score: number }) {
   const gradientClass = score >= 80
-    ? 'from-[#E50914] to-[#C40812]'
+    ? 'from-[#0D9488] to-[#0F766E]'
     : score >= 60
-      ? 'from-[#E50914] to-[#F4C430]'
-      : 'from-[#F4C430] to-[#E0B52E]'
+      ? 'from-[#0D9488] to-[#10B981]'
+      : 'from-[#10B981] to-[#34D399]'
 
-  const textColor = score >= 80 ? 'text-[#E50914]' : score >= 60 ? 'text-[#E50914]' : 'text-[#F4C430]'
+  const textColor = score >= 80 ? 'text-[#0D9488]' : score >= 60 ? 'text-[#0D9488]' : 'text-[#10B981]'
 
   return (
     <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ function HeatmapCell({ value }: { value: number }) {
 
 function FamilyConstellationCard({ family }: { family: FamilyRecord }) {
   const memberNodes = Math.min(family.members, 6)
-  const planColor = family.plan === 'Family+' ? '#F59E0B' : family.plan === 'Pro' ? '#F43F5E' : '#64748B'
+  const planColor = family.plan === 'Family+' ? '#059669' : family.plan === 'Pro' ? '#0D9488' : '#64748B'
 
   return (
     <motion.div
@@ -235,7 +235,7 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
       className="flex flex-col items-center justify-center py-20 px-4">
       {/* Network illustration */}
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-500/10 to-[--status-danger-bg] flex items-center justify-center border border-[--status-danger-border]">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-500/10 to-[--status-danger-bg] flex items-center justify-center border border-[--status-danger-border]">
           <Network className="w-10 h-10 text-[--status-danger]" />
         </div>
         {/* Decorative orbit rings */}
@@ -339,8 +339,8 @@ export function AdminFamilies() {
     const family = families.filter(f => f.plan === 'Family+').length
     return [
       { plan: 'Free', count: free, color: '#64748B', pct: families.length ? Math.round((free / families.length) * 100) : 0 },
-      { plan: 'Pro', count: pro, color: '#F43F5E', pct: families.length ? Math.round((pro / families.length) * 100) : 0 },
-      { plan: 'Family+', count: family, color: '#F59E0B', pct: families.length ? Math.round((family / families.length) * 100) : 0 },
+      { plan: 'Pro', count: pro, color: '#0D9488', pct: families.length ? Math.round((pro / families.length) * 100) : 0 },
+      { plan: 'Family+', count: family, color: '#059669', pct: families.length ? Math.round((family / families.length) * 100) : 0 },
     ]
   }, [families])
 
@@ -350,8 +350,8 @@ export function AdminFamilies() {
     const medium = families.filter(f => f.activityScore >= 50 && f.activityScore < 80).length
     const low = families.filter(f => f.activityScore < 50).length
     return [
-      { tier: 'High', count: high, color: '#F43F5E', icon: Flame },
-      { tier: 'Medium', count: medium, color: '#EC4899', icon: Zap },
+      { tier: 'High', count: high, color: '#0D9488', icon: Flame },
+      { tier: 'Medium', count: medium, color: '#10B981', icon: Zap },
       { tier: 'Low', count: low, color: '#D946EF', icon: CircleDot },
     ]
   }, [families])

@@ -92,7 +92,7 @@ import { FAB } from '@/components/shared/fab'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const EVENT_COLORS = ['#E50914', '#22C55E', '#F4C430', '#EF4444', '#F97316', '#EC4899', '#F4C430', '#F59E0B'] as const
+const EVENT_COLORS = ['#0D9488', '#22C55E', '#10B981', '#EF4444', '#F97316', '#10B981', '#10B981', '#059669'] as const
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 const DAY_LABELS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const
@@ -272,13 +272,13 @@ const MonthDayCell = React.memo(function MonthDayCell({
       aria-label={format(day, 'EEEE, MMMM d, yyyy')}
       className={`relative border-b border-r border-[--border-subtle] p-1 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-[--border-subtle]/50 ${
         !inMonth ? 'opacity-40' : ''
-      } ${today ? 'ring-1 ring-inset ring-[#E50914]/40' : ''}`}
+      } ${today ? 'ring-1 ring-inset ring-[#0D9488]/40' : ''}`}
     >
       <div className="flex items-start justify-between">
         <span
           className={`inline-flex items-center justify-center size-7 text-sm rounded-full transition-colors ${
             today
-              ? 'bg-[#E50914] text-white font-semibold'
+              ? 'bg-[#0D9488] text-white font-semibold'
               : 'text-[--text-primary]'
           }`}
         >
@@ -421,7 +421,7 @@ function WeekView({
               <div
                 className={`mt-1 inline-flex items-center justify-center size-8 text-sm rounded-full ${
                   today
-                    ? 'bg-[#E50914] text-white font-semibold'
+                    ? 'bg-[#0D9488] text-white font-semibold'
                     : 'text-[--text-primary]'
                 }`}
               >
@@ -535,7 +535,7 @@ function DayView({
         <div className="flex items-center gap-3">
           <div
             className={`inline-flex items-center justify-center size-12 text-xl font-semibold rounded-full ${
-              today ? 'bg-[#E50914] text-white' : 'text-[--text-primary]'
+              today ? 'bg-[#0D9488] text-white' : 'text-[--text-primary]'
             }`}
           >
             {format(currentDate, 'd')}
@@ -614,12 +614,12 @@ function DayView({
           {/* Current time indicator */}
           {today && (
             <div
-              className="absolute left-16 right-0 h-0.5 bg-[#E50914] z-20 pointer-events-none"
+              className="absolute left-16 right-0 h-0.5 bg-[#0D9488] z-20 pointer-events-none"
               style={{
                 top: `${(getHours(new Date()) * 60 + getMinutes(new Date())) / 1440 * 100}%`,
               }}
             >
-              <div className="absolute -left-1 -top-1 size-2.5 rounded-full bg-[#E50914]" />
+              <div className="absolute -left-1 -top-1 size-2.5 rounded-full bg-[#0D9488]" />
             </div>
           )}
         </div>
@@ -676,7 +676,7 @@ function AgendaView({
                 <div
                   className={`inline-flex items-center justify-center size-9 text-sm font-semibold rounded-full shrink-0 ${
                     today
-                      ? 'bg-[#E50914] text-white'
+                      ? 'bg-[#0D9488] text-white'
                       : 'bg-[--bg-surface] border border-[--border-subtle] text-[--text-primary]'
                   }`}
                 >
@@ -691,7 +691,7 @@ function AgendaView({
                   </p>
                 </div>
                 {today && (
-                  <Badge className="bg-[#E50914]/20 text-[#E50914] border-0 text-[10px] ml-auto">
+                  <Badge className="bg-[#0D9488]/20 text-[#0D9488] border-0 text-[10px] ml-auto">
                     Today
                   </Badge>
                 )}
@@ -850,21 +850,21 @@ function MiniCalendar({
               onClick={() => onDateSelect(day)}
               className={`h-[28px] flex flex-col items-center justify-center rounded-md transition-colors relative ${
                 !inMonth ? 'opacity-30' : 'hover:bg-[--border-subtle]'
-              } ${selected && !today ? 'ring-1 ring-[#E50914]/60 bg-[#E50914]/10' : ''}`}
+              } ${selected && !today ? 'ring-1 ring-[#0D9488]/60 bg-[#0D9488]/10' : ''}`}
             >
               <span
                 className={`text-[10px] leading-none ${
                   today
-                    ? 'bg-[#E50914] text-white rounded-full size-5 flex items-center justify-center font-semibold'
+                    ? 'bg-[#0D9488] text-white rounded-full size-5 flex items-center justify-center font-semibold'
                     : selected
-                    ? 'text-[#E50914] font-medium'
+                    ? 'text-[#0D9488] font-medium'
                     : 'text-[--text-primary]'
                 }`}
               >
                 {format(day, 'd')}
               </span>
               {hasEvents && !today && (
-                <div className="w-1 h-1 rounded-full bg-[#E50914] absolute bottom-0.5" />
+                <div className="w-1 h-1 rounded-full bg-[#0D9488] absolute bottom-0.5" />
               )}
             </button>
           )
@@ -908,7 +908,7 @@ function UpcomingEventsPanel({
         <h3 className="text-xs font-semibold text-[--text-primary]">{t.calendar.upcomingEvents}</h3>
         <button
           onClick={onViewAll}
-          className="text-[10px] text-[#E50914] hover:text-[#E50914]/80 transition-colors font-medium"
+          className="text-[10px] text-[#0D9488] hover:text-[#0D9488]/80 transition-colors font-medium"
         >
           {t.calendar.viewAll}
         </button>
@@ -940,7 +940,7 @@ function UpcomingEventsPanel({
                 </div>
                 {member && (
                   <div
-                    className="size-5 rounded-full bg-[#E50914]/20 flex items-center justify-center text-[9px] text-[#E50914] font-semibold shrink-0"
+                    className="size-5 rounded-full bg-[#0D9488]/20 flex items-center justify-center text-[9px] text-[#0D9488] font-semibold shrink-0"
                     title={getMemberName(member)}
                   >
                     {getMemberInitials(member)}
@@ -1220,7 +1220,7 @@ function EventModal({
               value={form.title}
               onChange={(e) => updateForm({ title: e.target.value })}
               placeholder="Enter event title"
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#E50914]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#0D9488]/50"
             />
           </div>
 
@@ -1235,7 +1235,7 @@ function EventModal({
               onChange={(e) => updateForm({ description: e.target.value })}
               placeholder="Add a description (optional)"
               rows={3}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] resize-none focus-visible:ring-[#E50914]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] resize-none focus-visible:ring-[#0D9488]/50"
             />
           </div>
 
@@ -1256,7 +1256,7 @@ function EventModal({
                 type="date"
                 value={form.startDate}
                 onChange={(e) => handleStartDateChange(e.target.value)}
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#E50914]/50 [color-scheme:dark]"
+                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#0D9488]/50 [color-scheme:dark]"
               />
             </div>
             {!form.allDay && (
@@ -1266,7 +1266,7 @@ function EventModal({
                   type="time"
                   value={form.startTime}
                   onChange={(e) => updateForm({ startTime: e.target.value })}
-                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#E50914]/50 [color-scheme:dark]"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#0D9488]/50 [color-scheme:dark]"
                 />
               </div>
             )}
@@ -1280,7 +1280,7 @@ function EventModal({
                 type="date"
                 value={form.endDate}
                 onChange={(e) => updateForm({ endDate: e.target.value })}
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#E50914]/50 [color-scheme:dark]"
+                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#0D9488]/50 [color-scheme:dark]"
               />
             </div>
             {!form.allDay && (
@@ -1290,7 +1290,7 @@ function EventModal({
                   type="time"
                   value={form.endTime}
                   onChange={(e) => updateForm({ endTime: e.target.value })}
-                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#E50914]/50 [color-scheme:dark]"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[#0D9488]/50 [color-scheme:dark]"
                 />
               </div>
             )}
@@ -1307,7 +1307,7 @@ function EventModal({
               value={form.location}
               onChange={(e) => updateForm({ location: e.target.value })}
               placeholder="Add location (optional)"
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#E50914]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#0D9488]/50"
             />
           </div>
 
@@ -1321,12 +1321,12 @@ function EventModal({
               value={form.repeat}
               onValueChange={(value) => updateForm({ repeat: value as RepeatOption })}
             >
-              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[#E50914]/50">
+              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[#0D9488]/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                 {repeatOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="text-[--text-primary] focus:bg-[#E50914]/20 focus:text-[--text-primary]">
+                  <SelectItem key={option.value} value={option.value} className="text-[--text-primary] focus:bg-[#0D9488]/20 focus:text-[--text-primary]">
                     {option.label}
                   </SelectItem>
                 ))}
@@ -1344,14 +1344,14 @@ function EventModal({
               value={form.assignTo}
               onValueChange={(value) => updateForm({ assignTo: value })}
             >
-              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[#E50914]/50">
+              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[#0D9488]/50">
                 <SelectValue placeholder="Select member" />
               </SelectTrigger>
               <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
                 {members.map((member) => (
-                  <SelectItem key={member.user_id} value={member.user_id} className="text-[--text-primary] focus:bg-[#E50914]/20 focus:text-[--text-primary]">
+                  <SelectItem key={member.user_id} value={member.user_id} className="text-[--text-primary] focus:bg-[#0D9488]/20 focus:text-[--text-primary]">
                     <div className="flex items-center gap-2">
-                      <div className="size-5 rounded-full bg-[#E50914]/20 flex items-center justify-center text-[9px] text-[#E50914] font-semibold">
+                      <div className="size-5 rounded-full bg-[#0D9488]/20 flex items-center justify-center text-[9px] text-[#0D9488] font-semibold">
                         {getMemberInitials(member)}
                       </div>
                       {getMemberName(member)}
@@ -1394,7 +1394,7 @@ function EventModal({
           <Button
             onClick={handleSave}
             disabled={saving || !form.title.trim()}
-            className="bg-[#E50914] hover:bg-[#C40812] text-white disabled:opacity-50 btn-glow btn-press"
+            className="bg-[#0D9488] hover:bg-[#0F766E] text-white disabled:opacity-50 btn-glow btn-press"
           >
             {saving ? t.common.loading : t.common.save}
           </Button>
@@ -1456,7 +1456,7 @@ function EventDetailDialog({
             <div>
               <p className="text-sm text-[--text-primary]">{formatEventTime(event)}</p>
               {event.all_day && (
-                <Badge className="mt-1 bg-[#E50914]/20 text-[#E50914] border-0 text-[10px]">
+                <Badge className="mt-1 bg-[#0D9488]/20 text-[#0D9488] border-0 text-[10px]">
                   All Day
                 </Badge>
               )}
@@ -1493,7 +1493,7 @@ function EventDetailDialog({
           </Button>
           <Button
             onClick={onEdit}
-            className="bg-[#E50914] hover:bg-[#C40812] text-white btn-glow btn-press"
+            className="bg-[#0D9488] hover:bg-[#0F766E] text-white btn-glow btn-press"
           >
             {t.common.edit}
           </Button>
@@ -1806,7 +1806,7 @@ export default function CalendarPage() {
                   onClick={() => setView(v)}
                   className={`h-7 px-2.5 text-xs rounded-md gap-1.5 transition-all ${
                     view === v
-                      ? 'bg-[#E50914] text-white hover:bg-[#C40812] shadow-sm'
+                      ? 'bg-[#0D9488] text-white hover:bg-[#0F766E] shadow-sm'
                       : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
                   }`}
                 >
@@ -1820,7 +1820,7 @@ export default function CalendarPage() {
             <Button
               onClick={handleAddEvent}
               size="sm"
-              className="bg-[#E50914] hover:bg-[#C40812] text-white gap-1.5 btn-glow btn-press"
+              className="bg-[#0D9488] hover:bg-[#0F766E] text-white gap-1.5 btn-glow btn-press"
             >
               <Plus className="size-4" />
               <span className="hidden sm:inline">{t.calendar.addEvent}</span>

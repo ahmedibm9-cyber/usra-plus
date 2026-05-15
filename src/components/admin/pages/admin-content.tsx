@@ -118,8 +118,8 @@ const DEFAULT_BRANDING: AppBranding = {
   appName: 'USRA PLUS',
   tagline: 'Your Family, Organized',
   taglineAr: 'عائلتك، منظمة',
-  primaryColor: '#E50914',
-  secondaryColor: '#F4C430',
+  primaryColor: '#0D9488',
+  secondaryColor: '#10B981',
   logoUrl: '',
   faviconUrl: '',
   darkModeDefault: true,
@@ -176,7 +176,7 @@ function ConfigToggle({
   description,
   checked,
   onCheckedChange,
-  accentColor = '#E50914',
+  accentColor = '#0D9488',
   badge,
 }: {
   label: React.ReactNode
@@ -251,7 +251,7 @@ function LegalEditor({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge className="text-[10px] bg-[#E50914]/10 text-[#E50914] border-[#E50914]/20">
+          <Badge className="text-[10px] bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/20">
             {languageLabel}
           </Badge>
           <span className="text-xs text-[--text-muted] font-metric">
@@ -269,7 +269,7 @@ function LegalEditor({
           )}
           <Button
             onClick={addSection}
-            className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 h-8 text-xs"
+            className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 h-8 text-xs"
           >
             <Plus className="w-3.5 h-3.5 mr-1" /> Add Section
           </Button>
@@ -282,7 +282,7 @@ function LegalEditor({
         <Input
           value={content.title}
           onChange={e => onChange({ ...content, title: e.target.value })}
-          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
         />
       </div>
 
@@ -293,7 +293,7 @@ function LegalEditor({
           type="date"
           value={content.lastUpdated}
           onChange={e => onChange({ ...content, lastUpdated: e.target.value })}
-          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
         />
       </div>
 
@@ -338,7 +338,7 @@ function LegalEditor({
                   <Input
                     value={section.heading}
                     onChange={e => updateSection(index, 'heading', e.target.value)}
-                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                     placeholder="Section heading..."
                   />
                 </div>
@@ -348,7 +348,7 @@ function LegalEditor({
                     value={section.body}
                     onChange={e => updateSection(index, 'body', e.target.value)}
                     rows={3}
-                    className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30 resize-y"
+                    className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30 resize-y"
                     placeholder="Section content..."
                   />
                 </div>
@@ -449,17 +449,17 @@ function TemplateVariablesPanel({ forTemplate }: { forTemplate?: string }) {
   return (
     <div className="space-y-2">
       <h4 className="text-xs text-[--text-muted] uppercase tracking-wider flex items-center gap-1.5">
-        <Copy className="w-3 h-3 text-[#E50914]" /> Available Variables
+        <Copy className="w-3 h-3 text-[#0D9488]" /> Available Variables
       </h4>
       <div className="grid grid-cols-1 gap-1.5">
         {vars.map(v => (
           <button
             key={v.key}
             onClick={() => copyToClipboard(v.key)}
-            className="flex items-center justify-between p-2 bg-[--bg-primary] rounded-lg border border-[--border-subtle] hover:border-[#E50914]/30 transition-colors text-left group"
+            className="flex items-center justify-between p-2 bg-[--bg-primary] rounded-lg border border-[--border-subtle] hover:border-[#0D9488]/30 transition-colors text-left group"
           >
             <div>
-              <code className="text-xs text-[#E50914] font-metric">{v.key}</code>
+              <code className="text-xs text-[#0D9488] font-metric">{v.key}</code>
               <p className="text-[9px] text-[--text-muted] mt-0.5">{v.description}</p>
             </div>
             <Copy className="w-3 h-3 text-[--text-muted] opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -476,7 +476,7 @@ function SocialMediaPreview({ branding }: { branding: AppBranding }) {
   return (
     <div className="space-y-3">
       <h4 className="text-xs text-[--text-muted] uppercase tracking-wider flex items-center gap-1.5">
-        <Share2 className="w-3 h-3 text-[#E50914]" /> Social Media Preview
+        <Share2 className="w-3 h-3 text-[#0D9488]" /> Social Media Preview
       </h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Twitter/X Card */}
@@ -765,7 +765,7 @@ export function AdminContent() {
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 h-9"
+              className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 h-9"
             >
               {isSaving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
               Save All
@@ -783,8 +783,8 @@ export function AdminContent() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <ContentCard className="p-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#E50914]/10 flex items-center justify-center">
-                <FileText className="w-3.5 h-3.5 text-[#E50914]" />
+              <div className="w-7 h-7 rounded-lg bg-[#0D9488]/10 flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5 text-[#0D9488]" />
               </div>
               <div>
                 <p className="text-[10px] text-[--text-muted]">Terms Sections</p>
@@ -794,8 +794,8 @@ export function AdminContent() {
           </ContentCard>
           <ContentCard className="p-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#F4C430]/10 flex items-center justify-center">
-                <Globe className="w-3.5 h-3.5 text-[#F4C430]" />
+              <div className="w-7 h-7 rounded-lg bg-[#10B981]/10 flex items-center justify-center">
+                <Globe className="w-3.5 h-3.5 text-[#10B981]" />
               </div>
               <div>
                 <p className="text-[10px] text-[--text-muted]">Privacy Sections</p>
@@ -816,8 +816,8 @@ export function AdminContent() {
           </ContentCard>
           <ContentCard className="p-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#E50914]/10 flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5 text-[#E50914]" />
+              <div className="w-7 h-7 rounded-lg bg-[#0D9488]/10 flex items-center justify-center">
+                <Zap className="w-3.5 h-3.5 text-[#0D9488]" />
               </div>
               <div>
                 <p className="text-[10px] text-[--text-muted]">Active Toggles</p>
@@ -836,7 +836,7 @@ export function AdminContent() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="text-[--text-muted] hover:text-[--text-secondary] px-3 py-1.5 text-xs sm:text-sm gap-1.5 rounded-lg relative data-[state=active]:bg-[#E50914]/10 data-[state=active]:text-[#E50914] data-[state=active]:shadow-none transition-all"
+                className="text-[--text-muted] hover:text-[--text-secondary] px-3 py-1.5 text-xs sm:text-sm gap-1.5 rounded-lg relative data-[state=active]:bg-[#0D9488]/10 data-[state=active]:text-[#0D9488] data-[state=active]:shadow-none transition-all"
               >
                 {tab.icon}
                 <span className="hidden sm:inline">{tab.label}</span>
@@ -844,7 +844,7 @@ export function AdminContent() {
                   <motion.div
                     layoutId="tab-underline"
                     className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #E50914, #F4C430)' }}
+                    style={{ background: 'linear-gradient(90deg, #0D9488, #10B981)' }}
                   />
                 )}
               </TabsTrigger>
@@ -866,7 +866,7 @@ export function AdminContent() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <ContentCard className="p-5">
                     <div className="flex items-center gap-2 mb-4">
-                      <Type className="w-4 h-4 text-[#E50914]" />
+                      <Type className="w-4 h-4 text-[#0D9488]" />
                       <h3 className="text-sm font-semibold text-[--text-primary]">English (EN)</h3>
                     </div>
                     <LegalEditor
@@ -880,7 +880,7 @@ export function AdminContent() {
 
                   <ContentCard className="p-5">
                     <div className="flex items-center gap-2 mb-4">
-                      <Languages className="w-4 h-4 text-[#E50914]" />
+                      <Languages className="w-4 h-4 text-[#0D9488]" />
                       <h3 className="text-sm font-semibold text-[--text-primary]">العربية (AR)</h3>
                     </div>
                     <LegalEditor
@@ -909,7 +909,7 @@ export function AdminContent() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <ContentCard className="p-5">
                     <div className="flex items-center gap-2 mb-4">
-                      <Type className="w-4 h-4 text-[#E50914]" />
+                      <Type className="w-4 h-4 text-[#0D9488]" />
                       <h3 className="text-sm font-semibold text-[--text-primary]">English (EN)</h3>
                     </div>
                     <LegalEditor
@@ -923,7 +923,7 @@ export function AdminContent() {
 
                   <ContentCard className="p-5">
                     <div className="flex items-center gap-2 mb-4">
-                      <Languages className="w-4 h-4 text-[#E50914]" />
+                      <Languages className="w-4 h-4 text-[#0D9488]" />
                       <h3 className="text-sm font-semibold text-[--text-primary]">العربية (AR)</h3>
                     </div>
                     <LegalEditor
@@ -953,7 +953,7 @@ export function AdminContent() {
                   <ContentCard className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2">
-                        <Palette className="w-4 h-4 text-[#E50914]" />
+                        <Palette className="w-4 h-4 text-[#0D9488]" />
                         <h3 className="text-sm font-semibold text-[--text-primary]">App Branding</h3>
                       </div>
                       <div className="flex items-center gap-2">
@@ -965,13 +965,13 @@ export function AdminContent() {
                         </Button>
                         <Button
                           onClick={handleExportBranding}
-                          className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 h-8 text-[10px] px-2"
+                          className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 h-8 text-[10px] px-2"
                         >
                           <Download className="w-3 h-3 mr-1" /> Export
                         </Button>
                         <Button
                           onClick={() => importInputRef.current?.click()}
-                          className="bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20 hover:bg-[#F4C430]/20 h-8 text-[10px] px-2"
+                          className="bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981]/20 h-8 text-[10px] px-2"
                         >
                           <Upload className="w-3 h-3 mr-1" /> Import
                         </Button>
@@ -992,7 +992,7 @@ export function AdminContent() {
                         <Input
                           value={branding.appName}
                           onChange={e => { setBranding({ ...branding, appName: e.target.value }); markChanged() }}
-                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                         />
                       </div>
 
@@ -1002,7 +1002,7 @@ export function AdminContent() {
                         <Input
                           value={branding.tagline}
                           onChange={e => { setBranding({ ...branding, tagline: e.target.value }); markChanged() }}
-                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                         />
                       </div>
 
@@ -1012,7 +1012,7 @@ export function AdminContent() {
                         <Input
                           value={branding.taglineAr}
                           onChange={e => { setBranding({ ...branding, taglineAr: e.target.value }); markChanged() }}
-                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                           dir="rtl"
                         />
                       </div>
@@ -1022,7 +1022,7 @@ export function AdminContent() {
                         <Switch
                           checked={branding.darkModeDefault}
                           onCheckedChange={v => { setBranding({ ...branding, darkModeDefault: v }); markChanged() }}
-                          className="data-[state=checked]:bg-[#E50914]"
+                          className="data-[state=checked]:bg-[#0D9488]"
                         />
                         <div>
                           <p className="text-sm text-[--text-secondary]">Dark Mode Default</p>
@@ -1047,7 +1047,7 @@ export function AdminContent() {
                             <Input
                               value={branding.primaryColor}
                               onChange={e => { setBranding({ ...branding, primaryColor: e.target.value }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 flex-1"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 flex-1"
                             />
                             <div className="w-10 h-10 rounded-lg" style={{ backgroundColor: branding.primaryColor }} />
                           </div>
@@ -1064,7 +1064,7 @@ export function AdminContent() {
                             <Input
                               value={branding.secondaryColor}
                               onChange={e => { setBranding({ ...branding, secondaryColor: e.target.value }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 flex-1"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 flex-1"
                             />
                             <div className="w-10 h-10 rounded-lg" style={{ backgroundColor: branding.secondaryColor }} />
                           </div>
@@ -1083,7 +1083,7 @@ export function AdminContent() {
                           <Input
                             value={branding.logoUrl}
                             onChange={e => { setBranding({ ...branding, logoUrl: e.target.value }); markChanged() }}
-                            className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                            className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                             placeholder="https://..."
                           />
                         </div>
@@ -1094,7 +1094,7 @@ export function AdminContent() {
                           <Input
                             value={branding.faviconUrl}
                             onChange={e => { setBranding({ ...branding, faviconUrl: e.target.value }); markChanged() }}
-                            className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                            className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                             placeholder="https://..."
                           />
                         </div>
@@ -1113,7 +1113,7 @@ export function AdminContent() {
                           <select
                             value={branding.fontFamily}
                             onChange={e => { setBranding({ ...branding, fontFamily: e.target.value }); markChanged() }}
-                            className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30"
+                            className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30"
                           >
                             {FONT_OPTIONS.map(font => (
                               <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>
@@ -1141,14 +1141,14 @@ export function AdminContent() {
                                   markChanged()
                                 }
                               }}
-                              className="w-full accent-[#E50914] h-2"
+                              className="w-full accent-[#0D9488] h-2"
                             />
                             <div className="flex justify-between">
                               {BORDER_RADIUS_OPTIONS.map((opt, i) => (
                                 <button
                                   key={opt.value}
                                   onClick={() => { setBranding({ ...branding, borderRadius: opt.value }); markChanged() }}
-                                  className={`text-[9px] transition-colors ${branding.borderRadius === opt.value ? 'text-[#E50914] font-bold' : 'text-[--text-muted] hover:text-[--text-secondary]'}`}
+                                  className={`text-[9px] transition-colors ${branding.borderRadius === opt.value ? 'text-[#0D9488] font-bold' : 'text-[--text-muted] hover:text-[--text-secondary]'}`}
                                 >
                                   {opt.label}
                                 </button>
@@ -1169,7 +1169,7 @@ export function AdminContent() {
                                 onClick={() => { setBranding({ ...branding, animationSpeed: opt.value }); markChanged() }}
                                 className={`flex-1 px-3 py-2 text-xs rounded-lg border transition-all ${
                                   branding.animationSpeed === opt.value
-                                    ? 'bg-[#E50914]/10 text-[#E50914] border-[#E50914]/30 font-medium'
+                                    ? 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/30 font-medium'
                                     : 'bg-[--bg-primary] text-[--text-muted] border-[--border-subtle] hover:text-[--text-secondary]'
                                 }`}
                               >
@@ -1185,9 +1185,9 @@ export function AdminContent() {
                   {/* Live Preview Section */}
                   <ContentCard className="p-6">
                     <div className="flex items-center gap-2 mb-4">
-                      <Eye className="w-4 h-4 text-[#E50914]" />
+                      <Eye className="w-4 h-4 text-[#0D9488]" />
                       <h3 className="text-sm font-semibold text-[--text-primary]">Live Preview</h3>
-                      <Badge className="text-[9px] bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20 ml-2">Real-time</Badge>
+                      <Badge className="text-[9px] bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 ml-2">Real-time</Badge>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1299,7 +1299,7 @@ export function AdminContent() {
                   <ContentCard className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2">
-                        <Settings className="w-4 h-4 text-[#E50914]" />
+                        <Settings className="w-4 h-4 text-[#0D9488]" />
                         <h3 className="text-sm font-semibold text-[--text-primary]">Application Configuration</h3>
                       </div>
                       <Button
@@ -1353,7 +1353,7 @@ export function AdminContent() {
                             <Input
                               value={appConfig.maintenanceMessageEn}
                               onChange={e => { setAppConfig({ ...appConfig, maintenanceMessageEn: e.target.value }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                             />
                           </div>
                           <div>
@@ -1361,7 +1361,7 @@ export function AdminContent() {
                             <Input
                               value={appConfig.maintenanceMessageAr}
                               onChange={e => { setAppConfig({ ...appConfig, maintenanceMessageAr: e.target.value }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                               dir="rtl"
                             />
                           </div>
@@ -1371,7 +1371,7 @@ export function AdminContent() {
                       {/* Notification Settings */}
                       <div className="pt-4 border-t border-[--border-subtle]">
                         <h4 className="text-xs text-[--text-muted] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                          <Bell className="w-3 h-3 text-[#F4C430]" /> Notification Settings
+                          <Bell className="w-3 h-3 text-[#10B981]" /> Notification Settings
                         </h4>
                         <div className="space-y-3">
                           <ConfigToggle
@@ -1379,21 +1379,21 @@ export function AdminContent() {
                             description="Send push notifications to user devices"
                             checked={appConfig.pushNotificationsEnabled}
                             onCheckedChange={v => { setAppConfig({ ...appConfig, pushNotificationsEnabled: v }); markChanged() }}
-                            accentColor="#F4C430"
+                            accentColor="#10B981"
                           />
                           <ConfigToggle
                             label="Email Notifications"
                             description="Send notification emails to users"
                             checked={appConfig.emailNotificationsEnabled}
                             onCheckedChange={v => { setAppConfig({ ...appConfig, emailNotificationsEnabled: v }); markChanged() }}
-                            accentColor="#F4C430"
+                            accentColor="#10B981"
                           />
                           <ConfigToggle
                             label="In-App Notifications"
                             description="Show notifications inside the app"
                             checked={appConfig.inAppNotificationsEnabled}
                             onCheckedChange={v => { setAppConfig({ ...appConfig, inAppNotificationsEnabled: v }); markChanged() }}
-                            accentColor="#F4C430"
+                            accentColor="#10B981"
                           />
                         </div>
                       </div>
@@ -1401,7 +1401,7 @@ export function AdminContent() {
                       {/* Security & Rate Limiting */}
                       <div className="pt-4 border-t border-[--border-subtle]">
                         <h4 className="text-xs text-[--text-muted] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                          <Shield className="w-3 h-3 text-[#E50914]" /> Security & Rate Limiting
+                          <Shield className="w-3 h-3 text-[#0D9488]" /> Security & Rate Limiting
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                           <div>
@@ -1412,7 +1412,7 @@ export function AdminContent() {
                               type="number"
                               value={appConfig.apiRateLimitPerMin}
                               onChange={e => { setAppConfig({ ...appConfig, apiRateLimitPerMin: parseInt(e.target.value) || 60 }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 font-metric"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 font-metric"
                               min={10}
                               max={1000}
                             />
@@ -1425,7 +1425,7 @@ export function AdminContent() {
                               type="number"
                               value={appConfig.sessionTimeoutHours}
                               onChange={e => { setAppConfig({ ...appConfig, sessionTimeoutHours: parseInt(e.target.value) || 24 }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 font-metric"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 font-metric"
                               min={1}
                               max={720}
                             />
@@ -1438,7 +1438,7 @@ export function AdminContent() {
                               type="number"
                               value={appConfig.maxLoginAttempts}
                               onChange={e => { setAppConfig({ ...appConfig, maxLoginAttempts: parseInt(e.target.value) || 5 }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 font-metric"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 font-metric"
                               min={3}
                               max={20}
                             />
@@ -1449,7 +1449,7 @@ export function AdminContent() {
                       {/* Content Moderation */}
                       <div className="pt-4 border-t border-[--border-subtle]">
                         <h4 className="text-xs text-[--text-muted] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                          <MessageSquare className="w-3 h-3 text-[#F4C430]" /> Content Moderation
+                          <MessageSquare className="w-3 h-3 text-[#10B981]" /> Content Moderation
                         </h4>
                         <div className="space-y-3">
                           <ConfigToggle
@@ -1457,14 +1457,14 @@ export function AdminContent() {
                             description="Automatically flag inappropriate content"
                             checked={appConfig.autoModerationEnabled}
                             onCheckedChange={v => { setAppConfig({ ...appConfig, autoModerationEnabled: v }); markChanged() }}
-                            accentColor="#F4C430"
+                            accentColor="#10B981"
                           />
                           <ConfigToggle
                             label="Profanity Filter"
                             description="Block profanity in user-generated content"
                             checked={appConfig.profanityFilterEnabled}
                             onCheckedChange={v => { setAppConfig({ ...appConfig, profanityFilterEnabled: v }); markChanged() }}
-                            accentColor="#F4C430"
+                            accentColor="#10B981"
                           />
                         </div>
                       </div>
@@ -1472,14 +1472,14 @@ export function AdminContent() {
                       {/* GDPR & Privacy */}
                       <div className="pt-4 border-t border-[--border-subtle]">
                         <h4 className="text-xs text-[--text-muted] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                          <FileDown className="w-3 h-3 text-[#E50914]" /> Data & Privacy
+                          <FileDown className="w-3 h-3 text-[#0D9488]" /> Data & Privacy
                         </h4>
                         <div className="space-y-3">
                           <ConfigToggle
                             label={
                               <>
                                 GDPR Data Export
-                                <Badge className="text-[9px] bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20 ml-1">COMPLIANCE</Badge>
+                                <Badge className="text-[9px] bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 ml-1">COMPLIANCE</Badge>
                               </>
                             }
                             description="Allow users to export their personal data"
@@ -1499,7 +1499,7 @@ export function AdminContent() {
                               type="number"
                               value={appConfig.maxFamilyMembers}
                               onChange={e => { setAppConfig({ ...appConfig, maxFamilyMembers: parseInt(e.target.value) || 10 }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 font-metric"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 font-metric"
                               min={2}
                               max={50}
                             />
@@ -1510,7 +1510,7 @@ export function AdminContent() {
                               type="number"
                               value={appConfig.maxFamiliesPerUser}
                               onChange={e => { setAppConfig({ ...appConfig, maxFamiliesPerUser: parseInt(e.target.value) || 3 }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 font-metric"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 font-metric"
                               min={1}
                               max={20}
                             />
@@ -1521,7 +1521,7 @@ export function AdminContent() {
                               type="number"
                               value={appConfig.maxFileUploadMB}
                               onChange={e => { setAppConfig({ ...appConfig, maxFileUploadMB: parseInt(e.target.value) || 25 }); markChanged() }}
-                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30 font-metric"
+                              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30 font-metric"
                               min={1}
                               max={100}
                             />
@@ -1531,7 +1531,7 @@ export function AdminContent() {
                             <select
                               value={appConfig.defaultLanguage}
                               onChange={e => { setAppConfig({ ...appConfig, defaultLanguage: e.target.value }); markChanged() }}
-                              className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30"
+                              className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30"
                             >
                               <option value="en">English</option>
                               <option value="ar">العربية</option>
@@ -1559,7 +1559,7 @@ export function AdminContent() {
                 <ContentCard className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-[#E50914]" />
+                      <Mail className="w-4 h-4 text-[#0D9488]" />
                       <h3 className="text-sm font-semibold text-[--text-primary]">Email Templates</h3>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1580,11 +1580,11 @@ export function AdminContent() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs text-[--text-muted] uppercase tracking-wider flex items-center gap-2">
-                          <Check className="w-3 h-3 text-[#F4C430]" /> Welcome Email
+                          <Check className="w-3 h-3 text-[#10B981]" /> Welcome Email
                         </h4>
                         <Button
                           onClick={() => handleSendTestEmail('welcome')}
-                          className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 h-7 text-[10px] px-2"
+                          className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 h-7 text-[10px] px-2"
                         >
                           <Send className="w-3 h-3 mr-1" /> Send Test
                         </Button>
@@ -1594,7 +1594,7 @@ export function AdminContent() {
                         <Input
                           value={emailTemplates.welcomeSubject}
                           onChange={e => { setEmailTemplates({ ...emailTemplates, welcomeSubject: e.target.value }); markChanged() }}
-                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                         />
                       </div>
                       <div>
@@ -1603,7 +1603,7 @@ export function AdminContent() {
                           value={emailTemplates.welcomeBody}
                           onChange={e => { setEmailTemplates({ ...emailTemplates, welcomeBody: e.target.value }); markChanged() }}
                           rows={5}
-                          className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30 resize-y font-mono"
+                          className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30 resize-y font-mono"
                         />
                       </div>
                       <EmailPreview
@@ -1621,7 +1621,7 @@ export function AdminContent() {
                         </h4>
                         <Button
                           onClick={() => handleSendTestEmail('passwordReset')}
-                          className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 h-7 text-[10px] px-2"
+                          className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 h-7 text-[10px] px-2"
                         >
                           <Send className="w-3 h-3 mr-1" /> Send Test
                         </Button>
@@ -1631,7 +1631,7 @@ export function AdminContent() {
                         <Input
                           value={emailTemplates.passwordResetSubject}
                           onChange={e => { setEmailTemplates({ ...emailTemplates, passwordResetSubject: e.target.value }); markChanged() }}
-                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                         />
                       </div>
                       <div>
@@ -1640,7 +1640,7 @@ export function AdminContent() {
                           value={emailTemplates.passwordResetBody}
                           onChange={e => { setEmailTemplates({ ...emailTemplates, passwordResetBody: e.target.value }); markChanged() }}
                           rows={5}
-                          className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30 resize-y font-mono"
+                          className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30 resize-y font-mono"
                         />
                       </div>
                       <EmailPreview
@@ -1654,11 +1654,11 @@ export function AdminContent() {
                     <div className="space-y-3 pt-4 border-t border-[--border-subtle]">
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs text-[--text-muted] uppercase tracking-wider flex items-center gap-2">
-                          <Mail className="w-3 h-3 text-[#E50914]" /> Family Invitation Email
+                          <Mail className="w-3 h-3 text-[#0D9488]" /> Family Invitation Email
                         </h4>
                         <Button
                           onClick={() => handleSendTestEmail('invitation')}
-                          className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 h-7 text-[10px] px-2"
+                          className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 h-7 text-[10px] px-2"
                         >
                           <Send className="w-3 h-3 mr-1" /> Send Test
                         </Button>
@@ -1668,7 +1668,7 @@ export function AdminContent() {
                         <Input
                           value={emailTemplates.invitationSubject}
                           onChange={e => { setEmailTemplates({ ...emailTemplates, invitationSubject: e.target.value }); markChanged() }}
-                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#E50914]/30"
+                          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-sm focus:border-[#0D9488]/30"
                         />
                       </div>
                       <div>
@@ -1677,7 +1677,7 @@ export function AdminContent() {
                           value={emailTemplates.invitationBody}
                           onChange={e => { setEmailTemplates({ ...emailTemplates, invitationBody: e.target.value }); markChanged() }}
                           rows={5}
-                          className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30 resize-y font-mono"
+                          className="w-full bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30 resize-y font-mono"
                         />
                       </div>
                       <EmailPreview

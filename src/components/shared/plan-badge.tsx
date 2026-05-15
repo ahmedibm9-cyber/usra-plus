@@ -28,7 +28,7 @@ export function UpgradePrompt({ feature, currentCount, limit }: { feature: strin
   <div className="flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-accent/20">
    <Sparkles className="w-4 h-4 text-accent shrink-0" />
    <p className="text-xs text-[#F5F5F0]/70 font-['Inter',sans-serif]">
-    {currentCount}/{limit} {feature} on Free plan. <span className="text-accent font-medium cursor-pointer hover:text-[#E0B52E] font-['Space_Grotesk',sans-serif]">Upgrade to Pro</span> for unlimited.
+    {currentCount}/{limit} {feature} on Free plan. <span className="text-accent font-medium cursor-pointer hover:text-[#34D399] font-['Space_Grotesk',sans-serif]">Upgrade to Pro</span> for unlimited.
    </p>
   </div>
  )

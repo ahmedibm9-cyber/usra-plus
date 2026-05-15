@@ -313,7 +313,12 @@ export function seedDemoData() {
   // ─── Subscription ──────────────────────────────────────────────────
   useSubscriptionStore.getState().setPlan('family_plus')
 
-  // 3. Mark demo data as ready — this signals to the UI that
+  // 3. Ensure onboarding is suppressed — a race condition can briefly
+  //    set showOnboarding=true before the family data is populated,
+  //    causing the OnboardingFlow to flash on screen.
+  useAppStore.getState().setShowOnboarding(false)
+
+  // 4. Mark demo data as ready — this signals to the UI that
   //    all stores are populated and it's safe to render content
   useAppStore.getState().setDemoDataReady(true)
 }

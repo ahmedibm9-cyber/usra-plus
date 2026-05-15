@@ -36,8 +36,8 @@ import { CSS } from '@dnd-kit/utilities'
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { color: string; bg: string; dot: string; label: string }> = {
   urgent: { color: 'text-red-400', bg: 'bg-red-500/15', dot: 'bg-red-500', label: 'Urgent' },
-  high: { color: 'text-[#E50914]', bg: 'bg-[#E50914]/15', dot: 'bg-[#E50914]', label: 'High' },
-  medium: { color: 'text-[#F4C430]', bg: 'bg-[#F4C430]/15', dot: 'bg-[#F4C430]', label: 'Medium' },
+  high: { color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/15', dot: 'bg-[#0D9488]', label: 'High' },
+  medium: { color: 'text-[#10B981]', bg: 'bg-[#10B981]/15', dot: 'bg-[#10B981]', label: 'Medium' },
   low: { color: 'text-green-400', bg: 'bg-green-500/15', dot: 'bg-green-500', label: 'Low' },
 }
 
@@ -53,8 +53,8 @@ interface KanbanColumnConfig {
 }
 
 const KANBAN_COLUMNS: KanbanColumnConfig[] = [
-  { id: 'todo', titleKey: 'toDo', dotColor: 'bg-amber-400', borderColor: 'border-l-amber-400', status: 'todo' },
-  { id: 'in_progress', titleKey: 'inProgress', dotColor: 'bg-[#E50914]', borderColor: 'border-l-[#E50914]', status: 'in_progress' },
+  { id: 'todo', titleKey: 'toDo', dotColor: 'bg-emerald-400', borderColor: 'border-l-emerald-400', status: 'todo' },
+  { id: 'in_progress', titleKey: 'inProgress', dotColor: 'bg-[#0D9488]', borderColor: 'border-l-[#0D9488]', status: 'in_progress' },
   { id: 'done', titleKey: 'done', dotColor: 'bg-green-400', borderColor: 'border-l-green-400', status: 'done' },
   { id: 'backlog', titleKey: 'backlog', dotColor: 'bg-gray-500', borderColor: 'border-l-gray-500', status: 'backlog' },
 ]
@@ -90,7 +90,7 @@ function KanbanTaskCard({
     <div
       className={cn(
         'bg-[--border-subtle] rounded-lg p-3 hover:bg-[--border-subtle] transition-colors cursor-grab active:cursor-grabbing border border-[--border-subtle]',
-        isDragOverlay && 'shadow-2xl shadow-[#E50914]/10 ring-1 ring-[#E50914]/20 rotate-2',
+        isDragOverlay && 'shadow-2xl shadow-[#0D9488]/10 ring-1 ring-[#0D9488]/20 rotate-2',
         task.status === 'done' && 'opacity-60'
       )}
     >
@@ -128,7 +128,7 @@ function KanbanTaskCard({
         {task.assignee && assigneeInitials && (
           <Avatar className="h-5 w-5 border border-[--border-subtle] flex-shrink-0">
             {task.assignee.avatar_url && <AvatarImage src={task.assignee.avatar_url} alt="" />}
-            <AvatarFallback className="text-[8px] bg-[#E50914]/20 text-[#E50914]">
+            <AvatarFallback className="text-[8px] bg-[#0D9488]/20 text-[#0D9488]">
               {assigneeInitials}
             </AvatarFallback>
           </Avatar>

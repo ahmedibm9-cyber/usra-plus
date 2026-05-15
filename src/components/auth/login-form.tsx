@@ -45,6 +45,12 @@ const fadeUp = {
   animate: { opacity: 1, y: 0 },
 }
 
+// Compact TextField sx — consistent across all auth forms
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': { height: 40 },
+  '& .MuiOutlinedInput-input': { fontSize: 14 },
+}
+
 // Google SVG icon
 function GoogleIcon() {
   return (
@@ -259,7 +265,7 @@ export function LoginForm() {
               borderColor: 'divider',
             }}
           >
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: 3 }}>
               {/* Top bar: Theme toggle + Language selector */}
               <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0 }}>
                 <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -270,8 +276,8 @@ export function LoginForm() {
 
               {/* Logo + Heading */}
               <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0.05 }}>
-                <Box sx={{ textAlign: 'center', mt: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
                     <IconButton
                       onClick={() => {
                         if (showAdminLogin) return
@@ -315,7 +321,7 @@ export function LoginForm() {
                     direction="row"
                     spacing={1}
                     sx={{
-                      mt: 2,
+                      mt: 1.5,
                       px: 1.5,
                       py: 1,
                       borderRadius: 2,
@@ -348,7 +354,7 @@ export function LoginForm() {
               <Box
                 component="form"
                 onSubmit={showAdminLogin ? handleAdminSubmit : handleSubmit}
-                sx={{ mt: 3, '& > .MuiBox-root + .MuiBox-root': { mt: 2 } }}
+                sx={{ mt: 2, '& > .MuiBox-root + .MuiBox-root': { mt: 1.5 } }}
               >
                 {/* Email / Access Identifier */}
                 <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0.1 }}>
@@ -372,16 +378,12 @@ export function LoginForm() {
                       input: {
                         startAdornment: (
                           <InputAdornment position="start">
-                            {showAdminLogin ? <Fingerprint sx={{ fontSize: 18, color: 'text.secondary' }} /> : <Mail sx={{ fontSize: 18, color: 'text.secondary' }} />}
+                            {showAdminLogin ? <Fingerprint sx={{ fontSize: 16, color: 'text.secondary' }} /> : <Mail sx={{ fontSize: 16, color: 'text.secondary' }} />}
                           </InputAdornment>
                         ),
                       },
                     }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        height: 48,
-                      },
-                    }}
+                    sx={textFieldSx}
                   />
                 </motion.div>
 
@@ -427,7 +429,7 @@ export function LoginForm() {
                       input: {
                         startAdornment: (
                           <InputAdornment position="start">
-                            <Lock sx={{ fontSize: 18, color: 'text.secondary' }} />
+                            <Lock sx={{ fontSize: 16, color: 'text.secondary' }} />
                           </InputAdornment>
                         ),
                         endAdornment: (
@@ -439,17 +441,13 @@ export function LoginForm() {
                               aria-label={showPassword ? 'Hide password' : 'Show password'}
                               size="small"
                             >
-                              {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                              {showPassword ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
                             </IconButton>
                           </InputAdornment>
                         ),
                       },
                     }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        height: 48,
-                      },
-                    }}
+                    sx={textFieldSx}
                   />
                 </motion.div>
 
@@ -505,7 +503,7 @@ export function LoginForm() {
                     disabled={isLoading || (showAdminLogin && adminAttempts >= 5)}
                     color={showAdminLogin ? 'secondary' : 'primary'}
                     sx={{
-                      height: 48,
+                      height: 40,
                       borderRadius: 2,
                       fontSize: 14,
                       fontWeight: 600,
@@ -532,7 +530,7 @@ export function LoginForm() {
                     sx={{
                       display: 'block',
                       textAlign: 'center',
-                      mt: 2,
+                      mt: 1.5,
                       color: 'text.secondary',
                       opacity: 0.6,
                       lineHeight: 1.8,
@@ -547,7 +545,7 @@ export function LoginForm() {
                 <>
                   {/* Divider */}
                   <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0.25 }}>
-                    <Divider sx={{ mt: 3 }}>
+                    <Divider sx={{ mt: 2 }}>
                       <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>
                         {t.auth.orContinueWith}
                       </Typography>
@@ -564,8 +562,8 @@ export function LoginForm() {
                       disabled={isLoading}
                       startIcon={isLoading ? undefined : <GoogleIcon />}
                       sx={{
-                        mt: 2,
-                        height: 48,
+                        mt: 1.5,
+                        height: 40,
                         borderRadius: 2,
                         borderColor: 'divider',
                         color: 'text.secondary',
@@ -586,7 +584,7 @@ export function LoginForm() {
                       sx={{
                         display: 'block',
                         textAlign: 'center',
-                        mt: 2,
+                        mt: 1.5,
                         color: 'text.secondary',
                         lineHeight: 1.8,
                       }}
@@ -618,7 +616,7 @@ export function LoginForm() {
                   <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0.4 }}>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', mt: 2, color: 'text.secondary' }}
+                      sx={{ textAlign: 'center', mt: 1.5, color: 'text.secondary' }}
                     >
                       {t.auth.noAccount}{' '}
                       <Link

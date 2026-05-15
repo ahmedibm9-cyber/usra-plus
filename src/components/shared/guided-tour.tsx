@@ -187,7 +187,7 @@ function CelebrationConfetti() {
    'var(--primary)',
    'var(--accent)',
    '#22C55E',
-   '#F59E0B',
+   '#059669',
    '#EF4444',
    'var(--accent)',
   ]

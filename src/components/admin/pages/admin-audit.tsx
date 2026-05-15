@@ -78,10 +78,10 @@ function getActionColor(action: string) {
   switch (action) {
     case 'login':
     case 'logout':
-      return { bg: 'bg-[#F4C430]/10', text: 'text-[#F4C430]', border: 'border-[#F4C430]/20', dot: 'bg-[#F4C430]' }
+      return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
     case 'view_user':
     case 'export_data':
-      return { bg: 'bg-[#F4C430]/10', text: 'text-[#F4C430]', border: 'border-[#F4C430]/20', dot: 'bg-[#F4C430]' }
+      return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
     case 'ban_user':
     case 'shadow_ban':
     case 'unban_user':
@@ -94,16 +94,16 @@ function getActionColor(action: string) {
       return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', dot: 'bg-[--status-warning]' }
     case 'feature_flag_toggle':
     case 'system_config_change':
-      return { bg: 'bg-[#E50914]/10', text: 'text-[#E50914]', border: 'border-[#E50914]/20', dot: 'bg-[#E50914]' }
+      return { bg: 'bg-[#0D9488]/10', text: 'text-[#0D9488]', border: 'border-[#0D9488]/20', dot: 'bg-[#0D9488]' }
     case 'clear_errors':
     case 'run_autoheal':
-      return { bg: 'bg-[#F4C430]/10', text: 'text-[#F4C430]', border: 'border-[#F4C430]/20', dot: 'bg-[#F4C430]' }
+      return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
     case 'create_coupon':
-      return { bg: 'bg-[#F4C430]/10', text: 'text-[#F4C430]', border: 'border-[#F4C430]/20', dot: 'bg-[#F4C430]' }
+      return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
     case 'send_announcement':
       return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]', dot: 'bg-[--status-danger]' }
     case 'resolve_fraud_alert':
-      return { bg: 'bg-[#F4C430]/10', text: 'text-[#F4C430]', border: 'border-[#F4C430]/20', dot: 'bg-[#F4C430]' }
+      return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
     default:
       return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', dot: 'bg-[--bg-surface-2]' }
   }
@@ -130,14 +130,14 @@ function getActionIcon(action: string) {
 
 function getTargetTypeColor(targetType: string) {
   switch (targetType) {
-    case 'user': return 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20'
+    case 'user': return 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20'
     case 'system': return 'bg-[--status-danger-bg] text-[--status-danger] border-[--status-danger-border]'
     case 'subscription': return 'bg-[--status-warning-bg] text-[--status-warning] border-[--status-warning-border]'
-    case 'feature_flag': return 'bg-[#E50914]/10 text-[#E50914] border-[#E50914]/20'
-    case 'coupon': return 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20'
+    case 'feature_flag': return 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/20'
+    case 'coupon': return 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20'
     case 'moderation': return 'bg-[--status-warning-bg] text-[--status-warning] border-[--status-warning-border]'
     case 'announcement': return 'bg-[--status-danger-bg] text-[--status-danger] border-[--status-danger-border]'
-    case 'session': return 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20'
+    case 'session': return 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20'
     default: return 'bg-[--bg-surface] text-[--text-muted] border-[--border-subtle]'
   }
 }
@@ -295,13 +295,13 @@ export function AdminAudit() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-[--text-primary]">
                 Audit
-                <span className="bg-gradient-to-r from-[#F4C430] to-[#F4C430] bg-clip-text text-transparent"> Log</span>
+                <span className="bg-gradient-to-r from-[#10B981] to-[#10B981] bg-clip-text text-transparent"> Log</span>
               </h1>
               <p className="text-sm text-[--text-muted] mt-1">Complete audit trail of all admin actions and system changes</p>
             </div>
             <div className="flex items-center gap-2">
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs ${
-                source === 'live' ? 'bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20' : 'bg-[--status-warning-bg] text-[--status-warning] border border-[--status-warning-border]'
+                source === 'live' ? 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20' : 'bg-[--status-warning-bg] text-[--status-warning] border border-[--status-warning-border]'
               }`}>
                 <Shield className="w-3 h-3" />
                 {source === 'live' ? 'Live Data' : 'Demo Data'}
@@ -325,20 +325,20 @@ export function AdminAudit() {
           title="Actions Today"
           value={stats?.actionsToday ?? '—'}
           icon={Activity}
-          color="#F4C430"
+          color="#10B981"
         />
         <StatsCard
           title="Most Active Admin"
           value={stats?.mostActiveAdmin ? stats.mostActiveAdmin.split('@')[0] : '—'}
           icon={Shield}
-          color="#F4C430"
+          color="#10B981"
           sub={stats?.mostActiveAdmin || ''}
         />
         <StatsCard
           title="Most Common Action"
           value={stats?.mostCommonAction ? formatAction(stats.mostCommonAction) : '—'}
           icon={Zap}
-          color="#C40812"
+          color="#0F766E"
         />
         <StatsCard
           title="High-Risk Actions"
@@ -355,7 +355,7 @@ export function AdminAudit() {
         <div className="px-4 py-3 border-b border-[--border-subtle]">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-[--text-primary] flex items-center gap-2">
-              <Shield className="w-4 h-4 text-[#F4C430]" />
+              <Shield className="w-4 h-4 text-[#10B981]" />
               Audit Log
               <span className="text-xs text-[--text-muted] font-normal">({total} entries)</span>
             </h3>
@@ -368,13 +368,13 @@ export function AdminAudit() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="pl-7 pr-3 py-1.5 bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#F4C430]/30 w-36"
+                  className="pl-7 pr-3 py-1.5 bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30 w-36"
                 />
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all ${
-                  showFilters ? 'bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20' : 'bg-[--bg-surface] text-[--text-muted] border border-[--border-subtle] hover:text-[--text-secondary]'
+                  showFilters ? 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20' : 'bg-[--bg-surface] text-[--text-muted] border border-[--border-subtle] hover:text-[--text-secondary]'
                 }`}
               >
                 <Filter className="w-3 h-3" />
@@ -399,7 +399,7 @@ export function AdminAudit() {
                     <select
                       value={actionFilter}
                       onChange={e => setActionFilter(e.target.value)}
-                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#F4C430]/30"
+                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30"
                     >
                       <option value="">All Actions</option>
                       {actionTypes.map(t => (
@@ -412,7 +412,7 @@ export function AdminAudit() {
                     <select
                       value={adminFilter}
                       onChange={e => setAdminFilter(e.target.value)}
-                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#F4C430]/30"
+                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30"
                     >
                       <option value="">All Admins</option>
                       {adminEmails.map(e => (
@@ -426,7 +426,7 @@ export function AdminAudit() {
                       type="date"
                       value={dateFrom}
                       onChange={e => setDateFrom(e.target.value)}
-                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#F4C430]/30"
+                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30"
                     />
                   </div>
                   <div>
@@ -435,7 +435,7 @@ export function AdminAudit() {
                       type="date"
                       value={dateTo}
                       onChange={e => setDateTo(e.target.value)}
-                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#F4C430]/30"
+                      className="w-full bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30"
                     />
                   </div>
                 </div>

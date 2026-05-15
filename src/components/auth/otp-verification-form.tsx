@@ -10,18 +10,15 @@ import { getAppTheme } from '@/lib/mui-theme'
 import {
   Card,
   CardContent,
-  TextField,
   Button,
   Typography,
   Box,
   Stack,
   IconButton,
   Alert,
-  LinearProgress,
   Tooltip,
 } from '@mui/material'
 import {
-  Mail,
   CheckCircle,
   Refresh,
   Shield,
@@ -270,7 +267,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
             overflow: 'hidden',
           }}
         >
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: 3 }}>
             {/* Language & Theme selector */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
@@ -294,8 +291,8 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                   <Box sx={{ position: 'relative' }}>
                     <Box
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: 52,
+                        height: 52,
                         borderRadius: 3,
                         display: 'flex',
                         alignItems: 'center',
@@ -306,9 +303,9 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                       }}
                     >
                       {verified ? (
-                        <CheckCircle sx={{ fontSize: 28, color: '#fff' }} />
+                        <CheckCircle sx={{ fontSize: 26, color: '#fff' }} />
                       ) : (
-                        <VpnKey sx={{ fontSize: 28, color: '#fff' }} />
+                        <VpnKey sx={{ fontSize: 26, color: '#fff' }} />
                       )}
                     </Box>
                   </Box>
@@ -407,11 +404,11 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                   >
                     <Alert
                       severity="error"
-                      icon={<ErrorOutline sx={{ fontSize: 18 }} />}
+                      icon={<ErrorOutline sx={{ fontSize: 16 }} />}
                       sx={{
-                        mt: 2,
+                        mt: 1.5,
                         borderRadius: 2,
-                        '& .MuiAlert-message': { fontSize: 14 },
+                        '& .MuiAlert-message': { fontSize: 13 },
                       }}
                     >
                       {error}
@@ -428,7 +425,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                   <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ justifyContent: 'center', mt: 3 }}
+                    sx={{ justifyContent: 'center', mt: 2.5 }}
                   >
                     {otp.map((digit, index) => (
                       <Box key={index} sx={{ position: 'relative' }}>
@@ -458,10 +455,10 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                           aria-label={`Digit ${index + 1} of ${OTP_LENGTH}`}
                           style={{
                             position: 'relative',
-                            width: 44,
-                            height: 56,
+                            width: 42,
+                            height: 52,
                             textAlign: 'center',
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: 700,
                             fontFamily: '"JetBrains Mono", monospace',
                             borderRadius: 12,
@@ -525,10 +522,10 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                     variant="contained"
                     onClick={() => handleVerify()}
                     disabled={isVerifying || otp.join('').length !== OTP_LENGTH}
-                    startIcon={<Shield sx={{ fontSize: 18 }} />}
+                    startIcon={<Shield sx={{ fontSize: 16 }} />}
                     sx={{
-                      mt: 3,
-                      height: 44,
+                      mt: 2.5,
+                      height: 40,
                       borderRadius: 2,
                       fontSize: 14,
                       fontWeight: 600,
@@ -544,7 +541,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.2 }}
                 >
-                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Box sx={{ mt: 1.5, textAlign: 'center' }}>
                     {canResend ? (
                       <Button
                         type="button"
@@ -609,10 +606,10 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                       severity="warning"
                       icon={<AutoAwesome sx={{ fontSize: 16 }} />}
                       sx={{
-                        mt: 2,
+                        mt: 1.5,
                         borderRadius: 2,
-                        bgcolor: 'rgba(217,119,6,0.05)',
-                        border: '1px solid rgba(217,119,6,0.2)',
+                        bgcolor: 'rgba(13,148,136,0.05)',
+                        border: '1px solid rgba(13,148,136,0.2)',
                         '& .MuiAlert-icon': { color: 'secondary.main' },
                       }}
                     >
@@ -655,7 +652,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.3 }}
                 >
-                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Box sx={{ mt: 1.5, textAlign: 'center' }}>
                     <Button
                       type="button"
                       size="small"

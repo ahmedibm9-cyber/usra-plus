@@ -3,8 +3,8 @@
  * No external dependencies required.
  */
 
-const DEFAULT_COLORS = ['#E50914', '#E50914', '#22C55E', '#F59E0B', '#EC4899']
-const TASK_COMPLETION_COLORS = ['#E50914', '#E50914', '#F59E0B', '#10B981']
+const DEFAULT_COLORS = ['#0D9488', '#0D9488', '#22C55E', '#059669', '#10B981']
+const TASK_COMPLETION_COLORS = ['#0D9488', '#0D9488', '#059669', '#10B981']
 
 interface Particle {
   x: number

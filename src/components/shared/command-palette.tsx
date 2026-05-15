@@ -191,9 +191,9 @@ function HighlightMatch({ text, query }: { text: string; query: string }) {
 const typeConfig: Record<ContentType, { icon: React.ElementType; color: string; bgColor: string }> = {
  tasks: { icon: CheckSquare, color: 'text-[--accent-primary]', bgColor: 'bg-[--accent-primary]/15' },
  events: { icon: CalendarClock, color: 'text-[#22C55E]', bgColor: 'bg-[#22C55E]/15' },
- grocery: { icon: ShoppingBag, color: 'text-[#F59E0B]', bgColor: 'bg-[#F59E0B]/15' },
- chat: { icon: MessageCircle, color: 'text-[#E50914]', bgColor: 'bg-[#E50914]/15' },
- files: { icon: FileText, color: 'text-[#EC4899]', bgColor: 'bg-[#EC4899]/15' },
+ grocery: { icon: ShoppingBag, color: 'text-[#059669]', bgColor: 'bg-[#059669]/15' },
+ chat: { icon: MessageCircle, color: 'text-[#0D9488]', bgColor: 'bg-[#0D9488]/15' },
+ files: { icon: FileText, color: 'text-[#10B981]', bgColor: 'bg-[#10B981]/15' },
  settings: { icon: Settings, color: 'text-muted-foreground', bgColor: 'bg-[--text-muted]/15' },
 }
 

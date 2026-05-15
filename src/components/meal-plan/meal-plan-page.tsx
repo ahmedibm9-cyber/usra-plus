@@ -73,10 +73,10 @@ function addDays(d: Date, n: number): Date {
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
 const MEAL_TYPE_CONFIG: Record<MealType, { icon: React.ElementType; colorClass: string; bgClass: string; borderClass: string }> = {
-  breakfast: { icon: Sunrise, colorClass: 'text-amber-400', bgClass: 'bg-amber-500/10', borderClass: 'border-amber-500/20' },
+  breakfast: { icon: Sunrise, colorClass: 'text-emerald-400', bgClass: 'bg-emerald-500/10', borderClass: 'border-emerald-500/20' },
   lunch: { icon: Sun, colorClass: 'text-[#22C55E]', bgClass: 'bg-[#22C55E]/10', borderClass: 'border-[#22C55E]/20' },
-  dinner: { icon: Moon, colorClass: 'text-[#E50914]', bgClass: 'bg-[#E50914]/10', borderClass: 'border-[#E50914]/20' },
-  snack: { icon: Cookie, colorClass: 'text-[#F4C430]', bgClass: 'bg-[#F4C430]/10', borderClass: 'border-[#F4C430]/20' },
+  dinner: { icon: Moon, colorClass: 'text-[#0D9488]', bgClass: 'bg-[#0D9488]/10', borderClass: 'border-[#0D9488]/20' },
+  snack: { icon: Cookie, colorClass: 'text-[#10B981]', bgClass: 'bg-[#10B981]/10', borderClass: 'border-[#10B981]/20' },
 }
 
 // ─── Meal Card ─────────────────────────────────────────────────────
@@ -355,7 +355,7 @@ function MealDialogInner({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-[10px] h-6 text-[#E50914] hover:text-[#C40812]"
+                className="text-[10px] h-6 text-[#0D9488] hover:text-[#0F766E]"
                 onClick={() => setShowGroceryImport(!showGroceryImport)}
               >
                 <ShoppingCart className="size-3 mr-1" />
@@ -385,7 +385,7 @@ function MealDialogInner({
                           className={`
                             w-full text-left text-xs px-2 py-1.5 rounded-md transition-colors
                             ${ingredients.includes(item.name)
-                              ? 'bg-[#E50914]/10 text-[#E50914]'
+                              ? 'bg-[#0D9488]/10 text-[#0D9488]'
                               : 'text-[--text-secondary] hover:bg-[--bg-surface-2]'
                             }
                           `}
@@ -459,7 +459,7 @@ function MealDialogInner({
                       className={`
                         flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border cursor-pointer transition-all
                         ${isSelected
-                          ? 'bg-[#E50914]/10 border-[#E50914]/30 text-[#E50914]'
+                          ? 'bg-[#0D9488]/10 border-[#0D9488]/30 text-[#0D9488]'
                           : 'border-[--border-subtle] text-[--text-muted] hover:border-[--border-medium]'
                         }
                       `}
@@ -504,7 +504,7 @@ function MealDialogInner({
           <Button
             type="button"
             onClick={handleSave}
-            className="bg-[#E50914] hover:bg-[#C40812] text-white"
+            className="bg-[#0D9488] hover:bg-[#0F766E] text-white"
           >
             {t.common.save}
           </Button>
@@ -629,7 +629,7 @@ function MealDetailSheet({
                 variant="outline"
                 size="sm"
                 onClick={handleAddToGrocery}
-                className="w-full border-[--border-subtle] text-[#E50914] hover:text-[#C40812] hover:border-[#E50914]/30"
+                className="w-full border-[--border-subtle] text-[#0D9488] hover:text-[#0F766E] hover:border-[#0D9488]/30"
               >
                 <ShoppingCart className="size-3.5 mr-1.5" />
                 {t.mealPlan.addToGrocery}
@@ -670,7 +670,7 @@ function MealDetailSheet({
                 href={meal.recipeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-[#E50914] hover:text-[#C40812] transition-colors"
+                className="flex items-center gap-1.5 text-xs text-[#0D9488] hover:text-[#0F766E] transition-colors"
               >
                 <ExternalLink className="size-3" />
                 {meal.recipeUrl}
@@ -784,7 +784,7 @@ function AISuggestionsDialog({
       <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] max-w-lg rounded-2xl shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
         <DialogHeader>
           <DialogTitle className="text-[--text-primary] flex items-center gap-2">
-            <Sparkles className="size-4 text-[#E50914]" />
+            <Sparkles className="size-4 text-[#0D9488]" />
             {t.mealPlan.suggestMeals}
           </DialogTitle>
         </DialogHeader>
@@ -795,7 +795,7 @@ function AISuggestionsDialog({
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="flex flex-col items-center gap-2">
-                <Sparkles className="size-6 text-[#E50914] animate-pulse" />
+                <Sparkles className="size-6 text-[#0D9488] animate-pulse" />
                 <p className="text-xs text-[--text-muted]">{isRTL ? 'جاري التحميل...' : 'Loading...'}</p>
               </div>
             </div>
@@ -810,7 +810,7 @@ function AISuggestionsDialog({
                   onSelect(suggestion)
                   onOpenChange(false)
                 }}
-                className="w-full text-left p-4 rounded-2xl border border-[--border-subtle] bg-[--bg-primary] hover:border-[#E50914]/30 hover:bg-[#E50914]/5 transition-all duration-200 cursor-pointer card-hover"
+                className="w-full text-left p-4 rounded-2xl border border-[--border-subtle] bg-[--bg-primary] hover:border-[#0D9488]/30 hover:bg-[#0D9488]/5 transition-all duration-200 cursor-pointer card-hover"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-sm font-medium text-[--text-primary]">{suggestion.title}</h3>
@@ -1023,8 +1023,8 @@ export default function MealPlanPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-10 rounded-2xl bg-[#E50914]/10">
-            <UtensilsCrossed className="size-5 text-[#E50914]" />
+          <div className="flex items-center justify-center size-10 rounded-2xl bg-[#0D9488]/10">
+            <UtensilsCrossed className="size-5 text-[#0D9488]" />
           </div>
           <div>
             <h1 className="text-xl font-bold font-display text-[--text-primary]">{t.mealPlan.title}</h1>
@@ -1051,7 +1051,7 @@ export default function MealPlanPage() {
             variant="outline"
             size="sm"
             onClick={() => setAiDialogOpen(true)}
-            className="border-[#E50914]/20 text-[#E50914] hover:text-[#C40812] hover:border-[#E50914]/30 hover:bg-[#E50914]/5"
+            className="border-[#0D9488]/20 text-[#0D9488] hover:text-[#0F766E] hover:border-[#0D9488]/30 hover:bg-[#0D9488]/5"
           >
             <Sparkles className="size-3.5 mr-1.5" />
             {t.mealPlan.suggestMeals}
@@ -1061,7 +1061,7 @@ export default function MealPlanPage() {
           <Button
             size="sm"
             onClick={handleAddNew}
-            className="bg-[#E50914] hover:bg-[#C40812] text-white"
+            className="bg-[#0D9488] hover:bg-[#0F766E] text-white"
           >
             <Plus className="size-3.5 mr-1.5" />
             {t.mealPlan.addMeal}
@@ -1083,7 +1083,7 @@ export default function MealPlanPage() {
           <Button
             size="sm"
             onClick={handleAddNew}
-            className="mt-4 bg-[#E50914] hover:bg-[#C40812] text-white"
+            className="mt-4 bg-[#0D9488] hover:bg-[#0F766E] text-white"
           >
             <Plus className="size-3.5 mr-1.5" />
             {t.mealPlan.addMeal}
@@ -1100,17 +1100,17 @@ export default function MealPlanPage() {
                   key={day.key}
                   className={`
                     flex flex-col items-center py-2 px-1 rounded-2xl shadow-lg
-                    ${day.isToday ? 'bg-[#E50914]/10 border border-[#E50914]/20' : 'bg-[--bg-surface-2]'}
+                    ${day.isToday ? 'bg-[#0D9488]/10 border border-[#0D9488]/20' : 'bg-[--bg-surface-2]'}
                   `}
                 >
-                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${day.isToday ? 'text-[#E50914]' : 'text-[--text-muted]'}`}>
+                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${day.isToday ? 'text-[#0D9488]' : 'text-[--text-muted]'}`}>
                     {day.label}
                   </span>
-                  <span className={`text-sm font-bold ${day.isToday ? 'text-[#E50914]' : 'text-[--text-primary]'}`}>
+                  <span className={`text-sm font-bold ${day.isToday ? 'text-[#0D9488]' : 'text-[--text-primary]'}`}>
                     {new Date(day.date + 'T00:00:00').getDate()}
                   </span>
                   {day.isToday && (
-                    <Badge className="text-[8px] px-1 py-0 h-3.5 bg-[#E50914]/20 text-[#E50914] border-0 mt-0.5">
+                    <Badge className="text-[8px] px-1 py-0 h-3.5 bg-[#0D9488]/20 text-[#0D9488] border-0 mt-0.5">
                       {t.mealPlan.today}
                     </Badge>
                   )}
@@ -1155,7 +1155,7 @@ export default function MealPlanPage() {
           >
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <UtensilsCrossed className="size-4 text-[#E50914]" />
+                <UtensilsCrossed className="size-4 text-[#0D9488]" />
                 <span className="text-xs text-[--text-muted]">{t.mealPlan.totalMeals}:</span>
                 <span className="text-sm font-semibold text-[--text-primary]">{weekMeals.length}</span>
               </div>

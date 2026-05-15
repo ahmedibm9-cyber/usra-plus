@@ -72,7 +72,7 @@ export function ThemeToggle() {
               exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
             >
-              <LightMode sx={{ fontSize: 18, color: '#FBBF24' }} />
+              <LightMode sx={{ fontSize: 18, color: '#34D399' }} />
             </motion.div>
           ) : (
             <motion.div

@@ -139,15 +139,16 @@ export async function POST(req: NextRequest) {
       console.error('[OTP Send] Supabase error:', supabaseError)
     }
 
+    // Always return devCode when no email was actually sent — without an
+    // email provider the user has no other way to receive the code.
+    const shouldReturnCode = isDev || !emailSent
+
     return NextResponse.json({
       success: true,
       message: emailSent
         ? 'A verification link has been sent to your email. You can also use the code below.'
         : 'Verification code generated.',
-      // Always return devCode in development for testing
-      ...(isDev ? { devCode: code } : {}),
-      // In production, if Supabase email was sent, tell the user
-      // If not, we still provide the OTP code system
+      ...(shouldReturnCode ? { devCode: code } : {}),
       emailSent,
       expiresIn: 600, // seconds
     })

@@ -44,7 +44,7 @@ const DemoModeBanner = dynamic(() => import('./demo-mode-banner').then(m => ({ d
 function AdminPageLoader() {
   return (
     <div className="flex items-center justify-center py-20">
-      <Loader2 className="w-6 h-6 animate-spin text-[#F4C430]" />
+      <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
     </div>
   )
 }
@@ -82,18 +82,18 @@ const NAV_ITEMS: { id: AdminPage; label: string; icon: React.ReactNode; group: s
 function getAccentColor(accent: ModuleAccent, type: 'bg' | 'text' | 'border' | 'bg-subtle' | 'shadow') {
   if (accent === 'founder') {
     switch (type) {
-      case 'bg': return '#F4C430'
-      case 'text': return 'text-[#F4C430]'
-      case 'border': return 'border-[#F4C430]'
-      case 'bg-subtle': return 'bg-[#F4C430]/10'
+      case 'bg': return '#10B981'
+      case 'text': return 'text-[#10B981]'
+      case 'border': return 'border-[#10B981]'
+      case 'bg-subtle': return 'bg-[#10B981]/10'
       case 'shadow': return 'rgba(244, 196, 48, 0.35)'
     }
   }
   switch (type) {
-    case 'bg': return '#E50914'
-    case 'text': return 'text-[#E50914]'
-    case 'border': return 'border-[#E50914]'
-    case 'bg-subtle': return 'bg-[#E50914]/10'
+    case 'bg': return '#0D9488'
+    case 'text': return 'text-[#0D9488]'
+    case 'border': return 'border-[#0D9488]'
+    case 'bg-subtle': return 'bg-[#0D9488]/10'
     case 'shadow': return 'rgba(229, 9, 20, 0.35)'
   }
 }
@@ -102,8 +102,8 @@ function getAccentColor(accent: ModuleAccent, type: 'bg' | 'text' | 'border' | '
 function LedIndicator({ status }: { status: 'healthy' | 'warning' | 'error' | 'idle' }) {
   const colorMap = {
     healthy: 'bg-[#22C55E] shadow-[0_0_6px_rgba(34,197,94,0.5)]',
-    warning: 'bg-[#F4C430] shadow-[0_0_6px_rgba(244,196,48,0.5)]',
-    error: 'bg-[#E50914] shadow-[0_0_6px_rgba(229,9,20,0.5)]',
+    warning: 'bg-[#10B981] shadow-[0_0_6px_rgba(244,196,48,0.5)]',
+    error: 'bg-[#0D9488] shadow-[0_0_6px_rgba(229,9,20,0.5)]',
     idle: 'bg-[--text-muted]',
   }
   return <span className={`inline-block w-1.5 h-1.5 rounded-full ${colorMap[status]}`} />
@@ -169,12 +169,12 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-lg text-[--text-muted] hover:text-[#F4C430] hover:bg-[--bg-surface-2] transition-all"
+        className="relative p-2 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[--bg-surface-2] transition-all"
         title="Notifications"
       >
         <Bell className="w-4 h-4" />
         {total > 0 && (
-          <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#E50914] text-[8px] font-bold text-white shadow-[0_0_4px_rgba(229,9,20,0.5)] px-0.5">
+          <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#0D9488] text-[8px] font-bold text-white shadow-[0_0_4px_rgba(229,9,20,0.5)] px-0.5">
             {total > 99 ? '99+' : total}
           </span>
         )}
@@ -193,7 +193,7 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
             <div className="px-4 py-3 border-b border-[--border-subtle] flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[--text-primary]">Notifications</h3>
               {total > 0 && (
-                <span className="text-[10px] font-medium text-[#E50914] bg-[--status-danger-bg] px-2 py-0.5 rounded-full">{total} items need attention</span>
+                <span className="text-[10px] font-medium text-[#0D9488] bg-[--status-danger-bg] px-2 py-0.5 rounded-full">{total} items need attention</span>
               )}
             </div>
 
@@ -257,11 +257,11 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
                     className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-[--bg-surface-2] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <LifeBuoy className="w-3.5 h-3.5 text-[#F4C430]" />
+                      <LifeBuoy className="w-3.5 h-3.5 text-[#10B981]" />
                       <span className="text-xs font-medium text-[--text-primary]">Open Tickets</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold text-[#F4C430] bg-[#F4C430]/10 px-1.5 py-0.5 rounded-full">{data.counts.openTickets}</span>
+                      <span className="text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 px-1.5 py-0.5 rounded-full">{data.counts.openTickets}</span>
                       <ArrowRight className="w-3 h-3 text-[--text-muted]" />
                     </div>
                   </button>
@@ -381,7 +381,7 @@ function AdminSearchPalette({ onNavigate }: { onNavigate: (page: AdminPage) => v
         onChange={e => { setQuery(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
         placeholder="Search commands... (Ctrl+K)"
-        className="pl-8 pr-12 py-1.5 bg-[--bg-surface-2] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#F4C430]/30 focus:ring-1 focus:ring-[#F4C430]/10 w-56 transition-all font-sans"
+        className="pl-8 pr-12 py-1.5 bg-[--bg-surface-2] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30 focus:ring-1 focus:ring-[#10B981]/10 w-56 transition-all font-sans"
       />
       <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-[--text-muted] bg-[--bg-surface] border border-[--border-subtle] rounded px-1 py-0.5 pointer-events-none">⌘K</kbd>
 
@@ -610,7 +610,7 @@ export function AdminLayout() {
         {/* Sidebar Header — Logo + Branding */}
         <div className="h-16 flex items-center px-4 border-b border-[--border-subtle]">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-[#F4C430] flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(244,196,48,0.25)]">
+            <div className="w-8 h-8 rounded-lg bg-[#10B981] flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(244,196,48,0.25)]">
               <Shield className="w-4 h-4 text-black" />
             </div>
             {!sidebarCollapsed && (
@@ -618,7 +618,7 @@ export function AdminLayout() {
                 <h1 className="text-sm font-bold text-[--text-primary] whitespace-nowrap font-display">
                   USRA PLUS
                 </h1>
-                <p className="text-[10px] text-[#F4C430] whitespace-nowrap font-medium tracking-wider font-metric">
+                <p className="text-[10px] text-[#10B981] whitespace-nowrap font-medium tracking-wider font-metric">
                   COMMAND CENTER
                 </p>
               </motion.div>
@@ -630,7 +630,7 @@ export function AdminLayout() {
         <nav className="flex-1 py-4 overflow-y-auto custom-scrollbar">
           {Object.entries(groupedNav).map(([group, items]) => {
             const groupAccent = getGroupAccent(items)
-            const accentColor = groupAccent === 'founder' ? '#F4C430' : '#E50914'
+            const accentColor = groupAccent === 'founder' ? '#10B981' : '#0D9488'
             return (
               <div key={group} className="mb-4">
                 {!sidebarCollapsed && (
@@ -658,14 +658,14 @@ export function AdminLayout() {
                 <div className="space-y-0.5 px-2">
                   {items.map((item) => {
                     const isActive = currentPage === item.id
-                    const itemAccentColor = item.accent === 'founder' ? '#F4C430' : '#E50914'
+                    const itemAccentColor = item.accent === 'founder' ? '#10B981' : '#0D9488'
                     return (
                       <button
                         key={item.id}
                         onClick={() => handleNavClick(item.id)}
                         className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm transition-all relative ${
                           isActive
-                            ? 'bg-[#F4C430]/10 text-[#F4C430]'
+                            ? 'bg-[#10B981]/10 text-[#10B981]'
                             : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-surface-2]'
                         }`}
                         title={sidebarCollapsed ? item.label : undefined}
@@ -679,7 +679,7 @@ export function AdminLayout() {
                             transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                           />
                         )}
-                        <span className={`shrink-0 ${isActive ? 'text-[#F4C430]' : 'text-[--text-muted]'}`}>
+                        <span className={`shrink-0 ${isActive ? 'text-[#10B981]' : 'text-[--text-muted]'}`}>
                           {item.icon}
                         </span>
                         {!sidebarCollapsed && (
@@ -696,7 +696,7 @@ export function AdminLayout() {
                         )}
                         {/* Founder badge for premium modules */}
                         {!isActive && item.accent === 'founder' && !sidebarCollapsed && (
-                          <Zap className="ml-auto w-3 h-3 text-[#F4C430]/30" />
+                          <Zap className="ml-auto w-3 h-3 text-[#10B981]/30" />
                         )}
                       </button>
                     )
@@ -716,7 +716,7 @@ export function AdminLayout() {
           <div className="p-2 pt-0">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="w-full flex items-center justify-center py-2 rounded-lg text-[--text-muted] hover:text-[#F4C430] hover:bg-[--bg-surface-2] transition-all"
+              className="w-full flex items-center justify-center py-2 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[--bg-surface-2] transition-all"
             >
               {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </button>
@@ -746,7 +746,7 @@ export function AdminLayout() {
               <span
                 className={`text-[10px] font-medium tracking-wide font-metric ${
                   analyticsSource === 'live' ? 'text-[#22C55E]'
-                    : analyticsSource === 'demo' ? 'text-[#F4C430]'
+                    : analyticsSource === 'demo' ? 'text-[#10B981]'
                     : 'text-[--text-muted]'
                 }`}
               >
@@ -763,14 +763,14 @@ export function AdminLayout() {
               }}
             >
               {currentAccent === 'founder' ? (
-                <Zap className="w-3 h-3 text-[#F4C430]" />
+                <Zap className="w-3 h-3 text-[#10B981]" />
               ) : (
-                <ShieldAlert className="w-3 h-3 text-[#E50914]" />
+                <ShieldAlert className="w-3 h-3 text-[#0D9488]" />
               )}
               <span
                 className="text-[10px] font-medium font-metric"
                 style={{
-                  color: currentAccent === 'founder' ? '#F4C430' : '#E50914',
+                  color: currentAccent === 'founder' ? '#10B981' : '#0D9488',
                 }}
               >
                 {currentAccent === 'founder' ? 'FOUNDER' : 'ADMIN'}
@@ -785,7 +785,7 @@ export function AdminLayout() {
             {/* Theme Toggle — Dark/Light Mode */}
             <button
               onClick={toggleTheme}
-              className="relative p-2 rounded-lg text-[--text-muted] hover:text-[#F4C430] hover:bg-[--bg-surface-2] transition-all"
+              className="relative p-2 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[--bg-surface-2] transition-all"
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {theme === 'dark' ? (
@@ -799,10 +799,10 @@ export function AdminLayout() {
             <NotificationBellDropdown onNavigate={handleNavClick} />
 
             {/* Admin Role Badge — Yellow Accent */}
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#F4C430]/[0.08] border border-[#F4C430]/15">
-              <Shield className="w-3 h-3 text-[#F4C430]" />
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#10B981]/[0.08] border border-[#10B981]/15">
+              <Shield className="w-3 h-3 text-[#10B981]" />
               <span
-                className="text-[10px] text-[#F4C430] font-medium capitalize font-metric"
+                className="text-[10px] text-[#10B981] font-medium capitalize font-metric"
               >
                 {adminRole?.replace('_', ' ')}
               </span>
@@ -811,7 +811,7 @@ export function AdminLayout() {
             {/* Avatar */}
             <div className="flex items-center gap-2">
               <div
-                className="w-7 h-7 rounded-full bg-[#F4C430] flex items-center justify-center text-black text-xs font-bold shadow-[0_0_10px_rgba(244,196,48,0.2)] font-display"
+                className="w-7 h-7 rounded-full bg-[#10B981] flex items-center justify-center text-black text-xs font-bold shadow-[0_0_10px_rgba(244,196,48,0.2)] font-display"
               >
                 {adminUser?.name?.charAt(0) || 'A'}
               </div>
@@ -825,7 +825,7 @@ export function AdminLayout() {
             {/* Logout */}
             <button
               onClick={logoutAdmin}
-              className="p-2 rounded-lg text-[--text-muted] hover:text-[#E50914] hover:bg-[#E50914]/10 transition-all"
+              className="p-2 rounded-lg text-[--text-muted] hover:text-[#0D9488] hover:bg-[#0D9488]/10 transition-all"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -880,11 +880,11 @@ export function AdminLayout() {
           <div className="flex items-center gap-4">
             {/* Active Module */}
             <span className="text-[9px] text-[--text-muted] font-metric">
-              MODULE: <span style={{ color: currentAccent === 'founder' ? '#F4C430' : '#E50914' }}>{currentNav?.label?.toUpperCase() || 'OVERVIEW'}</span>
+              MODULE: <span style={{ color: currentAccent === 'founder' ? '#10B981' : '#0D9488' }}>{currentNav?.label?.toUpperCase() || 'OVERVIEW'}</span>
             </span>
             {/* Role */}
             <span className="text-[9px] text-[--text-muted] font-metric">
-              ROLE: <span className="text-[#F4C430]">{adminRole?.toUpperCase() || 'ADMIN'}</span>
+              ROLE: <span className="text-[#10B981]">{adminRole?.toUpperCase() || 'ADMIN'}</span>
             </span>
             {/* Environment */}
             <span className="text-[9px] text-[--text-muted] font-metric">

@@ -298,7 +298,7 @@ function FamilyManagementTab() {
  }
 
  const roleBadgeColor: Record<FamilyRole, string> = {
-  owner: 'bg-accent/20 text-accent border-amber-500/30',
+  owner: 'bg-accent/20 text-accent border-emerald-500/30',
   admin: 'bg-primary/20 text-accent border-primary/30',
   member: 'bg-muted text-muted-foreground border-border',
  }
@@ -1740,7 +1740,7 @@ function SecurityTab() {
       </div>
      </div>
      <div className="flex items-center gap-2">
-      <Badge variant="outline" className="bg-amber-500/10 text-accent border-amber-500/20 text-xs">
+      <Badge variant="outline" className="bg-emerald-500/10 text-accent border-emerald-500/20 text-xs">
        Coming Soon
       </Badge>
       <Switch
@@ -2877,7 +2877,7 @@ function IntegrationsTab() {
    description: t.integrations.smartHomeDesc,
    icon: Home,
    color: 'text-accent',
-   bgColor: 'bg-amber-500/10',
+   bgColor: 'bg-emerald-500/10',
   },
  ]
 
@@ -2998,7 +2998,7 @@ function IntegrationsTab() {
         <p className="text-muted-foreground text-xs">{app.description}</p>
        </div>
        <div className="flex items-center gap-2">
-        <Badge variant="outline" className="bg-amber-500/10 text-accent border-amber-500/20 text-xs">
+        <Badge variant="outline" className="bg-emerald-500/10 text-accent border-emerald-500/20 text-xs">
          {t.integrations.comingSoon}
         </Badge>
         <Lock className="size-3.5 text-muted-foreground" />

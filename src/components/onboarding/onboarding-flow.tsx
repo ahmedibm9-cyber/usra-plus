@@ -23,12 +23,12 @@ const AVATAR_OPTIONS = ['🏠', '👨‍👩‍👧‍👦', '🕌', '🌙', '�
 
 // ─── Color Options ───────────────────────────────────────────────
 const COLOR_OPTIONS = [
-  { name: 'signal', bg: 'bg-[#E50914]', light: 'bg-[#E50914]/20', border: 'border-[#E50914]', text: 'text-[#E50914]', hex: '#E50914' },
-  { name: 'gold', bg: 'bg-[#F4C430]', light: 'bg-[#F4C430]/20', border: 'border-[#F4C430]', text: 'text-[#F4C430]', hex: '#F4C430' },
-  { name: 'emerald', bg: 'bg-[#22C55E]', light: 'bg-[#22C55E]/20', border: 'border-[#22C55E]', text: 'text-[#22C55E]', hex: '#22C55E' },
-  { name: 'amber', bg: 'bg-amber-500', light: 'bg-amber-500/20', border: 'border-amber-500', text: 'text-amber-400', hex: '#F59E0B' },
-  { name: 'rose', bg: 'bg-rose-500', light: 'bg-rose-500/20', border: 'border-rose-500', text: 'text-rose-400', hex: '#F43F5E' },
-  { name: 'cyan', bg: 'bg-[#E50914]', light: 'bg-[#E50914]/20', border: 'border-[#E50914]', text: 'text-[#E50914]', hex: '#F4C430' },
+  { name: 'teal', bg: 'bg-[#0D9488]', light: 'bg-[#0D9488]/20', border: 'border-[#0D9488]', text: 'text-[#0D9488]', hex: '#0D9488' },
+  { name: 'emerald', bg: 'bg-[#10B981]', light: 'bg-[#10B981]/20', border: 'border-[#10B981]', text: 'text-[#10B981]', hex: '#10B981' },
+  { name: 'green', bg: 'bg-[#22C55E]', light: 'bg-[#22C55E]/20', border: 'border-[#22C55E]', text: 'text-[#22C55E]', hex: '#22C55E' },
+  { name: 'jade', bg: 'bg-[#059669]', light: 'bg-[#059669]/20', border: 'border-[#059669]', text: 'text-[#059669]', hex: '#059669' },
+  { name: 'mint', bg: 'bg-[#34D399]', light: 'bg-[#34D399]/20', border: 'border-[#34D399]', text: 'text-[#34D399]', hex: '#34D399' },
+  { name: 'cyan', bg: 'bg-[#06B6D4]', light: 'bg-[#06B6D4]/20', border: 'border-[#06B6D4]', text: 'text-[#06B6D4]', hex: '#06B6D4' },
 ]
 
 // ─── Step Types ──────────────────────────────────────────────────
@@ -41,33 +41,33 @@ const FEATURE_CARDS = [
     icon: Calendar,
     title: 'Shared Calendar',
     description: 'Sync family schedules',
-    color: '#E50914',
+    color: '#0D9488',
   },
   {
     icon: ListChecks,
     title: 'Task Management',
     description: 'Assign & track chores',
-    color: '#F4C430',
+    color: '#10B981',
   },
   {
     icon: ShoppingCart,
     title: 'Smart Grocery',
     description: 'Shared shopping lists',
-    color: '#E50914',
+    color: '#0D9488',
   },
   {
     icon: MessageCircle,
     title: 'Family Chat',
     description: 'Stay connected always',
-    color: '#F4C430',
+    color: '#10B981',
   },
 ]
 
 // ─── Family Benefits Data ───────────────────────────────────────
 const FAMILY_BENEFITS = [
-  { icon: Shield, text: 'Private & secure space', color: '#E50914' },
-  { icon: Users, text: 'Up to 20 family members', color: '#F4C430' },
-  { icon: Zap, text: 'Real-time sync & updates', color: '#E50914' },
+  { icon: Shield, text: 'Private & secure space', color: '#0D9488' },
+  { icon: Users, text: 'Up to 20 family members', color: '#10B981' },
+  { icon: Zap, text: 'Real-time sync & updates', color: '#0D9488' },
 ]
 
 // ─── Floating Particle Component ────────────────────────────────
@@ -96,7 +96,7 @@ function FloatingParticles() {
             top: `${p.y}%`,
             width: p.size,
             height: p.size,
-            backgroundColor: p.id % 3 === 0 ? '#E50914' : '#F4C430',
+            backgroundColor: p.id % 3 === 0 ? '#0D9488' : '#10B981',
           }}
           animate={{
             y: [0, -30, 0],
@@ -151,9 +151,9 @@ function StepProgressBar({ currentStep }: { currentStep: OnboardingStep }) {
             <span
               className={`font-metric text-[10px] tracking-widest uppercase transition-colors duration-300 ${
                 step.num === currentStep
-                  ? 'text-[#E50914]'
+                  ? 'text-[#0D9488]'
                   : step.num < currentStep
-                  ? 'text-[#F4C430]'
+                  ? 'text-[#10B981]'
                   : 'text-[--text-muted]'
               }`}
             >
@@ -179,7 +179,7 @@ function StepProgressBar({ currentStep }: { currentStep: OnboardingStep }) {
         <motion.div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, #E50914, #F4C430)',
+            background: 'linear-gradient(90deg, #0D9488, #10B981)',
           }}
           initial={{ width: '0%' }}
           animate={{ width: `${percentage}%` }}
@@ -190,8 +190,8 @@ function StepProgressBar({ currentStep }: { currentStep: OnboardingStep }) {
           className="absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full"
           style={{
             left: `${percentage}%`,
-            background: '#F4C430',
-            boxShadow: '0 0 8px rgba(244, 196, 48, 0.6), 0 0 16px rgba(229, 9, 20, 0.3)',
+            background: '#10B981',
+            boxShadow: '0 0 8px rgba(16, 185, 129, 0.6), 0 0 16px rgba(13, 148, 136, 0.3)',
           }}
           initial={{ x: '-50%', opacity: 0 }}
           animate={{ x: '-50%', opacity: 1 }}
@@ -201,7 +201,7 @@ function StepProgressBar({ currentStep }: { currentStep: OnboardingStep }) {
 
       {/* Percentage */}
       <div className="flex justify-end mt-1.5">
-        <span className="font-metric text-[10px] text-[#F4C430] tracking-wider">
+        <span className="font-metric text-[10px] text-[#10B981] tracking-wider">
           {percentage}%
         </span>
       </div>
@@ -245,13 +245,13 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
         <motion.div
           animate={{
             boxShadow: [
-              '0 0 0 0 rgba(229, 9, 20, 0)',
-              '0 0 60px 10px rgba(229, 9, 20, 0.2)',
-              '0 0 0 0 rgba(229, 9, 20, 0)',
+              '0 0 0 0 rgba(13, 148, 136, 0)',
+              '0 0 60px 10px rgba(13, 148, 136, 0.2)',
+              '0 0 0 0 rgba(13, 148, 136, 0)',
             ],
           }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-[#E50914] via-[#C40812] to-[#8B0000] flex items-center justify-center relative"
+          className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-[#0D9488] via-[#0F766E] to-[#065F46] flex items-center justify-center relative"
         >
           <Home className="w-14 h-14 text-white" />
           {/* Inner shine */}
@@ -259,7 +259,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
         </motion.div>
         {/* Orbiting dot */}
         <motion.div
-          className="absolute w-2 h-2 rounded-full bg-[#F4C430]"
+          className="absolute w-2 h-2 rounded-full bg-[#10B981]"
           style={{ top: '50%', left: '50%' }}
           animate={{
             x: [0, 58, 0, -58, 0],
@@ -303,7 +303,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
           <motion.span
             animate={{ opacity: [1, 0] }}
             transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
-            className="inline-block w-[2px] h-5 bg-[#E50914] ml-0.5 align-middle"
+            className="inline-block w-[2px] h-5 bg-[#0D9488] ml-0.5 align-middle"
           />
         </p>
       </div>
@@ -367,7 +367,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
           >
             <Button
               onClick={onGetStarted}
-              className="w-full h-13 bg-[#E50914] hover:bg-[#C40812] text-white text-base font-semibold rounded-xl btn-press transition-all duration-300 hover:shadow-[0_0_40px_rgba(229,9,20,0.4)] relative overflow-hidden group"
+              className="w-full h-13 bg-[#0D9488] hover:bg-[#0F766E] text-white text-base font-semibold rounded-xl btn-press transition-all duration-300 hover:shadow-[0_0_40px_rgba(13,148,136,0.4)] relative overflow-hidden group"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {/* Shimmer effect */}
@@ -596,10 +596,10 @@ function FamilyStep({
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 mb-4"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-4"
         >
-          <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
-          <p className="text-xs text-amber-300">{isRTL ? 'الوضع بدون إنترنت — لن يتم حفظ العائلة على الخادم' : 'Offline mode — family will be stored locally'}</p>
+          <WifiOff className="w-4 h-4 text-emerald-400 shrink-0" />
+          <p className="text-xs text-emerald-300">{isRTL ? 'الوضع بدون إنترنت — لن يتم حفظ العائلة على الخادم' : 'Offline mode — family will be stored locally'}</p>
         </motion.div>
       )}
       <AnimatePresence mode="wait">
@@ -637,24 +637,24 @@ function FamilyStep({
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setAction('create')}
-                className="group relative rounded-2xl p-6 bg-[--bg-surface] border border-[--border-subtle] hover:border-[#E50914]/40 transition-all duration-300 text-left overflow-hidden"
+                className="group relative rounded-2xl p-6 bg-[--bg-surface] border border-[--border-subtle] hover:border-[#0D9488]/40 transition-all duration-300 text-left overflow-hidden"
                 style={{
-                  boxShadow: '0 0 0 0 rgba(229, 9, 20, 0)',
+                  boxShadow: '0 0 0 0 rgba(13, 148, 136, 0)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(229, 9, 20, 0.12)'
+                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(13, 148, 136, 0.12)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 0 rgba(229, 9, 20, 0)'
+                  e.currentTarget.style.boxShadow = '0 0 0 0 rgba(13, 148, 136, 0)'
                 }}
               >
                 {/* Animated gradient bg on hover */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#E50914]/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0D9488]/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 {/* Top accent line */}
-                <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-transparent via-[#E50914]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-transparent via-[#0D9488]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10">
-                  <div className="w-14 h-14 rounded-2xl bg-[#E50914]/15 flex items-center justify-center mb-4 group-hover:bg-[#E50914]/25 transition-colors duration-300">
-                    <Users className="w-7 h-7 text-[#E50914]" />
+                  <div className="w-14 h-14 rounded-2xl bg-[#0D9488]/15 flex items-center justify-center mb-4 group-hover:bg-[#0D9488]/25 transition-colors duration-300">
+                    <Users className="w-7 h-7 text-[#0D9488]" />
                   </div>
                   <h3
                     className="text-[--text-primary] font-semibold mb-1.5"
@@ -663,7 +663,7 @@ function FamilyStep({
                     {t.onboarding.createFamily}
                   </h3>
                   <p className="text-[--text-muted] text-sm">Start a new family space</p>
-                  <div className="mt-3 flex items-center gap-1 text-[#E50914] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="mt-3 flex items-center gap-1 text-[#0D9488] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span>Create</span>
                     <ChevronRight className="w-3 h-3" />
                   </div>
@@ -675,24 +675,24 @@ function FamilyStep({
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setAction('join')}
-                className="group relative rounded-2xl p-6 bg-[--bg-surface] border border-[--border-subtle] hover:border-[#F4C430]/40 transition-all duration-300 text-left overflow-hidden"
+                className="group relative rounded-2xl p-6 bg-[--bg-surface] border border-[--border-subtle] hover:border-[#10B981]/40 transition-all duration-300 text-left overflow-hidden"
                 style={{
-                  boxShadow: '0 0 0 0 rgba(244, 196, 48, 0)',
+                  boxShadow: '0 0 0 0 rgba(16, 185, 129, 0)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(244, 196, 48, 0.10)'
+                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(16, 185, 129, 0.10)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 0 rgba(244, 196, 48, 0)'
+                  e.currentTarget.style.boxShadow = '0 0 0 0 rgba(16, 185, 129, 0)'
                 }}
               >
                 {/* Animated gradient bg on hover */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#F4C430]/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#10B981]/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 {/* Top accent line */}
-                <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-transparent via-[#F4C430]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-transparent via-[#10B981]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10">
-                  <div className="w-14 h-14 rounded-2xl bg-[#F4C430]/15 flex items-center justify-center mb-4 group-hover:bg-[#F4C430]/25 transition-colors duration-300">
-                    <UserPlus className="w-7 h-7 text-[#F4C430]" />
+                  <div className="w-14 h-14 rounded-2xl bg-[#10B981]/15 flex items-center justify-center mb-4 group-hover:bg-[#10B981]/25 transition-colors duration-300">
+                    <UserPlus className="w-7 h-7 text-[#10B981]" />
                   </div>
                   <h3
                     className="text-[--text-primary] font-semibold mb-1.5"
@@ -701,7 +701,7 @@ function FamilyStep({
                     {t.onboarding.joinFamily}
                   </h3>
                   <p className="text-[--text-muted] text-sm">Enter an invite code</p>
-                  <div className="mt-3 flex items-center gap-1 text-[#F4C430] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="mt-3 flex items-center gap-1 text-[#10B981] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span>Join</span>
                     <ChevronRight className="w-3 h-3" />
                   </div>
@@ -758,13 +758,13 @@ function FamilyStep({
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl overflow-hidden shadow-lg">
-              {/* Red accent bar at top */}
-              <div className="h-[2px] bg-gradient-to-r from-transparent via-[#E50914] to-transparent" />
+              {/* Teal accent bar at top */}
+              <div className="h-[2px] bg-gradient-to-r from-transparent via-[#0D9488] to-transparent" />
 
               <div className="p-6 space-y-5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#E50914]/15 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-[#E50914]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#0D9488]/15 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#0D9488]" />
                   </div>
                   <div>
                     <h2
@@ -783,7 +783,7 @@ function FamilyStep({
                     value={familyName}
                     onChange={(e) => setFamilyName(e.target.value)}
                     placeholder="The Smith Family"
-                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] h-11 focus:border-[#E50914]/50 focus:ring-[#E50914]/20 transition-colors"
+                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] h-11 focus:border-[#0D9488]/50 focus:ring-[#0D9488]/20 transition-colors"
                   />
                 </div>
 
@@ -793,7 +793,7 @@ function FamilyStep({
                     value={familyDescription}
                     onChange={(e) => setFamilyDescription(e.target.value)}
                     placeholder="A loving family..."
-                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] resize-none focus:border-[#E50914]/50 focus:ring-[#E50914]/20 transition-colors"
+                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] resize-none focus:border-[#0D9488]/50 focus:ring-[#0D9488]/20 transition-colors"
                     rows={3}
                   />
                 </div>
@@ -809,7 +809,7 @@ function FamilyStep({
                   <Button
                     onClick={handleCreateFamily}
                     disabled={isLoading || !familyName.trim()}
-                    className="flex-1 bg-[#E50914] hover:bg-[#C40812] text-white h-11 font-semibold hover:shadow-[0_0_20px_rgba(229,9,20,0.3)] transition-all duration-300"
+                    className="flex-1 bg-[#0D9488] hover:bg-[#0F766E] text-white h-11 font-semibold hover:shadow-[0_0_20px_rgba(13,148,136,0.3)] transition-all duration-300"
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   >
                     {isLoading ? t.common.loading : t.onboarding.create}
@@ -829,13 +829,13 @@ function FamilyStep({
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl overflow-hidden shadow-lg">
-              {/* Yellow accent bar at top */}
-              <div className="h-[2px] bg-gradient-to-r from-transparent via-[#F4C430] to-transparent" />
+              {/* Emerald accent bar at top */}
+              <div className="h-[2px] bg-gradient-to-r from-transparent via-[#10B981] to-transparent" />
 
               <div className="p-6 space-y-5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F4C430]/15 flex items-center justify-center">
-                    <UserPlus className="w-5 h-5 text-[#F4C430]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#10B981]/15 flex items-center justify-center">
+                    <UserPlus className="w-5 h-5 text-[#10B981]" />
                   </div>
                   <div>
                     <h2
@@ -854,7 +854,7 @@ function FamilyStep({
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                     placeholder="ABCD1234"
-                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] font-metric text-lg tracking-[0.3em] text-center placeholder:text-[--text-muted] placeholder:tracking-widest h-12 focus:border-[#F4C430]/50 focus:ring-[#F4C430]/20 transition-colors"
+                    className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] font-metric text-lg tracking-[0.3em] text-center placeholder:text-[--text-muted] placeholder:tracking-widest h-12 focus:border-[#10B981]/50 focus:ring-[#10B981]/20 transition-colors"
                     maxLength={8}
                   />
                 </div>
@@ -870,7 +870,7 @@ function FamilyStep({
                   <Button
                     onClick={handleJoinFamily}
                     disabled={isLoading || !inviteCode.trim()}
-                    className="flex-1 bg-[#F4C430] hover:bg-[#D4A820] text-black font-semibold h-11 hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition-all duration-300"
+                    className="flex-1 bg-[#10B981] hover:bg-[#059669] text-white font-semibold h-11 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300"
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   >
                     {isLoading ? t.common.loading : t.onboarding.join}
@@ -969,7 +969,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
             variant="outline"
             size="sm"
             onClick={() => setAvatarGenOpen(true)}
-            className="border-[#E50914]/30 text-[#E50914] hover:bg-[#E50914]/10 hover:text-[#C40812] h-7 text-xs"
+            className="border-[#0D9488]/30 text-[#0D9488] hover:bg-[#0D9488]/10 hover:text-[#0F766E] h-7 text-xs"
           >
             <Wand2 className="size-3 mr-1" />
             {t.avatarGen.generateWithAI}
@@ -991,20 +991,20 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
               className={`w-full aspect-square rounded-xl flex items-center justify-center text-2xl transition-all duration-200 relative overflow-hidden ${
                 familyAvatar === emoji && !aiAvatarUrl
                   ? `${selectedColorOption.light} ${selectedColorOption.border} border-2 shadow-lg`
-                  : 'bg-[--bg-surface] border border-[--border-subtle] hover:border-[#E50914]/30'
+                  : 'bg-[--bg-surface] border border-[--border-subtle] hover:border-[#0D9488]/30'
               }`}
             >
               {emoji}
               {/* Hover glow ring */}
               {familyAvatar !== emoji && (
-                <div className="absolute inset-0 rounded-xl bg-[#E50914]/5 opacity-0 hover:opacity-100 transition-opacity duration-200" />
+                <div className="absolute inset-0 rounded-xl bg-[#0D9488]/5 opacity-0 hover:opacity-100 transition-opacity duration-200" />
               )}
               {/* Selected indicator dot */}
               {familyAvatar === emoji && !aiAvatarUrl && (
                 <motion.div
                   layoutId="avatar-selected"
-                  className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#E50914]"
-                  style={{ boxShadow: '0 0 6px rgba(229, 9, 20, 0.6)' }}
+                  className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#0D9488]"
+                  style={{ boxShadow: '0 0 6px rgba(13, 148, 136, 0.6)' }}
                 />
               )}
             </motion.button>
@@ -1123,7 +1123,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3 }}
           >
-            <Star className="w-5 h-5 text-[#F4C430]" />
+            <Star className="w-5 h-5 text-[#10B981]" />
           </motion.div>
           <div>
             <p
@@ -1149,7 +1149,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
       >
         <Button
           onClick={onComplete}
-          className="w-full h-13 bg-[#E50914] hover:bg-[#C40812] text-white font-semibold rounded-xl btn-press transition-all duration-300 hover:shadow-[0_0_40px_rgba(229,9,20,0.4)] flex items-center justify-center gap-2 relative overflow-hidden group"
+          className="w-full h-13 bg-[#0D9488] hover:bg-[#0F766E] text-white font-semibold rounded-xl btn-press transition-all duration-300 hover:shadow-[0_0_40px_rgba(13,148,136,0.4)] flex items-center justify-center gap-2 relative overflow-hidden group"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
           {/* Shimmer effect */}
@@ -1214,7 +1214,7 @@ export function OnboardingFlow() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="w-full max-w-lg relative z-10"
         style={{
-          boxShadow: '0 0 80px rgba(229, 9, 20, 0.04), 0 0 160px rgba(244, 196, 48, 0.02)',
+          boxShadow: '0 0 80px rgba(13, 148, 136, 0.04), 0 0 160px rgba(16, 185, 129, 0.02)',
         }}
       >
         {/* Progress Bar */}
@@ -1226,11 +1226,11 @@ export function OnboardingFlow() {
             <div
               className="w-1.5 h-1.5 rounded-full"
               style={{
-                backgroundColor: '#E50914',
-                boxShadow: '0 0 6px rgba(229, 9, 20, 0.5)',
+                backgroundColor: '#0D9488',
+                boxShadow: '0 0 6px rgba(13, 148, 136, 0.5)',
               }}
             />
-            <span className="font-metric text-[10px] tracking-[0.3em] uppercase text-[#E50914]">
+            <span className="font-metric text-[10px] tracking-[0.3em] uppercase text-[#0D9488]">
               {currentStep}/3
             </span>
           </div>

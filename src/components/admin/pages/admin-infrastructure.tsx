@@ -137,7 +137,7 @@ function formatBytes(bytes: number): string {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'healthy': return { bg: 'bg-[#F4C430]/10', text: 'text-[#F4C430]', border: 'border-[#F4C430]/20', dot: 'bg-[#F4C430]' }
+    case 'healthy': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
     case 'degraded': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', dot: 'bg-[--status-warning]' }
     case 'down': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]', dot: 'bg-[--status-danger]' }
     default: return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', dot: 'bg-[--bg-surface-2]' }
@@ -194,11 +194,11 @@ function MetricCard({ label, value, unit, icon: Icon, color, sub }: {
 function ProgressBar({ value, max, color = 'emerald' }: { value: number; max: number; color?: string }) {
   const pct = Math.min((value / max) * 100, 100)
   const colorMap: Record<string, string> = {
-    emerald: 'bg-[#F4C430]/60',
+    emerald: 'bg-[#10B981]/60',
     amber: 'bg-[--status-warning]/60',
     red: 'bg-[--status-danger-bg]',
     orange: 'bg-[--status-warning]/60',
-    cyan: 'bg-[#F4C430]/60',
+    cyan: 'bg-[#10B981]/60',
   }
   return (
     <div className="h-2 bg-[--bg-surface] rounded-full overflow-hidden">
@@ -288,7 +288,7 @@ function AdminInfrastructureInner() {
         <AlertTriangle className="w-12 h-12 text-[--status-warning] mb-4" />
         <h3 className="text-lg font-medium text-[--text-primary] mb-2">Failed to load data</h3>
         <p className="text-sm text-[--text-muted] mb-4">{error}</p>
-        <button onClick={fetchData} className="px-4 py-2 bg-[#E50914] text-white rounded-lg hover:bg-[#E50914]/80 transition-colors">
+        <button onClick={fetchData} className="px-4 py-2 bg-[#0D9488] text-white rounded-lg hover:bg-[#0D9488]/80 transition-colors">
           Retry
         </button>
       </div>
@@ -310,10 +310,10 @@ function AdminInfrastructureInner() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* ── Header ── */}
-      <motion.div variants={itemVariants} className={`relative overflow-hidden rounded-xl p-5 ${overallHealthy ? 'bg-[#F4C430]/5 border border-[#F4C430]/15' : 'bg-[--status-warning-bg] border border-[--status-warning-border]'}`}>
+      <motion.div variants={itemVariants} className={`relative overflow-hidden rounded-xl p-5 ${overallHealthy ? 'bg-[#10B981]/5 border border-[#10B981]/15' : 'bg-[--status-warning-bg] border border-[--status-warning-border]'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Terminal className="w-5 h-5 text-[#F4C430]" />
+            <Terminal className="w-5 h-5 text-[#10B981]" />
             <div>
               <h2 className="text-xl font-bold text-[--text-primary] font-metric">Server Infrastructure</h2>
               <p className="text-sm text-[--text-muted]">Live system metrics · {healthyCount}/{healthChecks.length} components healthy</p>
@@ -321,8 +321,8 @@ function AdminInfrastructureInner() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#F4C430] animate-pulse" />
-              <span className="text-[10px] font-metric text-[#F4C430]">LIVE</span>
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="text-[10px] font-metric text-[#10B981]">LIVE</span>
             </div>
             <span className="text-[10px] font-metric text-[--text-muted]">{currentTime.toLocaleTimeString()}</span>
             <button onClick={fetchData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-secondary] transition-all">
@@ -334,12 +334,12 @@ function AdminInfrastructureInner() {
 
       {/* ── Core Metrics Grid ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <MetricCard label="Heap Used" value={memory?.heapUsedMB?.toFixed(1) || '—'} unit="MB" icon={MemoryStick} color="#F4C430" sub={`of ${memory?.heapTotalMB?.toFixed(0) || '?'}MB`} />
-        <MetricCard label="System RAM" value={memory?.systemUsagePercent?.toFixed(1) || '—'} unit="%" icon={Cpu} color={memory?.systemUsagePercent && memory.systemUsagePercent > 80 ? '#EF4444' : '#F59E0B'} sub={`${memory?.systemUsedMB?.toFixed(0) || '?'}MB used`} />
-        <MetricCard label="Uptime" value={uptime?.formatted || '—'} icon={Clock} color="#F4C430" />
+        <MetricCard label="Heap Used" value={memory?.heapUsedMB?.toFixed(1) || '—'} unit="MB" icon={MemoryStick} color="#10B981" sub={`of ${memory?.heapTotalMB?.toFixed(0) || '?'}MB`} />
+        <MetricCard label="System RAM" value={memory?.systemUsagePercent?.toFixed(1) || '—'} unit="%" icon={Cpu} color={memory?.systemUsagePercent && memory.systemUsagePercent > 80 ? '#EF4444' : '#059669'} sub={`${memory?.systemUsedMB?.toFixed(0) || '?'}MB used`} />
+        <MetricCard label="Uptime" value={uptime?.formatted || '—'} icon={Clock} color="#10B981" />
         <MetricCard label="DB Size" value={typeof database?.sizeMB === 'number' ? database.sizeMB.toFixed(2) : (database?.sizeMB || '—')} unit={typeof database?.sizeMB === 'number' ? 'MB' : undefined} icon={Database} color="#F97316" sub={database ? `${database.totalRows} rows` : ''} />
-        <MetricCard label="Sessions" value={activeConnections} icon={Users} color="#C40812" sub="active" />
-        <MetricCard label="Growth" value={userGrowth ? `${userGrowth.growthRate >= 0 ? '+' : ''}${userGrowth.growthRate.toFixed(1)}` : '—'} unit="%" icon={TrendingUp} color={userGrowth && userGrowth.growthRate >= 0 ? '#F4C430' : '#EF4444'} sub="week/week" />
+        <MetricCard label="Sessions" value={activeConnections} icon={Users} color="#0F766E" sub="active" />
+        <MetricCard label="Growth" value={userGrowth ? `${userGrowth.growthRate >= 0 ? '+' : ''}${userGrowth.growthRate.toFixed(1)}` : '—'} unit="%" icon={TrendingUp} color={userGrowth && userGrowth.growthRate >= 0 ? '#10B981' : '#EF4444'} sub="week/week" />
       </div>
 
       {/* ── Memory & DB Details ── */}
@@ -351,7 +351,7 @@ function AdminInfrastructureInner() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-metric text-[--text-muted] uppercase tracking-wider">Heap Usage</span>
-                  <span className="text-[10px] font-metric text-[#F4C430]">{memory?.heapUsedMB?.toFixed(1)} / {memory?.heapTotalMB?.toFixed(1)} MB</span>
+                  <span className="text-[10px] font-metric text-[#10B981]">{memory?.heapUsedMB?.toFixed(1)} / {memory?.heapTotalMB?.toFixed(1)} MB</span>
                 </div>
                 <ProgressBar value={memory?.heapUsedMB || 0} max={memory?.heapTotalMB || 1} color="emerald" />
                 <span className="text-[10px] text-[--text-muted] font-metric">{memory?.heapUsagePercent?.toFixed(1)}% utilized</span>
@@ -367,7 +367,7 @@ function AdminInfrastructureInner() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-metric text-[--text-muted] uppercase tracking-wider">RSS (Resident Set)</span>
-                  <span className="text-[10px] font-metric text-[#F4C430]">{memory?.rssMB?.toFixed(1)} MB</span>
+                  <span className="text-[10px] font-metric text-[#10B981]">{memory?.rssMB?.toFixed(1)} MB</span>
                 </div>
                 <ProgressBar value={memory?.rssMB || 0} max={memory?.systemTotalMB || 1} color="cyan" />
               </div>
@@ -378,7 +378,7 @@ function AdminInfrastructureInner() {
                 </div>
                 <div className="bg-[--bg-primary] rounded-lg p-3">
                   <span className="text-[9px] text-[--text-muted] font-metric uppercase">Free RAM</span>
-                  <p className="text-sm font-metric text-[#F4C430]">{memory?.systemFreeMB?.toFixed(0) || '—'} MB</p>
+                  <p className="text-sm font-metric text-[#10B981]">{memory?.systemFreeMB?.toFixed(0) || '—'} MB</p>
                 </div>
               </div>
             </div>
@@ -464,7 +464,7 @@ function AdminInfrastructureInner() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[--text-secondary]" />
                   <span className="text-[10px] font-metric text-[--text-muted]">Server Uptime</span>
-                  <span className="text-sm font-metric text-[#F4C430] ml-auto">{uptime?.formatted || '—'}</span>
+                  <span className="text-sm font-metric text-[#10B981] ml-auto">{uptime?.formatted || '—'}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <HardDrive className="w-4 h-4 text-[--status-warning]" />
@@ -481,16 +481,16 @@ function AdminInfrastructureInner() {
       {userGrowth && (
         <motion.div variants={itemVariants} className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-4">
-            <TrendingUp className="w-5 h-5 text-[#F4C430]" />
+            <TrendingUp className="w-5 h-5 text-[#10B981]" />
             <h3 className="text-sm font-semibold text-[--text-primary]">User Growth</h3>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-metric ${userGrowth.growthRate >= 0 ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'bg-[--status-danger-bg] text-[--status-danger]'}`}>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-metric ${userGrowth.growthRate >= 0 ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[--status-danger-bg] text-[--status-danger]'}`}>
               {userGrowth.growthRate >= 0 ? '+' : ''}{userGrowth.growthRate.toFixed(1)}%
             </span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-[--bg-primary] rounded-lg p-3">
               <span className="text-[9px] text-[--text-muted] font-metric uppercase">This Week</span>
-              <p className="text-lg font-bold text-[#F4C430] font-metric">{userGrowth.thisWeek}</p>
+              <p className="text-lg font-bold text-[#10B981] font-metric">{userGrowth.thisWeek}</p>
             </div>
             <div className="bg-[--bg-primary] rounded-lg p-3">
               <span className="text-[9px] text-[--text-muted] font-metric uppercase">Last Week</span>
@@ -498,13 +498,13 @@ function AdminInfrastructureInner() {
             </div>
             <div className="bg-[--bg-primary] rounded-lg p-3">
               <span className="text-[9px] text-[--text-muted] font-metric uppercase">Growth</span>
-              <p className={`text-lg font-bold font-metric ${userGrowth.growthRate >= 0 ? 'text-[#F4C430]' : 'text-[--status-danger]'}`}>
+              <p className={`text-lg font-bold font-metric ${userGrowth.growthRate >= 0 ? 'text-[#10B981]' : 'text-[--status-danger]'}`}>
                 {userGrowth.growthRate >= 0 ? '+' : ''}{userGrowth.growthRate.toFixed(1)}%
               </p>
             </div>
             <div className="bg-[--bg-primary] rounded-lg p-3">
               <span className="text-[9px] text-[--text-muted] font-metric uppercase">Net Change</span>
-              <p className={`text-lg font-bold font-metric ${userGrowth.thisWeek - userGrowth.lastWeek >= 0 ? 'text-[#F4C430]' : 'text-[--status-danger]'}`}>
+              <p className={`text-lg font-bold font-metric ${userGrowth.thisWeek - userGrowth.lastWeek >= 0 ? 'text-[#10B981]' : 'text-[--status-danger]'}`}>
                 {userGrowth.thisWeek - userGrowth.lastWeek >= 0 ? '+' : ''}{userGrowth.thisWeek - userGrowth.lastWeek}
               </p>
             </div>

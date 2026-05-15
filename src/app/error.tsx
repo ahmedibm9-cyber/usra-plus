@@ -54,7 +54,7 @@ export default function Error({ error, reset }: ErrorProps) {
           width: '64px',
           height: '64px',
           borderRadius: '16px',
-          background: 'linear-gradient(135deg, #E50914, #C40812)',
+          background: 'linear-gradient(135deg, #0D9488, #0F766E)',
           marginBottom: '24px',
         }}>
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -116,7 +116,7 @@ export default function Error({ error, reset }: ErrorProps) {
               gap: '8px',
               padding: '10px 24px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #E50914, #C40812)',
+              background: 'linear-gradient(135deg, #0D9488, #0F766E)',
               color: '#FFFFFF',
               fontSize: '14px',
               fontWeight: 600,

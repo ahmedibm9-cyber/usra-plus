@@ -32,6 +32,12 @@ const fadeUp = {
   animate: { opacity: 1, y: 0 },
 }
 
+// Compact TextField sx — consistent across all auth forms
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': { height: 40 },
+  '& .MuiOutlinedInput-input': { fontSize: 14 },
+}
+
 export function ForgotPasswordForm() {
   const { setAuthView } = useAuthStore()
   const { t, isRTL } = useI18n()
@@ -108,20 +114,20 @@ export function ForgotPasswordForm() {
                 borderColor: 'divider',
               }}
             >
-              <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
                 {/* Theme toggle */}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1.5 }}>
                   <ThemeToggle />
                 </Box>
 
                 {/* Success illustration */}
                 <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2.5 }}>
                     <Box sx={{ position: 'relative' }}>
                       <Box
                         sx={{
-                          width: 80,
-                          height: 80,
+                          width: 72,
+                          height: 72,
                           borderRadius: '50%',
                           bgcolor: 'primary.light',
                           border: '1px solid',
@@ -131,7 +137,7 @@ export function ForgotPasswordForm() {
                           justifyContent: 'center',
                         }}
                       >
-                        <CheckCircle sx={{ fontSize: 40, color: 'primary.main' }} />
+                        <CheckCircle sx={{ fontSize: 36, color: 'primary.main' }} />
                       </Box>
                     </Box>
                   </Box>
@@ -160,8 +166,8 @@ export function ForgotPasswordForm() {
                     fullWidth
                     startIcon={<ArrowBack sx={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
                     sx={{
-                      mt: 4,
-                      height: 44,
+                      mt: 3,
+                      height: 40,
                       borderRadius: 2,
                       borderColor: 'divider',
                       color: 'text.secondary',
@@ -199,20 +205,20 @@ export function ForgotPasswordForm() {
               borderColor: 'divider',
             }}
           >
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: 3 }}>
               {/* Theme toggle */}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1.5 }}>
                 <ThemeToggle />
               </Box>
 
               {/* Header */}
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0 }}>
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <Box sx={{ textAlign: 'center', mb: 2.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
                     <Box
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: 52,
+                        height: 52,
                         borderRadius: 3,
                         bgcolor: 'primary.light',
                         border: '1px solid',
@@ -222,7 +228,7 @@ export function ForgotPasswordForm() {
                         justifyContent: 'center',
                       }}
                     >
-                      <Mail sx={{ fontSize: 28, color: 'primary.main' }} />
+                      <Mail sx={{ fontSize: 26, color: 'primary.main' }} />
                     </Box>
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
@@ -231,7 +237,7 @@ export function ForgotPasswordForm() {
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     {isRTL ? 'أدخل بريدك الإلكتروني وسنرسل لك رابط الإعادة' : "Enter your email and we'll send you a reset link"}
                   </Typography>
-                  <Divider sx={{ width: 48, mx: 'auto', mt: 2, borderColor: 'secondary.main', borderBottomWidth: 2 }} />
+                  <Divider sx={{ width: 48, mx: 'auto', mt: 1.5, borderColor: 'secondary.main', borderBottomWidth: 2 }} />
                 </Box>
               </motion.div>
 
@@ -256,12 +262,12 @@ export function ForgotPasswordForm() {
                       input: {
                         startAdornment: (
                           <InputAdornment position="start">
-                            <Mail sx={{ fontSize: 18, color: 'text.secondary' }} />
+                            <Mail sx={{ fontSize: 16, color: 'text.secondary' }} />
                           </InputAdornment>
                         ),
                       },
                     }}
-                    sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                    sx={textFieldSx}
                   />
                 </motion.div>
 
@@ -273,7 +279,7 @@ export function ForgotPasswordForm() {
                     disabled={isLoading}
                     sx={{
                       mt: 2,
-                      height: 44,
+                      height: 40,
                       borderRadius: 2,
                       fontSize: 14,
                       fontWeight: 600,
@@ -286,7 +292,7 @@ export function ForgotPasswordForm() {
 
               {/* Back to login */}
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
-                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Box sx={{ textAlign: 'center', mt: 1.5 }}>
                   <Button
                     type="button"
                     onClick={() => setAuthView('login')}
@@ -309,4 +315,3 @@ export function ForgotPasswordForm() {
     </ThemeProvider>
   )
 }
-

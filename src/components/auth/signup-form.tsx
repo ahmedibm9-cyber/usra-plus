@@ -66,13 +66,19 @@ interface FormErrors {
   terms?: string
 }
 
-// Password strength calculation with teal/amber colors (no red/yellow)
+// Password strength calculation with teal/brown colors (no red/yellow)
 const getPasswordStrength = (pwd: string): { level: number; percent: number; color: string; label: string } => {
   if (!pwd) return { level: 0, percent: 0, color: '', label: '' }
-  if (pwd.length < 6) return { level: 1, percent: 25, color: '#92400E', label: 'Weak' } // amber dark
-  if (pwd.length < 8) return { level: 2, percent: 50, color: '#D97706', label: 'Fair' } // amber
+  if (pwd.length < 6) return { level: 1, percent: 25, color: '#9A3412', label: 'Weak' } // warm brown
+  if (pwd.length < 8) return { level: 2, percent: 50, color: '#0D9488', label: 'Fair' } // teal
   if (pwd.length < 12) return { level: 3, percent: 75, color: '#0D6B58', label: 'Good' } // teal
   return { level: 4, percent: 100, color: '#0D6B58', label: 'Strong' } // teal
+}
+
+// Compact TextField sx — consistent across all auth forms
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': { height: 40 },
+  '& .MuiOutlinedInput-input': { fontSize: 14 },
 }
 
 // USRA PLUS Hex Logo
@@ -317,7 +323,7 @@ export function SignupForm() {
               borderColor: 'divider',
             }}
           >
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: 3 }}>
               {/* Top bar */}
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0 }}>
                 <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -328,8 +334,8 @@ export function SignupForm() {
 
               {/* Header */}
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.05 }}>
-                <Box sx={{ textAlign: 'center', mt: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
                     <HexLogo />
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.5, mb: 0.5 }}>
@@ -338,14 +344,14 @@ export function SignupForm() {
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     {isRTL ? 'ابدأ بإدارة عائلتك' : 'Start managing your family'}
                   </Typography>
-                  <Divider sx={{ width: 48, mx: 'auto', mt: 2, borderColor: 'secondary.main', borderBottomWidth: 2 }} />
+                  <Divider sx={{ width: 48, mx: 'auto', mt: 1.5, borderColor: 'secondary.main', borderBottomWidth: 2 }} />
                 </Box>
               </motion.div>
 
               {/* Auth Error */}
               {authError && (
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
-                  <Typography variant="caption" sx={{ display: 'block', mt: 2, color: 'error.main' }}>
+                  <Typography variant="caption" sx={{ display: 'block', mt: 1.5, color: 'error.main' }}>
                     {authError}
                   </Typography>
                 </motion.div>
@@ -355,7 +361,7 @@ export function SignupForm() {
               <Box
                 component="form"
                 onSubmit={handleSubmit}
-                sx={{ mt: 3, '& > .MuiBox-root + .MuiBox-root': { mt: 2 } }}
+                sx={{ mt: 2, '& > .MuiBox-root + .MuiBox-root': { mt: 1.5 } }}
               >
                 {/* Name Row */}
                 <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.1 }}>
@@ -376,12 +382,12 @@ export function SignupForm() {
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Person sx={{ fontSize: 18, color: 'text.secondary' }} />
+                              <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
                             </InputAdornment>
                           ),
                         },
                       }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                      sx={textFieldSx}
                     />
                     <TextField
                       fullWidth
@@ -399,12 +405,12 @@ export function SignupForm() {
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Person sx={{ fontSize: 18, color: 'text.secondary' }} />
+                              <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
                             </InputAdornment>
                           ),
                         },
                       }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                      sx={textFieldSx}
                     />
                   </Stack>
                 </motion.div>
@@ -427,12 +433,12 @@ export function SignupForm() {
                       input: {
                         startAdornment: (
                           <InputAdornment position="start">
-                            <Mail sx={{ fontSize: 18, color: 'text.secondary' }} />
+                            <Mail sx={{ fontSize: 16, color: 'text.secondary' }} />
                           </InputAdornment>
                         ),
                       },
                     }}
-                    sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                    sx={textFieldSx}
                   />
                 </motion.div>
 
@@ -445,7 +451,7 @@ export function SignupForm() {
                         value={countryCode}
                         label="Code"
                         onChange={(e) => setCountryCode(e.target.value)}
-                        sx={{ height: 44, borderRadius: 2 }}
+                        sx={{ height: 40, borderRadius: 2, fontSize: 14 }}
                       >
                         {countryCodes.map((cc) => (
                           <MenuItem key={cc.code} value={cc.code} sx={{ py: 0.75 }}>
@@ -473,12 +479,12 @@ export function SignupForm() {
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Phone sx={{ fontSize: 18, color: 'text.secondary' }} />
+                              <Phone sx={{ fontSize: 16, color: 'text.secondary' }} />
                             </InputAdornment>
                           ),
                         },
                       }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                      sx={textFieldSx}
                     />
                   </Stack>
                 </motion.div>
@@ -501,7 +507,7 @@ export function SignupForm() {
                       input: {
                         startAdornment: (
                           <InputAdornment position="start">
-                            <Lock sx={{ fontSize: 18, color: 'text.secondary' }} />
+                            <Lock sx={{ fontSize: 16, color: 'text.secondary' }} />
                           </InputAdornment>
                         ),
                         endAdornment: (
@@ -513,17 +519,17 @@ export function SignupForm() {
                               aria-label={showPassword ? 'Hide password' : 'Show password'}
                               size="small"
                             >
-                              {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                              {showPassword ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
                             </IconButton>
                           </InputAdornment>
                         ),
                       },
                     }}
-                    sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                    sx={textFieldSx}
                   />
                   {/* Password strength indicator */}
                   {password && (
-                    <Box sx={{ mt: 1 }}>
+                    <Box sx={{ mt: 0.5 }}>
                       <LinearProgress
                         variant="determinate"
                         value={passwordStrength.percent}
@@ -538,7 +544,7 @@ export function SignupForm() {
                           },
                         }}
                       />
-                      <Typography variant="caption" sx={{ color: passwordStrength.color, mt: 0.5, display: 'block' }}>
+                      <Typography variant="caption" sx={{ color: passwordStrength.color, mt: 0.25, display: 'block' }}>
                         {passwordStrength.label}
                       </Typography>
                     </Box>
@@ -563,7 +569,7 @@ export function SignupForm() {
                       input: {
                         startAdornment: (
                           <InputAdornment position="start">
-                            <Lock sx={{ fontSize: 18, color: 'text.secondary' }} />
+                            <Lock sx={{ fontSize: 16, color: 'text.secondary' }} />
                           </InputAdornment>
                         ),
                         endAdornment: (
@@ -575,13 +581,13 @@ export function SignupForm() {
                               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                               size="small"
                             >
-                              {showConfirmPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                              {showConfirmPassword ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
                             </IconButton>
                           </InputAdornment>
                         ),
                       },
                     }}
-                    sx={{ '& .MuiOutlinedInput-root': { height: 44 } }}
+                    sx={textFieldSx}
                   />
                 </motion.div>
 
@@ -643,7 +649,7 @@ export function SignupForm() {
                     variant="contained"
                     disabled={isLoading}
                     sx={{
-                      height: 44,
+                      height: 40,
                       borderRadius: 2,
                       fontSize: 14,
                       fontWeight: 600,
@@ -657,7 +663,7 @@ export function SignupForm() {
 
               {/* Divider */}
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.45 }}>
-                <Divider sx={{ mt: 3 }}>
+                <Divider sx={{ mt: 2 }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>
                     {t.auth.orContinueWith}
                   </Typography>
@@ -674,8 +680,8 @@ export function SignupForm() {
                   disabled={isGoogleLoading}
                   startIcon={isGoogleLoading ? undefined : <GoogleIcon />}
                   sx={{
-                    mt: 2,
-                    height: 44,
+                    mt: 1.5,
+                    height: 40,
                     borderRadius: 2,
                     borderColor: 'divider',
                     color: 'text.secondary',
@@ -693,7 +699,7 @@ export function SignupForm() {
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.55 }}>
                 <Typography
                   variant="body2"
-                  sx={{ textAlign: 'center', mt: 2, color: 'text.secondary' }}
+                  sx={{ textAlign: 'center', mt: 1.5, color: 'text.secondary' }}
                 >
                   {t.auth.hasAccount}{' '}
                   <Link

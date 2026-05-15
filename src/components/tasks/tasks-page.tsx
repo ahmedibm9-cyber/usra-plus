@@ -104,8 +104,8 @@ import { FAB } from '@/components/shared/fab'
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { color: string; bg: string; border: string; label: string }> = {
   urgent: { color: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/30', label: 'Urgent' },
-  high: { color: 'text-[#E50914]', bg: 'bg-[#E50914]/15', border: 'border-[#E50914]/30', label: 'High' },
-  medium: { color: 'text-[#F4C430]', bg: 'bg-[#F4C430]/15', border: 'border-[#F4C430]/30', label: 'Medium' },
+  high: { color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/15', border: 'border-[#0D9488]/30', label: 'High' },
+  medium: { color: 'text-[#10B981]', bg: 'bg-[#10B981]/15', border: 'border-[#10B981]/30', label: 'Medium' },
   low: { color: 'text-green-400', bg: 'bg-green-500/15', border: 'border-green-500/30', label: 'Low' },
 }
 
@@ -116,9 +116,9 @@ const STATUS_CONFIG: Record<TaskStatus, { dot: string; label: string; icon: Reac
     icon: <Circle className="size-3.5 text-[--text-muted]" />,
   },
   in_progress: {
-    dot: 'bg-[#E50914]',
+    dot: 'bg-[#0D9488]',
     label: 'In Progress',
-    icon: <Clock className="size-3.5 text-[#E50914]" />,
+    icon: <Clock className="size-3.5 text-[#0D9488]" />,
   },
   done: {
     dot: 'bg-green-400',
@@ -144,9 +144,9 @@ const DATE_GROUP_ORDER: DateGroup[] = ['overdue', 'today', 'tomorrow', 'this_wee
 
 const DATE_GROUP_LABELS: Record<DateGroup, { label: string; color: string }> = {
   overdue: { label: 'Overdue', color: 'text-red-400' },
-  today: { label: 'Today', color: 'text-[#E50914]' },
-  tomorrow: { label: 'Tomorrow', color: 'text-[#E50914]/70' },
-  this_week: { label: 'This Week', color: 'text-[#F4C430]' },
+  today: { label: 'Today', color: 'text-[#0D9488]' },
+  tomorrow: { label: 'Tomorrow', color: 'text-[#0D9488]/70' },
+  this_week: { label: 'This Week', color: 'text-[#10B981]' },
   later: { label: 'Later', color: 'text-[--text-muted]' },
   no_date: { label: 'No Due Date', color: 'text-[--text-muted]' },
 }
@@ -289,7 +289,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-2 w-full text-left mb-3"
       >
-        <MessageCircle className="size-4 text-[#E50914]" />
+        <MessageCircle className="size-4 text-[#0D9488]" />
         <span className="text-sm font-medium text-[--text-primary]">{t.comments.comments}</span>
         {commentCount > 0 && (
           <span className="text-xs text-[--text-muted] bg-[--border-subtle] px-1.5 py-0.5 rounded-full">
@@ -318,7 +318,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                     <div className="flex gap-2.5">
                       <Avatar className="h-7 w-7 rounded-full border border-[--border-subtle] flex-shrink-0">
                         {comment.author_avatar && <AvatarImage src={comment.author_avatar} alt="" />}
-                        <AvatarFallback className="text-[10px] bg-[#E50914]/20 text-[#E50914]">
+                        <AvatarFallback className="text-[10px] bg-[#0D9488]/20 text-[#0D9488]">
                           {comment.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -334,7 +334,7 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                               setReplyingTo(replyingTo === comment.id ? null : comment.id)
                               setReplyContent('')
                             }}
-                            className="text-xs text-[--text-muted] hover:text-[#E50914] transition-colors"
+                            className="text-xs text-[--text-muted] hover:text-[#0D9488] transition-colors"
                           >
                             <CornerDownRight className="size-3 inline mr-1" />
                             {t.comments.reply}
@@ -365,14 +365,14 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                               }}
                               placeholder={`${t.comments.replyTo} ${comment.author_name}...`}
                               rows={1}
-                              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-1.5 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[#E50914]/50 resize-none overflow-hidden min-h-[32px]"
+                              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-1.5 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[#0D9488]/50 resize-none overflow-hidden min-h-[32px]"
                             />
                             <div className="flex gap-1 flex-shrink-0">
                               <Button
                                 size="sm"
                                 onClick={() => handleAddReply(comment.id)}
                                 disabled={!replyContent.trim()}
-                                className="h-7 px-2 bg-[#E50914] hover:bg-[#C40812] text-white text-xs"
+                                className="h-7 px-2 bg-[#0D9488] hover:bg-[#0F766E] text-white text-xs"
                               >
                                 <Send className="size-3" />
                               </Button>
@@ -390,12 +390,12 @@ function CommentsPanel({ taskId }: { taskId: string }) {
 
                         {/* Replies */}
                         {replies.length > 0 && (
-                          <div className="ml-8 border-l-2 border-[#E50914]/20 pl-3 mt-2 space-y-2">
+                          <div className="ml-8 border-l-2 border-[#0D9488]/20 pl-3 mt-2 space-y-2">
                             {replies.map((reply) => (
                               <div key={reply.id} className="flex gap-2">
                                 <Avatar className="h-5 w-5 rounded-full border border-[--border-subtle] flex-shrink-0">
                                   {reply.author_avatar && <AvatarImage src={reply.author_avatar} alt="" />}
-                                  <AvatarFallback className="text-[8px] bg-[#E50914]/20 text-[#E50914]">
+                                  <AvatarFallback className="text-[8px] bg-[#0D9488]/20 text-[#0D9488]">
                                     {reply.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
@@ -442,13 +442,13 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                   handleAddComment()
                 }
               }}
-              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[#E50914]/50 resize-none overflow-hidden min-h-[36px]"
+              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[#0D9488]/50 resize-none overflow-hidden min-h-[36px]"
             />
             <Button
               size="sm"
               onClick={handleAddComment}
               disabled={!newComment.trim()}
-              className="h-9 px-3 bg-[#E50914] hover:bg-[#C40812] text-white"
+              className="h-9 px-3 bg-[#0D9488] hover:bg-[#0F766E] text-white"
             >
               <Send className="size-4" />
             </Button>
@@ -509,7 +509,7 @@ function TaskCard({
         'group relative flex items-start gap-3 rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4 transition-all duration-200',
         hovered && 'border-[--border-medium] bg-[--bg-surface-2] shadow-lg shadow-black/20 -translate-y-px',
         task.status === 'done' && 'opacity-60',
-        isDragOverlay && 'shadow-2xl shadow-[#E50914]/10 ring-1 ring-[#E50914]/20 scale-[1.03]'
+        isDragOverlay && 'shadow-2xl shadow-[#0D9488]/10 ring-1 ring-[#0D9488]/20 scale-[1.03]'
       )}
     >
       {/* Drag handle */}
@@ -549,7 +549,7 @@ function TaskCard({
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 20 }}
             >
-              <Circle className="size-5 text-[--text-muted] transition-colors hover:text-[#E50914]" />
+              <Circle className="size-5 text-[--text-muted] transition-colors hover:text-[#0D9488]" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -616,7 +616,7 @@ function TaskCard({
             <div className="flex items-center gap-1.5 ml-auto">
               <Avatar className="size-5 border border-[--border-subtle]">
                 {task.assignee.avatar_url && <AvatarImage src={task.assignee.avatar_url} alt="" />}
-                <AvatarFallback className="text-[9px] bg-[#E50914]/20 text-[#E50914]">
+                <AvatarFallback className="text-[9px] bg-[#0D9488]/20 text-[#0D9488]">
                   {assigneeInitials}
                 </AvatarFallback>
               </Avatar>
@@ -701,7 +701,7 @@ function SortableTaskCard({
     >
       {/* Drop indicator line */}
       {isOver && (
-        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-[#E50914] rounded-full z-10" />
+        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-[#0D9488] rounded-full z-10" />
       )}
       <TaskCard
         task={task}
@@ -790,7 +790,7 @@ function TaskModal({
               placeholder="Enter task title..."
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#E50914]/50"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#0D9488]/50"
             />
           </div>
 
@@ -801,7 +801,7 @@ function TaskModal({
               placeholder="Add a description (optional)..."
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#E50914]/50 min-h-[80px] resize-none"
+              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#0D9488]/50 min-h-[80px] resize-none"
             />
           </div>
 
@@ -822,8 +822,8 @@ function TaskModal({
                       <span className="flex items-center gap-2">
                         <span className={cn('size-2 rounded-full', PRIORITY_CONFIG[p].bg.replace('/15', ''), {
                           'bg-red-500': p === 'urgent',
-                          'bg-[#E50914]': p === 'high',
-                          'bg-[#F4C430]': p === 'medium',
+                          'bg-[#0D9488]': p === 'high',
+                          'bg-[#10B981]': p === 'medium',
                           'bg-green-500': p === 'low',
                         })} />
                         {PRIORITY_CONFIG[p].label}
@@ -886,7 +886,7 @@ function TaskModal({
                           {member.profiles?.avatar_url && (
                             <AvatarImage src={member.profiles.avatar_url} alt="" />
                           )}
-                          <AvatarFallback className="text-[8px] bg-[#E50914]/20 text-[#E50914]">
+                          <AvatarFallback className="text-[8px] bg-[#0D9488]/20 text-[#0D9488]">
                             {(
                               (member.profiles?.first_name?.[0] || '') +
                               (member.profiles?.last_name?.[0] || '')
@@ -958,7 +958,7 @@ function TaskModal({
           <Button
             onClick={handleSave}
             disabled={saving || !form.title.trim()}
-            className="bg-[#E50914] hover:bg-[#C40812] text-white btn-glow btn-press"
+            className="bg-[#0D9488] hover:bg-[#0F766E] text-white btn-glow btn-press"
           >
             {saving ? t.common.loading : t.common.save}
           </Button>
@@ -1350,7 +1350,7 @@ export default function TasksPage() {
             )}
             <Button
               onClick={handleAddTask}
-              className="bg-[#E50914] hover:bg-[#C40812] text-white gap-2 rounded-xl btn-glow btn-press btn-click-ripple"
+              className="bg-[#0D9488] hover:bg-[#0F766E] text-white gap-2 rounded-xl btn-glow btn-press btn-click-ripple"
             >
               <Plus className="size-4" />
               {t.tasks.addTask}
@@ -1365,7 +1365,7 @@ export default function TasksPage() {
             placeholder={t.tasks.search}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#E50914]/50 h-10 rounded-xl"
+            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[#0D9488]/50 h-10 rounded-xl"
           />
           {searchQuery && (
             <button
@@ -1395,7 +1395,7 @@ export default function TasksPage() {
                   className={cn(
                     'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
                     isActive
-                      ? 'bg-[#E50914] text-white shadow-sm'
+                      ? 'bg-[#0D9488] text-white shadow-sm'
                       : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
                   )}
                 >
@@ -1419,8 +1419,8 @@ export default function TasksPage() {
                   <span className="flex items-center gap-2">
                     <span className={cn('size-2 rounded-full', {
                       'bg-red-500': p === 'urgent',
-                      'bg-[#E50914]': p === 'high',
-                      'bg-[#F4C430]': p === 'medium',
+                      'bg-[#0D9488]': p === 'high',
+                      'bg-[#10B981]': p === 'medium',
                       'bg-green-500': p === 'low',
                     })} />
                     {PRIORITY_CONFIG[p].label}
@@ -1453,7 +1453,7 @@ export default function TasksPage() {
               className={cn(
                 'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
                 pageView === 'list'
-                  ? 'bg-[#E50914]/20 text-[#E50914]'
+                  ? 'bg-[#0D9488]/20 text-[#0D9488]'
                   : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
               )}
             >
@@ -1466,7 +1466,7 @@ export default function TasksPage() {
               className={cn(
                 'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
                 pageView === 'board'
-                  ? 'bg-[#E50914]/20 text-[#E50914]'
+                  ? 'bg-[#0D9488]/20 text-[#0D9488]'
                   : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
               )}
             >

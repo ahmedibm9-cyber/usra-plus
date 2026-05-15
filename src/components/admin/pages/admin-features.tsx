@@ -74,7 +74,7 @@ const itemVariants: Variants = {
 
 // ─── Sparkline Component ─────────────────────────────────────────────
 
-function Sparkline({ data, color = '#F59E0B' }: { data: number[]; color?: string }) {
+function Sparkline({ data, color = '#059669' }: { data: number[]; color?: string }) {
   if (!data.length) return null
   const width = 80
   const height = 28
@@ -124,7 +124,7 @@ function MiniBarBg() {
           width={barW}
           height={bar}
           rx={2}
-          fill="#F59E0B"
+          fill="#059669"
         />
       ))}
     </svg>
@@ -137,7 +137,7 @@ function CircularProgress({ value, size = 36, strokeWidth = 3 }: { value: number
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (value / 100) * circumference
-  const color = value >= 70 ? '#22C55E' : value >= 40 ? '#F59E0B' : '#EF4444'
+  const color = value >= 70 ? '#22C55E' : value >= 40 ? '#059669' : '#EF4444'
 
   return (
     <svg width={size} height={size} className="shrink-0">
@@ -170,8 +170,8 @@ function CircularProgress({ value, size = 36, strokeWidth = 3 }: { value: number
 
 function FeatureCard({ feature, index }: { feature: FeatureRow; index: number }) {
   const [hovered, setHovered] = useState(false)
-  const statusColor = feature.status === 'strong' ? '#22C55E' : feature.status === 'moderate' ? '#F59E0B' : '#EF4444'
-  const sparkColor = feature.status === 'strong' ? '#22C55E' : feature.status === 'moderate' ? '#F59E0B' : '#EF4444'
+  const statusColor = feature.status === 'strong' ? '#22C55E' : feature.status === 'moderate' ? '#059669' : '#EF4444'
+  const sparkColor = feature.status === 'strong' ? '#22C55E' : feature.status === 'moderate' ? '#059669' : '#EF4444'
 
   return (
     <motion.div
@@ -228,13 +228,13 @@ function FeatureCard({ feature, index }: { feature: FeatureRow; index: number })
         <div className="pt-3 mt-3 border-t border-[--status-warning-border] grid grid-cols-3 gap-3">
           <div>
             <p className="text-[9px] text-[--text-muted] uppercase tracking-wider">Drop-off Rate</p>
-            <span className={`text-xs font-medium ${feature.dropOffRate > 15 ? 'text-[--status-danger]' : feature.dropOffRate > 5 ? 'text-[--status-warning]' : 'text-[#F4C430]'}`}>
+            <span className={`text-xs font-medium ${feature.dropOffRate > 15 ? 'text-[--status-danger]' : feature.dropOffRate > 5 ? 'text-[--status-warning]' : 'text-[#10B981]'}`}>
               {feature.dropOffRate}%
             </span>
           </div>
           <div>
             <p className="text-[9px] text-[--text-muted] uppercase tracking-wider">Weekly Change</p>
-            <span className={`text-xs font-medium ${feature.weeklyTrend[6] >= feature.weeklyTrend[0] ? 'text-[#F4C430]' : 'text-[--status-danger]'}`}>
+            <span className={`text-xs font-medium ${feature.weeklyTrend[6] >= feature.weeklyTrend[0] ? 'text-[#10B981]' : 'text-[--status-danger]'}`}>
               {feature.weeklyTrend[6] >= feature.weeklyTrend[0] ? '+' : ''}
               {(((feature.weeklyTrend[6] - feature.weeklyTrend[0]) / Math.max(feature.weeklyTrend[0], 1)) * 100).toFixed(1)}%
             </span>
@@ -316,7 +316,7 @@ function VerticalFunnel({ steps }: { steps: FunnelStep[] }) {
                   />
                   <defs>
                     <linearGradient id={`funnel-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F59E0B" stopOpacity={opacity} />
+                      <stop offset="0%" stopColor="#059669" stopOpacity={opacity} />
                       <stop offset="100%" stopColor="#F97316" stopOpacity={opacityBottom} />
                     </linearGradient>
                   </defs>
@@ -376,7 +376,7 @@ function AdoptionChart({ data }: { data: AdoptionDataPoint[] }) {
     ? Object.keys(data[0]).filter(k => k !== 'month')
     : []
 
-  const lineColors = ['#F59E0B', '#F97316', '#D97706', '#B45309', '#92400E', '#78350F']
+  const lineColors = ['#059669', '#F97316', '#0D6B58', '#B45309', '#9A3412', '#78350F']
 
   const lines = lineKeys.map((key, i) => ({
     key,
@@ -757,7 +757,7 @@ export function AdminFeatures() {
             <h2 className="text-xl font-semibold text-[--text-primary] flex items-center gap-2">
               Product Intelligence Lab
               {dataSource === 'live' && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#F4C430]/10 text-[--text-muted] border border-[#F4C430]/10 font-normal">
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#10B981]/10 text-[--text-muted] border border-[#10B981]/10 font-normal">
                   Live
                 </span>
               )}
@@ -768,7 +768,7 @@ export function AdminFeatures() {
               )}
             </h2>
             {/* Amber gradient underline */}
-            <div className="h-[2px] w-32 rounded-full bg-gradient-to-r from-amber-500/80 via-orange-500/60 to-transparent mt-1" />
+            <div className="h-[2px] w-32 rounded-full bg-gradient-to-r from-emerald-500/80 via-teal-500/60 to-transparent mt-1" />
           </div>
         </div>
         <p className="text-sm text-[--text-muted] mt-1">Track feature adoption, drop-offs, and conversion across the platform</p>
@@ -809,7 +809,7 @@ export function AdminFeatures() {
                           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[--status-warning-bg] to-[--status-warning-bg] flex items-center justify-center border border-[--status-warning-border]">
                             <stat.icon className="w-4 h-4 text-[--status-warning]" />
                           </div>
-                          <span className={`text-[10px] font-medium flex items-center gap-0.5 ${stat.trendUp ? 'text-[#F4C430]' : 'text-[--status-danger]'}`}>
+                          <span className={`text-[10px] font-medium flex items-center gap-0.5 ${stat.trendUp ? 'text-[#10B981]' : 'text-[--status-danger]'}`}>
                             {stat.trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                             {stat.trend}
                           </span>
@@ -838,7 +838,7 @@ export function AdminFeatures() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-[9px] text-[--text-muted]">
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#F4C430]" /> Strong</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Strong</span>
                     <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[--status-warning]" /> Moderate</span>
                     <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[--status-danger]" /> Weak</span>
                   </div>
@@ -882,14 +882,14 @@ export function AdminFeatures() {
                         const maxClicks = upgradePrompts[0].clicks
                         const widthPct = (prompt.clicks / maxClicks) * 100
                         const barColor = i === 0
-                          ? 'from-amber-500 to-orange-500'
+                          ? 'from-emerald-500 to-teal-500'
                           : i === 1
-                            ? 'from-orange-500 to-amber-600'
+                            ? 'from-teal-500 to-emerald-600'
                             : i === 2
-                              ? 'from-amber-600 to-yellow-600'
+                              ? 'from-emerald-600 to-emerald-600'
                               : i === 3
-                                ? 'from-yellow-600 to-amber-700'
-                                : 'from-amber-700 to-yellow-700'
+                                ? 'from-emerald-600 to-emerald-700'
+                                : 'from-emerald-700 to-emerald-700'
 
                         return (
                           <motion.div

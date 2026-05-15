@@ -86,8 +86,8 @@ function formatDateTime(dateStr: string) {
 function getRoleBadgeColor(role: AdminRole) {
   switch (role) {
     case 'super_admin': return 'bg-[--status-danger-bg] text-[--status-danger] border-[--status-danger-border]'
-    case 'support_admin': return 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20'
-    case 'analytics_admin': return 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20'
+    case 'support_admin': return 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20'
+    case 'analytics_admin': return 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20'
     case 'billing_admin': return 'bg-[--status-warning-bg] text-[--status-warning] border-[--status-warning-border]'
     default: return 'bg-[--bg-surface] text-[--text-secondary] border-[--border-subtle]'
   }
@@ -104,13 +104,13 @@ function getRoleLabel(role: AdminRole) {
 }
 
 function getActionColor(action: string) {
-  if (action.includes('login') || action.includes('logout')) return 'text-[#F4C430]'
+  if (action.includes('login') || action.includes('logout')) return 'text-[#10B981]'
   if (action.includes('security') || action.includes('unauthorized') || action.includes('failed')) return 'text-[--status-danger]'
   return 'text-[--status-warning]'
 }
 
 function getActionBg(action: string) {
-  if (action.includes('login') || action.includes('logout')) return 'bg-[#F4C430]/10'
+  if (action.includes('login') || action.includes('logout')) return 'bg-[#10B981]/10'
   if (action.includes('security') || action.includes('unauthorized') || action.includes('failed')) return 'bg-[--status-danger-bg]'
   return 'bg-[--status-warning-bg]'
 }
@@ -119,7 +119,7 @@ function getAnnouncementTypeStyle(type: string) {
   switch (type) {
     case 'critical': return 'bg-[--status-danger-bg] text-[--status-danger] border-[--status-danger-border]'
     case 'warning': return 'bg-[--status-warning-bg] text-[--status-warning] border-[--status-warning-border]'
-    case 'info': return 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20'
+    case 'info': return 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20'
     default: return 'bg-[--bg-surface] text-[--text-secondary] border-[--border-subtle]'
   }
 }
@@ -622,7 +622,7 @@ export function AdminSettings() {
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="data-[state=active]:bg-[#E50914]/10 data-[state=active]:text-[#E50914] text-[--text-muted] hover:text-[--text-secondary] px-3 py-1.5 text-xs sm:text-sm gap-1.5 rounded-lg"
+              className="data-[state=active]:bg-[#0D9488]/10 data-[state=active]:text-[#0D9488] text-[--text-muted] hover:text-[--text-secondary] px-3 py-1.5 text-xs sm:text-sm gap-1.5 rounded-lg"
             >
               {tab.icon}
               <span className="hidden sm:inline">{tab.label}</span>
@@ -643,14 +643,14 @@ export function AdminSettings() {
                     placeholder="Search flags..."
                     value={flagSearch}
                     onChange={e => setFlagSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30"
+                    className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30"
                   />
                 </div>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={handleLoadFlagsFromDB}
-                  className="bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20 hover:bg-[#F4C430]/20"
+                  className="bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981]/20"
                 >
                   <RefreshCw className="w-4 h-4 mr-1.5" /> Load from DB
                 </Button>
@@ -664,7 +664,7 @@ export function AdminSettings() {
                 </Button>
                 <Button
                   onClick={() => setAddFlagOpen(true)}
-                  className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20"
+                  className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20"
                 >
                   <Plus className="w-4 h-4 mr-1.5" /> Add Flag
                 </Button>
@@ -673,8 +673,8 @@ export function AdminSettings() {
 
             {/* Persistence status */}
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${flagsPersisted ? 'bg-[#F4C430]' : 'bg-[--status-warning]'}`} />
-              <span className={`text-xs ${flagsPersisted ? 'text-[#F4C430]' : 'text-[--status-warning]'}`}>
+              <div className={`w-2 h-2 rounded-full ${flagsPersisted ? 'bg-[#10B981]' : 'bg-[--status-warning]'}`} />
+              <span className={`text-xs ${flagsPersisted ? 'text-[#10B981]' : 'text-[--status-warning]'}`}>
                 {flagsPersisted ? 'All changes persisted to database' : 'Changes not saved — click "Save to DB" to persist'}
               </span>
             </div>
@@ -714,20 +714,20 @@ export function AdminSettings() {
                         <Switch
                           checked={flag.enabled}
                           onCheckedChange={() => handleToggleFlag(flag.id)}
-                          className="data-[state=checked]:bg-[#E50914]"
+                          className="data-[state=checked]:bg-[#0D9488]"
                         />
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 max-w-[80px] h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
-                            <div className="h-full bg-[#E50914]/60 rounded-full" style={{ width: `${flag.rolloutPercentage}%` }} />
+                            <div className="h-full bg-[#0D9488]/60 rounded-full" style={{ width: `${flag.rolloutPercentage}%` }} />
                           </div>
                           <span className="text-xs text-[--text-muted]">{flag.rolloutPercentage}%</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {flag.targetPlan ? (
-                          <Badge className="text-[10px] bg-[#E50914]/10 text-[#E50914] border-[#E50914]/20">
+                          <Badge className="text-[10px] bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/20">
                             {flag.targetPlan}
                           </Badge>
                         ) : (
@@ -787,7 +787,7 @@ export function AdminSettings() {
                         className="p-1.5 rounded-lg bg-[--bg-surface] text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface-2] transition-all"
                         title={plan.active ? 'Deactivate' : 'Activate'}
                       >
-                        {plan.active ? <ToggleRight className="w-3.5 h-3.5 text-[#F4C430]" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                        {plan.active ? <ToggleRight className="w-3.5 h-3.5 text-[#10B981]" /> : <ToggleLeft className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
@@ -798,7 +798,7 @@ export function AdminSettings() {
                     <ul className="space-y-1.5">
                       {plan.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center gap-2 text-sm text-[--text-secondary]">
-                          <Check className="w-3 h-3 text-[#F4C430] shrink-0" />
+                          <Check className="w-3 h-3 text-[#10B981] shrink-0" />
                           {feature}
                         </li>
                       ))}
@@ -819,10 +819,10 @@ export function AdminSettings() {
                   </div>
 
                   {/* Active indicator */}
-                  <div className={`mt-4 pt-3 border-t ${plan.active ? 'border-[#F4C430]/10' : 'border-[--border-subtle]'}`}>
+                  <div className={`mt-4 pt-3 border-t ${plan.active ? 'border-[#10B981]/10' : 'border-[--border-subtle]'}`}>
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${plan.active ? 'bg-[#F4C430]' : 'bg-[--bg-surface]'}`} />
-                      <span className={`text-xs ${plan.active ? 'text-[#F4C430]' : 'text-[--text-muted]'}`}>
+                      <div className={`w-2 h-2 rounded-full ${plan.active ? 'bg-[#10B981]' : 'bg-[--bg-surface]'}`} />
+                      <span className={`text-xs ${plan.active ? 'text-[#10B981]' : 'text-[--text-muted]'}`}>
                         {plan.active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -840,7 +840,7 @@ export function AdminSettings() {
               <p className="text-[--text-muted] text-sm">{announcements.length} announcement{announcements.length !== 1 ? 's' : ''}</p>
               <Button
                 onClick={() => setAddAnnouncementOpen(true)}
-                className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20"
+                className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20"
               >
                 <Plus className="w-4 h-4 mr-1.5" /> New Announcement
               </Button>
@@ -856,8 +856,8 @@ export function AdminSettings() {
                 >
                   <SettingsCard className="p-4">
                     <div className="flex items-start gap-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${ann.type === 'critical' ? 'bg-[--status-danger-bg]' : ann.type === 'warning' ? 'bg-[--status-warning-bg]' : 'bg-[#F4C430]/10'}`}>
-                        {ann.type === 'critical' ? <AlertOctagon className="w-5 h-5 text-[--status-danger]" /> : ann.type === 'warning' ? <AlertCircle className="w-5 h-5 text-[--status-warning]" /> : <Info className="w-5 h-5 text-[#F4C430]" />}
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${ann.type === 'critical' ? 'bg-[--status-danger-bg]' : ann.type === 'warning' ? 'bg-[--status-warning-bg]' : 'bg-[#10B981]/10'}`}>
+                        {ann.type === 'critical' ? <AlertOctagon className="w-5 h-5 text-[--status-danger]" /> : ann.type === 'warning' ? <AlertCircle className="w-5 h-5 text-[--status-warning]" /> : <Info className="w-5 h-5 text-[#10B981]" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -865,7 +865,7 @@ export function AdminSettings() {
                           <Badge className={`text-[10px] border ${getAnnouncementTypeStyle(ann.type)}`}>
                             {ann.type}
                           </Badge>
-                          <Badge className={`text-[10px] border ${ann.active ? 'bg-[#F4C430]/10 text-[#F4C430] border-[#F4C430]/20' : 'bg-[--bg-surface] text-[--text-muted] border-[--border-subtle]'}`}>
+                          <Badge className={`text-[10px] border ${ann.active ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-[--bg-surface] text-[--text-muted] border-[--border-subtle]'}`}>
                             {ann.active ? 'Active' : 'Inactive'}
                           </Badge>
                         </div>
@@ -881,7 +881,7 @@ export function AdminSettings() {
                           className="p-1.5 rounded-lg bg-[--bg-surface] text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface-2] transition-all"
                           title={ann.active ? 'Deactivate' : 'Activate'}
                         >
-                          {ann.active ? <ToggleRight className="w-4 h-4 text-[#F4C430]" /> : <ToggleLeft className="w-4 h-4" />}
+                          {ann.active ? <ToggleRight className="w-4 h-4 text-[#10B981]" /> : <ToggleLeft className="w-4 h-4" />}
                         </button>
                         <button
                           onClick={() => handleConfirmAction(
@@ -951,7 +951,7 @@ export function AdminSettings() {
                     )}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       emergencyShutdown
-                        ? 'bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20 hover:bg-[#F4C430]/20'
+                        ? 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981]/20'
                         : 'bg-[--status-danger-bg] text-[--status-danger] border border-[--status-danger-border] hover:bg-[--status-danger-bg]'
                     }`}
                   >
@@ -987,7 +987,7 @@ export function AdminSettings() {
                     )}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       maintenanceMode
-                        ? 'bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20 hover:bg-[#F4C430]/20'
+                        ? 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981]/20'
                         : 'bg-[--status-warning-bg] text-[--status-warning] border border-[--status-warning-border] hover:bg-[--status-warning]/20'
                     }`}
                   >
@@ -1062,7 +1062,7 @@ export function AdminSettings() {
                     placeholder="Search logs..."
                     value={logSearch}
                     onChange={e => setLogSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30"
+                    className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30"
                   />
                 </div>
                 <div className="flex gap-1">
@@ -1072,7 +1072,7 @@ export function AdminSettings() {
                       onClick={() => setLogFilter(f)}
                       className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
                         logFilter === f
-                          ? 'bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20'
+                          ? 'bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20'
                           : 'text-[--text-muted] hover:text-[--text-muted] hover:bg-[--bg-surface]'
                       }`}
                     >
@@ -1083,7 +1083,7 @@ export function AdminSettings() {
               </div>
               <Button
                 onClick={handleExportLogs}
-                className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20"
+                className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20"
               >
                 <Download className="w-4 h-4 mr-1.5" /> Export
               </Button>
@@ -1149,8 +1149,8 @@ export function AdminSettings() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <SettingsCard className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#F4C430]/10 flex items-center justify-center">
-                      <HardDrive className="w-5 h-5 text-[#F4C430]" />
+                    <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center">
+                      <HardDrive className="w-5 h-5 text-[#10B981]" />
                     </div>
                     <div>
                       <p className="text-[--text-muted] text-[10px] uppercase tracking-wider">DB File Size</p>
@@ -1171,8 +1171,8 @@ export function AdminSettings() {
                 </SettingsCard>
                 <SettingsCard className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#E50914]/10 flex items-center justify-center">
-                      <Archive className="w-5 h-5 text-[#E50914]" />
+                    <div className="w-10 h-10 rounded-lg bg-[#0D9488]/10 flex items-center justify-center">
+                      <Archive className="w-5 h-5 text-[#0D9488]" />
                     </div>
                     <div>
                       <p className="text-[--text-muted] text-[10px] uppercase tracking-wider">Tables</p>
@@ -1236,13 +1236,13 @@ export function AdminSettings() {
                       placeholder="e.g. Before major update"
                       value={backupNote}
                       onChange={e => setBackupNote(e.target.value)}
-                      className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30"
+                      className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30"
                     />
                   </div>
                   <Button
                     onClick={handleBackup}
                     disabled={dbActionLoading === 'backup'}
-                    className="bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20 hover:bg-[#F4C430]/20 w-full sm:w-auto"
+                    className="bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981]/20 w-full sm:w-auto"
                   >
                     {dbActionLoading === 'backup' ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Download className="w-4 h-4 mr-1.5" />}
                     Backup Database
@@ -1263,8 +1263,8 @@ export function AdminSettings() {
                       {backups.map(b => (
                         <div key={b.id} className="flex items-center justify-between bg-[--bg-surface] rounded-lg p-3 border border-[--border-subtle]">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-[#E50914]/10 flex items-center justify-center shrink-0">
-                              <HardDrive className="w-4 h-4 text-[#E50914]" />
+                            <div className="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center shrink-0">
+                              <HardDrive className="w-4 h-4 text-[#0D9488]" />
                             </div>
                             <div className="min-w-0">
                               <p className="text-[--text-secondary] text-xs font-metric truncate">{b.filename}</p>
@@ -1312,8 +1312,8 @@ export function AdminSettings() {
                   {/* Run Migrations */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#E50914]/10 flex items-center justify-center">
-                        <RefreshCw className="w-5 h-5 text-[#E50914]" />
+                      <div className="w-10 h-10 rounded-lg bg-[#0D9488]/10 flex items-center justify-center">
+                        <RefreshCw className="w-5 h-5 text-[#0D9488]" />
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-[--text-primary]">Run Migrations</h4>
@@ -1323,7 +1323,7 @@ export function AdminSettings() {
                     <button
                       onClick={handleRunMigrations}
                       disabled={dbActionLoading === 'run_migrations'}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20 transition-all disabled:opacity-50"
+                      className="px-4 py-2 rounded-lg text-sm font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20 transition-all disabled:opacity-50"
                     >
                       {dbActionLoading === 'run_migrations' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Check Schema'}
                     </button>
@@ -1332,8 +1332,8 @@ export function AdminSettings() {
                   {/* Seed Demo Data */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#F4C430]/10 flex items-center justify-center">
-                        <Play className="w-5 h-5 text-[#F4C430]" />
+                      <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center">
+                        <Play className="w-5 h-5 text-[#10B981]" />
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-[--text-primary]">Seed Demo Data</h4>
@@ -1343,7 +1343,7 @@ export function AdminSettings() {
                     <button
                       onClick={handleSeed}
                       disabled={dbActionLoading === 'seed'}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20 hover:bg-[#F4C430]/20 transition-all disabled:opacity-50"
+                      className="px-4 py-2 rounded-lg text-sm font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981]/20 transition-all disabled:opacity-50"
                     >
                       {dbActionLoading === 'seed' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Seed Data'}
                     </button>
@@ -1407,7 +1407,7 @@ export function AdminSettings() {
                 <p className="text-[--text-muted] text-sm">{adminUsers.length} admin{adminUsers.length !== 1 ? 's' : ''}</p>
                 <Button
                   onClick={() => setAddAdminOpen(true)}
-                  className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20"
+                  className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20"
                 >
                   <UserPlus className="w-4 h-4 mr-1.5" /> Add Admin
                 </Button>
@@ -1429,8 +1429,8 @@ export function AdminSettings() {
                       <TableRow key={admin.id} className="border-[--border-subtle] hover:bg-[--bg-surface] transition-colors">
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#E50914]/20 to-[#F4C430]/20 flex items-center justify-center">
-                              <Crown className="w-3.5 h-3.5 text-[#E50914]" />
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0D9488]/20 to-[#10B981]/20 flex items-center justify-center">
+                              <Crown className="w-3.5 h-3.5 text-[#0D9488]" />
                             </div>
                             <span className="text-[--text-primary] text-sm font-medium">{admin.name}</span>
                           </div>
@@ -1444,8 +1444,8 @@ export function AdminSettings() {
                         <TableCell className="text-[--text-muted] text-xs">{formatDateTime(admin.lastLogin)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5">
-                            <div className={`w-2 h-2 rounded-full ${admin.status === 'online' ? 'bg-[#F4C430]' : 'bg-[--bg-surface]'}`} />
-                            <span className={`text-xs ${admin.status === 'online' ? 'text-[#F4C430]' : 'text-[--text-muted]'}`}>
+                            <div className={`w-2 h-2 rounded-full ${admin.status === 'online' ? 'bg-[#10B981]' : 'bg-[--bg-surface]'}`} />
+                            <span className={`text-xs ${admin.status === 'online' ? 'text-[#10B981]' : 'text-[--text-muted]'}`}>
                               {admin.status === 'online' ? 'Online' : 'Offline'}
                             </span>
                           </div>
@@ -1471,30 +1471,30 @@ export function AdminSettings() {
           <div className="space-y-4 py-2">
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Name *</label>
-              <input type="text" value={newFlag.name} onChange={e => setNewFlag({ ...newFlag, name: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="e.g. Dark Mode" />
+              <input type="text" value={newFlag.name} onChange={e => setNewFlag({ ...newFlag, name: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="e.g. Dark Mode" />
             </div>
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Key *</label>
-              <input type="text" value={newFlag.key} onChange={e => setNewFlag({ ...newFlag, key: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="e.g. dark_mode" />
+              <input type="text" value={newFlag.key} onChange={e => setNewFlag({ ...newFlag, key: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="e.g. dark_mode" />
             </div>
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Description</label>
-              <input type="text" value={newFlag.description} onChange={e => setNewFlag({ ...newFlag, description: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="Brief description" />
+              <input type="text" value={newFlag.description} onChange={e => setNewFlag({ ...newFlag, description: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="Brief description" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[--text-muted] text-xs block mb-1.5">Rollout %</label>
-                <input type="number" min={0} max={100} value={newFlag.rolloutPercentage} onChange={e => setNewFlag({ ...newFlag, rolloutPercentage: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                <input type="number" min={0} max={100} value={newFlag.rolloutPercentage} onChange={e => setNewFlag({ ...newFlag, rolloutPercentage: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
               </div>
               <div>
                 <label className="text-[--text-muted] text-xs block mb-1.5">Target Plan</label>
-                <input type="text" value={newFlag.targetPlan} onChange={e => setNewFlag({ ...newFlag, targetPlan: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="All plans" />
+                <input type="text" value={newFlag.targetPlan} onChange={e => setNewFlag({ ...newFlag, targetPlan: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="All plans" />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAddFlagOpen(false)} className="text-[--text-muted] hover:text-[--text-secondary]">Cancel</Button>
-            <Button onClick={handleAddFlag} className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20">Create Flag</Button>
+            <Button onClick={handleAddFlag} className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20">Create Flag</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1511,26 +1511,26 @@ export function AdminSettings() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[--text-muted] text-xs block mb-1.5">Price ($/mo)</label>
-                  <input type="number" value={editingPlan.price} onChange={e => setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                  <input type="number" value={editingPlan.price} onChange={e => setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
                 </div>
                 <div>
                   <label className="text-[--text-muted] text-xs block mb-1.5">Trial Days</label>
-                  <input type="number" value={editingPlan.trialDays} onChange={e => setEditingPlan({ ...editingPlan, trialDays: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                  <input type="number" value={editingPlan.trialDays} onChange={e => setEditingPlan({ ...editingPlan, trialDays: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
                 </div>
               </div>
               <div>
                 <label className="text-[--text-muted] text-xs block mb-1.5">Description</label>
-                <input type="text" value={editingPlan.description} onChange={e => setEditingPlan({ ...editingPlan, description: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                <input type="text" value={editingPlan.description} onChange={e => setEditingPlan({ ...editingPlan, description: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
               </div>
               <div>
                 <label className="text-[--text-muted] text-xs block mb-1.5">CTA Text</label>
-                <input type="text" value={editingPlan.ctaText} onChange={e => setEditingPlan({ ...editingPlan, ctaText: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                <input type="text" value={editingPlan.ctaText} onChange={e => setEditingPlan({ ...editingPlan, ctaText: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
               </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditPlanOpen(false)} className="text-[--text-muted] hover:text-[--text-secondary]">Cancel</Button>
-            <Button onClick={handleEditPlan} className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20">Save Changes</Button>
+            <Button onClick={handleEditPlan} className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20">Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1545,11 +1545,11 @@ export function AdminSettings() {
           <div className="space-y-4 py-2">
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Title *</label>
-              <input type="text" value={newAnnouncement.title} onChange={e => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="Announcement title" />
+              <input type="text" value={newAnnouncement.title} onChange={e => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="Announcement title" />
             </div>
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Message *</label>
-              <textarea value={newAnnouncement.message} onChange={e => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30 min-h-[80px] resize-none" placeholder="Announcement message" />
+              <textarea value={newAnnouncement.message} onChange={e => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30 min-h-[80px] resize-none" placeholder="Announcement message" />
             </div>
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Type</label>
@@ -1562,7 +1562,7 @@ export function AdminSettings() {
                       newAnnouncement.type === t
                         ? t === 'critical' ? 'bg-[--status-danger-bg] text-[--status-danger] border border-[--status-danger-border]'
                           : t === 'warning' ? 'bg-[--status-warning-bg] text-[--status-warning] border border-[--status-warning-border]'
-                            : 'bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/20'
+                            : 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20'
                         : 'text-[--text-muted] hover:text-[--text-muted] hover:bg-[--bg-surface]'
                     }`}
                   >
@@ -1574,17 +1574,17 @@ export function AdminSettings() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[--text-muted] text-xs block mb-1.5">Start Date</label>
-                <input type="date" value={newAnnouncement.startDate} onChange={e => setNewAnnouncement({ ...newAnnouncement, startDate: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                <input type="date" value={newAnnouncement.startDate} onChange={e => setNewAnnouncement({ ...newAnnouncement, startDate: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
               </div>
               <div>
                 <label className="text-[--text-muted] text-xs block mb-1.5">End Date</label>
-                <input type="date" value={newAnnouncement.endDate} onChange={e => setNewAnnouncement({ ...newAnnouncement, endDate: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#E50914]/30" />
+                <input type="date" value={newAnnouncement.endDate} onChange={e => setNewAnnouncement({ ...newAnnouncement, endDate: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#0D9488]/30" />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAddAnnouncementOpen(false)} className="text-[--text-muted] hover:text-[--text-secondary]">Cancel</Button>
-            <Button onClick={handleAddAnnouncement} className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20">Create Announcement</Button>
+            <Button onClick={handleAddAnnouncement} className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20">Create Announcement</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1599,11 +1599,11 @@ export function AdminSettings() {
           <div className="space-y-4 py-2">
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Name *</label>
-              <input type="text" value={newAdmin.name} onChange={e => setNewAdmin({ ...newAdmin, name: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="Full name" />
+              <input type="text" value={newAdmin.name} onChange={e => setNewAdmin({ ...newAdmin, name: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="Full name" />
             </div>
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Email *</label>
-              <input type="email" value={newAdmin.email} onChange={e => setNewAdmin({ ...newAdmin, email: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#E50914]/30" placeholder="email@example.com" />
+              <input type="email" value={newAdmin.email} onChange={e => setNewAdmin({ ...newAdmin, email: e.target.value })} className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#0D9488]/30" placeholder="email@example.com" />
             </div>
             <div>
               <label className="text-[--text-muted] text-xs block mb-1.5">Role</label>
@@ -1626,7 +1626,7 @@ export function AdminSettings() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAddAdminOpen(false)} className="text-[--text-muted] hover:text-[--text-secondary]">Cancel</Button>
-            <Button onClick={handleAddAdmin} className="bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 hover:bg-[#E50914]/20">Add Admin</Button>
+            <Button onClick={handleAddAdmin} className="bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20 hover:bg-[#0D9488]/20">Add Admin</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

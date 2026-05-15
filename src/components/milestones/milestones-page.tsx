@@ -50,10 +50,10 @@ import { toast } from 'sonner'
 // ─── Type Config ────────────────────────────────────────────────────
 const typeConfig: Record<MilestoneType, { emoji: string; color: string; bg: string; border: string; dotColor: string }> = {
   birthday: { emoji: '🎂', color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20', dotColor: 'bg-pink-400' },
-  anniversary: { emoji: '💍', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dotColor: 'bg-rose-400' },
-  graduation: { emoji: '🎓', color: 'text-[#E50914]', bg: 'bg-[#E50914]/10', border: 'border-[#E50914]/20', dotColor: 'bg-[#E50914]' },
-  achievement: { emoji: '🏆', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dotColor: 'bg-amber-400' },
-  custom: { emoji: '⭐', color: 'text-[#E50914]', bg: 'bg-[#E50914]/10', border: 'border-[#E50914]/20', dotColor: 'bg-[#E50914]' },
+  anniversary: { emoji: '💍', color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/20', dotColor: 'bg-teal-400' },
+  graduation: { emoji: '🎓', color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/10', border: 'border-[#0D9488]/20', dotColor: 'bg-[#0D9488]' },
+  achievement: { emoji: '🏆', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dotColor: 'bg-emerald-400' },
+  custom: { emoji: '⭐', color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/10', border: 'border-[#0D9488]/20', dotColor: 'bg-[#0D9488]' },
 }
 
 const typeIconMap: Record<MilestoneType, React.ElementType> = {
@@ -78,9 +78,9 @@ function getDaysUntilDate(dateStr: string): number {
 
 function getCountdownBadge(days: number, t: typeof import('@/i18n/en').en.milestones) {
   if (days === 0) return { label: t.today, color: 'bg-green-500/20 text-green-400 border-green-500/30' }
-  if (days === 1) return { label: t.tomorrow, color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' }
-  if (days <= 7) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-amber-500/15 text-amber-400 border-amber-500/20' }
-  if (days <= 30) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-[#E50914]/15 text-[#E50914] border-[#E50914]/20' }
+  if (days === 1) return { label: t.tomorrow, color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
+  if (days <= 7) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' }
+  if (days <= 30) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20' }
   return { label: t.inDays.replace('{n}', String(days)), color: 'bg-[--bg-surface-2] text-[--text-muted] border-[--border-subtle]' }
 }
 
@@ -370,10 +370,10 @@ export default function MilestonesPage() {
         transition={{ duration: 0.3, delay: 0.05 }}
         className="grid grid-cols-2 sm:grid-cols-4 gap-3"
       >
-        <StatCard icon={PartyPopper} label={mt.totalMilestones} value={stats.total} color="text-[#E50914]" bg="bg-[#E50914]/10" />
+        <StatCard icon={PartyPopper} label={mt.totalMilestones} value={stats.total} color="text-[#0D9488]" bg="bg-[#0D9488]/10" />
         <StatCard icon={Cake} label={mt.birthdaysCount} value={stats.birthdays} color="text-pink-400" bg="bg-pink-500/10" />
-        <StatCard icon={Clock} label={mt.nextUpcoming} value={stats.nextUpcoming} color="text-amber-400" bg="bg-amber-500/10" smallValue />
-        <StatCard icon={Calendar} label={mt.thisMonthCount} value={stats.thisMonth} color="text-[#E50914]" bg="bg-[#E50914]/10" />
+        <StatCard icon={Clock} label={mt.nextUpcoming} value={stats.nextUpcoming} color="text-emerald-400" bg="bg-emerald-500/10" smallValue />
+        <StatCard icon={Calendar} label={mt.thisMonthCount} value={stats.thisMonth} color="text-[#0D9488]" bg="bg-[#0D9488]/10" />
       </motion.div>
 
       {/* ─── Month Calendar Strip ───────────────────────────────── */}
@@ -512,7 +512,7 @@ export default function MilestonesPage() {
                       </span>
                     )}
                     {milestone.type === 'anniversary' && (
-                      <span className="text-rose-400">
+                      <span className="text-teal-400">
                         · {mt.anniversaryYearOther.replace('{n}', String(calculateAnniversaryYears(milestone.date)))}
                       </span>
                     )}
@@ -643,7 +643,7 @@ export default function MilestonesPage() {
                               </span>
                             )}
                             {milestone.type === 'anniversary' && (
-                              <span className="text-[10px] text-rose-400 font-medium">
+                              <span className="text-[10px] text-teal-400 font-medium">
                                 {mt.anniversaryYearOther.replace('{n}', String(calculateAnniversaryYears(milestone.date)))}
                               </span>
                             )}

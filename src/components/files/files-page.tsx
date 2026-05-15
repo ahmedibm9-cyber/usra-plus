@@ -101,11 +101,11 @@ function getFileIconColor(fileType: string, fileName?: string) {
   if (['pdf'].includes(ext) || fileType.includes('pdf'))
     return 'bg-red-500/15 text-red-400'
   if (['mp4', 'mov', 'avi', 'webm'].includes(ext) || fileType.startsWith('video/'))
-    return 'bg-[#E50914]/15 text-[#E50914]'
+    return 'bg-[#0D9488]/15 text-[#0D9488]'
   if (['mp3', 'wav', 'ogg', 'flac'].includes(ext) || fileType.startsWith('audio/'))
-    return 'bg-amber-500/15 text-amber-400'
+    return 'bg-emerald-500/15 text-emerald-400'
   if (['doc', 'docx'].includes(ext) || fileType.includes('word') || fileType.includes('document'))
-    return 'bg-[#E50914]/15 text-[#E50914]'
+    return 'bg-[#0D9488]/15 text-[#0D9488]'
   if (['xls', 'xlsx', 'csv'].includes(ext) || fileType.includes('spreadsheet') || fileType.includes('excel'))
     return 'bg-green-500/15 text-green-400'
   if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext) || fileType.includes('zip') || fileType.includes('rar'))
@@ -427,7 +427,7 @@ export function FilesPage() {
 
             {/* Sort dropdown */}
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
-              <SelectTrigger className="w-[120px] bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl h-9 text-xs focus:ring-[#E50914]/20 focus:border-[#E50914]/50">
+              <SelectTrigger className="w-[120px] bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl h-9 text-xs focus:ring-[#0D9488]/20 focus:border-[#0D9488]/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl">
@@ -483,7 +483,7 @@ export function FilesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.files.search}
-            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#E50914]/20 focus-visible:border-[#E50914]/50 focus-visible:ring-offset-0"
+            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#0D9488]/20 focus-visible:border-[#0D9488]/50 focus-visible:ring-offset-0"
           />
         </div>
       </div>
@@ -530,7 +530,7 @@ export function FilesPage() {
                       {/* File icon / preview */}
                       <div className="flex items-center justify-center h-20 mb-3">
                         {isImage ? (
-                          <div className="w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-pink-500/10 to-[#C40812]/10 flex items-center justify-center">
+                          <div className="w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-pink-500/10 to-[#0F766E]/10 flex items-center justify-center">
                             {file.url ? (
                               <img
                                 src={file.url}
@@ -559,7 +559,7 @@ export function FilesPage() {
                         <span className="text-[10px] text-[--text-muted]">
                           {format(new Date(file.created_at), 'MMM d')}
                         </span>
-                        <span className="text-[10px] text-[#E50914]">
+                        <span className="text-[10px] text-[#0D9488]">
                           {getUploaderName(file.uploaded_by)}
                         </span>
                       </div>

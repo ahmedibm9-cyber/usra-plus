@@ -132,7 +132,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
             ? 'bg-gray-500/20 text-muted-foreground border-gray-500/30'
             : plan === 'pro'
              ? 'bg-accent/20 text-accent border-accent/30'
-             : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+             : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
           }`}
          >
           {plan === 'free' && <span>Free</span>}
@@ -246,7 +246,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
          {/* Family+ Plan */}
          <div className="relative bg-background border border-border rounded-xl p-3.5 flex flex-col">
-          <p className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider mb-1">
+          <p className="text-xs font-semibold text-emerald-400/80 uppercase tracking-wider mb-1">
            {t.settings.familyPlus}
           </p>
           <p className="text-lg font-bold text-foreground">$9.99</p>
@@ -262,7 +262,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
             return (
              <div key={feat.key} className="flex items-center gap-1.5">
               {isIncluded ? (
-               <Check className="size-3 text-amber-400/70 shrink-0" />
+               <Check className="size-3 text-emerald-400/70 shrink-0" />
               ) : (
                <X className="size-3 text-muted-foreground/40 shrink-0" />
               )}
@@ -277,7 +277,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
           <Button
            onClick={() => handleUpgrade('family_plus')}
            variant="outline"
-           className="w-full mt-3 h-8 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300"
+           className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
            disabled={plan === 'family_plus'}
           >
            {plan === 'family_plus'
@@ -310,7 +310,7 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
           </span>
          </div>
          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
-          <HardDrive className="size-4 text-amber-400 shrink-0" />
+          <HardDrive className="size-4 text-emerald-400 shrink-0" />
           <span className="text-[10px] text-muted-foreground">
            {isRTL ? 'مساحة أكبر' : 'More Storage'}
           </span>

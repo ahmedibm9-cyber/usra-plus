@@ -134,7 +134,7 @@ const FALLBACK_WEATHER: WeatherData = {
 const tealTheme = createTheme({
   palette: {
     primary: { main: '#0D6B58' },
-    secondary: { main: '#F59E0B' },
+    secondary: { main: '#059669' },
   },
   shape: { borderRadius: 16 },
 })

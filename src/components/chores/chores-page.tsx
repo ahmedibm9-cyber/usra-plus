@@ -68,12 +68,12 @@ const CHORE_ICONS = [
 
 // ─── Person colors for avatars ─────────────────────────────────────
 const PERSON_COLORS = [
-  'bg-[#E50914]',
-  'bg-[#F4C430]',
+  'bg-[#0D9488]',
+  'bg-[#10B981]',
   'bg-[#22C55E]',
-  'bg-amber-500',
-  'bg-rose-500',
-  'bg-[#E50914]',
+  'bg-emerald-500',
+  'bg-teal-500',
+  'bg-[#0D9488]',
 ]
 
 function getPersonColor(index: number) {
@@ -83,16 +83,16 @@ function getPersonColor(index: number) {
 // ─── Difficulty badge colors ───────────────────────────────────────
 const DIFFICULTY_STYLES = {
   easy: 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/20',
-  medium: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-  hard: 'bg-rose-500/15 text-rose-400 border-rose-500/20',
+  medium: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+  hard: 'bg-teal-500/15 text-teal-400 border-teal-500/20',
 }
 
 // ─── Frequency badge colors ────────────────────────────────────────
 const FREQUENCY_STYLES = {
-  daily: 'bg-[#E50914]/15 text-[#E50914] border-[#E50914]/20',
-  weekly: 'bg-[#E50914]/15 text-[#E50914] border-[#E50914]/20',
-  biweekly: 'bg-[#E50914]/15 text-[#E50914] border-[#E50914]/20',
-  monthly: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
+  daily: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20',
+  weekly: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20',
+  biweekly: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20',
+  monthly: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
 }
 
 // ─── Progress Ring Component ───────────────────────────────────────
@@ -581,7 +581,7 @@ function ChoreListRow({
         variant="outline"
         className={`text-[10px] px-1.5 py-0 shrink-0 ${
           chore.isPaused
-            ? 'text-amber-400 border-amber-500/20'
+            ? 'text-emerald-400 border-emerald-500/20'
             : 'text-[#22C55E] border-[#22C55E]/20'
         }`}
       >
@@ -723,7 +723,7 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
   return (
     <div className="glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
       <h3 className="text-sm font-semibold text-[--text-primary] mb-3 flex items-center gap-2">
-        <Trophy className="size-4 text-amber-400" />
+        <Trophy className="size-4 text-emerald-400" />
         {t.chores.leaderboard}
         <span className="text-[10px] text-[--text-muted] font-normal ml-1">{t.chores.thisWeek}</span>
       </h3>
@@ -737,7 +737,7 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
             <div key={entry.personId} className="space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-[--text-muted]' : 'text-[--text-muted]'}`}>
+                  <span className={`text-sm font-bold ${idx === 0 ? 'text-emerald-400' : idx === 1 ? 'text-[--text-muted]' : 'text-[--text-muted]'}`}>
                     #{idx + 1}
                   </span>
                   <PersonAvatar personId={entry.personId} members={members} size="md" />
@@ -1013,14 +1013,14 @@ export default function ChoresPage() {
         </div>
         <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
           <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="size-4 text-[#E50914]" />
+            <BarChart3 className="size-4 text-[#0D9488]" />
             <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.completionRate}</span>
           </div>
           <span className="text-2xl font-bold text-[--text-primary]">{completionRate}%</span>
         </div>
         <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Trophy className="size-4 text-amber-400" />
+            <Trophy className="size-4 text-emerald-400" />
             <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.topContributor}</span>
           </div>
           <span className="text-lg font-bold text-[--text-primary] truncate">{topContributorName}</span>
