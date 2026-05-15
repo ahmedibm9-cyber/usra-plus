@@ -15,7 +15,7 @@ interface DemoModeBannerProps {
  * A sticky banner that shows at the top of the admin content area when
  * data is from demo mode (Supabase tables don't exist or are empty).
  *
- * - Amber/yellow accent color
+ * - Warning-themed accent via CSS variables
  * - Dismissible with X button
  * - Sticky at top of content area
  */

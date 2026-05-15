@@ -595,7 +595,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                   </Box>
                 </motion.div>
 
-                {/* Dev Mode OTP Display */}
+                {/* Dev Mode OTP Display — shown when no email provider is configured */}
                 {devCode && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
@@ -603,45 +603,64 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                     transition={{ duration: 0.3, delay: 0.25 }}
                   >
                     <Alert
-                      severity="warning"
+                      severity="info"
                       icon={<AutoAwesome sx={{ fontSize: 16 }} />}
                       sx={{
                         mt: 1.5,
                         borderRadius: 2,
-                        bgcolor: 'rgba(13,148,136,0.05)',
-                        border: '1px solid rgba(13,148,136,0.2)',
+                        bgcolor: 'rgba(13,148,136,0.08)',
+                        border: '1px solid rgba(13,148,136,0.25)',
                         '& .MuiAlert-icon': { color: 'secondary.main' },
                       }}
                     >
-                      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Stack direction="column" spacing={1}>
                         <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 500 }}>
-                          {isRTL ? 'وضع التطوير - الرمز:' : 'Dev Mode — Code:'}
+                          {isRTL ? 'رمز التحقق (البريد الإلكتروني غير مُفعّل بعد):' : 'Your verification code (email not yet active):'}
                         </Typography>
-                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                           <Typography
-                            variant="h6"
+                            variant="h5"
                             sx={{
                               fontFamily: '"JetBrains Mono", monospace',
                               fontWeight: 700,
                               color: 'secondary.main',
-                              letterSpacing: 2,
+                              letterSpacing: 3,
                             }}
                           >
                             {devCode}
                           </Typography>
-                          <Tooltip title="Copy code">
-                            <IconButton size="small" onClick={copyDevCode}>
-                              {copied ? <Check sx={{ fontSize: 14, color: 'success.main' }} /> : <ContentCopy sx={{ fontSize: 14, color: 'secondary.main' }} />}
-                            </IconButton>
-                          </Tooltip>
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                            <Button
+                              type="button"
+                              size="small"
+                              variant="outlined"
+                              onClick={() => {
+                                // Auto-fill the OTP inputs with the dev code
+                                const digits = devCode.split('')
+                                const newOtp = [...Array(OTP_LENGTH).fill('')]
+                                digits.forEach((d, i) => { if (i < OTP_LENGTH) newOtp[i] = d })
+                                setOtp(newOtp)
+                                inputRefs.current[Math.min(digits.length, OTP_LENGTH - 1)]?.focus()
+                              }}
+                              sx={{
+                                fontSize: 11,
+                                borderRadius: 1.5,
+                                textTransform: 'none',
+                                borderColor: 'secondary.main',
+                                color: 'secondary.main',
+                                '&:hover': { borderColor: 'secondary.main', bgcolor: 'rgba(13,148,136,0.05)' },
+                              }}
+                            >
+                              {isRTL ? 'ملء تلقائي' : 'Auto-fill'}
+                            </Button>
+                            <Tooltip title="Copy code">
+                              <IconButton size="small" onClick={copyDevCode}>
+                                {copied ? <Check sx={{ fontSize: 14, color: 'success.main' }} /> : <ContentCopy sx={{ fontSize: 14, color: 'secondary.main' }} />}
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
                         </Stack>
                       </Stack>
-                      <Typography variant="caption" sx={{ color: 'secondary.main', opacity: 0.5, mt: 0.5, display: 'block' }}>
-                        {isRTL
-                          ? 'سيتم دمج إرسال البريد الإلكتروني لاحقاً'
-                          : 'Email integration will be added later'
-                        }
-                      </Typography>
                     </Alert>
                   </motion.div>
                 )}

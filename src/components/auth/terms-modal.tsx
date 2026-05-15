@@ -202,7 +202,7 @@ export function TermsModal() {
         },
       }}
     >
-      {/* Header with teal/amber gradient accent */}
+      {/* Header with teal/emerald gradient accent */}
       <DialogTitle
         sx={{
           m: 0,

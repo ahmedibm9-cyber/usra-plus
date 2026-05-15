@@ -49,7 +49,7 @@ function AdminPageLoader() {
   )
 }
 
-/** Founder-level modules use Yellow accent; Regular admin modules use Red accent */
+/** Founder-level modules use Emerald accent; Regular admin modules use Teal accent */
 type ModuleAccent = 'founder' | 'admin'
 
 const NAV_ITEMS: { id: AdminPage; label: string; icon: React.ReactNode; group: string; accent: ModuleAccent }[] = [
@@ -86,7 +86,7 @@ function getAccentColor(accent: ModuleAccent, type: 'bg' | 'text' | 'border' | '
       case 'text': return 'text-[#10B981]'
       case 'border': return 'border-[#10B981]'
       case 'bg-subtle': return 'bg-[#10B981]/10'
-      case 'shadow': return 'rgba(244, 196, 48, 0.35)'
+      case 'shadow': return 'rgba(16, 185, 129, 0.35)'
     }
   }
   switch (type) {
@@ -94,7 +94,7 @@ function getAccentColor(accent: ModuleAccent, type: 'bg' | 'text' | 'border' | '
     case 'text': return 'text-[#0D9488]'
     case 'border': return 'border-[#0D9488]'
     case 'bg-subtle': return 'bg-[#0D9488]/10'
-    case 'shadow': return 'rgba(229, 9, 20, 0.35)'
+    case 'shadow': return 'rgba(13, 148, 136, 0.35)'
   }
 }
 
@@ -102,8 +102,8 @@ function getAccentColor(accent: ModuleAccent, type: 'bg' | 'text' | 'border' | '
 function LedIndicator({ status }: { status: 'healthy' | 'warning' | 'error' | 'idle' }) {
   const colorMap = {
     healthy: 'bg-[#22C55E] shadow-[0_0_6px_rgba(34,197,94,0.5)]',
-    warning: 'bg-[#10B981] shadow-[0_0_6px_rgba(244,196,48,0.5)]',
-    error: 'bg-[#0D9488] shadow-[0_0_6px_rgba(229,9,20,0.5)]',
+    warning: 'bg-[#10B981] shadow-[0_0_6px_rgba(16,185,129,0.5)]',
+    error: 'bg-[#0D9488] shadow-[0_0_6px_rgba(13,148,136,0.5)]',
     idle: 'bg-[--text-muted]',
   }
   return <span className={`inline-block w-1.5 h-1.5 rounded-full ${colorMap[status]}`} />
@@ -174,7 +174,7 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
       >
         <Bell className="w-4 h-4" />
         {total > 0 && (
-          <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#0D9488] text-[8px] font-bold text-white shadow-[0_0_4px_rgba(229,9,20,0.5)] px-0.5">
+          <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#0D9488] text-[8px] font-bold text-white shadow-[0_0_4px_rgba(13,148,136,0.5)] px-0.5">
             {total > 99 ? '99+' : total}
           </span>
         )}
@@ -610,7 +610,7 @@ export function AdminLayout() {
         {/* Sidebar Header — Logo + Branding */}
         <div className="h-16 flex items-center px-4 border-b border-[--border-subtle]">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-[#10B981] flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(244,196,48,0.25)]">
+            <div className="w-8 h-8 rounded-lg bg-[#10B981] flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
               <Shield className="w-4 h-4 text-black" />
             </div>
             {!sidebarCollapsed && (
@@ -758,8 +758,8 @@ export function AdminLayout() {
             <div
               className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-full border"
               style={{
-                borderColor: currentAccent === 'founder' ? 'rgba(244,196,48,0.15)' : 'rgba(229,9,20,0.15)',
-                backgroundColor: currentAccent === 'founder' ? 'rgba(244,196,48,0.05)' : 'rgba(229,9,20,0.05)',
+                borderColor: currentAccent === 'founder' ? 'rgba(16,185,129,0.15)' : 'rgba(13,148,136,0.15)',
+                backgroundColor: currentAccent === 'founder' ? 'rgba(16,185,129,0.05)' : 'rgba(13,148,136,0.05)',
               }}
             >
               {currentAccent === 'founder' ? (
@@ -798,7 +798,7 @@ export function AdminLayout() {
             {/* Notification Bell — Real-time Dropdown */}
             <NotificationBellDropdown onNavigate={handleNavClick} />
 
-            {/* Admin Role Badge — Yellow Accent */}
+            {/* Admin Role Badge — Emerald Accent */}
             <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#10B981]/[0.08] border border-[#10B981]/15">
               <Shield className="w-3 h-3 text-[#10B981]" />
               <span
@@ -811,7 +811,7 @@ export function AdminLayout() {
             {/* Avatar */}
             <div className="flex items-center gap-2">
               <div
-                className="w-7 h-7 rounded-full bg-[#10B981] flex items-center justify-center text-black text-xs font-bold shadow-[0_0_10px_rgba(244,196,48,0.2)] font-display"
+                className="w-7 h-7 rounded-full bg-[#10B981] flex items-center justify-center text-black text-xs font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)] font-display"
               >
                 {adminUser?.name?.charAt(0) || 'A'}
               </div>

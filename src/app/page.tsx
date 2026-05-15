@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo, Component } from 'react'
 import dynamic from 'next/dynamic'
-import { createClient, isDemoMode } from '@/lib/supabase/client'
+import { createClient, isDemoMode, isDemoUserId } from '@/lib/supabase/client'
 import { localGetMe, localUserToProfile } from '@/lib/local-auth'
 import { seedDemoData } from '@/lib/seed-demo-data'
 import { useAuthStore } from '@/stores/auth-store'
@@ -404,11 +404,16 @@ function MainApp() {
   useEffect(() => {
     const fetchInitialData = async () => {
       if (!user?.id) return
-      if (isDemoMode()) {
+
+      // Demo user detection: either no Supabase configured, or user is the demo account
+      // This ensures demo data seeds correctly even on Vercel where Supabase IS configured
+      const isDemoUser = isDemoMode() || isDemoUserId(user.id) || user.email === 'demo@usra.plus'
+      if (isDemoUser) {
         // Seed demo data into all stores (sets demoDataReady=true at the end)
         seedDemoData()
         return
       }
+
       if (!supabase) return
       try {
         const { data: memberships } = await supabase.from('family_members').select('family_id, role, families(*)').eq('user_id', user.id)
