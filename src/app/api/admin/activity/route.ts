@@ -13,55 +13,58 @@ export async function GET(request: Request) {
 
     const skip = (page - 1) * limit
 
-    // Build where clause
+    // Build where clause - using AuditLog model (maps to admin activity)
     const where: Record<string, unknown> = {}
 
     if (category) {
-      where.category = category
+      where.targetType = category
     }
 
     if (severity) {
-      where.severity = severity
+      where.action = { contains: severity }
     }
 
     if (search) {
       where.OR = [
         { action: { contains: search } },
         { details: { contains: search } },
+        { adminEmail: { contains: search } },
       ]
     }
 
     const [logs, total] = await Promise.all([
-      db.activityLog.findMany({
+      db.auditLog.findMany({
         where,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-          device: {
-            select: {
-              id: true,
-              deviceName: true,
-              deviceType: true,
-            },
-          },
-        },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      db.activityLog.count({ where }),
+      db.auditLog.count({ where }),
     ])
+
+    // Map AuditLog to activity format for the frontend
+    const mappedLogs = logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      category: log.targetType,
+      details: log.details,
+      severity: log.action.includes('delete') || log.action.includes('ban') ? 'high' : 
+                log.action.includes('update') || log.action.includes('create') ? 'medium' : 'low',
+      user: {
+        id: log.adminEmail,
+        name: log.adminEmail,
+        email: log.adminEmail,
+        role: 'admin',
+      },
+      ipAddress: log.ipAddress,
+      userAgent: log.userAgent,
+      createdAt: log.createdAt,
+    }))
 
     const totalPages = Math.ceil(total / limit)
 
     return NextResponse.json({
-      logs,
+      logs: mappedLogs,
       pagination: {
         page,
         limit,

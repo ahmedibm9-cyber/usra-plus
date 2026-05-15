@@ -15,16 +15,17 @@ export async function GET(request: NextRequest) {
     }
 
     const settings = await db.systemSetting.findMany({
-      orderBy: [{ category: 'asc' }, { key: 'asc' }],
+      orderBy: [{ key: 'asc' }],
     })
 
-    // Group by category
+    // Group by extracting category from key prefix (e.g. "general.siteName" → "general")
     const grouped: Record<string, typeof settings> = {}
     for (const setting of settings) {
-      if (!grouped[setting.category]) {
-        grouped[setting.category] = []
+      const category = setting.key.includes('.') ? setting.key.split('.')[0] : 'general'
+      if (!grouped[category]) {
+        grouped[category] = []
       }
-      grouped[setting.category].push(setting)
+      grouped[category].push(setting)
     }
 
     return NextResponse.json({

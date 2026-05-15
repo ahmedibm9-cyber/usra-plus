@@ -501,8 +501,8 @@ export function AdminOverview() {
   // Derive KPI values from live data or show 0
   const totalUsers = overviewData?.metrics?.totalUsers ?? analyticsData?.users.total ?? 0
   const monthlyActive = overviewData?.metrics?.monthlyActiveUsers ?? analyticsData?.users.monthlyActive ?? 0
-  const totalFamilies = overviewData?.families?.total ?? analyticsData?.families.total ?? 0
-  const mrr = overviewData?.keyMetrics?.mrr ?? analyticsData?.subscriptions.mrr ?? 0
+  const totalFamilies = (overviewData?.keyMetrics as Record<string, unknown>)?.totalFamilies as number ?? analyticsData?.families.total ?? 0
+  const mrr = Number(overviewData?.keyMetrics?.mrr ?? analyticsData?.subscriptions.mrr ?? 0)
 
   // isEmpty is true when no data exists yet (not "pre-launch" — the app IS live)
   const isEmpty = overviewData?.preLaunch === true || (totalUsers === 0 && totalFamilies === 0 && mrr === 0)

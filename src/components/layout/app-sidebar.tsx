@@ -195,7 +195,7 @@ function NavItemButton({
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const { currentPage, setCurrentPage, currentFamily, families, setCurrentFamily } = useAppStore()
   const { user, logout } = useAuthStore()
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const [familyMenuAnchor, setFamilyMenuAnchor] = useState<HTMLElement | null>(null)
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
 
