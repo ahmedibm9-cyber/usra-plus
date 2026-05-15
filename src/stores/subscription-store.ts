@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { SubscriptionPlan } from '@/types'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── AI Suggestion Daily Tracking (in-memory) ────────────────────────────────
 
@@ -124,8 +125,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           const response = await fetch(`/api/subscription/plan?userId=${encodeURIComponent(userId)}`)
           
           if (response.ok) {
-            const data = await response.json()
-            if (data.plan) {
+            const data = await safeJsonResponse<{ plan?: SubscriptionPlan; isTrial?: boolean; trialEnd?: string | null }>(response)
+            if (data?.plan) {
               set({ 
                 plan: data.plan as SubscriptionPlan, 
                 isTrial: data.isTrial === true,

@@ -47,6 +47,7 @@ import {
 import { BarChart as RechartsBarChart, Bar, ResponsiveContainer } from 'recharts'
 
 import { createClient } from '@/lib/supabase/client'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTaskStore } from '@/stores/task-store'
@@ -467,7 +468,7 @@ function usePrayerTimes() {
           `https://api.aladhan.com/v1/timingsByCity/${dateStr}?city=Riyadh&country=Saudi Arabia&method=4`
         )
         if (!response.ok) throw new Error('API error')
-        const data = await response.json()
+        const data = await safeJsonResponse<{ data?: { timings?: Record<string, string> } }>(response)
         const timings = data?.data?.timings
         if (!timings) throw new Error('No timings data')
 

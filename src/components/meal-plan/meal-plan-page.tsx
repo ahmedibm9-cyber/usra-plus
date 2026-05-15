@@ -49,6 +49,7 @@ import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useGroceryStore } from '@/stores/grocery-store'
 import { useI18n } from '@/i18n/use-translation'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import { toast } from 'sonner'
 
 // ─── Helpers ───────────────────────────────────────────────────────
@@ -738,8 +739,8 @@ function AISuggestionsDialog({
           language: isRTL ? 'ar' : 'en',
         }),
       })
-      const data = await res.json()
-      if (data.suggestions) {
+      const data = await safeJsonResponse<{ suggestions?: Array<{ title: string; description: string; prepTime: number; calories: number; ingredients: string[] }> }>(res)
+      if (data?.suggestions) {
         setSuggestions(data.suggestions)
       }
     } catch {

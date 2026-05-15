@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n/use-translation'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Style Presets ────────────────────────────────────────────────────────────
 
@@ -172,7 +173,10 @@ export function AvatarGenerator({
       style: 'avatar',
       size: '512x512',
      }),
-    }).then((res) => res.json())
+    }).then(async (res) => {
+      const data = await safeJsonResponse<{ imageUrl?: string; fallback?: boolean }>(res)
+      return data
+    })
    )
 
    const results = await Promise.allSettled(promises)

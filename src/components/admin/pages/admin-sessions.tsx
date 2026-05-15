@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -130,7 +131,7 @@ export function AdminSessions() {
     try {
       const res = await fetch('/api/admin/sessions', { signal: controller.signal, credentials: 'same-origin' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (!controller.signal.aborted) setData(json.data)
     } catch {
       // Silently fail

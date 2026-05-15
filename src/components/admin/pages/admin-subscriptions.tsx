@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Animation Variants ─────────────────────────────────────────────
 
@@ -450,7 +451,7 @@ export function AdminSubscriptions() {
     try {
       const res = await fetch('/api/admin/subscriptions', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         setPlans(json.data || [])
       }
     } catch {
@@ -471,7 +472,7 @@ export function AdminSubscriptions() {
         body: JSON.stringify({ planId, ...data }),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to update plan')
         return
       }
@@ -492,7 +493,7 @@ export function AdminSubscriptions() {
           credentials: 'same-origin',
         })
         if (!res.ok) {
-          const err = await res.json()
+          const err = await safeJsonResponse(res)
           toast.error(err.error || 'Failed to deactivate plan')
           return
         }
@@ -506,7 +507,7 @@ export function AdminSubscriptions() {
           body: JSON.stringify({ planId, isActive: true }),
         })
         if (!res.ok) {
-          const err = await res.json()
+          const err = await safeJsonResponse(res)
           toast.error(err.error || 'Failed to activate plan')
           return
         }
@@ -527,7 +528,7 @@ export function AdminSubscriptions() {
         body: JSON.stringify(data),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to create plan')
         return
       }

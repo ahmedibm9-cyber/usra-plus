@@ -10,6 +10,7 @@ import {
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ReferralStatus, ReferralRewardType } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Animation Variants ──────────────────────────────────────────────
 
@@ -225,7 +226,7 @@ export function AdminReferrals() {
     try {
       const res = await fetch('/api/admin/referrals', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         setReferrals(json.data || [])
         setMetrics(json.metrics || {
           totalReferrals: 0,
@@ -253,7 +254,7 @@ export function AdminReferrals() {
         body: JSON.stringify(data),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to create referral')
         return
       }
@@ -274,7 +275,7 @@ export function AdminReferrals() {
         body: JSON.stringify({ referralId, grantReward: true }),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to grant reward')
         return
       }
@@ -294,7 +295,7 @@ export function AdminReferrals() {
         body: JSON.stringify({ referralId, status }),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to update referral')
         return
       }
@@ -313,7 +314,7 @@ export function AdminReferrals() {
         credentials: 'same-origin',
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to delete referral')
         return
       }

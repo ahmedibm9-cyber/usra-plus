@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 import type { UserRecord, RiskLevel } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Types for API response ────────────────────────────────────────────────
 
@@ -292,7 +293,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
           credentials: 'same-origin',
         })
         if (!cancelled && res.ok) {
-          const json: UserDetailResponse = await res.json()
+          const json = await safeJsonResponse<UserDetailResponse>(res)
           setDetail(json)
         } else if (!cancelled) {
           setDetail(null)
@@ -334,7 +335,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
         // Re-fetch detail to show new note
         const detailRes = await fetch(`/api/admin/users/${userId}/detail`, { credentials: 'same-origin' })
         if (detailRes.ok) {
-          const json: UserDetailResponse = await detailRes.json()
+          const json = await safeJsonResponse<UserDetailResponse>(detailRes)
           setDetail(json)
         }
       } else {

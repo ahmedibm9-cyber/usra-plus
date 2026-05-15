@@ -286,7 +286,7 @@ function CreateTicketModal({ onClose, onCreated }: { onClose: () => void; onCrea
         onCreated()
         onClose()
       } else {
-        const data = await res.json()
+        const data = await safeJsonResponse(res)
         toast.error(data.error || 'Failed to create ticket')
       }
     } catch {
@@ -372,7 +372,7 @@ export function AdminSupport() {
         return
       }
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         if (json.data) {
           setData(json.data as SupportData)
         }
@@ -399,7 +399,7 @@ export function AdminSupport() {
         toast.success(`Ticket ${action === 'resolved' ? 'resolved' : action === 'closed' ? 'closed' : 'updated'}`)
         fetchData()
       } else {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to update ticket')
       }
     } catch {
@@ -501,7 +501,7 @@ export function AdminSupport() {
                 try {
                   const res = await fetch('/api/admin/export?type=audit-logs&format=csv', { credentials: 'same-origin' })
                   if (res.ok) {
-                    const json = await res.json()
+                    const json = await safeJsonResponse(res)
                     const blob = new Blob([json.data], { type: 'text/csv' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')

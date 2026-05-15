@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   authors: [{ name: "USRA PLUS" }],
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/logo-new.png",
+    apple: "/logo-new.png",
   },
   openGraph: {
     title: "USRA PLUS — Your Family Operating System",
@@ -63,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr" className="light" suppressHydrationWarning>
       <head>
-        <link rel="apple-touch-icon" href="/logo.svg" />
+        <link rel="apple-touch-icon" href="/logo-new.png" />
         {/* Theme flash prevention — apply class before paint */}
         <script
           dangerouslySetInnerHTML={{

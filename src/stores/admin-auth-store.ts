@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import type { AdminRole, AdminUser, AdminAuditLog } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Session Management ────────────────────────────────────────────────────
 // Admin session uses httpOnly cookies set by the server.
@@ -83,9 +84,9 @@ export const useAdminAuthStore = create<AdminAuthState>()(
           return false
         }
 
-        const data = await response.json()
+        const data = await safeJsonResponse<{ success: boolean; adminUser?: AdminUser }>(response)
         
-        if (!data.success || !data.adminUser) {
+        if (!data || !data.success || !data.adminUser) {
           get().addAuditLog('failed_login', 'admin_auth', null, { email })
           return false
         }

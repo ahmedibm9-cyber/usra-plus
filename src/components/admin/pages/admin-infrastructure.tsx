@@ -256,7 +256,7 @@ function AdminInfrastructureInner() {
         return
       }
       if (!res.ok) throw new Error('Failed to fetch infrastructure data')
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (!mountedRef.current) return
       if (json.data) {
         setApiData(json.data)

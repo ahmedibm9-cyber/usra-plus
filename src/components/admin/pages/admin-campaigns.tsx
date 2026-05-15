@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { EmailCampaign, UserSegment, ABTest, EmailCampaignStatus } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Animation Variants ──────────────────────────────────────────────
 
@@ -96,7 +97,7 @@ function timeAgo(dateStr: string): string {
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', ...opts?.headers } })
-  const data = await res.json()
+  const data = await safeJsonResponse(res)
   if (!res.ok) throw new Error(data.error || data.details || 'Request failed')
   return data
 }

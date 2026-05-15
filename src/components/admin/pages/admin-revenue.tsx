@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { TransactionType, TransactionStatus, RefundStatus } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Animation Variants ──────────────────────────────────────────────
 
@@ -237,7 +238,7 @@ export function AdminRevenue() {
     try {
       const res = await fetch('/api/admin/revenue', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         setAnalytics(json.data)
       }
     } catch {
@@ -271,7 +272,7 @@ export function AdminRevenue() {
         body: JSON.stringify({ refundId, action: 'approve' }),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to approve refund')
         return
       }
@@ -291,7 +292,7 @@ export function AdminRevenue() {
         body: JSON.stringify({ refundId, action: 'reject' }),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to reject refund')
         return
       }
@@ -349,7 +350,7 @@ export function AdminRevenue() {
               try {
                 const res = await fetch('/api/admin/export?type=revenue&format=csv', { credentials: 'same-origin' })
                 if (res.ok) {
-                  const json = await res.json()
+                  const json = await safeJsonResponse(res)
                   const blob = new Blob([json.data], { type: 'text/csv' })
                   const url = URL.createObjectURL(blob)
                   const a = document.createElement('a')
@@ -371,7 +372,7 @@ export function AdminRevenue() {
               try {
                 const res = await fetch('/api/admin/export?type=revenue&format=json', { credentials: 'same-origin' })
                 if (res.ok) {
-                  const json = await res.json()
+                  const json = await safeJsonResponse(res)
                   const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' })
                   const url = URL.createObjectURL(blob)
                   const a = document.createElement('a')

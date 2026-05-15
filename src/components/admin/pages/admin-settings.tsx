@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import type { FeatureFlag, PlanConfig, Announcement, AdminRole } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // Admin user type for the Admin Access tab
 interface AdminAccessUser {
@@ -196,7 +197,7 @@ export function AdminSettings() {
     try {
       const res = await fetch('/api/admin/system', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         if (json.data) {
           setDbStats(json.data.databaseStats)
           setBackups(json.data.backups || [])
@@ -308,7 +309,7 @@ export function AdminSettings() {
         }),
       })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         setFlagsPersisted(true)
         addAuditLog('feature_flags_saved_to_db', 'feature_flag', null, { count: featureFlags.length })
         toast({ title: 'Feature flags saved', description: `${featureFlags.length} flags persisted to database` })
@@ -321,14 +322,14 @@ export function AdminSettings() {
             body: JSON.stringify({ action: 'load_feature_flags' }),
           })
           if (loadRes.ok) {
-            const loadJson = await loadRes.json()
+            const loadJson = await safeJsonResponse(loadRes)
             if (loadJson.featureFlags) {
               setFeatureFlags(loadJson.featureFlags)
             }
           }
         }
       } else {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         toast({ title: 'Save failed', description: json.error || 'Unknown error', variant: 'destructive' })
       }
     } catch {
@@ -348,7 +349,7 @@ export function AdminSettings() {
         body: JSON.stringify({ action: 'load_feature_flags' }),
       })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         if (json.featureFlags) {
           setFeatureFlags(json.featureFlags)
           setFlagsPersisted(true)
@@ -535,7 +536,7 @@ export function AdminSettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, ...body }),
       })
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (res.ok && json.success) {
         toast({ title: 'Success', description: json.message || `Action ${action} completed` })
         // Refresh data

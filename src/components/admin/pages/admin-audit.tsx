@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { Skeleton } from '@/components/ui/skeleton'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import {
   Shield, AlertTriangle, Search, Filter, ChevronDown, ChevronUp,
   ChevronLeft, ChevronRight, Loader2, RefreshCw, Clock,
@@ -222,7 +223,7 @@ export function AdminAudit() {
         credentials: 'same-origin',
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (!controller.signal.aborted) {
         setData(json.data)
         setSource(json.source === 'live' ? 'live' : 'demo')

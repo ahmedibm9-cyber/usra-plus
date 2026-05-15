@@ -83,6 +83,7 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { GroceryItemSkeleton } from '@/components/shared/skeleton-patterns'
 import { cn } from '@/lib/utils'
 import { announce } from '@/lib/live-announcer'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import {
   DndContext,
   DragOverlay,
@@ -697,8 +698,8 @@ export function GroceryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: itemNames, language: lang }),
       })
-      const data = await res.json()
-      if (data.recipes) {
+      const data = await safeJsonResponse<{ recipes?: RecipeSuggestion[] }>(res)
+      if (data?.recipes) {
         setRecipes(data.recipes)
       }
     } catch {

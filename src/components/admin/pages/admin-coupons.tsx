@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { CouponDiscountType, CouponAudience } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Animation Variants ──────────────────────────────────────────────
 
@@ -459,7 +460,7 @@ export function AdminCoupons() {
     try {
       const res = await fetch('/api/admin/coupons', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         setCoupons(json.data || [])
       }
     } catch {
@@ -480,7 +481,7 @@ export function AdminCoupons() {
         body: JSON.stringify(data),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to create coupon')
         return
       }
@@ -501,7 +502,7 @@ export function AdminCoupons() {
         body: JSON.stringify({ couponId, isActive }),
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to toggle coupon')
         return
       }
@@ -519,7 +520,7 @@ export function AdminCoupons() {
         credentials: 'same-origin',
       })
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         toast.error(err.error || 'Failed to delete coupon')
         return
       }

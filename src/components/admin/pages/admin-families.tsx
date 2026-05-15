@@ -296,7 +296,7 @@ export function AdminFamilies() {
           return
         }
         if (!cancelled && res.ok) {
-          const json: FamiliesApiResponse = await res.json()
+          const json = await safeJsonResponse<FamiliesApiResponse>(res)
           setDataSource(json.source)
           const mapped: FamilyRecord[] = json.data.map(f => ({
             id: f.id,
@@ -456,7 +456,7 @@ export function AdminFamilies() {
                 try {
                   const res = await fetch('/api/admin/export?type=families&format=csv', { credentials: 'same-origin' })
                   if (res.ok) {
-                    const json = await res.json()
+                    const json = await safeJsonResponse(res)
                     const blob = new Blob([json.data], { type: 'text/csv' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
@@ -479,7 +479,7 @@ export function AdminFamilies() {
                 try {
                   const res = await fetch('/api/admin/export?type=families&format=json', { credentials: 'same-origin' })
                   if (res.ok) {
-                    const json = await res.json()
+                    const json = await safeJsonResponse(res)
                     const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback, useMemo, Component } from 're
 import dynamic from 'next/dynamic'
 import { createClient, isDemoMode } from '@/lib/supabase/client'
 import { localGetMe, localUserToProfile } from '@/lib/local-auth'
+import { seedDemoData } from '@/lib/seed-demo-data'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
@@ -404,7 +405,8 @@ function MainApp() {
     const fetchInitialData = async () => {
       if (!user?.id) return
       if (isDemoMode()) {
-        useAppStore.getState().setDemoDataReady(true)
+        // Seed demo data into all stores (sets demoDataReady=true at the end)
+        seedDemoData()
         return
       }
       if (!supabase) return

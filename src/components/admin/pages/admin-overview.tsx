@@ -18,6 +18,7 @@ import { useOverviewData, useAnalyticsData } from '@/hooks/use-admin-data'
 import { useAdminStore } from '@/stores/admin-store'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { DataSource } from '@/hooks/use-admin-data'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Animated Counter Hook ───────────────────────────────────────────────────
 function useAnimatedCounter(target: number, duration = 1400, startOnMount = true) {
@@ -454,7 +455,7 @@ export function AdminOverview() {
   const [dbLabel, setDbLabel] = useState('SQLite')
   useEffect(() => {
     fetch('/api/admin/db-info', { credentials: 'same-origin' })
-      .then(res => res.ok ? res.json() : null)
+      .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
       .then(data => {
         if (data?.displayBadge) setDbLabel(data.displayBadge)
       })
@@ -482,7 +483,7 @@ export function AdminOverview() {
     try {
       const res = await fetch('/api/admin/system-health', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         if (json.data) setSystemHealth(json.data)
       }
     } catch {

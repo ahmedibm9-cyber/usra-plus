@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -587,7 +588,7 @@ export function AdminContent() {
     try {
       const res = await fetch('/api/admin/content', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         const c = json.content || {}
 
         if (c.terms_of_service_en) setTermsEn(c.terms_of_service_en)
@@ -634,7 +635,7 @@ export function AdminContent() {
         setLastSavedAt(new Date().toLocaleTimeString())
         addAuditLog('content_saved', 'content', null, { keys: 7 })
       } else {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         toast.error(json.error || 'Failed to save content')
       }
     } catch {

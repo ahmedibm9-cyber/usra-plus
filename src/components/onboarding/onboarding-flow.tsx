@@ -5,6 +5,7 @@ import { createClient, isDemoMode } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAppStore } from '@/stores/app-store'
 import { useI18n } from '@/i18n/use-translation'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -464,10 +465,10 @@ function FamilyStep({
         }),
       })
 
-      const data = await res.json()
+      const data = await safeJsonResponse<{ family?: Record<string, unknown>; error?: string }>(res)
 
-      if (!res.ok) {
-        throw new Error(data.error || t.common.error)
+      if (!res.ok || !data) {
+        throw new Error(data?.error || t.common.error)
       }
 
       const family = data.family
@@ -539,10 +540,10 @@ function FamilyStep({
         }),
       })
 
-      const data = await res.json()
+      const data = await safeJsonResponse<{ family?: Record<string, unknown>; error?: string }>(res)
 
-      if (!res.ok) {
-        toast.error(data.error || 'Invalid invite code')
+      if (!res.ok || !data) {
+        toast.error(data?.error || 'Invalid invite code')
         setIsLoading(false)
         return
       }

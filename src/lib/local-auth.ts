@@ -7,6 +7,7 @@
  */
 
 import type { UserProfile, Language, Theme } from '@/types'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Shape returned by the local auth API ──────────────────────────────────
 export interface LocalAuthUser {
@@ -55,10 +56,10 @@ export async function localLogin({
       body: JSON.stringify({ email, password }),
     })
 
-    const data = await res.json()
+    const data = await safeJsonResponse<{ user?: LocalAuthUser; error?: string }>(res)
 
-    if (!res.ok) {
-      return { user: null, error: data.error || 'Login failed' }
+    if (!res.ok || !data) {
+      return { user: null, error: data?.error || 'Login failed' }
     }
 
     return { user: data.user as LocalAuthUser, error: null }
@@ -98,10 +99,10 @@ export async function localSignUp({
       }),
     })
 
-    const data = await res.json()
+    const data = await safeJsonResponse<{ user?: LocalAuthUser; error?: string; devCode?: string; needsVerification?: boolean }>(res)
 
-    if (!res.ok) {
-      return { user: null, error: data.error || 'Signup failed' }
+    if (!res.ok || !data) {
+      return { user: null, error: data?.error || 'Signup failed' }
     }
 
     return {
@@ -128,8 +129,8 @@ export async function localGetMe(): Promise<{ user: LocalAuthUser | null }> {
       return { user: null }
     }
 
-    const data = await res.json()
-    return { user: data.user as LocalAuthUser | null }
+    const data = await safeJsonResponse<{ user?: LocalAuthUser | null }>(res)
+    return { user: data?.user ?? null }
   } catch (err) {
     console.error('[Local Auth] GetMe request error:', err)
     return { user: null }
@@ -163,10 +164,10 @@ export async function localSendVerificationCode(email: string): Promise<{
       body: JSON.stringify({ email }),
     })
 
-    const data = await res.json()
+    const data = await safeJsonResponse<{ error?: string; devCode?: string; expiresIn?: number; alreadyVerified?: boolean }>(res)
 
-    if (!res.ok) {
-      return { success: false, error: data.error || 'Failed to send verification code' }
+    if (!res.ok || !data) {
+      return { success: false, error: data?.error || 'Failed to send verification code' }
     }
 
     return {
@@ -195,10 +196,10 @@ export async function localVerifyCode(email: string, code: string): Promise<{
       body: JSON.stringify({ email, code }),
     })
 
-    const data = await res.json()
+    const data = await safeJsonResponse<{ user?: LocalAuthUser; error?: string }>(res)
 
-    if (!res.ok) {
-      return { success: false, user: null, error: data.error || 'Verification failed' }
+    if (!res.ok || !data) {
+      return { success: false, user: null, error: data?.error || 'Verification failed' }
     }
 
     return {

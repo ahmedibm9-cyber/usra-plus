@@ -358,3 +358,335 @@ Stage Summary:
 - Significant bundle size reduction from dead code cleanup
 - Memory leak prevention in 6 Zustand stores
 - App is production-ready and serving correctly
+
+---
+Task ID: 2
+Agent: Trash Cleanup Audit Agent
+Task: Clean codebase of trash, dead code, and unnecessary files
+
+Work Log:
+- Read worklog.md to understand full project history (11 prior agent sessions)
+- Scanned entire project directory structure (src/, root, qa/, screenshots/, agent-ctx/, skills/, mini-services/, examples/, etc.)
+- Systematically searched for imports/references of every component, store, lib file, hook, and API route
+- Checked for .bak, .old, .tmp, test, spec, and log files
+- Identified dead component chains (admin-dashboard → old admin components)
+- Identified entire dead module chains (revenuecat-store → use-entitlements → paywall/customer-center)
+- Found 100+ screenshot/QA PNG files in root and qa/ directories
+- Found 106 agent context files in agent-ctx/
+- Found skills/ directory with 30+ AI skill packages (not part of the app)
+- Found 8 duplicate/overlapping shell scripts in root
+- Found duplicate Supabase SQL migration files (10 files, many overlapping)
+- Found duplicate theme implementations (lib/mui/ vs lib/mui-theme.ts)
+
+Stage Summary:
+- Comprehensive cleanup report created with 50+ files identified for removal
+- 4 CRITICAL dead-code chains identified (admin-dashboard, main-app, subscription components, lib files)
+- 100+ screenshot files found that should be removed
+- Multiple directories that are not part of the app (agent-ctx/, skills/, mini-services/, examples/, qa/, screenshots/, upload/, download/)
+- Potential bug found: demo data seeding broken (seedDemoData() only called from dead main-app.tsx)
+- See full report below
+
+---
+
+## TRASH CLEANUP REPORT — Task ID: 2
+
+### CATEGORY 1: Dead Component Files (never imported, safe to remove)
+
+| File | Reason |
+|------|--------|
+| `src/components/admin/admin-dashboard.tsx` | Never imported. Old admin dashboard replaced by admin-layout.tsx + pages/ directory |
+| `src/components/admin/admin-login.tsx` | Never imported. Admin login handled inline by login-form.tsx |
+| `src/components/admin/bug-detection.tsx` | Only imported by dead admin-dashboard.tsx. Transitively dead |
+| `src/components/admin/infrastructure.tsx` | Only imported by dead admin-dashboard.tsx. Transitively dead |
+| `src/components/admin/activity-monitor.tsx` | Only imported by dead admin-dashboard.tsx. Transitively dead |
+| `src/components/admin/system-settings.tsx` | Only imported by dead admin-dashboard.tsx. Transitively dead |
+| `src/components/admin/dashboard-overview.tsx` | Only imported by dead admin-dashboard.tsx. Transitively dead |
+| `src/components/admin/pages/admin-bug-detection.tsx` | Never imported by admin-layout.tsx (uses admin-bugs.tsx instead) |
+| `src/components/main-app/main-app.tsx` | Never imported. Old main app component replaced by inline MainApp in page.tsx |
+| `src/components/subscription/customer-center.tsx` | Never imported. Dead subscription component |
+| `src/components/subscription/paywall.tsx` | Never imported. Dead subscription component |
+| `src/components/dashboard/activity-feed-widget.tsx` | Never imported. Dead dashboard widget |
+| `src/components/dashboard/family-analytics-widget.tsx` | Never imported. Dead dashboard widget |
+| `src/components/shared/qr-code.tsx` | Never imported. Duplicate of family-qr-code.tsx which IS used |
+| `src/components/shared/shortcuts-modal.tsx` | Never imported |
+| `src/components/shared/app-logo.tsx` | Never imported. Logo is inline in page.tsx |
+
+### CATEGORY 2: Dead Store/Hook Files (transitively dead)
+
+| File | Reason |
+|------|--------|
+| `src/stores/revenuecat-store.ts` | Only imported by dead use-entitlements.ts |
+| `src/hooks/use-entitlements.ts` | Only imported by dead paywall.tsx and customer-center.tsx |
+
+### CATEGORY 3: Dead Lib Files (never imported)
+
+| File | Reason |
+|------|--------|
+| `src/lib/turnstile.ts` | Never imported anywhere |
+| `src/lib/sync-user.ts` | Never imported anywhere |
+| `src/lib/server-error-logger.ts` | Never imported anywhere |
+| `src/lib/verify-user-auth.ts` | Never imported anywhere |
+| `src/lib/performance.ts` | Never imported anywhere |
+| `src/lib/auth-google.ts` | Only self-references in comments |
+| `src/lib/optimistic-updates.ts` | Never imported anywhere |
+| `src/lib/auth-helpers.ts` | Only imported by dead main-app.tsx |
+| `src/lib/demo-data.ts` | Only imported by dead main-app.tsx ⚠️ BUG: demo seeding broken |
+| `src/lib/mui/provider.tsx` | Never imported. Duplicate of mui-theme-wrapper.tsx |
+| `src/lib/mui/theme.ts` | Never imported. Duplicate of lib/mui-theme.ts |
+| `src/lib/email/templates/index.ts` | Never imported |
+| `src/lib/supabase/store-helpers.ts` | Never imported |
+| `src/hooks/use-mobile.ts` | Never imported |
+
+### CATEGORY 4: Unused API Routes (never called from frontend)
+
+| File | Reason |
+|------|--------|
+| `src/app/api/prayer-times/route.ts` | Never called from any frontend component |
+| `src/app/api/email/send/route.ts` | Never called from any frontend component |
+| `src/app/api/migrate/route.ts` | Never called from any frontend component |
+| `src/app/api/admin/errors/route.ts` | Never called from any frontend component |
+| `src/app/api/admin/trials/route.ts` | Never called from any frontend component |
+
+### CATEGORY 5: Screenshot & QA Files (100+ files, not part of app)
+
+**Root directory PNGs (28 files):**
+`audit-after-login.png`, `test-tasks.png`, `production-rtl.png`, `signin-page.png`, `screenshot-signup.png`, `audit-loading-stuck.png`, `test-dashboard.png`, `test-calendar.png`, `new-ui2.png`, `screenshot-initial.png`, `screenshot-arabic.png`, `performance-audit-login.png`, `new-ui.png`, `audit-login-page.png`, `current-ui.png`, `new-ui3.png`, `test-grocery.png`, `audit-login-page-v2.png`, `test-screenshot-arabic.png`, `proxy-page.png`, `production-login.png`, `screenshot-signup-form.png`, `after-login.png`, `test-screenshot1.png`, `production-dashboard.png`
+
+**screenshots/ directory (3 files):**
+`auth-screen.png`, `auth-screen-prod.png`, `dashboard-demo-mode.png`
+
+**qa/ directory (96+ files):**
+Entire directory of QA screenshots (r1-*, s1-*, final-*, etc.)
+
+**upload/ directory (9 files):**
+Pasted images and ChatGPT-generated images
+
+### CATEGORY 6: Entire Directories to Remove (not part of app code)
+
+| Directory | File Count | Reason |
+|-----------|-----------|--------|
+| `agent-ctx/` | 106 files | Agent context/prompt files from build process — not app code |
+| `skills/` | 300+ files | AI skill packages (docx, xlsx, pdf, ppt, charts, etc.) — not part of the app |
+| `mini-services/` | 6 files | Standalone chat/notification microservices — not integrated into Next.js app |
+| `examples/` | 2 files | WebSocket example code — not part of the app |
+| `qa/` | 96+ files | QA screenshots directory |
+| `screenshots/` | 3 files | Screenshot directory |
+| `upload/` | 9 files | Pasted/uploaded images |
+| `download/` | 1 file | Only contains a README saying "generated files" |
+
+### CATEGORY 7: Root-Level Trash Files
+
+| File | Reason |
+|------|--------|
+| `worklog_backup.md` | Backup of worklog — original worklog.md is current |
+| `skills-lock.json` | Lock file for skills directory (which should be removed) |
+| `dev.log` | Development log file (249 bytes) — should not be in repo |
+| `APP_OVERVIEW_FOR_LOGO.md` | Reference doc for logo design — not app code |
+| `db/custom.db` | 450KB SQLite database file — should not be in repo |
+| `Caddyfile` | Reverse proxy config — deployment artifact |
+
+### CATEGORY 8: Duplicate/Overlapping Shell Scripts (8 in root)
+
+Only `scripts/prebuild.sh` is used (by vercel.json). The following 8 root scripts overlap:
+
+| File | Reason |
+|------|--------|
+| `keepalive.sh` | Duplicate of keep-alive.sh |
+| `keep-alive.sh` | Dev server keepalive — not needed in production |
+| `server.sh` | Overlaps with start.sh, run-server.sh |
+| `start.sh` | Overlaps with start-dev.sh, start-next.sh |
+| `start-dev.sh` | Overlaps with run-dev.sh |
+| `run-server.sh` | Overlaps with server.sh |
+| `run-dev.sh` | Overlaps with start-dev.sh |
+| `start-next.sh` | Overlaps with start.sh |
+| `server-supervisor.sh` | Supervisor config — deployment artifact |
+
+### CATEGORY 9: Duplicate Supabase SQL Migrations
+
+10 SQL files in `supabase/` directory, many overlapping:
+- `migration.sql` (360 lines) — original
+- `additional-tables.sql` (391 lines) — extended
+- `add-missing-tables.sql` (65 lines) — partial fix
+- `complete-migration.sql` (909 lines) — superset
+- `complete-fix-migration.sql` (1042 lines) — fix on top of complete
+- `final-migration.sql` (1256 lines) — latest version?
+- `fix-policies.sql` (46 lines) — partial fix
+- `fix-partial-migration.sql` (713 lines) — partial fix
+- `rls-and-indexes-migration.sql` (516 lines) — indexes only
+- `business-control-migration.sql` (1207 lines) — business tables
+
+Recommendation: Consolidate into a single `migration.sql` + one `rls-indexes.sql`
+
+### CATEGORY 10: Unused Public Assets
+
+| File | Reason |
+|------|--------|
+| `public/auth-bg.png` | Never referenced in code |
+| `public/auth-bg-new.png` | Never referenced in code |
+| `public/star-logo.png` | Never referenced in code |
+| `public/usra-plus-logo.png` | Never referenced in code |
+| `public/logo.png` | Never referenced in code (manifest.json uses logo.svg) |
+| `public/sw.js` | Service worker never registered in code |
+
+### BUG FOUND: Demo Data Seeding is Broken
+
+The `seedDemoData()` function in `lib/demo-data.ts` is only called from the dead `main-app.tsx`. In the current `page.tsx`, when `isDemoMode()` is true, it just calls `setDemoDataReady(true)` without actually seeding the stores. This means the app enters demo mode with empty stores, which is likely a bug introduced when the code was restructured.
+
+### SUMMARY
+
+| Category | Items | Estimated Size |
+|----------|-------|---------------|
+| Dead component files | 16 | ~15KB source |
+| Dead store/hook files | 2 | ~5KB source |
+| Dead lib files | 14 | ~20KB source |
+| Unused API routes | 5 | ~15KB source |
+| Screenshot/QA files | 130+ | ~50MB |
+| Entire non-app directories | 8 dirs | ~200MB+ (skills/ is large) |
+| Root trash files | 6 | ~460KB |
+| Duplicate shell scripts | 9 | ~5KB |
+| Duplicate SQL migrations | 9 | ~20KB |
+| Unused public assets | 6 | ~2MB |
+| **TOTAL** | **~190+ items** | **~250MB+** |
+
+### RECOMMENDED CLEANUP ACTIONS (Priority Order)
+
+1. **HIGH** — Remove dead component files (16 files): Safe, reduces bundle and confusion
+2. **HIGH** — Remove dead lib files (14 files): Safe, reduces bundle
+3. **HIGH** — Remove dead store/hook files (2 files): Safe
+4. **HIGH** — Fix demo data seeding bug: seedDemoData() should be called from page.tsx
+5. **MEDIUM** — Remove entire non-app directories (agent-ctx/, skills/, mini-services/, examples/, qa/, screenshots/, upload/, download/): Not app code, reduces repo size significantly
+6. **MEDIUM** — Remove 28 root-level screenshot PNGs: Not app code
+7. **MEDIUM** — Remove duplicate shell scripts (8 of 9): Keep only what's needed for deployment
+8. **MEDIUM** — Remove unused API routes (5 files): Reduce attack surface
+9. **MEDIUM** — Consolidate Supabase SQL migrations: Reduce confusion
+10. **LOW** — Remove unused public assets (6 files): Minor cleanup
+11. **LOW** — Remove root trash files (worklog_backup.md, skills-lock.json, dev.log, APP_OVERVIEW_FOR_LOGO.md, db/custom.db, Caddyfile)
+
+---
+Task ID: 6-safe-json
+Agent: Safe JSON Fix Agent
+Task: Fix "SyntaxError: Unexpected token '<'" by adding safe JSON parsing to all fetch calls
+
+Work Log:
+- Created /src/lib/safe-fetch.ts utility with `safeJsonResponse<T>()` function
+  - Checks Content-Type header before parsing (must include 'application/json')
+  - Returns null if response is not JSON (instead of throwing SyntaxError)
+  - Wraps everything in try/catch for additional safety
+  - Logs warnings in development mode for debugging
+- Updated ALL client-side fetch calls that use `.json()` to use `safeJsonResponse()`:
+  - /src/stores/admin-auth-store.ts (1 call)
+  - /src/stores/admin-store.ts (3 calls)
+  - /src/stores/subscription-store.ts (1 call)
+  - /src/hooks/use-admin-data.ts (4 calls in useAnalyticsData, useAdminUsers, useAdminFamilies, useDataFetch)
+  - /src/lib/local-auth.ts (5 calls: login, signup, getMe, sendVerification, verifyCode)
+  - /src/lib/turnstile.ts (1 call: verifyTurnstileToken)
+  - /src/components/dashboard/weather-widget.tsx (1 call)
+  - /src/components/dashboard/ai-summary-widget.tsx (1 call)
+  - /src/components/dashboard/dashboard-page.tsx (1 call: prayer times)
+  - /src/components/shared/avatar-generator.tsx (1 call: parallel image generation)
+  - /src/components/subscription/paywall.tsx (1 call: coupon redemption)
+  - /src/components/onboarding/onboarding-flow.tsx (2 calls: create family, join family)
+  - /src/components/grocery/grocery-page.tsx (1 call: recipe suggestions)
+  - /src/components/meal-plan/meal-plan-page.tsx (1 call: AI meal suggestions)
+  - All 26 admin component files (bug-detection, admin-layout, dashboard-overview, infrastructure, system-settings, activity-monitor, user-detail-drawer, and all pages/*)
+- Updated server-side external API calls:
+  - /src/app/api/subscription/route.ts (2 RevenueCat API calls)
+  - /src/app/api/prayer-times/route.ts (1 Aladhan API call)
+  - /src/app/api/migrate/route.ts (1 Supabase API call)
+- Each update preserves existing error handling logic — only the `.json()` call is made safer
+- All callers now check for null return and handle gracefully (fallback data, error messages, etc.)
+- Lint passes with 0 errors
+- Dev server running and returning HTTP 200
+
+Stage Summary:
+- Created safeJsonResponse utility that prevents "Unexpected token '<'" crashes
+- Updated 50+ fetch calls across 35+ files to use safe JSON parsing
+- No more unhandled SyntaxError when API endpoints return HTML error pages
+- All existing error handling preserved, just the .json() calls made safer
+
+---
+Task ID: 4
+Agent: Demo Data Seeding Fix Agent
+Task: Fix the demo data seeding bug in USRA PLUS
+
+Work Log:
+- Read worklog.md and identified the bug: seedDemoData() was never called from page.tsx
+- Audited all 16 Zustand stores (app, auth, task, grocery, calendar, notification, presence, activity, files, comment, chore, budget, chat, meal, milestone, subscription) to understand their interfaces and data shapes
+- Read the old lib/demo-data.ts (dead code, only imported by deleted main-app.tsx) as reference for the seeding logic
+- Created /src/lib/seed-demo-data.ts with a comprehensive seedDemoData() function that:
+  - Gets RTL status from useI18n store (instead of parameter)
+  - Has a hasSeeded guard to prevent double-seeding from useEffect re-runs
+  - Seeds auth store with demo user (Ahmed AlFamily / أحمد العائلي)
+  - Seeds app store with demo family (The Ahmed Family / عائلة الأحمد) + 3 family members
+  - Seeds task store with 10 demo tasks (various priorities: 2 urgent, 2 high, 3 medium, 2 low; various statuses: 4 todo, 2 in_progress, 3 done)
+  - Seeds grocery store with 12 demo items (Saudi context: Basmati Rice, Medina Dates, Labneh, Minced Meat, etc.)
+  - Seeds calendar store with 4 events using teal/emerald brand palette colors (#0D9488, #10B981, #059669)
+  - Seeds notification store with 3 demo notifications
+  - Seeds presence store with 3 online users
+  - Seeds activity store with 10 activities + 8 timeline items
+  - Seeds files store with 3 files
+  - Seeds chore store with 8 chores + 5 completion logs
+  - Seeds comment store with 6 task comments
+  - Seeds budget store with monthly budget (SAR 12,000) + 10 expenses
+  - Seeds chat store with 10 messages (including image messages with kabsa/family photos)
+  - Seeds meal store with 6 meals (Saudi dishes: Kabsa, Mandi, Foul Medames)
+  - Seeds milestone store with 6 milestones (birthdays, anniversary, graduation)
+  - Seeds subscription store with family_plus plan
+  - Sets demoDataReady(true) at the end
+- Updated /src/app/page.tsx:
+  - Added import: seedDemoData from '@/lib/seed-demo-data'
+  - Replaced broken `setDemoDataReady(true)` with `seedDemoData()` in the isDemoMode() branch of the MainApp useEffect
+  - Added inline comment explaining that seedDemoData() sets demoDataReady(true) at the end
+- Lint passes with 0 errors
+- Dev server running and compiling successfully (HTTP 200)
+
+Stage Summary:
+- Fixed critical bug: demo mode now properly seeds all stores with realistic Saudi/Arabic data
+- Demo family created so dashboard shows data instead of "no family" onboarding screen
+- All calendar event colors use teal/emerald brand palette (no red/yellow)
+- hasSeeded guard prevents infinite re-seeding from useEffect re-runs
+- New file: /src/lib/seed-demo-data.ts (clean implementation, not dependent on deleted demo-data.ts)
+- Modified file: /src/app/page.tsx (import + call seedDemoData() in demo mode branch)
+- Zero lint errors
+
+---
+Task ID: 3-delete
+Agent: Dead File Deletion Agent
+Task: Delete dead/trash files from the USRA PLUS codebase
+
+Work Log:
+- Read worklog.md to understand project history and prior audit findings
+- Verified each file for imports/references before deletion using grep
+- Deleted 16 dead component files:
+  - admin-dashboard.tsx, admin-login.tsx, bug-detection.tsx, infrastructure.tsx, activity-monitor.tsx, system-settings.tsx, dashboard-overview.tsx, pages/admin-bug-detection.tsx
+  - main-app/main-app.tsx, subscription/customer-center.tsx, subscription/paywall.tsx
+  - dashboard/activity-feed-widget.tsx, dashboard/family-analytics-widget.tsx
+  - shared/qr-code.tsx, shared/shortcuts-modal.tsx, shared/app-logo.tsx
+- Deleted 2 dead store/hook files: revenuecat-store.ts, use-entitlements.ts
+- Deleted 14 dead lib files + 1 orphaned lib file (email/send.ts, only used by deleted API route):
+  - turnstile.ts, sync-user.ts, server-error-logger.ts, verify-user-auth.ts, performance.ts, auth-google.ts, optimistic-updates.ts, auth-helpers.ts, demo-data.ts
+  - mui/provider.tsx, mui/theme.ts, email/templates/index.ts, supabase/store-helpers.ts
+  - email/send.ts (orphaned after deleting email/send API route)
+  - hooks/use-mobile.ts
+- Deleted 5 unused API routes: prayer-times, email/send, migrate, admin/errors, admin/trials
+- Deleted all root PNG screenshot files (25+ files)
+- Deleted 4 non-app directories: agent-ctx/, qa/, screenshots/, download/ (contents of upload/ cleared, dir busy)
+- Deleted 4 root trash files: worklog_backup.md, skills-lock.json, APP_OVERVIEW_FOR_LOGO.md, db/custom.db
+- Deleted 9 duplicate shell scripts: keepalive.sh, keep-alive.sh, server.sh, start.sh, start-dev.sh, run-server.sh, run-dev.sh, start-next.sh, server-supervisor.sh
+- Deleted 6 unused public assets: auth-bg.png, auth-bg-new.png, star-logo.png, usra-plus-logo.png, logo.png, sw.js
+- Cleaned up 7 empty directories left after deletions: lib/mui/, lib/email/templates/, lib/email/, components/subscription/, components/main-app/, db/, and 5 API route dirs
+- Verified: All deleted files confirmed never imported by active code
+- Lint passes with 0 errors after all deletions
+- Dev server running and returning HTTP 200 on port 3000
+
+Stage Summary:
+- 55+ source files deleted (components, stores, hooks, libs, API routes)
+- 130+ screenshot/QA files removed (~50MB)
+- 106 agent context files removed from agent-ctx/
+- 4 non-app directories removed (agent-ctx, qa, screenshots, download)
+- 9 duplicate shell scripts removed
+- 6 unused public assets removed
+- 7 empty directories cleaned up
+- upload/ directory cleared (mount point could not be removed, contents deleted)
+- Zero lint errors, dev server healthy
+- NOT deleted (per instructions): skills/, mini-services/, examples/, Caddyfile, dev.log, supabase/

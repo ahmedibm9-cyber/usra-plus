@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
 import { getAuthenticatedUserId } from '@/lib/auth-utils'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 /**
  * GET /api/subscription
@@ -102,7 +103,10 @@ export async function GET(request: NextRequest) {
           )
 
           if (rcResponse.ok) {
-            const rcData = await rcResponse.json()
+            const rcData = await safeJsonResponse<{ subscriber?: Record<string, unknown> }>(rcResponse)
+            if (!rcData) {
+              return NextResponse.json({ plan: 'free' }, { status: 200 })
+            }
             const subscriber = rcData.subscriber
 
             if (subscriber?.entitlements) {
@@ -260,7 +264,10 @@ async function handleSync(request: NextRequest, body: Record<string, unknown>) {
       })
     }
 
-    const rcData = await rcResponse.json()
+    const rcData = await safeJsonResponse<{ subscriber?: Record<string, unknown> }>(rcResponse)
+    if (!rcData) {
+      return NextResponse.json({ plan: 'free' }, { status: 200 })
+    }
     const subscriber = rcData.subscriber
 
     // Determine plan from entitlements

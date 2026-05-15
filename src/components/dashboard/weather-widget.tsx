@@ -28,6 +28,7 @@ import {
 } from '@mui/material'
 
 import { useI18n } from '@/i18n/use-translation'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -168,8 +169,13 @@ export function WeatherWidget() {
     try {
       const response = await fetch(`/api/weather?city=${city}`)
       if (!response.ok) throw new Error('Failed to fetch weather')
-      const data = await response.json() as WeatherData
-      setWeather(data)
+      const data = await safeJsonResponse<WeatherData>(response)
+      if (data) {
+        setWeather(data)
+      } else {
+        setError(true)
+        setWeather(FALLBACK_WEATHER)
+      }
     } catch {
       setError(true)
       setWeather(FALLBACK_WEATHER)

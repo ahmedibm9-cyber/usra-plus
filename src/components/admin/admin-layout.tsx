@@ -18,6 +18,7 @@ import {
   ArrowRight, Download, Ban, Heart, Wrench
 } from 'lucide-react'
 import type { AdminPage } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // Dynamic imports for admin pages
 const AdminOverview = dynamic(() => import('./pages/admin-overview').then(m => ({ default: m.AdminOverview })), { ssr: false, loading: () => <AdminPageLoader /> })
@@ -130,13 +131,13 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
 
   useEffect(() => {
     fetch('/api/admin/notifications', { credentials: 'same-origin' })
-      .then(res => res.ok ? res.json() : null)
+      .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
       .then(json => { if (json?.data) setData(json.data) })
       .catch(() => {})
     // Refresh every 60s
     const interval = setInterval(() => {
       fetch('/api/admin/notifications', { credentials: 'same-origin' })
-        .then(res => res.ok ? res.json() : null)
+        .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
         .then(json => { if (json?.data) setData(json.data) })
         .catch(() => {})
     }, 60000)
@@ -460,7 +461,7 @@ function SystemHealthWidget({ collapsed }: { collapsed: boolean }) {
       try {
         const dbRes = await fetch('/api/admin/db-info', { credentials: 'same-origin' })
         if (dbRes.ok) {
-          const dbData = await dbRes.json()
+          const dbData = await safeJsonResponse(dbRes)
           setHealth(prev => ({
             ...prev,
             dbStatus: 'healthy',

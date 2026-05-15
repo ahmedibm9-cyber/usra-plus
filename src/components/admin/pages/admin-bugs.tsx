@@ -15,6 +15,7 @@ import type {
   BugReport, DatabaseTableStatus, ConnectionTest, PerformanceMetric
 } from '@/types/admin'
 import { getCapturedErrors, clearCapturedErrors } from '@/lib/error-capture'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import {
   initAdminErrorMonitor, getMonitoredErrors, clearMonitoredErrors,
   getErrorMonitorStats, getErrorTrend, getSeverityDistribution,
@@ -1064,7 +1065,7 @@ function PerformanceMonitorTab({ bugApiMetrics }: { bugApiMetrics: PerformanceMe
     try {
       const res = await fetch('/api/admin/performance', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         setPerfData(json)
       }
     } catch {
@@ -1328,7 +1329,7 @@ function AutoHealTab() {
       })
 
       if (!res.ok) {
-        const err = await res.json()
+        const err = await safeJsonResponse(res)
         setResults(prev => [{
           action: actionId,
           affected_rows: 0,
@@ -1337,7 +1338,7 @@ function AutoHealTab() {
           duration_ms: 0,
         }, ...prev])
       } else {
-        const data = await res.json()
+        const data = await safeJsonResponse(res)
         const result = data.results ? data.results[0] : data
         setResults(prev => [result, ...prev])
       }
@@ -1366,7 +1367,7 @@ function AutoHealTab() {
       })
 
       if (res.ok) {
-        const data = await res.json()
+        const data = await safeJsonResponse(res)
         if (data.results) {
           setResults(prev => [...data.results, ...prev])
         }
@@ -1586,10 +1587,10 @@ function ApiHealthTab() {
         credentials: 'same-origin',
       })
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
+        const errData = await safeJsonResponse(res).catch(() => ({}))
         throw new Error(errData.error || `HTTP ${res.status}`)
       }
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (json.data) {
         setRoutes(json.data.routes || [])
         setSummary(json.data.summary || null)
@@ -1638,7 +1639,7 @@ function ApiHealthTab() {
           credentials: 'same-origin',
         })
         if (listRes.ok) {
-          const listJson = await listRes.json()
+          const listJson = await safeJsonResponse(listRes)
           if (listJson.data) {
             setRoutes(listJson.data.routes || [])
           }
@@ -2081,7 +2082,7 @@ export function AdminBugs() {
         return
       }
       if (!res.ok) throw new Error('Failed to fetch bug detection data')
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (!mountedRef.current) return
       setApiData(json)
     } catch (err) {
@@ -2111,7 +2112,7 @@ export function AdminBugs() {
       body: JSON.stringify(bug),
     })
     if (!res.ok) {
-      const err = await res.json()
+      const err = await safeJsonResponse(res)
       throw new Error(err.error || 'Failed to submit bug report')
     }
     await fetchData()

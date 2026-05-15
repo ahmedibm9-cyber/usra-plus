@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -126,9 +127,9 @@ export function useAnalyticsData(): UseAnalyticsDataReturn {
         throw new Error(`HTTP ${response.status}`)
       }
 
-      const json = await response.json()
+      const json = await safeJsonResponse<{ data: AnalyticsData; source: string }>(response)
 
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && json) {
         setData(json.data)
         setSource(json.source === 'live' ? 'live' : 'demo')
       }
@@ -225,9 +226,9 @@ export function useAdminUsers(params: UseAdminUsersParams = {}): UseAdminUsersRe
         throw new Error(`HTTP ${response.status}`)
       }
 
-      const json: PaginatedResponse<SafeUserRecord> = await response.json()
+      const json = await safeJsonResponse<PaginatedResponse<SafeUserRecord>>(response)
 
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && json) {
         setData(json.data)
         setTotal(json.total)
         setHasMore(json.hasMore)
@@ -324,9 +325,9 @@ export function useAdminFamilies(params: UseAdminFamiliesParams = {}): UseAdminF
         throw new Error(`HTTP ${response.status}`)
       }
 
-      const json: PaginatedResponse<SafeFamilyRecord> = await response.json()
+      const json = await safeJsonResponse<PaginatedResponse<SafeFamilyRecord>>(response)
 
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && json) {
         setData(json.data)
         setTotal(json.total)
         setHasMore(json.hasMore)
@@ -510,9 +511,9 @@ function useDataFetch<T>(endpoint: string): {
         throw new Error(`HTTP ${response.status}`)
       }
 
-      const json = await response.json()
+      const json = await safeJsonResponse<{ data: T; source: string }>(response)
 
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && json) {
         setData(json.data)
         setSource(json.source === 'live' ? 'live' : 'demo')
       }

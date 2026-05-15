@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { Skeleton } from '@/components/ui/skeleton'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import {
   Activity, UserPlus, Shield, Clock, TrendingUp,
   RefreshCw, Loader2, Users, BarChart3, Radio,
@@ -164,7 +165,7 @@ export function AdminActivity() {
   // Fetch database provider info
   useEffect(() => {
     fetch('/api/admin/db-info', { credentials: 'same-origin' })
-      .then(res => res.ok ? res.json() : null)
+      .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
       .then(data => {
         if (data) {
           setDbLabel(data.displayBadge || 'SQLite')
@@ -187,8 +188,8 @@ export function AdminActivity() {
         fetch('/api/admin/overview', { credentials: 'same-origin' }),
         fetch('/api/admin/analytics', { credentials: 'same-origin' }),
       ])
-      const overviewJson = overviewRes.ok ? await overviewRes.json() : null
-      const analyticsJson = analyticsRes.ok ? await analyticsRes.json() : null
+      const overviewJson = overviewRes.ok ? await safeJsonResponse(overviewRes) : null
+      const analyticsJson = analyticsRes.ok ? await safeJsonResponse(analyticsRes) : null
 
       // Get real user counts
       const users = analyticsJson?.data?.users?.total ?? 0

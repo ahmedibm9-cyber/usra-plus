@@ -34,6 +34,7 @@ import { useAdminAuthStore } from '@/stores/admin-auth-store'
 import { UserDetailDrawer } from '@/components/admin/user-detail-drawer'
 import { AdminTablePageSkeleton } from '@/components/shared/skeleton-patterns'
 import type { UserRecord } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 // ─── API Response Types ──────────────────────────────────────────────────────
 
@@ -480,7 +481,7 @@ export function AdminUsers() {
         return
       }
       if (res.ok) {
-        const json: UsersApiResponse = await res.json()
+        const json = await safeJsonResponse<UsersApiResponse>(res)
         setDataSource(json.source)
         setTotalFromApi(json.total)
         // Map API records to frontend UserRecord format
@@ -690,7 +691,7 @@ export function AdminUsers() {
           }),
         })
         if (res.ok) {
-          const json = await res.json()
+          const json = await safeJsonResponse(res)
           exportData = json.data || []
         } else {
           // Fallback: export from local data
@@ -776,7 +777,7 @@ export function AdminUsers() {
       })
 
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         const succeeded = json.summary?.succeeded ?? ids.length
         if (action === 'ban_selected') {
           toast.success(`Suspended ${succeeded} user(s)`)
@@ -927,7 +928,7 @@ export function AdminUsers() {
         }),
       })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         if (json.approvalRequired) {
           toast.success('Permanent ban submitted — requires founder approval', { duration: 5000 })
         } else {
@@ -989,7 +990,7 @@ export function AdminUsers() {
         setEditProfileOpen(false)
         setEditProfileTarget(null)
       } else {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         toast.error(json.error || 'Failed to update profile')
       }
     } catch {
@@ -1020,7 +1021,7 @@ export function AdminUsers() {
         setResetPasswordTarget(null)
         setNewPassword('')
       } else {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         toast.error(json.error || 'Failed to reset password')
       }
     } catch {

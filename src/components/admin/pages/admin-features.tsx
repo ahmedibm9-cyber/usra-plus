@@ -708,7 +708,7 @@ export function AdminFeatures() {
         return
       }
       if (!res.ok) throw new Error('Failed to fetch feature data')
-      const json = await res.json()
+      const json = await safeJsonResponse(res)
       if (!mountedRef.current) return
       setDataSource(json.source)
       if (json.source === 'unavailable' || !json.data) {

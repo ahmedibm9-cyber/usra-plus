@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import type { AdminPage, DateRange, FeatureFlag, PlanConfig, Announcement } from '@/types/admin'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 
 interface AdminState {
   currentPage: AdminPage
@@ -71,8 +72,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const res = await fetch('/api/admin/features', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
-        if (json.data) set({ featureFlags: json.data })
+        const json = await safeJsonResponse<{ data?: FeatureFlag[] }>(res)
+        if (json?.data) set({ featureFlags: json.data })
       }
     } catch { /* ignore */ }
   },
@@ -81,10 +82,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const res = await fetch('/api/admin/subscriptions', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse<{ data: Record<string, unknown>[] }>(res)
         // The API returns { data: PlanRow[], total: number }
         // json.data is the array directly (not json.data.plans)
-        if (Array.isArray(json.data)) {
+        if (json && Array.isArray(json.data)) {
           const mapped: PlanConfig[] = json.data.map((p: Record<string, unknown>) => ({
             id: p.id as string,
             plan: (p.slug as string) || (p.name as string),
@@ -112,8 +113,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const res = await fetch('/api/admin/system', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
-        if (json.data?.announcements) set({ announcements: json.data.announcements })
+        const json = await safeJsonResponse<{ data?: { announcements?: Announcement[] } }>(res)
+        if (json?.data?.announcements) set({ announcements: json.data.announcements })
       }
     } catch { /* ignore */ }
   },

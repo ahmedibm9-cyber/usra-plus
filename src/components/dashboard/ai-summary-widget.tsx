@@ -17,6 +17,7 @@ import {
   Stack,
 } from '@mui/material'
 import { useI18n } from '@/i18n/use-translation'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import type { Task, CalendarEvent, GroceryItem, FamilyMember } from '@/types'
 import { isToday, parseISO, format } from 'date-fns'
 
@@ -247,8 +248,8 @@ export function AISummaryWidget({
       })
 
       if (response.ok) {
-        const data = await response.json()
-        setSummary(data.summary || generateSmartSummary(tasks, groceryItems, events, members, isRTL))
+        const data = await safeJsonResponse<{ summary?: string }>(response)
+        setSummary(data?.summary || generateSmartSummary(tasks, groceryItems, events, members, isRTL))
       } else {
         setSummary(generateSmartSummary(tasks, groceryItems, events, members, isRTL))
       }

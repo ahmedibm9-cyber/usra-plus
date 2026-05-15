@@ -13,6 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import type {
   ModerationItem, FraudAlert, UserBan, AbuseReport, UserTrustScore,
   ModerationStatus, FraudSeverity, BanType, AbuseReportStatus, RiskLevel
@@ -150,7 +151,7 @@ async function apiAction(endpoint: string, method: string, body?: Record<string,
       useAdminAuthStore.getState().logoutAdmin()
       return null
     }
-    return await res.json()
+    return await safeJsonResponse(res)
   } catch {
     toast.error('Action failed — check your connection')
     return null
@@ -720,7 +721,7 @@ export function AdminModeration() {
     try {
       const res = await fetch('/api/admin/moderation?pageSize=50', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await res.json()
+        const json = await safeJsonResponse(res)
         const d = json.data || {}
         if (json.source) setDataSource(json.source)
 
