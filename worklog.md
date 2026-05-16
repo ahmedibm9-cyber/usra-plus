@@ -4098,3 +4098,58 @@ Stage Summary:
 - Dark/light mode fully supported via theme.palette tokens
 - All existing functionality preserved (navigation, notifications, search, system health, session management)
 - Zero lint errors, dev server healthy
+
+---
+Task ID: session-5
+Agent: Main Orchestrator (Session 5 - FULL MUI DESIGN SYSTEM ENFORCEMENT)
+Task: Audit and rebuild entire frontend UI to enterprise-grade MUI standards
+
+Work Log:
+- Audited entire codebase: found 86 files with className violations, 4775+ className usages, 100+ hardcoded hex colors, 200+ div elements
+- Rebuilt MUI theme (src/lib/mui-theme.ts) with MD3 standards:
+  - Added 8px grid spacing system (SPACING tokens)
+  - Added MD3 elevation system (5 levels with proper shadows)
+  - Added motion/animation tokens (duration + easing)
+  - Added 14-level MD3 typography scale (display2 → overline)
+  - Added complete component overrides for 28+ MUI components
+  - Dark theme uses semi-transparent overlays, no hardcoded colors
+- Rebuilt AuthScreen (src/app/page.tsx) with pure MUI:
+  - Replaced all hardcoded hex with theme palette references
+  - Used Container, Stack, Paper instead of div
+  - Used alpha() instead of manual rgba()
+  - All spacing via MUI system
+- Rebuilt Dashboard (src/components/dashboard/dashboard-page.tsx):
+  - REMOVED local createTheme/ThemeProvider anti-pattern
+  - Now uses global theme via useTheme()
+  - Replaced all hardcoded hex colors
+  - Used Container maxWidth="lg", Grid v2, Stack, Paper
+  - Replaced WEEKLY_ACTIVITY_DATA mock with real task store data
+- Rebuilt Sidebar (src/components/layout/app-sidebar.tsx):
+  - Replaced ButtonBase+Menu family selector with MUI Select
+  - Replaced section labels with MUI ListSubheader
+  - Replaced PRO badge with MUI Chip
+  - Added MUI Fab for Quick Add
+- Rebuilt Header (src/components/layout/app-header.tsx):
+  - Replaced InputBase with MUI TextField variant="outlined"
+  - Border glow uses theme palette
+  - Keyboard shortcut badge uses MUI Chip
+- Rebuilt Bottom Nav (src/components/layout/bottom-nav.tsx):
+  - Replaced custom nav with MUI BottomNavigation + BottomNavigationAction
+- Rebuilt Settings Page (src/components/settings/settings-page.tsx):
+  - Replaced Tailwind className with MUI sx
+  - Used MUI Tabs vertical + horizontal
+  - Used Container, Paper, Box, Stack
+- Rebuilt Admin Layout (src/components/admin/admin-layout.tsx):
+  - Replaced ALL 172 className usages with MUI sx
+  - Used MUI AppBar, Drawer, List, Paper, Container
+  - All text uses MUI Typography
+- Rebuilt feature pages partially (tasks, calendar, chat, chores, meal-plan, grocery, budget, milestones, onboarding)
+- Deployed to Vercel: https://usra-plus.vercel.app - HTTP 200
+- Lint passes with 0 errors
+
+Stage Summary:
+- 34 files changed, 10,200 insertions, 14,743 deletions
+- Theme: Enterprise MD3 with 8px grid, 5-level elevation, 14-level typography
+- Core screens: Pure MUI (auth, dashboard, sidebar, header, bottom nav, settings, admin layout)
+- Remaining: Admin sub-pages still have className (lower priority), files page needs full MUI rewrite
+- Before/After compliance: ~2/10 → ~7/10 MUI compliance
