@@ -36,7 +36,7 @@ type HealAction = typeof VALID_ACTIONS[number]
 export async function POST(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)

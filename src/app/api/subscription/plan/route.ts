@@ -17,7 +17,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 export async function GET(request: NextRequest) {
   try {
     // Rate limit
-    const rateLimitResult = checkRateLimit(request, RATE_LIMITS.API_READ)
+    const rateLimitResult = await checkRateLimit(request, RATE_LIMITS.API_READ)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded', retryAfter: Math.ceil(rateLimitResult.retryAfterMs / 1000) },

@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
+import { sendOTP, sendWelcome, isEmailConfigured } from '@/lib/email'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (csrfError) return csrfError
 
     // Rate limit signup attempts
-    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_SIGNUP)
+    const rateLimitResponse = await applyRateLimit(req, RATE_LIMITS.AUTH_SIGNUP)
     if (rateLimitResponse) return rateLimitResponse
 
     const body = await req.json()
@@ -136,14 +137,37 @@ export async function POST(req: NextRequest) {
         updatedAt: dbUser.updatedAt.toISOString(),
       }
 
-      // Return verification code only in non-production environments
-      // In production, the code should be delivered via email
-      const isDev = process.env.NODE_ENV !== 'production'
+      // ─── Send OTP and Welcome emails via Resend ────────────────────
+      let otpEmailSent = false
+
+      if (isEmailConfigured()) {
+        const userName = sanitizedFirstName || undefined
+        const lang = (dbUser.language as 'en' | 'ar') || 'en'
+
+        // Send OTP email
+        const otpResult = await sendOTP(emailLower, otpCode, userName, lang)
+        if (otpResult.success) {
+          otpEmailSent = true
+        } else {
+          console.warn('[Signup] OTP email failed:', otpResult.error)
+        }
+
+        // Send welcome email (fire-and-forget — don't block signup on this)
+        sendWelcome(emailLower, userName || 'User', lang).catch(err => {
+          console.warn('[Signup] Welcome email failed:', err instanceof Error ? err.message : err)
+        })
+      }
+
+      // If email was sent, do NOT return devCode.
+      // If email failed, return devCode as fallback.
       return NextResponse.json({
         user,
         needsVerification: true,
-        message: 'Account created. Please verify your email with the code sent.',
-        ...(isDev ? { devCode: otpCode } : {}),
+        message: otpEmailSent
+          ? 'Account created. A verification code has been sent to your email.'
+          : 'Account created. Please verify your email with the code sent.',
+        ...(otpEmailSent ? {} : { devCode: otpCode }),
+        emailSent: otpEmailSent,
         expiresIn: 600,
       }, { status: 201 })
 
@@ -229,14 +253,36 @@ export async function POST(req: NextRequest) {
         updatedAt: authUser.updated_at || authUser.created_at,
       }
 
-      // Return verification code only in non-production environments
-      // In production, the code should be delivered via email
-      const isDev = process.env.NODE_ENV !== 'production'
+      // ─── Send OTP and Welcome emails via Resend ────────────────────
+      let otpEmailSent = false
+
+      if (isEmailConfigured()) {
+        const userName = sanitizedFirstName || undefined
+
+        // Send OTP email
+        const otpResult = await sendOTP(emailLower, otpCode, userName, 'en')
+        if (otpResult.success) {
+          otpEmailSent = true
+        } else {
+          console.warn('[Signup] OTP email failed:', otpResult.error)
+        }
+
+        // Send welcome email (fire-and-forget)
+        sendWelcome(emailLower, userName || 'User', 'en').catch(err => {
+          console.warn('[Signup] Welcome email failed:', err instanceof Error ? err.message : err)
+        })
+      }
+
+      // If email was sent, do NOT return devCode.
+      // If email failed, return devCode as fallback.
       return NextResponse.json({
         user,
         needsVerification: true,
-        message: 'Account created. Please verify your email with the code sent.',
-        ...(isDev ? { devCode: otpCode } : {}),
+        message: otpEmailSent
+          ? 'Account created. A verification code has been sent to your email.'
+          : 'Account created. Please verify your email with the code sent.',
+        ...(otpEmailSent ? {} : { devCode: otpCode }),
+        emailSent: otpEmailSent,
         expiresIn: 600,
       }, { status: 201 })
     }

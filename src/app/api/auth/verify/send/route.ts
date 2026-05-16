@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { db } from '@/lib/db'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
+import { sendOTP, isEmailConfigured } from '@/lib/email'
 import crypto from 'crypto'
 
 // In-memory OTP send rate limiting per email
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (csrfError) return csrfError
 
     // Rate limit OTP send attempts
-    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_VERIFY)
+    const rateLimitResponse = await applyRateLimit(req, RATE_LIMITS.AUTH_VERIFY)
     if (rateLimitResponse) return rateLimitResponse
 
     const supabaseAdmin = getSupabaseAdmin()
@@ -108,45 +109,54 @@ export async function POST(req: NextRequest) {
       otpSendAttempts.set(emailLower, { count: 1, resetTime: now + OTP_SEND_WINDOW })
     }
 
-    const isDev = process.env.NODE_ENV !== 'production'
-
-    // Try to send verification email via Supabase
-    // Method 1: Use Supabase's built-in OTP which sends a real email
+    // ─── Try sending OTP email via Resend ─────────────────────────────
     let emailSent = false
 
-    try {
-      // Look up the Supabase user by email — list users and filter client-side
-      const { data: { users: supabaseUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
-
-      if (!listError && supabaseUsers) {
-        const supabaseUser = supabaseUsers.find(u => u.email?.toLowerCase() === emailLower)
-
-        if (supabaseUser && !supabaseUser.email_confirmed_at) {
-          // Resend the Supabase confirmation email (sends a real email)
-          const { error: resendError } = await supabaseAdmin.auth.resend({
-            type: 'signup',
-            email: emailLower,
-          })
-
-          if (resendError) {
-            console.error('[OTP Send] Supabase resend error:', resendError.message)
-          } else {
-            emailSent = true
-          }
-        }
+    if (isEmailConfigured()) {
+      const userName = user.firstName || undefined
+      const result = await sendOTP(emailLower, code, userName, (user.language as 'en' | 'ar') || 'en')
+      if (result.success) {
+        emailSent = true
+      } else {
+        console.warn('[OTP Send] Resend email failed, falling back:', result.error)
       }
-    } catch (supabaseError) {
-      console.error('[OTP Send] Supabase error:', supabaseError)
     }
 
-    // Always return devCode when no email was actually sent — without an
-    // email provider the user has no other way to receive the code.
-    const shouldReturnCode = isDev || !emailSent
+    // ─── Fallback: Try Supabase built-in email ────────────────────────
+    if (!emailSent) {
+      try {
+        const { data: { users: supabaseUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+
+        if (!listError && supabaseUsers) {
+          const supabaseUser = supabaseUsers.find(u => u.email?.toLowerCase() === emailLower)
+
+          if (supabaseUser && !supabaseUser.email_confirmed_at) {
+            const { error: resendError } = await supabaseAdmin.auth.resend({
+              type: 'signup',
+              email: emailLower,
+            })
+
+            if (resendError) {
+              console.error('[OTP Send] Supabase resend error:', resendError.message)
+            } else {
+              emailSent = true
+            }
+          }
+        }
+      } catch (supabaseError) {
+        console.error('[OTP Send] Supabase error:', supabaseError)
+      }
+    }
+
+    // If email was sent successfully (Resend or Supabase), do NOT return devCode.
+    // If email failed entirely, return devCode as a fallback so the user
+    // can still verify (especially in dev environments without email setup).
+    const shouldReturnCode = !emailSent
 
     return NextResponse.json({
       success: true,
       message: emailSent
-        ? 'A verification link has been sent to your email. You can also use the code below.'
+        ? 'A verification code has been sent to your email.'
         : 'Verification code generated.',
       ...(shouldReturnCode ? { devCode: code } : {}),
       emailSent,

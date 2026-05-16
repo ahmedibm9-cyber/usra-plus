@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
  Dialog,
@@ -21,10 +21,10 @@ import {
  ShieldCheck,
  BarChart3,
  MessageSquare,
+ Loader2,
 } from 'lucide-react'
 import { useI18n } from '@/i18n/use-translation'
 import { useSubscriptionStore } from '@/stores/subscription-store'
-import { toast } from 'sonner'
 import type { SubscriptionPlan } from '@/types'
 
 interface UpgradeModalProps {
@@ -48,7 +48,8 @@ const PLAN_FEATURES = [
 
 export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit }: UpgradeModalProps) {
  const { t, isRTL } = useI18n()
- const { plan, setPlan } = useSubscriptionStore()
+ const { plan, initiateCheckout, isCheckoutLoading } = useSubscriptionStore()
+ const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
 
  const featureLabels: Record<string, { en: string; ar: string }> = {
   tasks: { en: 'Tasks', ar: 'المهام' },
@@ -60,32 +61,17 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
  const featureLabel = featureLabels[feature]?.[isRTL ? 'ar' : 'en'] || feature
 
  const handleUpgrade = async (targetPlan: SubscriptionPlan) => {
-  // TODO: Integrate payment provider (Stripe/RevenueCat) here.
-  // For now, upgrade requests go through the server API.
-  // Client-side setPlan is called only after server confirms the upgrade.
+  setSelectedPlan(targetPlan)
   try {
-   const { useAuthStore } = await import('@/stores/auth-store')
-   const userId = useAuthStore.getState()?.user?.id
-   if (userId) {
-    const { useSubscriptionStore } = await import('@/stores/subscription-store')
-    await useSubscriptionStore.getState().fetchPlanFromServer(userId)
-   }
-   // If fetchPlanFromServer updated the plan (server confirmed), show success
-   // If not (no payment yet), show"coming soon" message
-   toast.info(
-    isRTL
-     ? 'سيتم تفعيل الدفع قريبًا'
-     : 'Payment integration coming soon!',
-    {
-     description: isRTL
-      ? 'سيتم تفعيل خطتك بعد إتمام عملية الدفع'
-      : 'Your plan will be activated after payment is processed',
-    }
-   )
+   await initiateCheckout(targetPlan)
+   // After initiateCheckout, the browser will redirect to Stripe Checkout.
+   // No need to close the modal here — the redirect will navigate away.
+   // If the redirect fails (e.g. Stripe not configured), the store will show a toast.
   } catch {
-   toast.error(isRTL ? 'حدث خطأ' : 'Something went wrong')
+   // Error is handled in the store
+  } finally {
+   setSelectedPlan(null)
   }
-  onOpenChange(false)
  }
 
  return (
@@ -234,12 +220,18 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            <Button
             onClick={() => handleUpgrade('pro')}
             className="w-full mt-3 h-8 text-xs bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
-            disabled={plan === 'pro'}
+            disabled={plan === 'pro' || isCheckoutLoading}
            >
-            {plan === 'pro'
-             ? (isRTL ? 'الخطة الحالية' : 'Current Plan')
-             : (isRTL ? 'الترقية إلى Pro' : 'Upgrade to Pro')
-            }
+            {isCheckoutLoading && selectedPlan === 'pro' ? (
+             <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              {isRTL ? 'جارٍ التحويل...' : 'Redirecting...'}
+             </>
+            ) : plan === 'pro' ? (
+             isRTL ? 'الخطة الحالية' : 'Current Plan'
+            ) : (
+             isRTL ? 'الترقية إلى Pro' : 'Upgrade to Pro'
+            )}
            </Button>
           </div>
          </div>
@@ -278,12 +270,18 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            onClick={() => handleUpgrade('family_plus')}
            variant="outline"
            className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-           disabled={plan === 'family_plus'}
+           disabled={plan === 'family_plus' || isCheckoutLoading}
           >
-           {plan === 'family_plus'
-            ? (isRTL ? 'الخطة الحالية' : 'Current Plan')
-            : (isRTL ? 'الترقية إلى Family+' : 'Upgrade to Family+')
-           }
+           {isCheckoutLoading && selectedPlan === 'family_plus' ? (
+            <>
+             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+             {isRTL ? 'جارٍ التحويل...' : 'Redirecting...'}
+            </>
+           ) : plan === 'family_plus' ? (
+            isRTL ? 'الخطة الحالية' : 'Current Plan'
+           ) : (
+            isRTL ? 'الترقية إلى Family+' : 'Upgrade to Family+'
+           )}
           </Button>
          </div>
         </div>

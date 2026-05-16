@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
   try {
   // Rate limit check
   try {
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
     if (rateLimitResponse) return rateLimitResponse
   } catch {
     // Rate limit check itself failed, continue
@@ -557,7 +557,7 @@ export async function POST(request: NextRequest) {
   try {
   // Rate limit check
   try {
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
     if (rateLimitResponse) return rateLimitResponse
   } catch {
     // Rate limit check itself failed, continue

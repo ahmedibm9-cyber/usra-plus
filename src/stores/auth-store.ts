@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import type { AuthView, UserProfile, Language } from '@/types'
+import { setUserContext, clearUserContext } from '@/lib/error-reporting'
 
 interface AuthState {
   user: UserProfile | null
@@ -84,7 +85,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   authView: 'login',
   showTermsModal: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  setUser: (user) => {
+   if (user) {
+    setUserContext(user.id, user.email)
+   }
+   set({ user, isAuthenticated: !!user })
+  },
   setIsAuthenticated: (value) => set({ isAuthenticated: value }),
   setIsLoading: (value) => set({ isLoading: value }),
   setAuthView: (view) => set({ authView: view }),
@@ -113,7 +119,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Step 4: Reset all domain stores to prevent data leakage
     await resetAllStores()
 
-    // Step 5: Finally set auth state to logged out
+    // Step 5: Clear Sentry user context
+    clearUserContext()
+
+    // Step 6: Finally set auth state to logged out
     set({ user: null, isAuthenticated: false, authView: 'login' })
   },
 }))

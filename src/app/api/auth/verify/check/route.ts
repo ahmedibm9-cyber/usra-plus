@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     if (csrfError) return csrfError
 
     // Rate limit verification attempts
-    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_VERIFY)
+    const rateLimitResponse = await applyRateLimit(req, RATE_LIMITS.AUTH_VERIFY)
     if (rateLimitResponse) return rateLimitResponse
 
     const supabaseAdmin = getSupabaseAdmin()

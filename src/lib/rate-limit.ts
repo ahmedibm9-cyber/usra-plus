@@ -1,16 +1,19 @@
 /**
  * Rate Limiting Utility for USRA PLUS API Routes
  * 
- * In-memory sliding window rate limiter with per-IP and per-endpoint tracking.
- * For production at scale, replace with Redis-backed rate limiting.
+ * Dual-backend rate limiter: tries Upstash Redis first (for distributed,
+ * serverless-friendly rate limiting), falls back to in-memory sliding
+ * window when Redis is not configured.
  */
 
-interface RateLimitEntry {
+import { isRedisConfigured, checkRedisRateLimit } from './redis-rate-limit'
+
+export interface RateLimitEntry {
   count: number
   resetTime: number
 }
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   /** Max requests per window */
   maxRequests: number
   /** Window duration in milliseconds */
@@ -94,12 +97,30 @@ export interface RateLimitResult {
 
 /**
  * Check if a request is within rate limits.
+ * Tries Redis first, falls back to in-memory.
  * 
  * @param request - The incoming request
  * @param config - Rate limit configuration
  * @returns Rate limit result with allowed status and metadata
  */
-export function checkRateLimit(request: Request, config: RateLimitConfig): RateLimitResult {
+export async function checkRateLimit(request: Request, config: RateLimitConfig): Promise<RateLimitResult> {
+  // ─── Try Redis first ──────────────────────────────────────────────
+  if (isRedisConfigured()) {
+    const redisResult = await checkRedisRateLimit(request, config)
+    if (redisResult !== null) {
+      return redisResult
+    }
+    // Redis check failed — fall through to in-memory
+  }
+
+  // ─── In-memory fallback ───────────────────────────────────────────
+  return checkInMemoryRateLimit(request, config)
+}
+
+/**
+ * In-memory sliding window rate limit check.
+ */
+function checkInMemoryRateLimit(request: Request, config: RateLimitConfig): RateLimitResult {
   const clientId = getClientId(request)
   const storeKey = `${config.key}:${clientId}`
   const now = Date.now()
@@ -143,12 +164,13 @@ export function checkRateLimit(request: Request, config: RateLimitConfig): RateL
 /**
  * Apply rate limit to a request and return appropriate response if limited.
  * Returns null if the request is allowed (pass-through).
+ * Now async to support Redis-backed rate limiting.
  */
-export function applyRateLimit(
+export async function applyRateLimit(
   request: Request,
   config: RateLimitConfig
-): Response | null {
-  const result = checkRateLimit(request, config)
+): Promise<Response | null> {
+  const result = await checkRateLimit(request, config)
   
   if (!result.allowed) {
     return new Response(

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit: 3 attempts per hour per user
-    const rateLimitResult = checkRateLimit(request, {
+    const rateLimitResult = await checkRateLimit(request, {
       maxRequests: 3,
       windowMs: 60 * 60 * 1000,
       key: 'coupon:redeem',

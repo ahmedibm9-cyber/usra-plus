@@ -67,7 +67,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ): Promise<NextResponse<UserDetailResponse>> {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse as NextResponse<UserDetailResponse>
 
   const auth = verifyAdminAuth(request)

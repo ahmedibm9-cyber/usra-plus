@@ -6,7 +6,7 @@ import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 // GET: Return all system settings grouped by category
 export async function GET(request: NextRequest) {
   try {
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
     if (rateLimitResponse) return rateLimitResponse
 
     const auth = verifyAdminAuth(request)
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 // PUT: Update a setting by key (super_admin only)
 export async function PUT(request: NextRequest) {
   try {
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
     if (rateLimitResponse) return rateLimitResponse
 
     const auth = verifyAdminAuth(request)

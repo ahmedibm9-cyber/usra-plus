@@ -51,6 +51,7 @@ const OnboardingFlow = dynamic(() => import('@/components/onboarding/onboarding-
 const CommandPalette = dynamic(() => import('@/components/shared/command-palette').then(m => ({ default: m.CommandPalette })), { ssr: false })
 const GuidedTour = dynamic(() => import('@/components/shared/guided-tour').then(m => ({ default: m.GuidedTour })), { ssr: false })
 const PageWrapper = dynamic(() => import('@/components/shared/page-wrapper').then(m => ({ default: m.PageWrapper })), { ssr: false })
+const CookieConsentBanner = dynamic(() => import('@/components/shared/cookie-consent').then(m => ({ default: m.CookieConsent })), { ssr: false })
 
 // Admin
 const AdminLayout = dynamic(() => import('@/components/admin/admin-layout').then(m => ({ default: m.AdminLayout })), { ssr: false, loading: () => <ChunkLoader /> })
@@ -668,6 +669,7 @@ function MainApp() {
       <BottomNav />
       <CommandPalette />
       <GuidedTour />
+      <CookieConsentBanner />
     </Box>
   )
 }

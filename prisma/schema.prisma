@@ -340,6 +340,9 @@ model UserSubscription {
   id                    String    @id @default(uuid())
   userId                String
   revenuecatId          String?   @unique
+  stripeCustomerId      String?   @unique
+  stripeSubscriptionId  String?   @unique
+  stripePriceId         String?
   plan                  String    @default("free")
   status                String    @default("active")
   productIdentifier     String?
@@ -348,6 +351,8 @@ model UserSubscription {
   currentPeriodStart    DateTime?
   currentPeriodEnd      DateTime?
   expirationDate        DateTime?
+  trialStart            DateTime?
+  trialEnd              DateTime?
   autoRenew            Boolean   @default(true)
   isSandbox             Boolean   @default(false)
   cancellationReason    String?
@@ -364,6 +369,22 @@ model UserSubscription {
   @@index([status])
   @@index([plan])
   @@index([revenuecatId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+model Consent {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // "terms", "privacy", "marketing", "cookies"
+  granted   Boolean
+  version   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
 }
 
 model VerificationCode {

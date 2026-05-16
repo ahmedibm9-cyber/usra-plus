@@ -74,7 +74,7 @@ const SUPABASE_TABLE_MAP: Array<{ model: string; table: string }> = [
 export async function GET(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)
@@ -356,7 +356,7 @@ async function getPrismaSystemSettings(): Promise<Array<{
 export async function POST(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)

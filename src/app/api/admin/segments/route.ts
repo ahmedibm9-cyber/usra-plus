@@ -7,7 +7,7 @@ import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 export async function GET(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)
@@ -247,7 +247,7 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
 
   try {
-  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+  const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
   if (rateLimitResponse) return rateLimitResponse
 
   const auth = verifyAdminAuth(request)

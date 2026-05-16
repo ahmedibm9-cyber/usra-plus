@@ -10,7 +10,7 @@ import { db } from '@/lib/db'
 
 export async function GET(request: Request) {
   try {
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_API)
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_API)
     if (rateLimitResponse) return rateLimitResponse
 
     const auth = verifyAdminAuth(request)

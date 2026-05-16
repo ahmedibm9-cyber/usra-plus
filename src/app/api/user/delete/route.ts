@@ -32,7 +32,7 @@ const ACCOUNT_DELETE_RATE_LIMIT = { maxRequests: 1, windowMs: 60 * 60 * 1000, ke
 export async function DELETE(request: NextRequest) {
   try {
     // ─── Rate Limiting ────────────────────────────────────────────────
-    const rateLimitResponse = applyRateLimit(request, ACCOUNT_DELETE_RATE_LIMIT)
+    const rateLimitResponse = await applyRateLimit(request, ACCOUNT_DELETE_RATE_LIMIT)
     if (rateLimitResponse) return rateLimitResponse
 
     // ─── CSRF Protection ──────────────────────────────────────────────

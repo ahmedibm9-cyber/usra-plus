@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     if (csrfError) return csrfError
 
     // Rate limit login attempts
-    const rateLimitResponse = applyRateLimit(req, RATE_LIMITS.AUTH_LOGIN)
+    const rateLimitResponse = await applyRateLimit(req, RATE_LIMITS.AUTH_LOGIN)
     if (rateLimitResponse) return rateLimitResponse
 
     const body = await req.json()

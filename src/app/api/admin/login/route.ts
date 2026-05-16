@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const csrfError = validateCSRF(request)
     if (csrfError) return csrfError
 
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ADMIN_LOGIN)
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.ADMIN_LOGIN)
     if (rateLimitResponse) return rateLimitResponse
 
     // Refuse default password in production
