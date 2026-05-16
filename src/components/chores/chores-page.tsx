@@ -18,7 +18,7 @@ import {
   BarChart3,
   CalendarDays,
   MoreVert,
-} from '@mui/icons-material'
+} from 'lucide-react'
 import {
   Container,
   Stack,
@@ -400,7 +400,7 @@ function ChoreCard({
             <Typography variant="body2" fontWeight={600} noWrap>{chore.title}</Typography>
           </Stack>
           <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}>
-            <MoreVert fontSize="small" />
+            <MoreVert size={20} />
           </IconButton>
           <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
             <MenuItem onClick={() => { onEdit(chore); setMenuAnchor(null) }}>

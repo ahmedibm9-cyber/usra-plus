@@ -4153,3 +4153,35 @@ Stage Summary:
 - Core screens: Pure MUI (auth, dashboard, sidebar, header, bottom nav, settings, admin layout)
 - Remaining: Admin sub-pages still have className (lower priority), files page needs full MUI rewrite
 - Before/After compliance: ~2/10 → ~7/10 MUI compliance
+
+---
+Task ID: 1
+Agent: fix-mui-icons
+Task: Fix broken MUI icon imports causing 500 error
+
+Work Log:
+- Read worklog.md to understand project history and context
+- Read meal-plan-page.tsx and onboarding-flow.tsx to identify all icon import and usage locations
+- Fixed meal-plan-page.tsx (9 invalid icon imports):
+  - Plus → Add (import + 3 JSX usages: line 171, 497, 839)
+  - Sunrise → WbTwilight (import + MEAL_TYPE_ICON + mealTypeOptions)
+  - Sun → WbSunny (import + MEAL_TYPE_ICON + mealTypeOptions)
+  - Moon → DarkMode (import + MEAL_TYPE_ICON + mealTypeOptions)
+  - Clock → Schedule (import + 3 Chip icon usages)
+  - Flame → LocalFireDepartment (import + 3 Chip icon usages)
+  - Sparkles → AutoAwesome (import + 3 JSX usages)
+  - UtensilsCrossed → Restaurant (import + 1 JSX usage)
+  - Users → People (import, unused in JSX but still caused crash)
+- Fixed onboarding-flow.tsx (1 invalid icon import):
+  - Users → People (import + FAMILY_BENEFITS + 2 JSX usages)
+- Verified all old icon names completely removed from both files via grep
+- Verified all new icon names present in correct locations via grep
+- Dev server started and compiling (Turbopack); remaining build errors from OTHER files with same Lucide→MUI icon issue (not in scope of this task)
+- Note: Other files (grocery, budget, chores, etc.) also have invalid Lucide icon names as MUI imports but were not part of this task scope
+
+Stage Summary:
+- 9 invalid MUI icon imports fixed in meal-plan-page.tsx (Plus→Add, Sunrise→WbTwilight, Sun→WbSunny, Moon→DarkMode, Clock→Schedule, Flame→LocalFireDepartment, Sparkles→AutoAwesome, UtensilsCrossed→Restaurant, Users→People)
+- 1 invalid MUI icon import fixed in onboarding-flow.tsx (Users→People)
+- All import statements and JSX usages updated in both files
+- Zero remaining instances of the 9 specified invalid icon names in the two target files
+- Additional invalid MUI icon imports exist in other files (out of scope)

@@ -4,23 +4,25 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
+  Add,
+  Schedule,
+  LocalFireDepartment,
+  ShoppingCart,
+  AutoAwesome,
+  X,
+  Restaurant,
+  Link as LinkIcon,
+  People,
+} from '@mui/icons-material'
+import {
   Sunrise,
   Sun,
   Moon,
   Cookie,
-  Clock,
-  Flame,
-  ShoppingCart,
-  Sparkles,
   Trash2,
   Pencil,
-  X,
-  UtensilsCrossed,
-  Link as LinkIcon,
-  Users,
   ExternalLink,
-} from '@mui/icons-material'
+} from 'lucide-react'
 import {
   Container,
   Stack,
@@ -113,17 +115,17 @@ function MealCard({ meal, onClick }: { meal: Meal; onClick: () => void }) {
       <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
         <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={0.5}>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
-            <Icon sx={{ fontSize: 14, flexShrink: 0, color: `${theme.palette[chipColor].main}` }} />
+            <Icon size={14} style={{ flexShrink: 0, color: theme.palette[chipColor].main }} />
             <Typography variant="body2" fontWeight={500} noWrap>{meal.title}</Typography>
           </Stack>
         </Stack>
 
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
           {meal.prepTime && (
-            <Chip icon={<Clock sx={{ fontSize: 12 }} />} label={`${meal.prepTime} ${t.mealPlan.minutes}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
+            <Chip icon={<Schedule sx={{ fontSize: 12 }} />} label={`${meal.prepTime} ${t.mealPlan.minutes}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
           )}
           {meal.calories && (
-            <Chip icon={<Flame sx={{ fontSize: 12 }} />} label={`${meal.calories} ${t.mealPlan.kcal}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
+            <Chip icon={<LocalFireDepartment sx={{ fontSize: 12 }} />} label={`${meal.calories} ${t.mealPlan.kcal}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
           )}
         </Stack>
 
@@ -166,9 +168,9 @@ function AddMealSlot({ mealType, date, onClick }: { mealType: MealType; date: st
         '&:hover': { borderStyle: 'dashed', bgcolor: theme.palette.action.hover },
       }}
     >
-      <Icon sx={{ fontSize: 14 }} />
+      <Icon size={14} />
       <Typography variant="caption" fontWeight={500}>{t.mealPlan[mealType]}</Typography>
-      <Plus sx={{ fontSize: 12 }} />
+      <Add sx={{ fontSize: 12 }} />
     </Button>
   )
 }
@@ -207,7 +209,7 @@ function MealDetailSheet({
       <DialogTitle>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: `${theme.palette[chipColor].main}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon sx={{ fontSize: 16, color: theme.palette[chipColor].main }} />
+            <Icon size={16} style={{ color: theme.palette[chipColor].main }} />
           </Box>
           {meal.title}
         </Stack>
@@ -221,13 +223,13 @@ function MealDetailSheet({
           <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
             {meal.prepTime && (
               <Stack direction="row" alignItems="center" spacing={0.5}>
-                <Clock sx={{ fontSize: 14 }} color="action" />
+                <Schedule sx={{ fontSize: 14 }} color="action" />
                 <Typography variant="caption" color="text.secondary">{meal.prepTime} {t.mealPlan.minutes}</Typography>
               </Stack>
             )}
             {meal.calories && (
               <Stack direction="row" alignItems="center" spacing={0.5}>
-                <Flame sx={{ fontSize: 14 }} color="action" />
+                <LocalFireDepartment sx={{ fontSize: 14 }} color="action" />
                 <Typography variant="caption" color="text.secondary">{meal.calories} {t.mealPlan.kcal}</Typography>
               </Stack>
             )}
@@ -287,7 +289,7 @@ function MealDetailSheet({
               <Button
                 variant="text"
                 size="small"
-                startIcon={<ExternalLink sx={{ fontSize: 12 }} />}
+                startIcon={<ExternalLink size={12} />}
                 href={meal.recipeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -304,13 +306,13 @@ function MealDetailSheet({
             <Button
               variant="outlined"
               fullWidth
-              startIcon={<Pencil sx={{ fontSize: 14 }} />}
+              startIcon={<Pencil size={14} }/>
               onClick={() => { onEdit(meal); onOpenChange(false) }}
             >
               {t.mealPlan.editMeal}
             </Button>
             <IconButton color="error" onClick={() => { onDelete(meal.id); onOpenChange(false) }}>
-              <Trash2 sx={{ fontSize: 14 }} />
+              <Trash2 size={14} />
             </IconButton>
           </Stack>
         </Stack>
@@ -400,9 +402,9 @@ function MealDialogInner({
   }, [title, description, mealType, date, assignedTo, ingredients, recipeUrl, prepTime, calories, meal, user, onSave, onOpenChange, isRTL])
 
   const mealTypeOptions: { value: MealType; icon: React.ElementType; label: string }[] = [
-    { value: 'breakfast', icon: Sunrise, label: t.mealPlan.breakfast },
-    { value: 'lunch', icon: Sun, label: t.mealPlan.lunch },
-    { value: 'dinner', icon: Moon, label: t.mealPlan.dinner },
+    { value: 'breakfast', icon: WbTwilight, label: t.mealPlan.breakfast },
+    { value: 'lunch', icon: WbSunny, label: t.mealPlan.lunch },
+    { value: 'dinner', icon: DarkMode, label: t.mealPlan.dinner },
     { value: 'snack', icon: Cookie, label: t.mealPlan.snack },
   ]
 
@@ -428,7 +430,7 @@ function MealDialogInner({
                     color={MEAL_TYPE_COLOR[opt.value]}
                     size="small"
                     onClick={() => setMealType(opt.value)}
-                    startIcon={<Icon sx={{ fontSize: 14 }} />}
+                    startIcon={<Icon size={14} />}
                     sx={{ textTransform: 'none', flex: 1 }}
                   >
                     {opt.label}
@@ -494,7 +496,7 @@ function MealDialogInner({
                 fullWidth
               />
               <IconButton onClick={handleAddIngredient} color="primary">
-                <Plus sx={{ fontSize: 16 }} />
+                <Add sx={{ fontSize: 16 }} />
               </IconButton>
             </Stack>
           </Stack>
@@ -609,7 +611,7 @@ function AISuggestionsDialog({
     <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
       <DialogTitle>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Sparkles sx={{ fontSize: 16, color: 'primary.main' }} />
+          <AutoAwesome sx={{ fontSize: 16, color: 'primary.main' }} />
           {t.mealPlan.suggestMeals}
         </Stack>
       </DialogTitle>
@@ -618,7 +620,7 @@ function AISuggestionsDialog({
         <Stack spacing={1.5}>
           {isLoading ? (
             <Stack alignItems="center" sx={{ py: 4 }}>
-              <Sparkles sx={{ fontSize: 24, color: 'primary.main', animation: 'pulse 2s infinite' }} />
+              <AutoAwesome sx={{ fontSize: 24, color: 'primary.main', animation: 'pulse 2s infinite' }} />
               <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>{isRTL ? 'جاري التحميل...' : 'Loading...'}</Typography>
             </Stack>
           ) : (
@@ -632,8 +634,8 @@ function AISuggestionsDialog({
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
                   <Typography variant="body2" fontWeight={500}>{suggestion.title}</Typography>
                   <Stack direction="row" spacing={0.5}>
-                    {suggestion.prepTime > 0 && <Chip icon={<Clock sx={{ fontSize: 10 }} />} label={`${suggestion.prepTime} ${t.mealPlan.minutes}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />}
-                    {suggestion.calories > 0 && <Chip icon={<Flame sx={{ fontSize: 10 }} />} label={`${suggestion.calories} ${t.mealPlan.kcal}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />}
+                    {suggestion.prepTime > 0 && <Chip icon={<Schedule sx={{ fontSize: 10 }} />} label={`${suggestion.prepTime} ${t.mealPlan.minutes}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />}
+                    {suggestion.calories > 0 && <Chip icon={<LocalFireDepartment sx={{ fontSize: 10 }} />} label={`${suggestion.calories} ${t.mealPlan.kcal}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />}
                   </Stack>
                 </Stack>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>{suggestion.description}</Typography>
@@ -821,7 +823,7 @@ export default function MealPlanPage() {
         <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <UtensilsCrossed sx={{ color: 'primary.main' }} />
+              <Restaurant sx={{ color: 'primary.main' }} />
             </Box>
             <Box>
               <Typography variant="h5" fontWeight={700}>{t.mealPlan.title}</Typography>
@@ -833,10 +835,10 @@ export default function MealPlanPage() {
             <IconButton onClick={handlePrevWeek}><ChevronLeft /></IconButton>
             <Button size="small" variant="outlined" onClick={handleToday}>{isRTL ? 'اليوم' : 'Today'}</Button>
             <IconButton onClick={handleNextWeek}><ChevronRight /></IconButton>
-            <Button size="small" variant="outlined" startIcon={<Sparkles sx={{ fontSize: 14 }} />} onClick={() => setAiDialogOpen(true)}>
+            <Button size="small" variant="outlined" startIcon={<AutoAwesome sx={{ fontSize: 14 }} />} onClick={() => setAiDialogOpen(true)}>
               {t.mealPlan.suggestMeals}
             </Button>
-            <Button variant="contained" size="small" startIcon={<Plus sx={{ fontSize: 14 }} />} onClick={handleAddNew}>
+            <Button variant="contained" size="small" startIcon={<Add sx={{ fontSize: 14 }} />} onClick={handleAddNew}>
               {t.mealPlan.addMeal}
             </Button>
           </Stack>

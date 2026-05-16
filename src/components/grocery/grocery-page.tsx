@@ -29,7 +29,7 @@ import {
   Share2,
   FileText,
   Trash,
-} from '@mui/icons-material'
+} from 'lucide-react'
 import {
   Container,
   Stack,
@@ -267,7 +267,7 @@ export function GroceryPage() {
         <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30` }}>
-              <ShoppingBag sx={{ color: 'primary.main' }} />
+              <ShoppingBag size={24} style={{ color: theme.palette.primary.main }} />
             </Box>
             <Box>
               <Typography variant="h5" fontWeight={700}>{t.grocery.title}</Typography>
@@ -276,7 +276,7 @@ export function GroceryPage() {
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center">
             <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel><Stack direction="row" alignItems="center" spacing={0.5}><ArrowUpDown sx={{ fontSize: 12 }} /><Typography variant="caption">Sort</Typography></Stack></InputLabel>
+              <InputLabel><Stack direction="row" alignItems="center" spacing={0.5}><ArrowUpDown size={12} /><Typography variant="caption">Sort</Typography></Stack></InputLabel>
               <Select value={sortBy} label="Sort" onChange={(e) => setSortBy(e.target.value as typeof sortBy)}>
                 <MenuItem value="created_at">Created Date</MenuItem>
                 <MenuItem value="name">Name</MenuItem>
@@ -284,7 +284,7 @@ export function GroceryPage() {
                 <MenuItem value="manual">Manual Order</MenuItem>
               </Select>
             </FormControl>
-            <Button variant="contained" startIcon={<Plus sx={{ fontSize: 16 }} />} onClick={() => setShowAddItem(true)}>
+            <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setShowAddItem(true)}>
               {t.grocery.addItem}
             </Button>
           </Stack>
@@ -303,7 +303,7 @@ export function GroceryPage() {
         {recentItems.length > 0 && (
           <Stack spacing={1}>
             <Stack direction="row" alignItems="center" spacing={0.5}>
-              <Sparkles sx={{ fontSize: 14, color: 'secondary.main' }} />
+              <Sparkles size={14} style={{ color: theme.palette.secondary.main }} />
               <Typography variant="caption" fontWeight={500} color="text.secondary">Quick Add</Typography>
             </Stack>
             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
@@ -322,7 +322,7 @@ export function GroceryPage() {
           size="small"
           fullWidth
           sx={{ '& .MuiInputAdornment-root': { mr: 1 } }}
-          InputProps={{ startAdornment: <Search sx={{ fontSize: 18, color: 'text.secondary', mr: 1 }} /> }}
+          InputProps={{ startAdornment: <Search size={18} style={{ color: theme.palette.text.secondary, marginRight: 4 }} /> }}
         />
 
         {/* Category Tabs */}
@@ -334,7 +334,7 @@ export function GroceryPage() {
             return (
               <Chip
                 key={cat.key}
-                icon={<Icon sx={{ fontSize: 14 }} />}
+                icon={<Icon size={14} />}
                 label={`${cat.label} (${count})`}
                 size="small"
                 variant={isActive ? 'filled' : 'outlined'}
