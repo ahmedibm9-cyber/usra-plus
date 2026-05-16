@@ -1128,3 +1128,37 @@ Stage Summary:
 - Investor Grade: Late-Stage Hobby / Pre-MVP
 - Top 5 Blockers: devCode leak, broken admin auth, zero email, broken subscription plan, decorative CSP
 - Quick Wins (7 items, <1 hour): Fix admin auth pattern, gate devCode, fix subscription plan endpoint, add not-found.tsx, fix error pages light mode, add HSTS, remove error.message exposure
+
+---
+Task ID: forensic-audit-v2
+Agent: Main Orchestrator
+Task: Full enterprise-grade platform forensic audit (second comprehensive audit)
+
+Work Log:
+- Launched 4 parallel forensic audit agents covering all 12 categories
+- Directly verified critical findings with grep/rg against live codebase
+- Confirmed hardcoded color counts: #0D9488 (354 in 34 files), #EF4444 (44 in 11 files), #10B981 (746 in 35 files)
+- Confirmed dangerouslySetInnerHTML in 3 files (campaigns, chart, layout)
+- Confirmed React.memo used only 1 time in entire codebase
+- Confirmed 268 console.log/warn/error calls in production code
+- Confirmed 0 Zustand selector patterns vs 86 full-store subscriptions
+- Confirmed not-found.tsx MISSING
+- Confirmed prisma/migrations directory MISSING
+- Confirmed .env.example EXISTS
+- Confirmed familyColor default is 'teal' (fixed)
+- Confirmed subscription/plan uses broken server-client (no cookie handling)
+- Confirmed account deletion only signs out user — NO actual data deletion
+- Confirmed Socket.io has cors: * and no auth
+
+CRITICAL NEW FINDINGS:
+1. Account deletion is FAKE — only signs user out, no data deleted (PDPL violation)
+2. 746 instances of #10B981 hardcoded (worse than previously reported)
+3. 268 console statements in production (previously estimated 83-95)
+4. 0 Zustand selector patterns found (cascade re-renders confirmed)
+5. Socket.io has no authentication — anyone can connect and impersonate
+
+Stage Summary:
+- Overall Platform Score: 3.5/10 (down from 4.1 due to more thorough audit revealing worse issues)
+- Deployment Safety: Unsafe
+- Investor Grade: Late-Stage Hobby Project
+- Top Blockers: No email delivery, no payment flow, fake account deletion, broken admin auth, broken subscription plan
