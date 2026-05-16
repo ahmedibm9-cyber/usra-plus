@@ -25,6 +25,7 @@ import {
   differenceInMinutes,
   isBefore,
   isAfter,
+  addHours,
 } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import { useAppStore } from '@/stores/app-store'
@@ -32,67 +33,57 @@ import { useCalendarStore } from '@/stores/calendar-store'
 import { useI18n } from '@/i18n/use-translation'
 import { toast } from 'sonner'
 import type { CalendarEvent, UserProfile, FamilyMember } from '@/types'
-import { EmptyState } from '@/components/shared/empty-state'
-import { EventCardSkeleton } from '@/components/shared/skeleton-patterns'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
+  Container,
+  Stack,
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  FormControlLabel,
+  Checkbox,
+  Switch,
+  Divider,
+  Avatar,
   Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+  ToggleButtonGroup,
+  ToggleButton,
+  useTheme,
+  useMediaQuery,
+  Fab,
+} from '@mui/material'
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
-  CalendarDays,
-  CalendarRange,
-  LayoutList,
-  Clock,
-  Trash2,
-  Calendar as CalendarIcon,
-  CalendarClock,
-  MapPin,
+  Add,
+  CalendarMonth,
+  ViewWeek,
+  ViewDay,
+  ViewAgenda,
+  AccessTime,
+  Delete,
+  LocationOn,
   Repeat,
-  User,
-} from 'lucide-react'
-import { FAB } from '@/components/shared/fab'
+  Person,
+  CalendarToday,
+} from '@mui/icons-material'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const EVENT_COLORS = ['var(--accent-primary)', '#22C55E', 'var(--accent)', '#EF4444', '#F97316', 'var(--accent)', 'var(--accent)', 'var(--accent)'] as const
+const EVENT_PALETTE_KEYS = ['primary', 'success', 'secondary', 'error', 'warning', 'info', 'primary', 'primary'] as const
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 const DAY_LABELS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const
@@ -122,10 +113,24 @@ const EMPTY_FORM: EventFormData = {
   endDate: '',
   endTime: '10:00',
   allDay: false,
-  color: EVENT_COLORS[0],
+  color: '',
   location: '',
   repeat: 'none',
   assignTo: '',
+}
+
+// ─── Helper: Get event color from theme palette ──────────────────────────────
+function getEventColor(theme: ReturnType<typeof useTheme> extends () => infer T ? T : never, index?: number): string {
+  const idx = index ?? 0
+  const key = EVENT_PALETTE_KEYS[idx % EVENT_PALETTE_KEYS.length]
+  return theme.palette[key]?.main ?? theme.palette.primary.main
+}
+
+function resolveEventColor(color: string | null | undefined, theme: ReturnType<typeof useTheme> extends () => infer T ? T : never, fallbackIndex?: number): string {
+  if (color && color.startsWith('#')) return color
+  if (color && color.startsWith('var(')) return getEventColor(theme, fallbackIndex)
+  if (color) return color
+  return getEventColor(theme, fallbackIndex)
 }
 
 // ─── Helper: Get events for a specific day ───────────────────────────────────
@@ -145,14 +150,11 @@ function getEventsForDay(events: CalendarEvent[], day: Date): CalendarEvent[] {
 function getEventPosition(event: CalendarEvent, day: Date) {
   const start = parseISO(event.start_time)
   const end = event.end_time ? parseISO(event.end_time) : addDays(start, 1)
-
   const dayStart = startOfDay(day)
   const eventStartInDay = isSameDay(start, day) ? start : dayStart
   const eventEndInDay = isSameDay(end, day) ? end : endOfDay(day)
-
   const topMinutes = differenceInMinutes(eventStartInDay, dayStart)
   const durationMinutes = differenceInMinutes(eventEndInDay, eventStartInDay)
-
   return {
     top: (topMinutes / 1440) * 100,
     height: Math.max((durationMinutes / 1440) * 100, 2),
@@ -193,52 +195,78 @@ function getMemberInitials(member: FamilyMember): string {
   return '?'
 }
 
+function formatHour(hour: number): string {
+  if (hour === 0) return '12 AM'
+  if (hour < 12) return `${hour} AM`
+  if (hour === 12) return '12 PM'
+  return `${hour - 12} PM`
+}
+
 // ─── Event Card ──────────────────────────────────────────────────────────────
 
 function EventCard({
   event,
   compact = false,
   onClick,
+  colorIndex,
 }: {
   event: CalendarEvent
   compact?: boolean
   onClick?: () => void
+  colorIndex?: number
 }) {
-  const color = event.color || EVENT_COLORS[0]
+  const theme = useTheme()
+  const color = resolveEventColor(event.color, theme, colorIndex)
   const creatorName = formatCreatorName(event.creator)
 
   if (compact) {
     return (
-      <button
+      <Box
         onClick={onClick}
-        className="w-full text-left group rounded-lg px-2 py-1.5 transition-colors hover:bg-[--border-subtle] flex items-center gap-2"
+        sx={{
+          width: '100%',
+          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          px: 1,
+          py: 0.5,
+          borderRadius: 1,
+          cursor: 'pointer',
+          transition: 'background-color 0.2s',
+          '&:hover': { bgcolor: 'action.hover' },
+        }}
       >
-        <div
-          className="h-2 w-2 rounded-full shrink-0"
-          style={{ backgroundColor: color }}
-        />
-        <span className="text-xs text-[--text-primary] truncate">{event.title}</span>
-      </button>
+        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
+        <Typography variant="caption" noWrap>{event.title}</Typography>
+      </Box>
     )
   }
 
   return (
-    <button
+    <Paper
       onClick={onClick}
-      className="w-full text-left group rounded-2xl p-3 transition-colors hover:bg-[--border-subtle] flex gap-3 border border-[--border-subtle] card-hover shadow-lg"
-      style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
+      variant="outlined"
+      sx={{
+        cursor: 'pointer',
+        p: 1.5,
+        borderLeftColor: color,
+        borderLeftWidth: 3,
+        transition: 'all 0.2s',
+        '&:hover': { bgcolor: 'action.hover', boxShadow: theme.shadows[2] },
+      }}
     >
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[--text-primary] truncate">{event.title}</p>
-        <div className="flex items-center gap-1.5 mt-1">
-          <Clock className="size-3 text-[--text-muted]" />
-          <span className="text-xs text-[--text-muted]">{formatEventTime(event)}</span>
-        </div>
+      <Stack spacing={0.5}>
+        <Typography variant="body2" fontWeight={500} noWrap>{event.title}</Typography>
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <AccessTime sx={{ fontSize: 12 }} color="action" />
+          <Typography variant="caption" color="text.secondary">{formatEventTime(event)}</Typography>
+        </Stack>
         {creatorName && (
-          <p className="text-xs text-[--text-muted] mt-1">by {creatorName}</p>
+          <Typography variant="caption" color="text.secondary">by {creatorName}</Typography>
         )}
-      </div>
-    </button>
+      </Stack>
+    </Paper>
   )
 }
 
@@ -252,66 +280,95 @@ const MonthDayCell = React.memo(function MonthDayCell({
   inMonth,
   onEventClick,
   onDayClick,
-  t,
+  moreEventsLabel,
 }: {
   day: Date
   events: CalendarEvent[]
   inMonth: boolean
   onEventClick: (event: CalendarEvent) => void
   onDayClick: (day: Date) => void
-  t: { calendar: { moreEvents: string } }
+  moreEventsLabel: string
 }) {
+  const theme = useTheme()
   const today = isToday(day)
   const pillsToShow = events.slice(0, MAX_EVENTS_PER_CELL)
   const moreCount = events.length > MAX_EVENTS_PER_CELL ? events.length - MAX_EVENTS_PER_CELL : 0
 
   return (
-    <div
+    <Box
       onClick={() => onDayClick(day)}
       role="gridcell"
       aria-label={format(day, 'EEEE, MMMM d, yyyy')}
-      className={`relative border-b border-r border-[--border-subtle] p-1 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-colors hover:bg-[--border-subtle]/50 ${
-        !inMonth ? 'opacity-40' : ''
-      } ${today ? 'ring-1 ring-inset ring-[var(--accent-primary)]/40' : ''}`}
+      sx={{
+        position: 'relative',
+        borderRight: '1px solid',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        p: 0.5,
+        minHeight: { xs: 80, sm: 100 },
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+        '&:hover': { bgcolor: 'action.hover' },
+        opacity: inMonth ? 1 : 0.4,
+        ...(today && { boxShadow: `inset 0 0 0 1px ${theme.palette.primary.main}60` }),
+      }}
     >
-      <div className="flex items-start justify-between">
-        <span
-          className={`inline-flex items-center justify-center size-7 text-sm rounded-full transition-colors ${
-            today
-              ? 'bg-[var(--accent-primary)] text-white font-semibold'
-              : 'text-[--text-primary]'
-          }`}
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 28,
+            height: 28,
+            fontSize: 14,
+            borderRadius: '50%',
+            ...(today
+              ? { bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 600 }
+              : { color: 'text.primary' }),
+          }}
         >
           {format(day, 'd')}
-        </span>
-      </div>
+        </Box>
+      </Stack>
 
-      {/* Event pills */}
-      <div className="mt-0.5 space-y-0.5 overflow-hidden">
-        {pillsToShow.map((event) => (
-          <button
-            key={event.id}
-            onClick={(e) => {
-              e.stopPropagation()
-              onEventClick(event)
-            }}
-            className="w-full text-left text-[10px] leading-tight px-1.5 py-0.5 rounded-md truncate transition-opacity hover:opacity-80 border-l-2"
-            style={{
-              backgroundColor: `${event.color || EVENT_COLORS[0]}15`,
-              color: event.color || EVENT_COLORS[0],
-              borderLeftColor: event.color || EVENT_COLORS[0],
-            }}
-          >
-            {event.title}
-          </button>
-        ))}
+      <Stack spacing={0.25} sx={{ mt: 0.25, overflow: 'hidden' }}>
+        {pillsToShow.map((event, idx) => {
+          const eColor = resolveEventColor(event.color, theme, idx)
+          return (
+            <Box
+              key={event.id}
+              onClick={(e) => { e.stopPropagation(); onEventClick(event) }}
+              sx={{
+                width: '100%',
+                textAlign: 'left',
+                fontSize: 10,
+                lineHeight: 1.3,
+                px: 0.5,
+                py: 0.25,
+                borderRadius: 0.5,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+                bgcolor: `${eColor}18`,
+                color: eColor,
+                borderLeft: `2px solid ${eColor}`,
+                transition: 'opacity 0.2s',
+                '&:hover': { opacity: 0.8 },
+              }}
+            >
+              {event.title}
+            </Box>
+          )
+        })}
         {moreCount > 0 && (
-          <span className="text-[10px] text-[--text-muted] px-1.5">
-            +{moreCount} {t.calendar.moreEvents}
-          </span>
+          <Typography variant="caption" sx={{ fontSize: 10, px: 0.5 }} color="text.secondary">
+            +{moreCount} {moreEventsLabel}
+          </Typography>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   )
 })
 
@@ -322,53 +379,47 @@ function MonthView({
   events,
   onEventClick,
   onDayClick,
+  moreEventsLabel,
 }: {
   currentDate: Date
   events: CalendarEvent[]
   onEventClick: (event: CalendarEvent) => void
   onDayClick: (day: Date) => void
+  moreEventsLabel: string
 }) {
-  const { t } = useI18n()
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
   const calStart = startOfWeek(monthStart)
   const calEnd = endOfWeek(monthEnd)
   const days = eachDayOfInterval({ start: calStart, end: calEnd })
 
-  // Memoize event grouping to avoid re-computing on every render
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>()
     for (const day of days) {
       const key = format(day, 'yyyy-MM-dd')
       const dayEvts = getEventsForDay(events, day)
-      if (dayEvts.length > 0) {
-        map.set(key, dayEvts)
-      }
+      if (dayEvts.length > 0) map.set(key, dayEvts)
     }
     return map
   }, [days, events])
 
   return (
-    <div role="grid" aria-label="Calendar" className="flex flex-col h-full">
+    <Box role="grid" aria-label="Calendar" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Day headers */}
-      <div className="grid grid-cols-7 border-b border-[--border-subtle]">
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid', borderColor: 'divider' }}>
         {WEEK_DAYS.map((day, i) => (
-          <div
-            key={i}
-            className="py-3 text-center text-xs font-medium text-[--text-muted] uppercase tracking-wider"
-          >
+          <Typography key={i} variant="overline" sx={{ py: 1.5, textAlign: 'center', letterSpacing: 1 }}>
             {day}
-          </div>
+          </Typography>
         ))}
-      </div>
+      </Box>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 flex-1 auto-rows-fr" role="row">
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', flex: 1 }} role="row">
         {days.map((day, i) => {
           const key = format(day, 'yyyy-MM-dd')
           const dayEvents = eventsByDay.get(key) || []
           const inMonth = isSameMonth(day, currentDate)
-
           return (
             <MonthDayCell
               key={i}
@@ -377,12 +428,12 @@ function MonthView({
               inMonth={inMonth}
               onEventClick={onEventClick}
               onDayClick={onDayClick}
-              t={t}
+              moreEventsLabel={moreEventsLabel}
             />
           )
         })}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
@@ -399,116 +450,104 @@ function WeekView({
   onEventClick: (event: CalendarEvent) => void
   onDayClick: (day: Date) => void
 }) {
+  const theme = useTheme()
   const weekStart = startOfWeek(currentDate)
   const weekDays = eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 6) })
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <Stack sx={{ height: '100%', overflow: 'hidden' }}>
       {/* Day headers */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-[--border-subtle] shrink-0">
-        <div className="py-3" />
+      <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+        <Box sx={{ py: 1.5 }} />
         {weekDays.map((day, i) => {
           const today = isToday(day)
           return (
-            <div
+            <Box
               key={i}
               onClick={() => onDayClick(day)}
-              className="py-3 text-center cursor-pointer hover:bg-[--border-subtle] transition-colors"
+              sx={{ py: 1.5, textAlign: 'center', cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, transition: 'background-color 0.2s' }}
             >
-              <div className="text-xs font-medium text-[--text-muted] uppercase tracking-wider">
-                {format(day, 'EEE')}
-              </div>
-              <div
-                className={`mt-1 inline-flex items-center justify-center size-8 text-sm rounded-full ${
-                  today
-                    ? 'bg-[var(--accent-primary)] text-white font-semibold'
-                    : 'text-[--text-primary]'
-                }`}
+              <Typography variant="overline" sx={{ letterSpacing: 1 }}>{format(day, 'EEE')}</Typography>
+              <Box
+                sx={{
+                  mt: 0.5,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 32,
+                  height: 32,
+                  fontSize: 14,
+                  borderRadius: '50%',
+                  ...(today
+                    ? { bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 600 }
+                    : { color: 'text.primary' }),
+                }}
               >
                 {format(day, 'd')}
-              </div>
-            </div>
+              </Box>
+            </Box>
           )
         })}
-      </div>
+      </Box>
 
       {/* Time grid */}
-      <ScrollArea className="flex-1">
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] relative">
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', position: 'relative' }}>
           {HOURS.map((hour) => (
             <React.Fragment key={hour}>
-              {/* Time label */}
-              <div className="h-16 border-b border-[--border-subtle] pr-2 text-right flex items-start pt-1">
-                <span className="text-[10px] text-[--text-muted]">
-                  {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
-                </span>
-              </div>
-              {/* Day cells for this hour */}
+              <Box sx={{ height: 64, borderBottom: '1px solid', borderColor: 'divider', pr: 1, textAlign: 'right', display: 'flex', alignItems: 'flex-start', pt: 0.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>{formatHour(hour)}</Typography>
+              </Box>
               {weekDays.map((day, di) => {
                 const hourEvents = getEventsForDay(events, day).filter((event) => {
                   if (event.all_day) return false
                   const start = parseISO(event.start_time)
                   return getHours(start) === hour && isSameDay(start, day)
                 })
-
                 return (
-                  <div
-                    key={di}
-                    className="h-16 border-b border-r border-[--border-subtle] relative"
-                  >
-                    {hourEvents.map((event) => {
+                  <Box key={di} sx={{ height: 64, borderBottom: '1px solid', borderRight: '1px solid', borderColor: 'divider', position: 'relative' }}>
+                    {hourEvents.map((event, idx) => {
                       const pos = getEventPosition(event, day)
+                      const eColor = resolveEventColor(event.color, theme, idx)
                       return (
-                        <button
+                        <Box
                           key={event.id}
                           onClick={() => onEventClick(event)}
-                          className="absolute left-0.5 right-0.5 rounded-md px-1.5 py-0.5 text-[10px] leading-tight truncate transition-opacity hover:opacity-80 z-10"
-                          style={{
+                          sx={{
+                            position: 'absolute',
+                            left: 2,
+                            right: 2,
+                            borderRadius: 0.5,
+                            px: 0.5,
+                            py: 0.25,
+                            fontSize: 10,
+                            lineHeight: 1.3,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            cursor: 'pointer',
+                            zIndex: 10,
                             top: `${((pos.top % (100 / 24)) / (100 / 24)) * 100}%`,
                             height: `${Math.max(pos.height * 24, 20)}%`,
-                            backgroundColor: `${event.color || EVENT_COLORS[0]}30`,
-                            color: event.color || EVENT_COLORS[0],
-                            borderLeft: `2px solid ${event.color || EVENT_COLORS[0]}`,
+                            bgcolor: `${eColor}30`,
+                            color: eColor,
+                            borderLeft: `2px solid ${eColor}`,
+                            transition: 'opacity 0.2s',
+                            '&:hover': { opacity: 0.8 },
                           }}
                         >
                           {event.title}
-                        </button>
+                        </Box>
                       )
                     })}
-                  </div>
+                  </Box>
                 )
               })}
             </React.Fragment>
           ))}
-          {/* All-day events row */}
-          {weekDays.some((day) => getEventsForDay(events, day).some((e) => e.all_day)) && (
-            <div className="col-span-8 border-b border-[--border-subtle] py-1 px-2 flex gap-1">
-              <div className="w-[60px] shrink-0" />
-              {weekDays.map((day, di) => {
-                const allDay = getEventsForDay(events, day).filter((e) => e.all_day)
-                return (
-                  <div key={di} className="flex-1 flex flex-col gap-0.5">
-                    {allDay.map((event) => (
-                      <button
-                        key={event.id}
-                        onClick={() => onEventClick(event)}
-                        className="rounded px-1 py-0.5 text-[10px] truncate transition-opacity hover:opacity-80"
-                        style={{
-                          backgroundColor: `${event.color || EVENT_COLORS[0]}25`,
-                          color: event.color || EVENT_COLORS[0],
-                        }}
-                      >
-                        {event.title}
-                      </button>
-                    ))}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </ScrollArea>
-    </div>
+        </Box>
+      </Box>
+    </Stack>
   )
 }
 
@@ -523,108 +562,131 @@ function DayView({
   events: CalendarEvent[]
   onEventClick: (event: CalendarEvent) => void
 }) {
+  const theme = useTheme()
   const dayEvents = getEventsForDay(events, currentDate)
   const timedEvents = dayEvents.filter((e) => !e.all_day)
   const allDayEvents = dayEvents.filter((e) => e.all_day)
   const today = isToday(currentDate)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <Stack sx={{ height: '100%', overflow: 'hidden' }}>
       {/* Day header */}
-      <div className="py-4 px-4 border-b border-[--border-subtle] shrink-0">
-        <div className="flex items-center gap-3">
-          <div
-            className={`inline-flex items-center justify-center size-12 text-xl font-semibold rounded-full ${
-              today ? 'bg-[var(--accent-primary)] text-white' : 'text-[--text-primary]'
-            }`}
+      <Box sx={{ py: 2, px: 2, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 48,
+              height: 48,
+              fontSize: 20,
+              fontWeight: 600,
+              borderRadius: '50%',
+              ...(today
+                ? { bgcolor: 'primary.main', color: 'primary.contrastText' }
+                : { color: 'text.primary' }),
+            }}
           >
             {format(currentDate, 'd')}
-          </div>
-          <div>
-            <p className="text-sm text-[--text-muted]">{format(currentDate, 'EEEE')}</p>
-            <p className="text-lg font-medium text-[--text-primary]">{format(currentDate, 'MMMM yyyy')}</p>
-          </div>
-        </div>
+          </Box>
+          <Stack>
+            <Typography variant="body2" color="text.secondary">{format(currentDate, 'EEEE')}</Typography>
+            <Typography variant="h6">{format(currentDate, 'MMMM yyyy')}</Typography>
+          </Stack>
+        </Stack>
         {allDayEvents.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {allDayEvents.map((event) => (
-              <button
-                key={event.id}
-                onClick={() => onEventClick(event)}
-                className="rounded-xl px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                style={{
-                  backgroundColor: `${event.color || EVENT_COLORS[0]}25`,
-                  color: event.color || EVENT_COLORS[0],
-                  borderLeft: `3px solid ${event.color || EVENT_COLORS[0]}`,
-                }}
-              >
-                {event.title}
-              </button>
-            ))}
-          </div>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+            {allDayEvents.map((event, idx) => {
+              const eColor = resolveEventColor(event.color, theme, idx)
+              return (
+                <Chip
+                  key={event.id}
+                  label={event.title}
+                  onClick={() => onEventClick(event)}
+                  sx={{
+                    bgcolor: `${eColor}25`,
+                    color: eColor,
+                    borderLeft: `3px solid ${eColor}`,
+                    cursor: 'pointer',
+                    '&:hover': { opacity: 0.8 },
+                  }}
+                />
+              )
+            })}
+          </Stack>
         )}
-      </div>
+      </Box>
 
       {/* Timeline */}
-      <ScrollArea className="flex-1">
-        <div className="relative">
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <Box sx={{ position: 'relative' }}>
           {HOURS.map((hour) => (
-            <div key={hour} className="flex min-h-[60px] border-b border-[--border-subtle]">
-              <div className="w-16 shrink-0 pr-2 text-right pt-1">
-                <span className="text-[10px] text-[--text-muted]">
-                  {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
-                </span>
-              </div>
-              <div className="flex-1 relative border-l border-[--border-subtle]">
+            <Stack key={hour} direction="row" sx={{ minHeight: 60, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ width: 64, flexShrink: 0, pr: 1, textAlign: 'right', pt: 0.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>{formatHour(hour)}</Typography>
+              </Box>
+              <Box sx={{ flex: 1, position: 'relative', borderLeft: '1px solid', borderColor: 'divider' }}>
                 {timedEvents
                   .filter((event) => getHours(parseISO(event.start_time)) === hour)
-                  .map((event) => {
+                  .map((event, idx) => {
                     const startMin = getMinutes(parseISO(event.start_time))
                     const durationMin = event.end_time
                       ? differenceInMinutes(parseISO(event.end_time), parseISO(event.start_time))
                       : 60
+                    const eColor = resolveEventColor(event.color, theme, idx)
                     return (
-                      <button
+                      <Box
                         key={event.id}
                         onClick={() => onEventClick(event)}
-                        className="absolute left-2 right-2 rounded-xl px-3 py-2 text-left transition-opacity hover:opacity-80 z-10"
-                        style={{
+                        sx={{
+                          position: 'absolute',
+                          left: 8,
+                          right: 8,
+                          borderRadius: 2,
+                          px: 1.5,
+                          py: 1,
+                          cursor: 'pointer',
+                          zIndex: 10,
                           top: `${(startMin / 60) * 100}%`,
                           height: `${Math.max((durationMin / 60) * 100, 30)}%`,
-                          minHeight: '30px',
-                          backgroundColor: `${event.color || EVENT_COLORS[0]}20`,
-                          borderLeft: `3px solid ${event.color || EVENT_COLORS[0]}`,
+                          minHeight: 30,
+                          bgcolor: `${eColor}20`,
+                          borderLeft: `3px solid ${eColor}`,
+                          transition: 'opacity 0.2s',
+                          '&:hover': { opacity: 0.8 },
                         }}
                       >
-                        <p
-                          className="text-xs font-medium truncate"
-                          style={{ color: event.color || EVENT_COLORS[0] }}
-                        >
-                          {event.title}
-                        </p>
-                        <p className="text-[10px] text-[--text-muted] mt-0.5">
+                        <Typography variant="caption" fontWeight={500} noWrap sx={{ color: eColor }}>{event.title}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontSize: 10 }}>
                           {formatEventTime(event)}
-                        </p>
-                      </button>
+                        </Typography>
+                      </Box>
                     )
                   })}
-              </div>
-            </div>
+              </Box>
+            </Stack>
           ))}
           {/* Current time indicator */}
           {today && (
-            <div
-              className="absolute left-16 right-0 h-0.5 bg-[var(--accent-primary)] z-20 pointer-events-none"
-              style={{
-                top: `${(getHours(new Date()) * 60 + getMinutes(new Date())) / 1440 * 100}%`,
+            <Box
+              sx={{
+                position: 'absolute',
+                left: 64,
+                right: 0,
+                height: 2,
+                bgcolor: 'primary.main',
+                zIndex: 20,
+                pointerEvents: 'none',
+                top: `${((getHours(new Date()) * 60 + getMinutes(new Date())) / 1440) * 100}%`,
               }}
             >
-              <div className="absolute -left-1 -top-1 size-2.5 rounded-full bg-[var(--accent-primary)]" />
-            </div>
+              <Box sx={{ position: 'absolute', left: -4, top: -4, width: 10, height: 10, borderRadius: '50%', bgcolor: 'primary.main' }} />
+            </Box>
           )}
-        </div>
-      </ScrollArea>
-    </div>
+        </Box>
+      </Box>
+    </Stack>
   )
 }
 
@@ -634,334 +696,79 @@ function AgendaView({
   currentDate,
   events,
   onEventClick,
+  noEventsLabel,
 }: {
   currentDate: Date
   events: CalendarEvent[]
   onEventClick: (event: CalendarEvent) => void
+  noEventsLabel: string
 }) {
-  const { t } = useI18n()
+  const theme = useTheme()
 
-  // Group events by date, starting from current date
   const upcomingDays = eachDayOfInterval({
     start: startOfDay(currentDate),
     end: addDays(currentDate, 30),
   })
 
   const groupedEvents = upcomingDays
-    .map((day) => ({
-      date: day,
-      events: getEventsForDay(events, day),
-    }))
+    .map((day) => ({ date: day, events: getEventsForDay(events, day) }))
     .filter((group) => group.events.length > 0)
 
   if (groupedEvents.length === 0) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="text-center">
-          <CalendarDays className="size-10 text-[--text-muted] mx-auto mb-3" />
-          <p className="text-sm text-[--text-muted]">{t.calendar.noEvents}</p>
-        </div>
-      </div>
+      <Stack alignItems="center" justifyContent="center" sx={{ py: 12 }}>
+        <CalendarMonth sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+        <Typography variant="body2" color="text.secondary">{noEventsLabel}</Typography>
+      </Stack>
     )
   }
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-6">
+    <Box sx={{ height: '100%', overflowY: 'auto' }}>
+      <Stack spacing={3} sx={{ p: 2 }}>
         {groupedEvents.map((group) => {
           const today = isToday(group.date)
           return (
-            <div key={group.date.toISOString()}>
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className={`inline-flex items-center justify-center size-9 text-sm font-semibold rounded-full shrink-0 ${
-                    today
-                      ? 'bg-[var(--accent-primary)] text-white'
-                      : 'bg-[--bg-surface] border border-[--border-subtle] text-[--text-primary]'
-                  }`}
+            <Box key={group.date.toISOString()}>
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 36,
+                    height: 36,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    borderRadius: '50%',
+                    flexShrink: 0,
+                    ...(today
+                      ? { bgcolor: 'primary.main', color: 'primary.contrastText' }
+                      : { bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', color: 'text.primary' }),
+                  }}
                 >
                   {format(group.date, 'd')}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-[--text-primary]">
-                    {format(group.date, 'EEEE')}
-                  </p>
-                  <p className="text-xs text-[--text-muted]">
-                    {format(group.date, 'MMMM yyyy')}
-                  </p>
-                </div>
-                {today && (
-                  <Badge className="bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-0 text-[10px] ml-auto">
-                    Today
-                  </Badge>
-                )}
-              </div>
-              <div className="space-y-2 pl-1">
-                {group.events.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onClick={() => onEventClick(event)}
-                  />
+                </Box>
+                <Stack>
+                  <Typography variant="body2" fontWeight={500}>{format(group.date, 'EEEE')}</Typography>
+                  <Typography variant="caption" color="text.secondary">{format(group.date, 'MMMM yyyy')}</Typography>
+                </Stack>
+                {today && <Chip label="Today" size="small" color="primary" sx={{ ml: 'auto !important', fontSize: 10, height: 20 }} />}
+              </Stack>
+              <Stack spacing={1} sx={{ pl: 0.5 }}>
+                {group.events.map((event, idx) => (
+                  <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} colorIndex={idx} />
                 ))}
-              </div>
-            </div>
+              </Stack>
+            </Box>
           )
         })}
-      </div>
-    </ScrollArea>
-  )
-}
-
-// ─── Day Events Popover ─────────────────────────────────────────────────────
-
-function DayEventsPanel({
-  day,
-  events,
-  onEventClick,
-  onClose,
-}: {
-  day: Date
-  events: CalendarEvent[]
-  onEventClick: (event: CalendarEvent) => void
-  onClose: () => void
-}) {
-  const dayEvents = getEventsForDay(events, day)
-
-  return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-[--text-primary]">
-          {format(day, 'EEEE, MMMM d, yyyy')}
-        </h3>
-        <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0 text-[--text-muted] hover:text-[--text-primary]">
-          ×
-        </Button>
-      </div>
-      {dayEvents.length === 0 ? (
-        <p className="text-xs text-[--text-muted] py-4 text-center">No events on this day</p>
-      ) : (
-        <div className="space-y-2">
-          {dayEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onClick={() => onEventClick(event)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Mini Calendar Sidebar ───────────────────────────────────────────────────
-
-function MiniCalendar({
-  currentDate,
-  onDateSelect,
-  events,
-}: {
-  currentDate: Date
-  onDateSelect: (date: Date) => void
-  events: CalendarEvent[]
-}) {
-  const { t } = useI18n()
-  const [miniMonth, setMiniMonth] = useState(currentDate)
-
-  // Sync mini calendar month with main calendar
-  useEffect(() => {
-    setMiniMonth(currentDate)
-  }, [currentDate])
-
-  const monthStart = startOfMonth(miniMonth)
-  const monthEnd = endOfMonth(miniMonth)
-  const calStart = startOfWeek(monthStart)
-  const calEnd = endOfWeek(monthEnd)
-  const days = eachDayOfInterval({ start: calStart, end: calEnd })
-
-  // Pre-compute which days have events
-  const eventDays = useMemo(() => {
-    const daySet = new Set<string>()
-    events.forEach((event) => {
-      const start = format(startOfDay(parseISO(event.start_time)), 'yyyy-MM-dd')
-      daySet.add(start)
-      if (event.end_time) {
-        const end = format(startOfDay(parseISO(event.end_time)), 'yyyy-MM-dd')
-        // Add all days in between
-        const dayIter = startOfDay(parseISO(event.start_time))
-        const endDay = startOfDay(parseISO(event.end_time))
-        let current = dayIter
-        while (isBefore(current, endDay) || isSameDay(current, endDay)) {
-          daySet.add(format(current, 'yyyy-MM-dd'))
-          current = addDays(current, 1)
-        }
-      }
-    })
-    return daySet
-  }, [events])
-
-  return (
-    <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-3">
-      {/* Mini calendar header */}
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-semibold text-[--text-primary]">{t.calendar.miniCalendar}</h3>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setMiniMonth((d) => subMonths(d, 1))}
-            className="size-5 flex items-center justify-center rounded text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] transition-colors"
-          >
-            <ChevronLeft className="size-3" />
-          </button>
-          <button
-            onClick={() => setMiniMonth((d) => addMonths(d, 1))}
-            className="size-5 flex items-center justify-center rounded text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] transition-colors"
-          >
-            <ChevronRight className="size-3" />
-          </button>
-        </div>
-      </div>
-
-      {/* Month label */}
-      <p className="text-[10px] text-[--text-muted] mb-2 text-center">
-        {format(miniMonth, 'MMMM yyyy')}
-      </p>
-
-      {/* Day headers */}
-      <div className="grid grid-cols-7 mb-1">
-        {DAY_LABELS_SHORT.map((d, i) => (
-          <div key={i} className="h-[28px] flex items-center justify-center text-[10px] font-medium text-[--text-muted]">
-            {d}
-          </div>
-        ))}
-      </div>
-
-      {/* Day cells */}
-      <div className="grid grid-cols-7">
-        {days.map((day, i) => {
-          const today = isToday(day)
-          const selected = isSameDay(day, currentDate)
-          const inMonth = isSameMonth(day, miniMonth)
-          const hasEvents = eventDays.has(format(day, 'yyyy-MM-dd'))
-
-          return (
-            <button
-              key={i}
-              onClick={() => onDateSelect(day)}
-              className={`h-[28px] flex flex-col items-center justify-center rounded-md transition-colors relative ${
-                !inMonth ? 'opacity-30' : 'hover:bg-[--border-subtle]'
-              } ${selected && !today ? 'ring-1 ring-[var(--accent-primary)]/60 bg-[var(--accent-primary)]/10' : ''}`}
-            >
-              <span
-                className={`text-[10px] leading-none ${
-                  today
-                    ? 'bg-[var(--accent-primary)] text-white rounded-full size-5 flex items-center justify-center font-semibold'
-                    : selected
-                    ? 'text-[var(--accent-primary)] font-medium'
-                    : 'text-[--text-primary]'
-                }`}
-              >
-                {format(day, 'd')}
-              </span>
-              {hasEvents && !today && (
-                <div className="w-1 h-1 rounded-full bg-[var(--accent-primary)] absolute bottom-0.5" />
-              )}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ─── Upcoming Events Panel ───────────────────────────────────────────────────
-
-function UpcomingEventsPanel({
-  events,
-  members,
-  onEventClick,
-  onViewAll,
-}: {
-  events: CalendarEvent[]
-  members: FamilyMember[]
-  onEventClick: (event: CalendarEvent) => void
-  onViewAll: () => void
-}) {
-  const { t } = useI18n()
-
-  const upcomingEvents = useMemo(() => {
-    const now = new Date()
-    return events
-      .filter((event) => isAfter(parseISO(event.start_time), now) || isToday(parseISO(event.start_time)))
-      .sort((a, b) => parseISO(a.start_time).getTime() - parseISO(b.start_time).getTime())
-      .slice(0, 5)
-  }, [events])
-
-  const getMemberForEvent = (event: CalendarEvent): FamilyMember | null => {
-    if (!event.created_by) return null
-    return members.find((m) => m.user_id === event.created_by) ?? null
-  }
-
-  return (
-    <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-2xl p-3">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-[--text-primary]">{t.calendar.upcomingEvents}</h3>
-        <button
-          onClick={onViewAll}
-          className="text-[10px] text-[var(--accent-primary)] hover:text-[var(--accent-primary)]/80 transition-colors font-medium"
-        >
-          {t.calendar.viewAll}
-        </button>
-      </div>
-
-      {upcomingEvents.length === 0 ? (
-        <p className="text-[10px] text-[--text-muted] py-4 text-center">{t.calendar.noEvents}</p>
-      ) : (
-        <div className="space-y-0">
-          {upcomingEvents.map((event, idx) => {
-            const member = getMemberForEvent(event)
-            return (
-              <button
-                key={event.id}
-                onClick={() => onEventClick(event)}
-                className="w-full text-left py-2 flex items-center gap-2 hover:bg-[--border-subtle] -mx-1 px-1 rounded transition-colors"
-              >
-                <div
-                  className="size-2 rounded-full shrink-0"
-                  style={{ backgroundColor: event.color || EVENT_COLORS[0] }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-[--text-primary] truncate font-medium">{event.title}</p>
-                  <p className="text-[10px] text-[--text-muted]">
-                    {event.all_day
-                      ? format(parseISO(event.start_time), 'MMM d')
-                      : format(parseISO(event.start_time), 'MMM d, h:mm a')}
-                  </p>
-                </div>
-                {member && (
-                  <div
-                    className="size-5 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[9px] text-[var(--accent-primary)] font-semibold shrink-0"
-                    title={getMemberName(member)}
-                  >
-                    {getMemberInitials(member)}
-                  </div>
-                )}
-                {idx < upcomingEvents.length - 1 && (
-                  <div className="absolute bottom-0 left-6 right-2 h-px bg-[--border-subtle]" />
-                )}
-              </button>
-            )
-          })}
-        </div>
-      )}
-    </div>
+      </Stack>
+    </Box>
   )
 }
 
 // ─── Description helpers for location/repeat ──────────────────────────────
-// Since calendar_events table lacks `location` and `recurrence` columns,
-// we embed them in the description field using a structured format.
-// Format: "📍 Location\n🔁 Repeat: weekly\n\nActual description"
 
 function buildDescriptionWithMetadata(description: string, location: string, repeat: RepeatOption): string | null {
   const parts: string[] = []
@@ -978,20 +785,18 @@ function parseDescriptionMetadata(rawDesc: string | null): { description: string
     repeat: 'none',
   }
   if (!rawDesc) return result
-
   const lines = rawDesc.split('\n')
   const descLines: string[] = []
   for (const line of lines) {
     const trimmed = line.trim()
     if (trimmed.startsWith('📍 ')) {
-      result.location = trimmed.slice(2) // Remove 📍 prefix
+      result.location = trimmed.slice(2)
     } else if (trimmed.startsWith('🔁 Repeat: ')) {
       const val = trimmed.slice('🔁 Repeat: '.length)
       if (['daily', 'weekly', 'monthly', 'yearly'].includes(val)) {
         result.repeat = val as RepeatOption
       }
     } else if (trimmed === '' && descLines.length === 0) {
-      // Skip leading blank lines between metadata and description
       continue
     } else {
       descLines.push(line)
@@ -1020,7 +825,8 @@ function EventModal({
   onSave: () => void
   members: FamilyMember[]
 }) {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
+  const theme = useTheme()
   const [form, setForm] = useState<EventFormData>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const isEditing = !!event
@@ -1039,7 +845,7 @@ function EventModal({
           endDate: format(end, 'yyyy-MM-dd'),
           endTime: format(end, 'HH:mm'),
           allDay: event.all_day,
-          color: event.color || EVENT_COLORS[0],
+          color: event.color || '',
           location: parsed.location,
           repeat: parsed.repeat,
           assignTo: event.created_by || '',
@@ -1061,7 +867,6 @@ function EventModal({
       return
     }
 
-    // Build description with embedded location/repeat metadata
     const combinedDescription = buildDescriptionWithMetadata(form.description, form.location, form.repeat)
     const startDateTime = form.allDay
       ? `${form.startDate}T00:00:00`
@@ -1087,7 +892,6 @@ function EventModal({
             color: form.color,
           })
           .eq('id', event.id)
-
         if (error) throw error
         toast.success('Event updated')
       } else {
@@ -1101,12 +905,10 @@ function EventModal({
           color: form.color,
           created_by: form.assignTo || userId,
         })
-
         if (error) throw error
         toast.success('Event created')
       }
 
-      // Also add to store for demo mode fallback
       const calendarStoreModule = await import('@/stores/calendar-store')
       const store = calendarStoreModule.useCalendarStore.getState()
       if (!isEditing) {
@@ -1137,837 +939,629 @@ function EventModal({
 
       onSave()
       onOpenChange(false)
-    } catch (err) {
-      console.error('Save event error:', err)
-      // Fallback for demo mode - add to store
-      const calendarStoreModule = await import('@/stores/calendar-store')
-      const store = calendarStoreModule.useCalendarStore.getState()
-      if (!isEditing) {
-        store.addEvent({
-          id: `event-${Date.now()}`,
-          family_id: familyId,
-          title: form.title.trim(),
-          description: combinedDescription,
-          start_time: form.allDay
-            ? `${form.startDate}T00:00:00`
-            : `${form.startDate}T${form.startTime}:00`,
-          end_time: form.allDay
-            ? `${form.endDate || form.startDate}T23:59:59`
-            : `${form.endDate || form.startDate}T${form.endTime}:00`,
-          all_day: form.allDay,
-          color: form.color,
-          created_by: form.assignTo || userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        toast.success('Event created')
-      }
-      onOpenChange(false)
-      onSave()
+    } catch {
+      toast.error('Failed to save event')
     } finally {
       setSaving(false)
     }
   }
 
-  const updateForm = (updates: Partial<EventFormData>) => {
-    setForm((prev) => ({ ...prev, ...updates }))
+  const handleDelete = async () => {
+    if (!event) return
+    try {
+      const supabase = createClient()
+      await supabase.from('calendar_events').delete().eq('id', event.id)
+      const calendarStoreModule = await import('@/stores/calendar-store')
+      const store = calendarStoreModule.useCalendarStore.getState()
+      store.deleteEvent(event.id)
+      toast.success('Event deleted')
+      onOpenChange(false)
+    } catch {
+      toast.error('Failed to delete event')
+    }
   }
-
-  const handleAllDayToggle = (checked: boolean) => {
-    setForm((prev) => ({
-      ...prev,
-      allDay: checked,
-      endDate: checked && prev.endDate !== prev.startDate ? prev.endDate : prev.startDate,
-    }))
-  }
-
-  const handleStartDateChange = (value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      startDate: value,
-      endDate: prev.startDate === prev.endDate ? value : prev.endDate,
-    }))
-  }
-
-  const repeatOptions: { value: RepeatOption; label: string }[] = [
-    { value: 'none', label: t.calendar.repeatNone },
-    { value: 'daily', label: t.calendar.repeatDaily },
-    { value: 'weekly', label: t.calendar.repeatWeekly },
-    { value: 'monthly', label: t.calendar.repeatMonthly },
-    { value: 'yearly', label: t.calendar.repeatYearly },
-  ]
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-[--text-primary] font-display">
-            {isEditing ? t.calendar.editEvent : t.calendar.addEvent}
-          </DialogTitle>
-          <DialogDescription className="text-[--text-muted]">
-            {isEditing ? 'Update event details' : 'Fill in the details to create a new event'}
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
+      <DialogTitle>{isEditing ? 'Edit Event' : 'New Event'}</DialogTitle>
+      <DialogContent sx={{ pb: 1 }}>
+        <Stack spacing={2} sx={{ pt: 1 }}>
+          <TextField
+            label="Event title"
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            placeholder="Enter event title..."
+            size="small"
+            fullWidth
+          />
 
-        <div className="space-y-4 py-2">
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="event-title" className="text-[--text-primary] text-sm">
-              {t.calendar.eventTitle}
-            </Label>
-            <Input
-              id="event-title"
-              value={form.title}
-              onChange={(e) => updateForm({ title: e.target.value })}
-              placeholder="Enter event title"
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[var(--accent-primary)]/50"
+          <TextField
+            label="Description"
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Add a description (optional)..."
+            multiline
+            rows={2}
+            size="small"
+            fullWidth
+          />
+
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="Start date"
+              type="date"
+              value={form.startDate}
+              onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
+              size="small"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
             />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="event-desc" className="text-[--text-primary] text-sm">
-              {t.calendar.description}
-            </Label>
-            <Textarea
-              id="event-desc"
-              value={form.description}
-              onChange={(e) => updateForm({ description: e.target.value })}
-              placeholder="Add a description (optional)"
-              rows={3}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] resize-none focus-visible:ring-[var(--accent-primary)]/50"
-            />
-          </div>
-
-          {/* All Day Toggle */}
-          <div className="flex items-center justify-between">
-            <Label className="text-[--text-primary] text-sm">{t.calendar.allDay}</Label>
-            <Switch
-              checked={form.allDay}
-              onCheckedChange={handleAllDayToggle}
-            />
-          </div>
-
-          {/* Start Date/Time */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-[--text-primary] text-sm">Start Date</Label>
-              <Input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => handleStartDateChange(e.target.value)}
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[var(--accent-primary)]/50 [color-scheme:dark]"
-              />
-            </div>
             {!form.allDay && (
-              <div className="space-y-2">
-                <Label className="text-[--text-primary] text-sm">{t.calendar.startTime}</Label>
-                <Input
-                  type="time"
-                  value={form.startTime}
-                  onChange={(e) => updateForm({ startTime: e.target.value })}
-                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[var(--accent-primary)]/50 [color-scheme:dark]"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* End Date/Time */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-[--text-primary] text-sm">End Date</Label>
-              <Input
-                type="date"
-                value={form.endDate}
-                onChange={(e) => updateForm({ endDate: e.target.value })}
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[var(--accent-primary)]/50 [color-scheme:dark]"
+              <TextField
+                label="Start time"
+                type="time"
+                value={form.startTime}
+                onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+                size="small"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
               />
-            </div>
-            {!form.allDay && (
-              <div className="space-y-2">
-                <Label className="text-[--text-primary] text-sm">{t.calendar.endTime}</Label>
-                <Input
-                  type="time"
-                  value={form.endTime}
-                  onChange={(e) => updateForm({ endTime: e.target.value })}
-                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus-visible:ring-[var(--accent-primary)]/50 [color-scheme:dark]"
-                />
-              </div>
             )}
-          </div>
+          </Stack>
 
-          {/* Location */}
-          <div className="space-y-2">
-            <Label htmlFor="event-location" className="text-[--text-primary] text-sm flex items-center gap-1.5">
-              <MapPin className="size-3.5" />
-              {t.calendar.location}
-            </Label>
-            <Input
-              id="event-location"
-              value={form.location}
-              onChange={(e) => updateForm({ location: e.target.value })}
-              placeholder="Add location (optional)"
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[var(--accent-primary)]/50"
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="End date"
+              type="date"
+              value={form.endDate}
+              onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
+              size="small"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
             />
-          </div>
+            {!form.allDay && (
+              <TextField
+                label="End time"
+                type="time"
+                value={form.endTime}
+                onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
+                size="small"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          </Stack>
 
-          {/* Repeat */}
-          <div className="space-y-2">
-            <Label className="text-[--text-primary] text-sm flex items-center gap-1.5">
-              <Repeat className="size-3.5" />
-              {t.calendar.repeat}
-            </Label>
+          <FormControlLabel
+            control={<Switch checked={form.allDay} onChange={(e) => setForm((f) => ({ ...f, allDay: e.target.checked }))} />}
+            label="All day"
+          />
+
+          <TextField
+            label="Location"
+            value={form.location}
+            onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+            placeholder="Add location (optional)"
+            size="small"
+            fullWidth
+            InputProps={{ startAdornment: <LocationOn sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} /> }}
+          />
+
+          <FormControl size="small" fullWidth>
+            <InputLabel>Repeat</InputLabel>
             <Select
               value={form.repeat}
-              onValueChange={(value) => updateForm({ repeat: value as RepeatOption })}
+              label="Repeat"
+              onChange={(e) => setForm((f) => ({ ...f, repeat: e.target.value as RepeatOption }))}
             >
-              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[var(--accent-primary)]/50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-                {repeatOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="text-[--text-primary] focus:bg-[var(--accent-primary)]/20 focus:text-[--text-primary]">
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              <MenuItem value="none">No repeat</MenuItem>
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="weekly">Weekly</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+              <MenuItem value="yearly">Yearly</MenuItem>
             </Select>
-          </div>
+          </FormControl>
 
-          {/* Assign To */}
-          <div className="space-y-2">
-            <Label className="text-[--text-primary] text-sm flex items-center gap-1.5">
-              <User className="size-3.5" />
-              {t.calendar.assignTo}
-            </Label>
-            <Select
-              value={form.assignTo}
-              onValueChange={(value) => updateForm({ assignTo: value })}
-            >
-              <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] focus:ring-[var(--accent-primary)]/50">
-                <SelectValue placeholder="Select member" />
-              </SelectTrigger>
-              <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
+          {members.length > 0 && (
+            <FormControl size="small" fullWidth>
+              <InputLabel>Assign to</InputLabel>
+              <Select
+                value={form.assignTo || '__none__'}
+                label="Assign to"
+                onChange={(e) => setForm((f) => ({ ...f, assignTo: e.target.value === '__none__' ? '' : e.target.value }))}
+              >
+                <MenuItem value="__none__">Unassigned</MenuItem>
                 {members.map((member) => (
-                  <SelectItem key={member.user_id} value={member.user_id} className="text-[--text-primary] focus:bg-[var(--accent-primary)]/20 focus:text-[--text-primary]">
-                    <div className="flex items-center gap-2">
-                      <div className="size-5 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[9px] text-[var(--accent-primary)] font-semibold">
+                  <MenuItem key={member.user_id} value={member.user_id}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Avatar sx={{ width: 24, height: 24, fontSize: 10, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
                         {getMemberInitials(member)}
-                      </div>
-                      {getMemberName(member)}
-                    </div>
-                  </SelectItem>
+                      </Avatar>
+                      <Typography variant="body2">{getMemberName(member)}</Typography>
+                    </Stack>
+                  </MenuItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Color Picker */}
-          <div className="space-y-2">
-            <Label className="text-[--text-primary] text-sm">{t.calendar.color}</Label>
-            <div className="flex gap-2 flex-wrap">
-              {EVENT_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => updateForm({ color })}
-                  className={`size-7 rounded-full transition-all ${
-                    form.color === color
-                      ? 'ring-2 ring-white ring-offset-2 ring-offset-[--bg-surface] scale-110'
-                      : 'hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            className="text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
-          >
-            {t.common.cancel}
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving || !form.title.trim()}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white disabled:opacity-50 btn-glow btn-press"
-          >
-            {saving ? t.common.loading : t.common.save}
-          </Button>
-        </DialogFooter>
+              </Select>
+            </FormControl>
+          )}
+        </Stack>
       </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        {isEditing && (
+          <Button onClick={handleDelete} color="error" startIcon={<Delete sx={{ fontSize: 16 }} />}>Delete</Button>
+        )}
+        <Box sx={{ flex: 1 }} />
+        <Button onClick={() => onOpenChange(false)} color="inherit">{t.common.cancel}</Button>
+        <Button onClick={handleSave} variant="contained" disabled={saving || !form.title.trim()}>
+          {saving ? t.common.loading : t.common.save}
+        </Button>
+      </DialogActions>
     </Dialog>
   )
 }
 
-// Helper for addHours
-function addHours(date: Date, hours: number): Date {
-  return new Date(date.getTime() + hours * 60 * 60 * 1000)
-}
+// ─── Mini Calendar Sidebar ───────────────────────────────────────────────────
 
-// ─── Event Detail Dialog ─────────────────────────────────────────────────────
-
-function EventDetailDialog({
-  event,
-  open,
-  onOpenChange,
-  onEdit,
-  onDelete,
+function MiniCalendar({
+  currentDate,
+  onDateSelect,
+  events,
 }: {
-  event: CalendarEvent | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit: () => void
-  onDelete: () => void
+  currentDate: Date
+  onDateSelect: (date: Date) => void
+  events: CalendarEvent[]
 }) {
   const { t } = useI18n()
+  const theme = useTheme()
+  const [miniMonth, setMiniMonth] = useState(currentDate)
 
-  if (!event) return null
+  useEffect(() => {
+    setMiniMonth(currentDate)
+  }, [currentDate])
 
-  const color = event.color || EVENT_COLORS[0]
-  const creatorName = formatCreatorName(event.creator)
+  const monthStart = startOfMonth(miniMonth)
+  const monthEnd = endOfMonth(miniMonth)
+  const calStart = startOfWeek(monthStart)
+  const calEnd = endOfWeek(monthEnd)
+  const days = eachDayOfInterval({ start: calStart, end: calEnd })
+
+  const eventDays = useMemo(() => {
+    const daySet = new Set<string>()
+    events.forEach((event) => {
+      const start = format(startOfDay(parseISO(event.start_time)), 'yyyy-MM-dd')
+      daySet.add(start)
+      if (event.end_time) {
+        const dayIter = startOfDay(parseISO(event.start_time))
+        const endDay = startOfDay(parseISO(event.end_time))
+        let current = dayIter
+        while (isBefore(current, endDay) || isSameDay(current, endDay)) {
+          daySet.add(format(current, 'yyyy-MM-dd'))
+          current = addDays(current, 1)
+        }
+      }
+    })
+    return daySet
+  }, [events])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-md rounded-2xl shadow-2xl">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div
-              className="size-4 rounded-full shrink-0"
-              style={{ backgroundColor: color }}
-            />
-            <DialogTitle className="text-[--text-primary] text-lg">
-              {event.title}
-            </DialogTitle>
-          </div>
-          <DialogDescription className="sr-only">
-            Event details for {event.title}
-          </DialogDescription>
-        </DialogHeader>
+    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <Typography variant="caption" fontWeight={600}>{t.calendar.miniCalendar}</Typography>
+        <Stack direction="row" spacing={0}>
+          <IconButton size="small" onClick={() => setMiniMonth((d) => subMonths(d, 1))} sx={{ p: 0.25 }}>
+            <ChevronLeft sx={{ fontSize: 14 }} />
+          </IconButton>
+          <IconButton size="small" onClick={() => setMiniMonth((d) => addMonths(d, 1))} sx={{ p: 0.25 }}>
+            <ChevronRight sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Stack>
+      </Stack>
 
-        <div className="space-y-4 py-2">
-          {/* Time */}
-          <div className="flex items-start gap-3">
-            <Clock className="size-4 text-[--text-muted] mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm text-[--text-primary]">{formatEventTime(event)}</p>
-              {event.all_day && (
-                <Badge className="mt-1 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-0 text-[10px]">
-                  All Day
-                </Badge>
+      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ display: 'block', mb: 1 }}>
+        {format(miniMonth, 'MMMM yyyy')}
+      </Typography>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', mb: 0.5 }}>
+        {DAY_LABELS_SHORT.map((d, i) => (
+          <Typography key={i} variant="caption" color="text.secondary" sx={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 500 }}>
+            {d}
+          </Typography>
+        ))}
+      </Box>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+        {days.map((day, i) => {
+          const today = isToday(day)
+          const selected = isSameDay(day, currentDate)
+          const inMonth = isSameMonth(day, miniMonth)
+          const hasEvents = eventDays.has(format(day, 'yyyy-MM-dd'))
+
+          return (
+            <IconButton
+              key={i}
+              size="small"
+              onClick={() => onDateSelect(day)}
+              sx={{
+                height: 28,
+                width: '100%',
+                borderRadius: 1,
+                position: 'relative',
+                opacity: inMonth ? 1 : 0.3,
+                ...(selected && !today && { bgcolor: `${theme.palette.primary.main}15`, boxShadow: `inset 0 0 0 1px ${theme.palette.primary.main}60` }),
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: 10,
+                  lineHeight: 1,
+                  ...(today
+                    ? { bgcolor: 'primary.main', color: 'primary.contrastText', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }
+                    : selected
+                    ? { color: 'primary.main', fontWeight: 500 }
+                    : { color: 'text.primary' }),
+                }}
+              >
+                {format(day, 'd')}
+              </Typography>
+              {hasEvents && !today && (
+                <Box sx={{ position: 'absolute', bottom: 2, width: 4, height: 4, borderRadius: '50%', bgcolor: 'primary.main' }} />
               )}
-            </div>
-          </div>
+            </IconButton>
+          )
+        })}
+      </Box>
+    </Paper>
+  )
+}
 
-          {/* Description */}
-          {event.description && (
-            <div className="flex items-start gap-3">
-              <CalendarClock className="size-4 text-[--text-muted] mt-0.5 shrink-0" />
-              <p className="text-sm text-[--text-primary] whitespace-pre-wrap">
-                {event.description}
-              </p>
-            </div>
-          )}
+// ─── Upcoming Events Panel ───────────────────────────────────────────────────
 
-          {/* Creator */}
-          {creatorName && (
-            <div className="flex items-center gap-3">
-              <CalendarIcon className="size-4 text-[--text-muted] shrink-0" />
-              <p className="text-sm text-[--text-muted]">Created by {creatorName}</p>
-            </div>
-          )}
-        </div>
+function UpcomingEventsPanel({
+  events,
+  members,
+  onEventClick,
+  onViewAll,
+}: {
+  events: CalendarEvent[]
+  members: FamilyMember[]
+  onEventClick: (event: CalendarEvent) => void
+  onViewAll: () => void
+}) {
+  const { t } = useI18n()
+  const theme = useTheme()
 
-        <DialogFooter className="gap-2 sm:gap-2">
-          <Button
-            variant="ghost"
-            onClick={onDelete}
-            className="text-[#EF4444] hover:text-[#EF4444] hover:bg-[#EF4444]/10"
-          >
-            <Trash2 className="size-4" />
-            {t.common.delete}
-          </Button>
-          <Button
-            onClick={onEdit}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white btn-glow btn-press"
-          >
-            {t.common.edit}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+  const upcomingEvents = useMemo(() => {
+    const now = new Date()
+    return events
+      .filter((event) => isAfter(parseISO(event.start_time), now) || isToday(parseISO(event.start_time)))
+      .sort((a, b) => parseISO(a.start_time).getTime() - parseISO(b.start_time).getTime())
+      .slice(0, 5)
+  }, [events])
+
+  const getMemberForEvent = (event: CalendarEvent): FamilyMember | null => {
+    if (!event.created_by) return null
+    return members.find((m) => m.user_id === event.created_by) ?? null
+  }
+
+  return (
+    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+        <Typography variant="caption" fontWeight={600}>{t.calendar.upcomingEvents}</Typography>
+        <Button size="small" onClick={onViewAll} sx={{ fontSize: 10, minWidth: 0, p: 0 }}>{t.calendar.viewAll}</Button>
+      </Stack>
+
+      {upcomingEvents.length === 0 ? (
+        <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ display: 'block', py: 2 }}>{t.calendar.noEvents}</Typography>
+      ) : (
+        <Stack spacing={0}>
+          {upcomingEvents.map((event, idx) => {
+            const member = getMemberForEvent(event)
+            const eColor = resolveEventColor(event.color, theme, idx)
+            return (
+              <Box
+                key={event.id}
+                onClick={() => onEventClick(event)}
+                sx={{
+                  width: '100%',
+                  textAlign: 'left',
+                  py: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  cursor: 'pointer',
+                  borderRadius: 1,
+                  transition: 'background-color 0.2s',
+                  '&:hover': { bgcolor: 'action.hover' },
+                }}
+              >
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: eColor, flexShrink: 0 }} />
+                <Stack sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="caption" fontWeight={500} noWrap>{event.title}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+                    {event.all_day
+                      ? format(parseISO(event.start_time), 'MMM d')
+                      : format(parseISO(event.start_time), 'MMM d, h:mm a')}
+                  </Typography>
+                </Stack>
+                {member && (
+                  <Tooltip title={getMemberName(member)}>
+                    <Avatar sx={{ width: 20, height: 20, fontSize: 9, bgcolor: `${theme.palette.primary.main}20`, color: 'primary.main', fontWeight: 600 }}>
+                      {getMemberInitials(member)}
+                    </Avatar>
+                  </Tooltip>
+                )}
+              </Box>
+            )
+          })}
+        </Stack>
+      )}
+    </Paper>
   )
 }
 
 // ─── Main Calendar Page ─────────────────────────────────────────────────────
 
 export default function CalendarPage() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isSmall = useMediaQuery(theme.breakpoints.down('sm'))
+
   const { currentFamily, familyMembers } = useAppStore()
-  const events = useCalendarStore(s => s.events)
+  const {
+    events,
+    selectedDate,
+    view,
+    setSelectedDate,
+    setView,
+    fetchEvents,
+  } = useCalendarStore()
+  const { user } = useAppStore()
 
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [view, setView] = useState<CalendarView>('month')
-  const [supabaseEvents, setSupabaseEvents] = useState<CalendarEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const [showEventModal, setShowEventModal] = useState(false)
-  const [showEventDetail, setShowEventDetail] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-
-  const familyId = currentFamily?.id ?? ''
-
-  // Merge Supabase events with calendar store events (store as fallback)
-  const allEvents = useMemo(() => {
-    if (supabaseEvents.length > 0) return supabaseEvents
-    if (events.length > 0) return events
-    return []
-  }, [supabaseEvents, events])
-
-  // ─── Fetch Events ───────────────────────────────────────────────────────
-
-  const fetchEvents = useCallback(async () => {
-    if (!familyId) {
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    try {
-      const supabase = createClient()
-      let rangeStart: Date
-      let rangeEnd: Date
-
-      switch (view) {
-        case 'month': {
-          const monthStart = startOfMonth(currentDate)
-          const monthEnd = endOfMonth(currentDate)
-          rangeStart = startOfWeek(monthStart)
-          rangeEnd = endOfWeek(monthEnd)
-          break
-        }
-        case 'week': {
-          rangeStart = startOfWeek(currentDate)
-          rangeEnd = endOfWeek(currentDate)
-          break
-        }
-        case 'day': {
-          rangeStart = startOfDay(currentDate)
-          rangeEnd = endOfDay(currentDate)
-          break
-        }
-        case 'agenda': {
-          rangeStart = startOfDay(currentDate)
-          rangeEnd = addDays(currentDate, 31)
-          break
-        }
-        default: {
-          rangeStart = startOfMonth(currentDate)
-          rangeEnd = endOfMonth(currentDate)
-        }
-      }
-
-      const { data, error } = await supabase
-        .from('calendar_events')
-        .select('*, creator:profiles(*)')
-        .eq('family_id', familyId)
-        .gte('start_time', rangeStart.toISOString())
-        .lte('start_time', rangeEnd.toISOString())
-        .order('start_time', { ascending: true })
-
-      if (error) throw error
-      setSupabaseEvents((data as unknown as CalendarEvent[]) || [])
-    } catch (err) {
-      console.error('Fetch events error:', err)
-      setSupabaseEvents([])
-    } finally {
-      setLoading(false)
-    }
-  }, [familyId, currentDate, view])
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
   useEffect(() => {
-    fetchEvents()
-  }, [fetchEvents])
-
-  // ─── Navigation ─────────────────────────────────────────────────────────
-
-  const navigatePrev = () => {
-    switch (view) {
-      case 'month':
-        setCurrentDate((d) => subMonths(d, 1))
-        break
-      case 'week':
-        setCurrentDate((d) => subWeeks(d, 1))
-        break
-      case 'day':
-      case 'agenda':
-        setCurrentDate((d) => subDays(d, 1))
-        break
+    if (currentFamily?.id && user?.id) {
+      fetchEvents(currentFamily.id, user.id).catch(() => {})
     }
-  }
+  }, [currentFamily?.id, user?.id, fetchEvents])
 
-  const navigateNext = () => {
-    switch (view) {
-      case 'month':
-        setCurrentDate((d) => addMonths(d, 1))
-        break
-      case 'week':
-        setCurrentDate((d) => addWeeks(d, 1))
-        break
-      case 'day':
-      case 'agenda':
-        setCurrentDate((d) => addDays(d, 1))
-        break
-    }
-  }
+  const familyId = currentFamily?.id || 'demo-family-001'
+  const userId = user?.id || 'demo-user-001'
+  const members = familyMembers
 
-  const navigateToday = () => {
+  const navigatePrev = useCallback(() => {
+    setCurrentDate((d) => {
+      switch (view) {
+        case 'month': return subMonths(d, 1)
+        case 'week': return subWeeks(d, 1)
+        case 'day': return subDays(d, 1)
+        case 'agenda': return subDays(d, 1)
+        default: return subMonths(d, 1)
+      }
+    })
+  }, [view])
+
+  const navigateNext = useCallback(() => {
+    setCurrentDate((d) => {
+      switch (view) {
+        case 'month': return addMonths(d, 1)
+        case 'week': return addWeeks(d, 1)
+        case 'day': return addDays(d, 1)
+        case 'agenda': return addDays(d, 1)
+        default: return addMonths(d, 1)
+      }
+    })
+  }, [view])
+
+  const navigateToday = useCallback(() => {
     setCurrentDate(new Date())
-  }
+  }, [])
 
-  // ─── Event Handlers ─────────────────────────────────────────────────────
-
-  const handleDayClick = (day: Date) => {
-    setSelectedDay(day)
-  }
-
-  const handleEventClick = (event: CalendarEvent) => {
+  const handleEventClick = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event)
-    setShowEventDetail(true)
-  }
+    setModalOpen(true)
+  }, [])
 
-  const handleAddEvent = () => {
+  const handleDayClick = useCallback((day: Date) => {
+    setCurrentDate(day)
+    setView('day')
+  }, [setView])
+
+  const handleAddEvent = useCallback(() => {
     setSelectedEvent(null)
-    setShowEventModal(true)
-  }
+    setModalOpen(true)
+  }, [])
 
-  const handleEditEvent = () => {
-    setShowEventDetail(false)
-    setShowEventModal(true)
-  }
+  const handleViewAll = useCallback(() => {
+    setView('agenda')
+    setCurrentDate(new Date())
+  }, [setView])
 
-  const handleDeleteEvent = async () => {
+  const handleDeleteEvent = useCallback(async () => {
     if (!selectedEvent) return
-
-    setDeleting(true)
     try {
       const supabase = createClient()
-      const { error } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('id', selectedEvent.id)
-
-      if (error) throw error
+      await supabase.from('calendar_events').delete().eq('id', selectedEvent.id)
+      const store = useCalendarStore.getState()
+      store.deleteEvent(selectedEvent.id)
       toast.success('Event deleted')
-      setShowDeleteConfirm(false)
-      setShowEventDetail(false)
-      setSelectedEvent(null)
-      fetchEvents()
-    } catch (err) {
-      console.error('Delete event error:', err)
-      // Fallback for demo mode
-      const calendarStoreModule = await import('@/stores/calendar-store')
-      const store = calendarStoreModule.useCalendarStore.getState()
-      store.removeEvent(selectedEvent.id)
-      toast.success('Event deleted')
-      setShowDeleteConfirm(false)
-      setShowEventDetail(false)
-      setSelectedEvent(null)
-    } finally {
-      setDeleting(false)
+    } catch {
+      toast.error('Failed to delete event')
     }
-  }
+    setDeleteConfirmOpen(false)
+    setModalOpen(false)
+    setSelectedEvent(null)
+  }, [selectedEvent])
 
-  const handleMiniCalDateSelect = (date: Date) => {
-    setCurrentDate(date)
-  }
-
-  const handleViewAll = () => {
-    setView('agenda')
-  }
-
-  // ─── Date Display ───────────────────────────────────────────────────────
-
-  const dateDisplay = useMemo(() => {
+  // Header label
+  const headerLabel = useMemo(() => {
     switch (view) {
-      case 'month':
-        return format(currentDate, 'MMMM yyyy')
+      case 'month': return format(currentDate, 'MMMM yyyy')
       case 'week': {
-        const weekStart = startOfWeek(currentDate)
-        const weekEnd = endOfWeek(currentDate)
-        if (isSameMonth(weekStart, weekEnd)) {
-          return `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'd, yyyy')}`
-        }
-        return `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`
+        const ws = startOfWeek(currentDate)
+        const we = addDays(ws, 6)
+        return `${format(ws, 'MMM d')} – ${format(we, 'MMM d, yyyy')}`
       }
-      case 'day':
-        return format(currentDate, 'EEEE, MMMM d, yyyy')
-      case 'agenda':
-        return format(currentDate, 'MMMM yyyy')
-      default:
-        return format(currentDate, 'MMMM yyyy')
+      case 'day': return format(currentDate, 'EEEE, MMMM d, yyyy')
+      case 'agenda': return format(currentDate, 'MMMM yyyy')
+      default: return format(currentDate, 'MMMM yyyy')
     }
-  }, [view, currentDate])
+  }, [currentDate, view])
 
   const viewIcons: Record<CalendarView, React.ReactNode> = {
-    month: <CalendarDays className="size-4" />,
-    week: <CalendarRange className="size-4" />,
-    day: <CalendarIcon className="size-4" />,
-    agenda: <LayoutList className="size-4" />,
-  }
-
-  const viewLabels: Record<CalendarView, string> = {
-    month: t.calendar.month,
-    week: t.calendar.week,
-    day: t.calendar.day,
-    agenda: t.calendar.agenda,
-  }
-
-  // ─── Render ─────────────────────────────────────────────────────────────
-
-  if (!familyId) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <CalendarDays className="size-10 text-[--text-muted] mx-auto mb-3" />
-          <p className="text-sm text-[--text-muted]">Select a family to view calendar</p>
-        </div>
-      </div>
-    )
+    month: <CalendarMonth sx={{ fontSize: 18 }} />,
+    week: <ViewWeek sx={{ fontSize: 18 }} />,
+    day: <ViewDay sx={{ fontSize: 18 }} />,
+    agenda: <ViewAgenda sx={{ fontSize: 18 }} />,
   }
 
   return (
-    <div className="flex flex-col h-full bg-[--bg-primary]">
-      {/* Header */}
-      <div className="shrink-0 border-b border-[--border-subtle] px-4 sm:px-6 py-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Left: Title + Navigation */}
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-[--text-primary] font-display">{t.calendar.title}</h1>
+    <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
+      <Stack spacing={2}>
+        {/* Header */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30`, display: 'flex' }}>
+              <CalendarToday sx={{ color: 'primary.main' }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" fontWeight={700}>{headerLabel}</Typography>
+              <Typography variant="body2" color="text.secondary">{events.length} events</Typography>
+            </Box>
+          </Stack>
 
-            <div className="flex items-center gap-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={navigatePrev}
-                    className="size-8 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
-                  >
-                    <ChevronLeft className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Previous</TooltipContent>
-              </Tooltip>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconButton onClick={navigatePrev} size="small"><ChevronLeft /></IconButton>
+            <Button size="small" variant="outlined" onClick={navigateToday}>Today</Button>
+            <IconButton onClick={navigateNext} size="small"><ChevronRight /></IconButton>
 
-              <Button
-                variant="ghost"
-                onClick={navigateToday}
-                className="h-8 px-3 text-xs text-[--text-primary] hover:bg-[--border-subtle]"
+            <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, borderRadius: 2 }}>
+              <ToggleButtonGroup
+                value={view}
+                exclusive
+                onChange={(_, v) => { if (v) setView(v as CalendarView) }}
+                size="small"
+                sx={{ gap: 0.25 }}
               >
-                Today
-              </Button>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={navigateNext}
-                    className="size-8 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
+                {([
+                  ['month', 'Month', <CalendarMonth key="m" sx={{ fontSize: 16 }} />],
+                  ['week', 'Week', <ViewWeek key="w" sx={{ fontSize: 16 }} />],
+                  ['day', 'Day', <ViewDay key="d" sx={{ fontSize: 16 }} />],
+                  ['agenda', 'Agenda', <ViewAgenda key="a" sx={{ fontSize: 16 }} />],
+                ] as const).map(([val, label, icon]) => (
+                  <ToggleButton
+                    key={val}
+                    value={val}
+                    sx={{ px: 1.5, py: 0.25, borderRadius: 1.5, textTransform: 'none', fontSize: 12, border: 'none' }}
                   >
-                    <ChevronRight className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Next</TooltipContent>
-              </Tooltip>
-            </div>
+                    {icon}
+                    {!isSmall && <Typography variant="caption" sx={{ ml: 0.5 }}>{label}</Typography>}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Paper>
 
-            <h2 className="text-sm font-medium text-[--text-primary] font-metric hidden sm:block">
-              {dateDisplay}
-            </h2>
-          </div>
-
-          {/* Right: View Toggles + Add Button */}
-          <div className="flex items-center gap-2">
-            {/* View toggles */}
-            <div className="flex items-center bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5">
-              {(['month', 'week', 'day', 'agenda'] as CalendarView[]).map((v) => (
-                <Button
-                  key={v}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setView(v)}
-                  className={`h-7 px-2.5 text-xs rounded-md gap-1.5 transition-all ${
-                    view === v
-                      ? 'bg-[var(--accent-primary)] text-white hover:bg-[var(--primary)] shadow-sm'
-                      : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
-                  }`}
-                >
-                  {viewIcons[v]}
-                  <span className="hidden sm:inline">{viewLabels[v]}</span>
-                </Button>
-              ))}
-            </div>
-
-            {/* Add Event Button */}
-            <Button
-              onClick={handleAddEvent}
-              size="sm"
-              className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white gap-1.5 btn-glow btn-press"
-            >
-              <Plus className="size-4" />
-              <span className="hidden sm:inline">{t.calendar.addEvent}</span>
+            <Button variant="contained" size="small" startIcon={<Add sx={{ fontSize: 16 }} />} onClick={handleAddEvent}>
+              {!isSmall && 'Add Event'}
             </Button>
-          </div>
-        </div>
+          </Stack>
+        </Stack>
 
-        {/* Mobile date display */}
-        <h2 className="text-sm font-medium text-[--text-primary] font-metric mt-2 sm:hidden">
-          {dateDisplay}
-        </h2>
-      </div>
-
-      {/* Main content area with sidebar */}
-      <div className="flex-1 overflow-hidden flex">
-        {/* Mini Calendar Sidebar (desktop only) */}
-        <div className="hidden md:flex flex-col w-[220px] shrink-0 border-r border-[--border-subtle] p-3 gap-3 overflow-y-auto">
-          <MiniCalendar
-            currentDate={currentDate}
-            onDateSelect={handleMiniCalDateSelect}
-            events={allEvents}
-          />
-          <UpcomingEventsPanel
-            events={allEvents}
-            members={familyMembers}
-            onEventClick={(event) => {
-              setSelectedDay(null)
-              handleEventClick(event)
-            }}
-            onViewAll={handleViewAll}
-          />
-        </div>
-
-        {/* Calendar Content */}
-        <div className="flex-1 overflow-hidden relative">
-          {loading ? (
-            <div className="flex items-center justify-center h-full px-4">
-              <div className="w-full max-w-md space-y-3">
-                <EventCardSkeleton count={3} />
-              </div>
-            </div>
-          ) : allEvents.length === 0 && view === 'month' ? (
-            <div className="flex items-center justify-center h-full">
-              <EmptyState
-                icon={CalendarDays}
-                title="No events scheduled"
-                description="Add your first event to stay organized"
-                action={{ label: 'Add Event', onClick: () => setShowEventModal(true) }}
+        {/* Main content area */}
+        <Stack direction="row" spacing={2}>
+          {/* Calendar view */}
+          <Paper variant="outlined" sx={{ flex: 1, minHeight: { xs: 400, md: 600 }, overflow: 'hidden', borderRadius: 2 }}>
+            {view === 'month' && (
+              <MonthView
+                currentDate={currentDate}
+                events={events}
+                onEventClick={handleEventClick}
+                onDayClick={handleDayClick}
+                moreEventsLabel={t.calendar.moreEvents}
               />
-            </div>
-          ) : (
-            <>
-              {view === 'month' && (
-                <MonthView
-                  currentDate={currentDate}
-                  events={allEvents}
-                  onEventClick={handleEventClick}
-                  onDayClick={handleDayClick}
-                />
-              )}
-              {view === 'week' && (
-                <WeekView
-                  currentDate={currentDate}
-                  events={allEvents}
-                  onEventClick={handleEventClick}
-                  onDayClick={handleDayClick}
-                />
-              )}
-              {view === 'day' && (
-                <DayView
-                  currentDate={currentDate}
-                  events={allEvents}
-                  onEventClick={handleEventClick}
-                />
-              )}
-              {view === 'agenda' && (
-                <AgendaView
-                  currentDate={currentDate}
-                  events={allEvents}
-                  onEventClick={handleEventClick}
-                />
-              )}
-            </>
-          )}
-
-          {/* Day Events Slide-over (Month view) */}
-          {selectedDay && view === 'month' && (
-            <div className="absolute top-0 right-0 bottom-0 w-80 bg-[--bg-surface] border-l border-[--border-subtle] shadow-xl z-20 animate-in slide-in-from-right duration-200">
-              <DayEventsPanel
-                day={selectedDay}
-                events={allEvents}
-                onEventClick={(event) => {
-                  setSelectedDay(null)
-                  handleEventClick(event)
-                }}
-                onClose={() => setSelectedDay(null)}
+            )}
+            {view === 'week' && (
+              <WeekView
+                currentDate={currentDate}
+                events={events}
+                onEventClick={handleEventClick}
+                onDayClick={handleDayClick}
               />
-            </div>
+            )}
+            {view === 'day' && (
+              <DayView
+                currentDate={currentDate}
+                events={events}
+                onEventClick={handleEventClick}
+              />
+            )}
+            {view === 'agenda' && (
+              <AgendaView
+                currentDate={currentDate}
+                events={events}
+                onEventClick={handleEventClick}
+                noEventsLabel={t.calendar.noEvents}
+              />
+            )}
+          </Paper>
+
+          {/* Sidebar — hidden on mobile */}
+          {!isMobile && (
+            <Stack spacing={2} sx={{ width: 280, flexShrink: 0 }}>
+              <MiniCalendar
+                currentDate={currentDate}
+                onDateSelect={(date) => { setCurrentDate(date) }}
+                events={events}
+              />
+              <UpcomingEventsPanel
+                events={events}
+                members={members}
+                onEventClick={handleEventClick}
+                onViewAll={handleViewAll}
+              />
+            </Stack>
           )}
-        </div>
-      </div>
+        </Stack>
+      </Stack>
 
       {/* Event Modal */}
       <EventModal
-        open={showEventModal}
-        onOpenChange={setShowEventModal}
+        open={modalOpen}
+        onOpenChange={(open) => { setModalOpen(open); if (!open) setSelectedEvent(null) }}
         event={selectedEvent}
         familyId={familyId}
-        userId={''}
-        onSave={fetchEvents}
-        members={familyMembers}
+        userId={userId}
+        onSave={() => { if (currentFamily?.id && user?.id) fetchEvents(currentFamily.id, user.id) }}
+        members={members}
       />
 
-      {/* Event Detail Dialog */}
-      <EventDetailDialog
-        event={selectedEvent}
-        open={showEventDetail}
-        onOpenChange={setShowEventDetail}
-        onEdit={handleEditEvent}
-        onDelete={() => setShowDeleteConfirm(true)}
-      />
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)} maxWidth="xs">
+        <DialogTitle>Delete Event</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">Are you sure you want to delete this event? This action cannot be undone.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmOpen(false)} color="inherit">Cancel</Button>
+          <Button onClick={handleDeleteEvent} color="error" variant="contained">Delete</Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="bg-[--bg-surface] border-[--border-subtle] rounded-2xl shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[--text-primary]">
-              Delete Event
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[--text-muted]">
-              Are you sure you want to delete &quot;{selectedEvent?.title}&quot;? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-[--bg-surface-2] border-[--border-subtle] text-[--text-primary] hover:bg-[--border-subtle]">
-              {t.common.cancel}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteEvent}
-              disabled={deleting}
-              className="bg-[#EF4444] text-white hover:bg-[#EF4444]/90"
-            >
-              {deleting ? t.common.loading : t.common.delete}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+      {/* FAB for mobile */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          onClick={handleAddEvent}
+          sx={{ position: 'fixed', bottom: 80, right: 16 }}
+        >
+          <Add />
+        </Fab>
+      )}
+    </Container>
   )
 }

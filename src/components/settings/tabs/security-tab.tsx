@@ -18,22 +18,25 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Switch from '@mui/material/Switch'
+import Chip from '@mui/material/Chip'
+import Avatar from '@mui/material/Avatar'
+import Divider from '@mui/material/Divider'
+import Paper from '@mui/material/Paper'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogActions from '@mui/material/DialogActions'
+import Alert from '@mui/material/Alert'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 import { useAuthStore } from '@/stores/auth-store'
 import { useI18n } from '@/i18n/use-translation'
@@ -59,6 +62,7 @@ export function SecurityTab() {
 
   // Delete account state
   const [deletingAccount, setDeletingAccount] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const sessions = [
     { id: '1', device: 'Chrome on macOS', icon: Chrome, ip: '192.168.1.1', lastActive: 'Current session', current: true },
@@ -113,19 +117,16 @@ export function SecurityTab() {
   const handleDeleteAccount = useCallback(async () => {
     setDeletingAccount(true)
     try {
-      // Call GDPR/PDPL-compliant deletion endpoint to purge all DB records
       const res = await fetch('/api/user/delete', { method: 'DELETE' })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error || 'Deletion failed')
       }
-
-      // After successful DB deletion, sign out and clear local state
       try {
         const supabase = createClient()
         await supabase.auth.signOut()
       } catch {
-        // Supabase sign-out failure is non-critical — DB records are already deleted
+        // non-critical
       }
       useAuthStore.getState().logout()
       toast.success('Account and all data permanently deleted.')
@@ -137,246 +138,249 @@ export function SecurityTab() {
   }, [t])
 
   return (
-    <div className="space-y-6">
+    <Stack spacing={3}>
       {/* Email Change */}
       <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            <Mail className="size-4 text-primary" /> Change Email
-          </span>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Mail size={16} color="primary" /> Change Email
+          </Stack>
         </SectionTitle>
         <SectionDescription>Update your email address</SectionDescription>
 
-        <div className="space-y-3">
-          <div>
-            <Label className="text-foreground text-xs mb-1.5 block">{t.auth.email}</Label>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-muted border-border text-foreground flex-1"
-              />
-              <Button
-                size="sm"
-                onClick={handleEmailChange}
-                disabled={savingEmail}
-                className="bg-primary hover:bg-primary/80 text-white shrink-0"
-              >
-                {savingEmail ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-                {t.common.save}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Stack spacing={2}>
+          <Stack direction="row" gap={1}>
+            <TextField
+              type="email"
+              label={t.auth.email}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              size="small"
+            />
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleEmailChange}
+              disabled={savingEmail}
+              startIcon={savingEmail ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              sx={{ flexShrink: 0 }}
+            >
+              {t.common.save}
+            </Button>
+          </Stack>
+        </Stack>
       </SectionCard>
 
       {/* Two-Factor Authentication */}
       <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-primary" /> Two-Factor Authentication
-          </span>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <ShieldCheck size={16} color="primary" /> Two-Factor Authentication
+          </Stack>
         </SectionTitle>
         <SectionDescription>Add an extra layer of security to your account</SectionDescription>
 
-        <div className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Lock className="size-4 text-accent" />
-            </div>
-            <div>
-              <p className="text-foreground text-sm font-medium">Two-Factor Authentication</p>
-              <p className="text-muted-foreground text-xs">Add an extra layer of security to your account</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-emerald-500/10 text-accent border-emerald-500/20 text-xs">
-              {isRTL ? 'المصادقة الثانية وإدارة الجلسات' : '2FA & Session Management'}
-            </Badge>
-            <Switch
-              checked={false}
-              disabled
-              className="data-[state=checked]:bg-primary/50"
-            />
-          </div>
-        </div>
+        <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Stack direction="row" alignItems="center" gap={1.5}>
+              <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Lock size={16} />
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>Two-Factor Authentication</Typography>
+                <Typography variant="caption" color="text.secondary">Add an extra layer of security to your account</Typography>
+              </Box>
+            </Stack>
+            <Stack direction="row" alignItems="center" gap={1}>
+              <Chip
+                label={isRTL ? 'المصادقة الثانية وإدارة الجلسات' : '2FA & Session Management'}
+                size="small"
+                variant="outlined"
+                color="success"
+              />
+              <Switch checked={false} disabled size="small" />
+            </Stack>
+          </Stack>
+        </Paper>
       </SectionCard>
 
       {/* Active Sessions */}
       <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            <Smartphone className="size-4 text-primary" /> Active Sessions
-          </span>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Smartphone size={16} color="primary" /> Active Sessions
+          </Stack>
         </SectionTitle>
         <SectionDescription>Devices currently signed in to your account</SectionDescription>
 
-        <div className="space-y-2">
-          {sessions.map((session) => (
-            <div
-              key={session.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border"
-            >
-              <div className="size-9 rounded-lg bg-muted flex items-center justify-center">
-                <session.icon className="size-4 text-muted-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`size-2 rounded-full ${session.current ? 'bg-green-400' : 'bg-[--text-muted]/40'}`} />
-                  <p className="text-foreground text-sm font-medium">{session.device}</p>
-                  {session.current && (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px] px-1.5 py-0">
-                      Current
-                    </Badge>
+        <Stack spacing={1}>
+          {sessions.map((session) => {
+            const Icon = session.icon
+            return (
+              <Paper key={session.id} elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
+                <Stack direction="row" alignItems="center" gap={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={16} color="text.secondary" />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Stack direction="row" alignItems="center" gap={1}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: session.current ? 'success.main' : 'text.disabled' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>{session.device}</Typography>
+                      {session.current && (
+                        <Chip label="Current" size="small" color="success" variant="outlined" />
+                      )}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">
+                      {session.ip} · {session.lastActive}
+                    </Typography>
+                  </Box>
+                  {!session.current && (
+                    <Button
+                      variant="text"
+                      size="small"
+                      color="error"
+                      onClick={() => handleRevokeSession(session.id)}
+                    >
+                      Revoke
+                    </Button>
                   )}
-                </div>
-                <p className="text-muted-foreground text-xs">
-                  {session.ip} &middot; {session.lastActive}
-                </p>
-              </div>
-              {!session.current && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRevokeSession(session.id)}
-                  className="text-[#EF4444]/60 hover:text-[#EF4444] hover:bg-[#EF4444]/10"
-                >
-                  Revoke
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
+                </Stack>
+              </Paper>
+            )
+          })}
+        </Stack>
       </SectionCard>
 
       {/* Change Password */}
       <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            <KeyRound className="size-4 text-primary" /> {t.settings.changePassword}
-          </span>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <KeyRound size={16} color="primary" /> {t.settings.changePassword}
+          </Stack>
         </SectionTitle>
         <SectionDescription>Update your password to keep your account secure</SectionDescription>
 
-        <div className="space-y-3">
-          <div>
-            <Label className="text-foreground text-xs mb-1.5 block">Current Password</Label>
-            <div className="relative">
-              <Input
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="bg-muted border-border text-foreground pr-10"
-                placeholder="Enter current password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
-            </div>
-          </div>
-          <div>
-            <Label className="text-foreground text-xs mb-1.5 block">New Password</Label>
-            <div className="relative">
-              <Input
-                type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-muted border-border text-foreground pr-10"
-                placeholder="Enter new password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
-            </div>
-          </div>
-          <div>
-            <Label className="text-foreground text-xs mb-1.5 block">{t.auth.confirmPassword}</Label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="bg-muted border-border text-foreground"
-              placeholder="Confirm new password"
-            />
-          </div>
+        <Stack spacing={2}>
+          <TextField
+            label="Current Password"
+            type={showCurrentPassword ? 'text' : 'password'}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Enter current password"
+            fullWidth
+            size="small"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                    {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label="New Password"
+            type={showNewPassword ? 'text' : 'password'}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password"
+            fullWidth
+            size="small"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setShowNewPassword(!showNewPassword)}>
+                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label={t.auth.confirmPassword}
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm new password"
+            fullWidth
+            size="small"
+          />
           <Button
-            size="sm"
+            variant="contained"
+            size="small"
             onClick={handlePasswordChange}
             disabled={savingPassword}
-            className="bg-primary hover:bg-primary/80 text-white"
+            startIcon={savingPassword ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />}
           >
-            {savingPassword ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
             {t.settings.changePassword}
           </Button>
-        </div>
+        </Stack>
       </SectionCard>
 
       {/* Privacy Controls */}
       <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            <Eye className="size-4 text-primary" /> Privacy Controls
-          </span>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Eye size={16} color="primary" /> Privacy Controls
+          </Stack>
         </SectionTitle>
         <SectionDescription>Manage your privacy and visibility settings</SectionDescription>
 
-        <div className="space-y-1">
+        <Stack>
           <SettingRow label="Online Status" description="Show when you are active">
-            <Switch defaultChecked />
+            <Switch defaultChecked size="small" />
           </SettingRow>
           <SettingRow label="Read Receipts" description="Let others know you have read messages">
-            <Switch defaultChecked />
+            <Switch defaultChecked size="small" />
           </SettingRow>
           <SettingRow label="Activity Visibility" description="Show your activity to family members">
-            <Switch defaultChecked />
+            <Switch defaultChecked size="small" />
           </SettingRow>
-        </div>
+        </Stack>
       </SectionCard>
 
       {/* Delete Account */}
-      <SectionCard className="border-[#EF4444]/20">
-        <SectionTitle className="text-[#EF4444]">
-          <span className="flex items-center gap-2">
-            <AlertTriangle className="size-4" /> {t.settings.deleteAccount}
-          </span>
+      <SectionCard sx={{ borderColor: 'error.light' }}>
+        <SectionTitle>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <AlertTriangle size={16} color="error" /> {t.settings.deleteAccount}
+          </Stack>
         </SectionTitle>
         <SectionDescription>Permanently delete your account and all associated data</SectionDescription>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="size-4" />
-              {t.settings.deleteAccount}
+        <Button
+          variant="contained"
+          color="error"
+          size="small"
+          startIcon={<Trash2 size={16} />}
+          onClick={() => setDeleteDialogOpen(true)}
+        >
+          {t.settings.deleteAccount}
+        </Button>
+
+        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+          <DialogTitle>{t.settings.deleteAccount}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              This will permanently delete your account, all your families, tasks, events, and data. This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>{t.common.cancel}</Button>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={() => { handleDeleteAccount(); setDeleteDialogOpen(false) }}
+              disabled={deletingAccount}
+              startIcon={deletingAccount ? <Loader2 size={16} className="animate-spin" /> : null}
+            >
+              {deletingAccount ? 'Deleting...' : `${t.common.delete} Account`}
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="bg-card border-border">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-foreground">{t.settings.deleteAccount}</AlertDialogTitle>
-              <AlertDialogDescription className="text-muted-foreground">
-                This will permanently delete your account, all your families, tasks, events, and data. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="bg-muted border-border text-foreground">
-                {t.common.cancel}
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteAccount} disabled={deletingAccount} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
-                {deletingAccount ? <Loader2 className="size-4 animate-spin" /> : null}
-                {deletingAccount ? 'Deleting...' : `${t.common.delete} Account`}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          </DialogActions>
+        </Dialog>
       </SectionCard>
-    </div>
+    </Stack>
   )
 }

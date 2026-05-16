@@ -2,13 +2,17 @@
 
 import { useCallback, useState, type ElementType } from 'react'
 import {
+  BottomNavigation,
+  BottomNavigationAction,
   Drawer,
   IconButton,
   Box,
   Typography,
   Paper,
-  ButtonBase,
+  Chip,
   Divider,
+  alpha,
+  useTheme,
 } from '@mui/material'
 import {
   Dashboard,
@@ -60,6 +64,7 @@ const moreNavItems: MoreNavItem[] = [
 ]
 
 function BottomNavInner() {
+  const theme = useTheme()
   const currentPage = useCurrentPage()
   const setCurrentPage = useAppStore((state) => state.setCurrentPage)
   const { t, isRTL } = useI18n()
@@ -73,6 +78,12 @@ function BottomNavInner() {
   )
 
   const isMoreItemActive = moreNavItems.some((item) => item.page === currentPage)
+
+  // Determine the "value" for BottomNavigation — use index of matching mainNavItems,
+  // or -1 if current page is in "more" list (then we show the More tab as selected)
+  const currentValue = mainNavItems.findIndex((item) => item.page === currentPage)
+  // If it's a "more" item, value = mainNavItems.length (the More tab)
+  const bottomNavValue = isMoreItemActive ? mainNavItems.length : currentValue
 
   return (
     <>
@@ -93,127 +104,56 @@ function BottomNavInner() {
           pb: 'max(env(safe-area-inset-bottom), 8px)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', px: 0.25, pt: 1, pb: 0.5, width: '100%' }}>
+        <BottomNavigation
+          value={bottomNavValue >= 0 ? bottomNavValue : 0}
+          onChange={(_event, newValue: number) => {
+            if (newValue === mainNavItems.length) {
+              setMoreDrawerOpen(true)
+            } else if (mainNavItems[newValue]) {
+              handleNavClick(mainNavItems[newValue].page)
+            }
+          }}
+          showLabels
+          sx={{
+            width: '100%',
+            bgcolor: 'transparent',
+            '& .MuiBottomNavigationAction-root': {
+              minWidth: 'auto',
+              maxWidth: 'none',
+              py: 0.5,
+              color: 'text.secondary',
+              transition: 'color 0.15s',
+              '&.Mui-selected': {
+                color: 'primary.dark',
+              },
+              '& .MuiBottomNavigationAction-label': {
+                fontSize: '0.5625rem',
+                '&.Mui-selected': {
+                  fontSize: '0.5625rem',
+                },
+              },
+            },
+          }}
+        >
           {mainNavItems.map((item) => {
-            const isActive = currentPage === item.page
             const Icon = item.icon
             const label = t.nav[item.labelKey]
-
             return (
-              <ButtonBase
+              <BottomNavigationAction
                 key={item.page}
-                onClick={() => handleNavClick(item.page)}
+                icon={<Icon sx={{ fontSize: 20 }} />}
+                label={label}
                 aria-label={label}
-                aria-current={isActive ? 'page' : undefined}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 0.25,
-                  minWidth: 48,
-                  minHeight: 44,
-                  borderRadius: 3,
-                  px: 1,
-                  py: 0.75,
-                  position: 'relative',
-                  color: isActive ? 'primary.dark' : 'text.secondary',
-                  '&:hover': { bgcolor: isActive ? 'transparent' : 'action.hover' },
-                  transition: 'color 0.15s',
-                }}
-              >
-                {/* Active Pill Background */}
-                {isActive && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 2,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: 56,
-                      height: 32,
-                      borderRadius: 3,
-                      bgcolor: 'primary.light',
-                      zIndex: 0,
-                    }}
-                  />
-                )}
-
-                <Icon sx={{ fontSize: 20, position: 'relative', zIndex: 1, transition: 'color 0.15s' }} />
-
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: '0.5625rem',
-                    fontWeight: 500,
-                    position: 'relative',
-                    zIndex: 1,
-                    transition: 'color 0.15s',
-                    lineHeight: 1,
-                  }}
-                >
-                  {label}
-                </Typography>
-              </ButtonBase>
+              />
             )
           })}
-
-          {/* More Button */}
-          <ButtonBase
-            onClick={() => setMoreDrawerOpen(true)}
+          {/* More tab */}
+          <BottomNavigationAction
+            icon={<MoreHoriz sx={{ fontSize: 20 }} />}
+            label={isRTL ? 'المزيد' : 'More'}
             aria-label={isRTL ? 'المزيد' : 'More'}
-            aria-current={isMoreItemActive ? 'page' : undefined}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 0.25,
-              minWidth: 48,
-              minHeight: 44,
-              borderRadius: 3,
-              px: 1,
-              py: 0.75,
-              position: 'relative',
-              color: isMoreItemActive ? 'primary.dark' : 'text.secondary',
-              '&:hover': { bgcolor: isMoreItemActive ? 'transparent' : 'action.hover' },
-              transition: 'color 0.15s',
-            }}
-          >
-            {/* Active Pill for More */}
-            {isMoreItemActive && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 2,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 56,
-                  height: 32,
-                  borderRadius: 3,
-                  bgcolor: 'primary.light',
-                  zIndex: 0,
-                }}
-              />
-            )}
-
-            <MoreHoriz sx={{ fontSize: 20, position: 'relative', zIndex: 1, transition: 'color 0.15s' }} />
-
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: '0.5625rem',
-                fontWeight: 500,
-                position: 'relative',
-                zIndex: 1,
-                transition: 'color 0.15s',
-                lineHeight: 1,
-              }}
-            >
-              {isRTL ? 'المزيد' : 'More'}
-            </Typography>
-          </ButtonBase>
-        </Box>
+          />
+        </BottomNavigation>
       </Paper>
 
       {/* More Menu Drawer */}
@@ -265,12 +205,16 @@ function BottomNavInner() {
             const label = (t.nav as Record<string, string>)[item.labelKey] || item.labelKey
 
             return (
-              <ButtonBase
+              <Paper
                 key={item.page}
+                component="button"
+                elevation={0}
                 onClick={() => {
                   handleNavClick(item.page)
                   setMoreDrawerOpen(false)
                 }}
+                aria-label={label}
+                aria-current={isActive ? 'page' : undefined}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -283,8 +227,12 @@ function BottomNavInner() {
                   fontWeight: 500,
                   color: isActive ? 'primary.dark' : 'text.secondary',
                   bgcolor: isActive ? 'primary.light' : 'transparent',
+                  border: '1px solid',
+                  borderColor: isActive ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+                  cursor: 'pointer',
                   '&:hover': { bgcolor: isActive ? 'primary.light' : 'action.hover' },
                   transition: 'all 0.15s',
+                  textAlign: 'center',
                 }}
               >
                 <Box
@@ -305,7 +253,7 @@ function BottomNavInner() {
                 <Typography variant="caption" sx={{ fontSize: '0.6875rem', fontWeight: 500, color: 'inherit' }}>
                   {label}
                 </Typography>
-              </ButtonBase>
+              </Paper>
             )
           })}
         </Box>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { format, isToday, isTomorrow, isThisWeek, parseISO } from 'date-fns'
+import { format, isToday, isTomorrow, isThisWeek, parseISO, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns'
 import {
   CheckCircle,
   CalendarMonth,
@@ -28,24 +28,24 @@ import {
   FormatQuote,
 } from '@mui/icons-material'
 import {
-  Card,
-  CardContent,
   Chip,
   Button,
   LinearProgress,
   Skeleton as MuiSkeleton,
   Avatar,
   Box,
+  Container,
   Divider,
   Typography,
   IconButton,
   Stack,
   Grid,
+  Paper,
   Tooltip,
+  SvgIcon,
   alpha,
-  createTheme,
-  ThemeProvider,
   useTheme,
+  CircularProgress,
 } from '@mui/material'
 import { BarChart as RechartsBarChart, Bar, ResponsiveContainer } from 'recharts'
 
@@ -70,59 +70,6 @@ import { AISummaryWidget } from '@/components/dashboard/ai-summary-widget'
 import { WeatherWidget } from '@/components/dashboard/weather-widget'
 import { ActivityTimelineWidget } from '@/components/dashboard/activity-timeline-widget'
 
-// ─── Teal Theme for Dashboard (mode-aware) ──────────────────────
-
-function getDashboardTheme(mode: 'light' | 'dark') {
-  return createTheme({
-    palette: {
-      mode,
-      primary: {
-        main: mode === 'dark' ? '#6EE7B7' : '#0D6B58',
-        light: mode === 'dark' ? '#A7F3D0' : '#4E9C8C',
-        dark: mode === 'dark' ? '#00513D' : '#003D30',
-        contrastText: mode === 'dark' ? '#00382A' : '#FFFFFF',
-      },
-      secondary: {
-        main: mode === 'dark' ? 'var(--secondary)' : 'var(--secondary)',
-        light: mode === 'dark' ? '#6EE7B7' : 'var(--secondary)',
-        dark: mode === 'dark' ? 'var(--secondary)' : '#064E3B',
-        contrastText: mode === 'dark' ? '#064E3B' : '#FFFFFF',
-      },
-      background: {
-        default: mode === 'dark' ? '#1C1B1F' : '#FEFCF9',
-        paper: mode === 'dark' ? '#2B2930' : '#FFFFFF',
-      },
-      text: {
-        primary: mode === 'dark' ? '#E6E1E5' : '#1C1B1F',
-        secondary: mode === 'dark' ? '#B8B5BC' : '#49454F',
-      },
-      divider: mode === 'dark' ? 'rgba(230, 225, 229, 0.10)' : 'rgba(28, 27, 31, 0.12)',
-    },
-    typography: {
-      fontFamily: 'inherit',
-    },
-    shape: {
-      borderRadius: 16,
-    },
-    components: {
-      MuiCard: {
-        styleOverrides: {
-          root: {
-            backgroundImage: 'none',
-          },
-        },
-      },
-      MuiPaper: {
-        styleOverrides: {
-          root: {
-            backgroundImage: 'none',
-          },
-        },
-      },
-    },
-  })
-}
-
 // ─── Prayer Times Interface ──────────────────────────────────────
 
 interface PrayerTimeData {
@@ -133,32 +80,24 @@ interface PrayerTimeData {
   minute: number
 }
 
-// ─── Sub-components ─────────────────────────────────────────────
+// ─── Productivity Ring (SvgIcon-based, uses theme) ───────────────
 
-function CircularProgress({
-  value,
-  size = 80,
-  strokeWidth = 6,
-  color = '#0D6B58',
-  trackColor = '#E0E0E0',
-}: {
-  value: number
-  size?: number
-  strokeWidth?: number
-  color?: string
-  trackColor?: string
-}) {
+function ProductivityRing({ value, size = 80, strokeWidth = 6 }: { value: number; size?: number; strokeWidth?: number }) {
+  const theme = useTheme()
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (value / 100) * circumference
 
   return (
-    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+    <SvgIcon
+      sx={{ width: size, height: size, transform: 'rotate(-90deg)' }}
+      viewBox={`0 0 ${size} ${size}`}
+    >
       <circle
         cx={size / 2}
         cy={size / 2}
         r={radius}
-        stroke={trackColor}
+        stroke={alpha(theme.palette.primary.main, 0.12)}
         strokeWidth={strokeWidth}
         fill="none"
       />
@@ -166,19 +105,21 @@ function CircularProgress({
         cx={size / 2}
         cy={size / 2}
         r={radius}
-        stroke={color}
+        stroke={theme.palette.primary.main}
         strokeWidth={strokeWidth}
         fill="none"
         strokeLinecap="round"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
-        style={{ transition: 'all 0.7s ease-out' }}
+        sx={{ transition: 'all 0.7s ease-out' }}
       />
-    </svg>
+    </SvgIcon>
   )
 }
 
-function MUICard({
+// ─── Animated Card Wrapper (uses Paper + motion) ─────────────────
+
+function DashCard({
   children,
   delay = 0,
   variant = 'elevated',
@@ -189,40 +130,42 @@ function MUICard({
   variant?: 'elevated' | 'outlined' | 'filled'
   sx?: object
 }) {
+  const theme = useTheme()
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: Math.min(delay, 0.15), ease: 'easeOut' }}
     >
-      <Card
-        variant={variant === 'outlined' ? 'outlined' : 'elevation'}
+      <Paper
+        variant={variant === 'outlined' ? 'outlined' : undefined}
+        elevation={variant === 'outlined' ? 0 : 1}
         sx={{
           borderRadius: 4,
           overflow: 'hidden',
           transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': variant === 'elevated' ? {
             transform: 'translateY(-2px)',
-            boxShadow: '0 8px 25px -5px rgba(13, 107, 88, 0.12), 0 4px 10px -4px rgba(13, 107, 88, 0.06)',
-            borderColor: alpha('#0D6B58', 0.15),
+            boxShadow: `0 8px 25px -5px ${alpha(theme.palette.primary.main, 0.12)}, 0 4px 10px -4px ${alpha(theme.palette.primary.main, 0.06)}`,
+            borderColor: alpha(theme.palette.primary.main, 0.15),
           } : {},
           ...sx,
         }}
       >
-        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-          {children}
-        </CardContent>
-      </Card>
+        {children}
+      </Paper>
     </motion.div>
   )
 }
+
+// ─── Stat Card ───────────────────────────────────────────────────
 
 function StatCard({
   icon: Icon,
   value,
   label,
   subValue,
-  progressColor = '#0D6B58',
   delay = 0,
   isLoading,
   trend,
@@ -232,12 +175,12 @@ function StatCard({
   value: string | number
   label: string
   subValue?: string
-  progressColor?: string
   delay?: number
   isLoading?: boolean
   trend?: 'up' | 'down' | 'neutral'
   trendLabel?: string
 }) {
+  const theme = useTheme()
   const [displayValue, setDisplayValue] = useState<string | number>(0)
   const [bounceScale, setBounceScale] = useState(1)
   const hasAnimated = useRef(false)
@@ -322,7 +265,7 @@ function StatCard({
   }, [value])
 
   return (
-    <MUICard delay={delay} sx={{ p: 2.5, lg: { p: 3 } }}>
+    <DashCard delay={delay} sx={{ p: 2.5 }}>
       {isLoading ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <MuiSkeleton variant="rounded" width={40} height={40} sx={{ borderRadius: 3 }} />
@@ -372,8 +315,8 @@ function StatCard({
                     fontSize: 9,
                     fontWeight: 600,
                     px: 0.5,
-                    bgcolor: trend === 'up' ? alpha('#0D6B58', 0.12) : alpha('#0D6B58', 0.08),
-                    color: '#0D6B58',
+                    bgcolor: trend === 'up' ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.08),
+                    color: 'primary.main',
                     '& .MuiChip-label': { px: 0.75 },
                   }}
                 />
@@ -387,11 +330,14 @@ function StatCard({
           </Box>
         </Box>
       )}
-    </MUICard>
+    </DashCard>
   )
 }
 
+// ─── Priority Badge (theme-based) ────────────────────────────────
+
 function PriorityBadge({ priority }: { priority: TaskPriority }) {
+  const theme = useTheme()
   const config: Record<TaskPriority, { label: string; opacity: number }> = {
     low: { label: 'Low', opacity: 0.3 },
     medium: { label: 'Medium', opacity: 0.55 },
@@ -408,9 +354,9 @@ function PriorityBadge({ priority }: { priority: TaskPriority }) {
         height: 18,
         fontSize: 10,
         px: 0.5,
-        bgcolor: alpha('#0D6B58', bgOpacity * 0.15),
-        color: alpha('#0D6B58', 0.4 + bgOpacity * 0.6),
-        borderColor: alpha('#0D6B58', bgOpacity * 0.25),
+        bgcolor: alpha(theme.palette.primary.main, bgOpacity * 0.15),
+        color: alpha(theme.palette.primary.main, 0.4 + bgOpacity * 0.6),
+        borderColor: alpha(theme.palette.primary.main, bgOpacity * 0.25),
         '& .MuiChip-label': { px: 0.75 },
       }}
     />
@@ -439,9 +385,9 @@ function formatEventTime(dateStr: string): string {
   }
 }
 
-// ─── Custom MUI EmptyState ──────────────────────────────────────
+// ─── Empty State ─────────────────────────────────────────────────
 
-function MUIEmptyState({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
+function EmptyState({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 4 }}>
       <Box sx={{ width: 64, height: 64, borderRadius: 3, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
@@ -481,11 +427,9 @@ function usePrayerTimes() {
         if (!timings) throw new Error('No timings data')
 
         const parseTime = (timeStr: string): { hour: number; minute: number; formatted: string } => {
-          // Aladhan returns times like "04:30" or "04:30 (EET)"
           const clean = timeStr.split(' ')[0]
           const [h, m] = clean.split(':').map(Number)
           const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h
-          const ampm = h >= 12 ? 'PM' : 'AM'
           return { hour: h, minute: m, formatted: `${hour12}:${m.toString().padStart(2, '0')}` }
         }
 
@@ -499,18 +443,11 @@ function usePrayerTimes() {
 
         const times: PrayerTimeData[] = names.map(({ key, nameAr }) => {
           const parsed = parseTime(timings[key] || '0:00')
-          return {
-            name: key,
-            nameAr,
-            time: parsed.formatted,
-            hour: parsed.hour,
-            minute: parsed.minute,
-          }
+          return { name: key, nameAr, time: parsed.formatted, hour: parsed.hour, minute: parsed.minute }
         })
 
         setPrayerTimes(times)
       } catch {
-        // Fallback times already set
         setPrayerTimes(FALLBACK_PRAYER_TIMES)
       } finally {
         setLoading(false)
@@ -522,10 +459,38 @@ function usePrayerTimes() {
   return { prayerTimes, loading }
 }
 
-// ─── Weekly Activity Data ──────────────────────────────────────
-// NOTE: This should come from a backend API endpoint that aggregates task completion data.
-// For now, we derive chart data from the activity store or show a "No activity data yet" state.
-// The data is generated dynamically in the component using useMemo.
+// ─── Weekly Activity Data (derived from task store) ──────────────
+
+const DAY_LABELS = [
+  { en: 'Mon', ar: 'إثنين' },
+  { en: 'Tue', ar: 'ثلاثاء' },
+  { en: 'Wed', ar: 'أربعاء' },
+  { en: 'Thu', ar: 'خميس' },
+  { en: 'Fri', ar: 'جمعة' },
+  { en: 'Sat', ar: 'سبت' },
+  { en: 'Sun', ar: 'أحد' },
+]
+
+function useWeeklyActivityData(tasks: Task[], isRTL: boolean) {
+  return useMemo(() => {
+    const now = new Date()
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+    const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
+
+    return days.map((day, idx) => {
+      const dayStr = format(day, 'yyyy-MM-dd')
+      const completed = tasks.filter(
+        (t) => t.status === 'done' && t.completed_at && format(parseISO(t.completed_at), 'yyyy-MM-dd') === dayStr
+      ).length
+      return {
+        day: DAY_LABELS[idx]?.en || '',
+        dayAr: DAY_LABELS[idx]?.ar || '',
+        tasks: completed,
+      }
+    })
+  }, [tasks, isRTL])
+}
 
 // ─── Motivational Quotes (Bilingual) ────────────────────────────────
 
@@ -540,6 +505,7 @@ const MOTIVATIONAL_QUOTES = [
 // ─── Main Dashboard Component ───────────────────────────────────
 
 export default function DashboardPage() {
+  const theme = useTheme()
   const { t, isRTL } = useI18n()
   const user = useCurrentUser()
   const currentFamily = useCurrentFamily()
@@ -554,10 +520,9 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Dynamic prayer times
   const { prayerTimes } = usePrayerTimes()
+  const weeklyActivityData = useWeeklyActivityData(tasks, isRTL)
 
-  // ─── Staggered Widget Loading ──────────────────────────────────
   const [visibleWidgets, setVisibleWidgets] = useState<'primary' | 'secondary' | 'tertiary'>('primary')
 
   useEffect(() => {
@@ -700,8 +665,6 @@ export default function DashboardPage() {
     }
   }, [tasks, events, groceryItems, familyMembers])
 
-  // ─── Upcoming Tasks (next 5, not done) ──────────────────────
-
   const upcomingTasks = useMemo(() => {
     return tasks
       .filter((t) => t.status !== 'done')
@@ -713,22 +676,9 @@ export default function DashboardPage() {
       .slice(0, 5)
   }, [tasks])
 
-  // ─── Upcoming Events (next 3) ───────────────────────────────
-
   const upcomingEvents = useMemo(() => {
     return events.slice(0, 3)
   }, [events])
-
-  // ─── Productivity Chart Data ────────────────────────────────
-
-  const productivityChartData = useMemo(() => {
-    return [
-      { name: 'Score', value: stats.productivityScore },
-      { name: 'Remaining', value: 100 - stats.productivityScore },
-    ]
-  }, [stats.productivityScore])
-
-  // ─── Greeting ───────────────────────────────────────────────
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -744,111 +694,65 @@ export default function DashboardPage() {
     return ''
   }, [user])
 
-  // ─── Prayer Times Logic ─────────────────────────────────────
-
   const nextPrayers = useMemo(() => {
     const now = new Date()
     const currentMinutes = now.getHours() * 60 + now.getMinutes()
-
     let nextIndex = prayerTimes.findIndex(p => p.hour * 60 + p.minute > currentMinutes)
     if (nextIndex === -1) nextIndex = 0
-
     const result: { name: string; nameAr: string; time: string; hour: number; minute: number; isNext: boolean }[] = []
     for (let i = 0; i < 3; i++) {
       const idx = (nextIndex + i) % prayerTimes.length
-      result.push({
-        ...prayerTimes[idx],
-        isNext: i === 0,
-      })
+      result.push({ ...prayerTimes[idx], isNext: i === 0 })
     }
     return result
   }, [prayerTimes])
 
-  // ─── Motivational Quote of the Day ─────────────────────────────
   const dailyQuote = useMemo(() => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
     return MOTIVATIONAL_QUOTES[dayOfYear % MOTIVATIONAL_QUOTES.length]
   }, [])
 
-  // ─── Streak (mock for now, can be persisted later) ─────────────
   const streak = useMemo(() => {
-    // Simulate streak based on completion rate
     return stats.completionRate > 0 ? Math.max(1, Math.min(30, Math.floor(stats.completionRate / 10) + 3)) : 0
   }, [stats.completionRate])
 
-  // ─── Quick Actions ──────────────────────────────────────────
-
   const quickActions = [
-    {
-      label: t.dashboard.addTask,
-      icon: Add,
-      onClick: () => setCurrentPage('tasks'),
-      color: '#0D6B58',
-    },
-    {
-      label: t.dashboard.addEvent,
-      icon: CalendarMonth,
-      onClick: () => setCurrentPage('calendar'),
-      color: '#047857',
-    },
-    {
-      label: t.dashboard.addGrocery,
-      icon: ShoppingCart,
-      onClick: () => setCurrentPage('grocery'),
-      color: '#059669',
-    },
-    {
-      label: 'Send Message',
-      icon: Chat,
-      onClick: () => setCurrentPage('chat'),
-      color: '#065F46',
-    },
+    { label: t.dashboard.addTask, icon: Add, onClick: () => setCurrentPage('tasks') },
+    { label: t.dashboard.addEvent, icon: CalendarMonth, onClick: () => setCurrentPage('calendar') },
+    { label: t.dashboard.addGrocery, icon: ShoppingCart, onClick: () => setCurrentPage('grocery') },
+    { label: 'Send Message', icon: Chat, onClick: () => setCurrentPage('chat') },
   ]
 
   // ─── No Family Onboarding ───────────────────────────────────
 
-  const isDark = useIsDarkMode()
-  const dashboardTheme = useMemo(() => getDashboardTheme(isDark ? 'dark' : 'light'), [isDark])
-
   if (!currentFamily) {
     return (
-      <ThemeProvider theme={dashboardTheme}>
-        <Box sx={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center', px: 2 }}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Box sx={{ textAlign: 'center', maxWidth: 400 }}>
-              <Box sx={{ mx: 'auto', mb: 3, width: 80, height: 80, borderRadius: 4, bgcolor: alpha('#0D6B58', 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Home sx={{ fontSize: 40, color: '#0D6B58' }} />
-              </Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>{t.onboarding.welcome}</Typography>
-              <Typography sx={{ color: 'text.secondary', mb: 4, lineHeight: 1.6 }}>
-                Create or join a family to start managing your household together. Track tasks, plan
-                events, share grocery lists, and more.
-              </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ justifyContent: 'center' }}>
-                <Button
-                  variant="contained"
-                  onClick={() => setShowOnboarding(true)}
-                  startIcon={<Add />}
-                  sx={{ borderRadius: 2, height: 44, px: 3, textTransform: 'none' }}
-                >
-                  {t.onboarding.createFamily}
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={() => setShowOnboarding(true)}
-                  sx={{ borderRadius: 2, height: 44, px: 3, textTransform: 'none' }}
-                >
-                  {t.onboarding.joinFamily}
-                </Button>
-              </Stack>
+      <Container maxWidth="sm" sx={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Box sx={{ textAlign: 'center', maxWidth: 400, mx: 'auto' }}>
+            <Box sx={{ mx: 'auto', mb: 3, width: 80, height: 80, borderRadius: 4, bgcolor: alpha(theme.palette.primary.main, 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Home sx={{ fontSize: 40, color: 'primary.main' }} />
             </Box>
-          </motion.div>
-        </Box>
-      </ThemeProvider>
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>{t.onboarding.welcome}</Typography>
+            <Typography sx={{ color: 'text.secondary', mb: 4, lineHeight: 1.6 }}>
+              Create or join a family to start managing your household together. Track tasks, plan
+              events, share grocery lists, and more.
+            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ justifyContent: 'center' }}>
+              <Button variant="contained" onClick={() => setShowOnboarding(true)} startIcon={<Add />}>
+                {t.onboarding.createFamily}
+              </Button>
+              <Button variant="outlined" onClick={() => setShowOnboarding(true)}>
+                {t.onboarding.joinFamily}
+              </Button>
+            </Stack>
+          </Box>
+        </motion.div>
+      </Container>
     )
   }
 
@@ -856,617 +760,508 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <ThemeProvider theme={dashboardTheme}>
-        <Box sx={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center', px: 2 }}>
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <Box sx={{ textAlign: 'center', maxWidth: 360 }}>
-              <Box sx={{ mx: 'auto', mb: 2, width: 64, height: 64, borderRadius: 3, bgcolor: alpha('#0D6B58', 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Warning sx={{ fontSize: 32, color: '#0D6B58' }} />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>{t.common.error}</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>{error}</Typography>
-              <Button variant="contained" onClick={fetchData} sx={{ borderRadius: 2, textTransform: 'none' }}>
-                {t.common.retry}
-              </Button>
+      <Container maxWidth="sm" sx={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center' }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <Box sx={{ textAlign: 'center', maxWidth: 360, mx: 'auto' }}>
+            <Box sx={{ mx: 'auto', mb: 2, width: 64, height: 64, borderRadius: 3, bgcolor: alpha(theme.palette.primary.main, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Warning sx={{ fontSize: 32, color: 'primary.main' }} />
             </Box>
-          </motion.div>
-        </Box>
-      </ThemeProvider>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>{t.common.error}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>{error}</Typography>
+            <Button variant="contained" onClick={fetchData}>
+              {t.common.retry}
+            </Button>
+          </Box>
+        </motion.div>
+      </Container>
     )
   }
 
   // ─── Dashboard Layout ───────────────────────────────────────
 
   return (
-    <ThemeProvider theme={dashboardTheme}>
-      <Box sx={{ bgcolor: 'background.default', overflowX: 'hidden' }}>
-        <Box sx={{ mx: 'auto', maxWidth: 1280, display: 'flex', flexDirection: 'column', gap: { xs: 1.5, lg: 2.5 } }}>
+    <Container maxWidth="lg" sx={{ bgcolor: 'background.default', overflowX: 'hidden', py: { xs: 1, lg: 2 } }}>
+      <Stack spacing={{ xs: 1.5, lg: 2.5 }}>
 
-          {/* ─── Welcome Section ──────── */}
-          <Box sx={{
-            position: 'relative',
-            overflow: 'hidden',
-            borderRadius: 4,
-            background: `linear-gradient(135deg, ${alpha('#0D6B58', 0.08)}, ${alpha('#065F46', 0.04)}, ${alpha('#34D399', 0.06)})`,
-            border: '1px solid',
-            borderColor: alpha('#0D6B58', 0.1),
-          }}>
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Box sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                alignItems: { md: 'center' },
-                justifyContent: { md: 'space-between' },
-                gap: 2,
-                px: { xs: 2, lg: 3 },
-                py: { xs: 2, lg: 2.5 },
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {/* Productivity Ring */}
-                  {!isLoading && (
-                    <Box sx={{ position: 'relative', flexShrink: 0 }}>
-                      <CircularProgress
-                        value={stats.productivityScore}
-                        size={64}
-                        strokeWidth={5}
-                        color="#0D6B58"
-                        trackColor={alpha('#0D6B58', 0.1)}
-                      />
-                      <Box sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.875rem', color: 'primary.main' }}>
-                          {stats.productivityScore}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  )}
-                  <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.875rem' } }}>
-                      {greeting}{userName ? `, ` : ''}{userName && (
-                        <Box
-                          component="span"
-                          sx={{
-                            background: 'linear-gradient(135deg, #0D6B58, #34D399)',
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                          }}
-                        >
-                          {userName}
-                        </Box>
-                      )} 👋
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5, flexWrap: 'wrap' }}>
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {currentDate} · <Box component="span" sx={{ color: 'primary.main', fontWeight: 500 }}>{currentFamily.name}</Box>
-                      </Typography>
-                      {streak > 0 && (
-                        <Chip
-                          size="small"
-                          icon={<LocalFireDepartment sx={{ fontSize: 12, color: '#F59E0B !important' }} />}
-                          label={`${streak} day streak`}
-                          sx={{
-                            height: 22,
-                            fontSize: '0.6875rem',
-                            fontWeight: 600,
-                            bgcolor: alpha('#F59E0B', 0.1),
-                            color: '#D97706',
-                            border: '1px solid',
-                            borderColor: alpha('#F59E0B', 0.2),
-                            '& .MuiChip-icon': { color: '#F59E0B' },
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Button
-                    variant="text"
-                    startIcon={<AutoAwesome sx={{ color: 'primary.main', fontSize: 16 }} />}
-                    onClick={() => setCurrentPage('settings')}
-                    sx={{ mt: { xs: 1, md: 0 }, alignSelf: { xs: 'flex-start', md: 'auto' }, borderRadius: 2, textTransform: 'none', color: 'text.secondary' }}
-                  >
-                    {currentFamily.name}
-                  </Button>
-                </Box>
-              </Box>
-
-              {/* Motivational Quote */}
-              {!isLoading && (
-                <Box sx={{
-                  px: { xs: 2, lg: 3 },
-                  pb: { xs: 2, lg: 2.5 },
-                  pt: 0,
-                }}>
-                  <Box sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 1,
-                    p: 1.5,
-                    borderRadius: 3,
-                    bgcolor: alpha('#0D6B58', 0.04),
-                    border: '1px solid',
-                    borderColor: alpha('#0D6B58', 0.06),
-                  }}>
-                    <FormatQuote sx={{ fontSize: 16, color: 'primary.main', opacity: 0.6, mt: 0.25, flexShrink: 0 }} />
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', lineHeight: 1.6, display: 'block' }}>
-                        {isRTL ? dailyQuote.ar : dailyQuote.en}
+        {/* ─── Welcome Section ──────── */}
+        <Box sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 4,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)}, ${alpha(theme.palette.primary.dark, 0.04)}, ${alpha(theme.palette.secondary.light, 0.06)})`,
+          border: '1px solid',
+          borderColor: alpha(theme.palette.primary.main, 0.1),
+        }}>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Box sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: { md: 'center' },
+              justifyContent: { md: 'space-between' },
+              gap: 2,
+              px: { xs: 2, lg: 3 },
+              py: { xs: 2, lg: 2.5 },
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {/* Productivity Ring */}
+                {!isLoading && (
+                  <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                    <ProductivityRing value={stats.productivityScore} size={64} strokeWidth={5} />
+                    <Box sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.875rem', color: 'primary.main' }}>
+                        {stats.productivityScore}
                       </Typography>
                     </Box>
                   </Box>
-                </Box>
-              )}
-            </motion.div>
-          </Box>
-
-          {/* ─── Stat Cards Row ── */}
-          <Grid container spacing={{ xs: 1.5, lg: 2 }}>
-            <Grid size={{ xs: 6, lg: 3 }}>
-              <StatCard
-                icon={CheckCircle}
-                value={isLoading ? '' : `${stats.completedTasks}/${stats.totalTasks}`}
-                label={t.dashboard.tasksCompleted}
-                subValue={
-                  !isLoading && stats.overdueTasks > 0
-                    ? `${stats.overdueTasks} ${t.dashboard.overdue.toLowerCase()}`
-                    : undefined
-                }
-                delay={0.05}
-                isLoading={isLoading}
-                trend="up"
-                trendLabel="+12%"
-              />
-            </Grid>
-            <Grid size={{ xs: 6, lg: 3 }}>
-              <StatCard
-                icon={CalendarMonth}
-                value={isLoading ? '' : stats.upcomingEvents}
-                label={t.dashboard.upcomingEvents}
-                delay={0.1}
-                isLoading={isLoading}
-                trend="neutral"
-              />
-            </Grid>
-            <Grid size={{ xs: 6, lg: 3 }}>
-              <StatCard
-                icon={Group}
-                value={isLoading ? '' : stats.familyMembers}
-                label={t.dashboard.members}
-                delay={0.15}
-                isLoading={isLoading}
-                trend="up"
-                trendLabel="+1"
-              />
-            </Grid>
-            <Grid size={{ xs: 6, lg: 3 }}>
-              <StatCard
-                icon={ShoppingCart}
-                value={isLoading ? '' : `${stats.groceryChecked}/${stats.groceryItems}`}
-                label={t.dashboard.groceryReminders}
-                delay={0.2}
-                isLoading={isLoading}
-                trend="up"
-                trendLabel="+3"
-              />
-            </Grid>
-          </Grid>
-
-          {/* ─── AI Summary ── Secondary ──── */}
-          <Box>
-            {visibleWidgets === 'primary' ? (
-              <MUICard sx={{ p: 2.5, lg: { p: 3 } }}>
-                <Stack spacing={1.5}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <MuiSkeleton variant="rounded" width={20} height={20} />
-                    <MuiSkeleton width="30%" height={16} />
-                  </Box>
-                  <MuiSkeleton height={80} />
-                </Stack>
-              </MUICard>
-            ) : (
-              <AISummaryWidget tasks={tasks} groceryItems={groceryItems} events={events} members={familyMembers} isLoading={isLoading} />
-            )}
-          </Box>
-
-          {/* ─── Weekly Chart + Prayer Times + Weather ── */}
-          <Grid container spacing={{ xs: 2, lg: 3 }}>
-            {/* Weekly Activity Bar Chart */}
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <MUICard delay={0.22} sx={{ p: 2.5, lg: { p: 3 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                  <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
-                    <BarChart sx={{ fontSize: 16, color: 'primary.main' }} />
-                    {isRTL ? 'هذا الأسبوع' : 'This Week'}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {isRTL ? 'المهام المنجزة' : 'Tasks completed'}
-                  </Typography>
-                </Box>
-                <Box sx={{ height: { xs: 180, lg: 200 }, width: '100%' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsBarChart
-                      data={WEEKLY_ACTIVITY_DATA}
-                      margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
-                    >
-                      <Bar
-                        dataKey="tasks"
-                        fill="#0D6B58"
-                        radius={[6, 6, 0, 0]}
-                        maxBarSize={32}
-                        animationBegin={200}
-                        animationDuration={600}
-                      />
-                    </RechartsBarChart>
-                  </ResponsiveContainer>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', px: 0.5, mt: 1 }}>
-                  {WEEKLY_ACTIVITY_DATA.map((d) => (
-                    <Typography key={d.day} variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
-                      {isRTL ? d.dayAr : d.day}
-                    </Typography>
-                  ))}
-                </Box>
-              </MUICard>
-            </Grid>
-
-            {/* Prayer Times + Weather */}
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Stack spacing={{ xs: 2, lg: 3 }}>
-                {/* Prayer Times Widget */}
-                <MUICard delay={0.24} variant="filled" sx={{ p: 2.5, lg: { p: 3 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                    <DarkMode sx={{ fontSize: 16, color: 'secondary.main' }} />
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {isRTL ? 'أوقات الصلاة' : 'Prayer Times'}
-                    </Typography>
-                  </Box>
-                  <Stack spacing={1}>
-                    {nextPrayers.map((prayer) => (
+                )}
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.875rem' } }}>
+                    {greeting}{userName ? `, ` : ''}{userName && (
                       <Box
-                        key={prayer.name}
+                        component="span"
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          borderRadius: 3,
-                          border: '1px solid',
-                          borderColor: prayer.isNext ? alpha('#0D6B58', 0.3) : 'divider',
-                          bgcolor: prayer.isNext ? alpha('#0D6B58', 0.08) : alpha('#000', 0.02),
-                          p: 1.25,
-                          transition: 'background-color 0.2s',
-                          '&:hover': {
-                            bgcolor: prayer.isNext ? alpha('#0D6B58', 0.12) : alpha('#000', 0.04),
-                          },
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.light})`,
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box
+                        {userName}
+                      </Box>
+                    )} 👋
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5, flexWrap: 'wrap' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {currentDate} · <Box component="span" sx={{ color: 'primary.main', fontWeight: 500 }}>{currentFamily.name}</Box>
+                    </Typography>
+                    {streak > 0 && (
+                      <Chip
+                        size="small"
+                        icon={<LocalFireDepartment sx={{ fontSize: 12 }} />}
+                        label={`${streak} day streak`}
+                        sx={{
+                          height: 22,
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          bgcolor: alpha(theme.palette.warning.main, 0.1),
+                          color: theme.palette.warning.dark,
+                          border: '1px solid',
+                          borderColor: alpha(theme.palette.warning.main, 0.2),
+                          '& .MuiChip-icon': { color: theme.palette.warning.main },
+                        }}
+                      />
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Button
+                  variant="text"
+                  startIcon={<AutoAwesome sx={{ color: 'primary.main', fontSize: 16 }} />}
+                  onClick={() => setCurrentPage('settings')}
+                  sx={{ mt: { xs: 1, md: 0 }, alignSelf: { xs: 'flex-start', md: 'auto' }, borderRadius: 2, textTransform: 'none', color: 'text.secondary' }}
+                >
+                  {currentFamily.name}
+                </Button>
+              </Box>
+            </Box>
+
+            {/* Motivational Quote */}
+            {!isLoading && (
+              <Box sx={{ px: { xs: 2, lg: 3 }, pb: { xs: 2, lg: 2.5 }, pt: 0 }}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 1,
+                  p: 1.5,
+                  borderRadius: 3,
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
+                  border: '1px solid',
+                  borderColor: alpha(theme.palette.primary.main, 0.06),
+                }}>
+                  <FormatQuote sx={{ fontSize: 16, color: 'primary.main', opacity: 0.6, mt: 0.25, flexShrink: 0 }} />
+                  <Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', lineHeight: 1.6, display: 'block' }}>
+                      {isRTL ? dailyQuote.ar : dailyQuote.en}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </motion.div>
+        </Box>
+
+        {/* ─── Stat Cards Row ── */}
+        <Grid container spacing={{ xs: 1.5, lg: 2 }}>
+          <Grid size={{ xs: 6, lg: 3 }}>
+            <StatCard
+              icon={CheckCircle}
+              value={isLoading ? '' : `${stats.completedTasks}/${stats.totalTasks}`}
+              label={t.dashboard.tasksCompleted}
+              subValue={
+                !isLoading && stats.overdueTasks > 0
+                  ? `${stats.overdueTasks} ${t.dashboard.overdue.toLowerCase()}`
+                  : undefined
+              }
+              delay={0.05}
+              isLoading={isLoading}
+              trend="up"
+              trendLabel="+12%"
+            />
+          </Grid>
+          <Grid size={{ xs: 6, lg: 3 }}>
+            <StatCard
+              icon={CalendarMonth}
+              value={isLoading ? '' : stats.upcomingEvents}
+              label={t.dashboard.upcomingEvents}
+              delay={0.1}
+              isLoading={isLoading}
+              trend="neutral"
+            />
+          </Grid>
+          <Grid size={{ xs: 6, lg: 3 }}>
+            <StatCard
+              icon={Group}
+              value={isLoading ? '' : stats.familyMembers}
+              label={t.dashboard.members}
+              delay={0.15}
+              isLoading={isLoading}
+              trend="up"
+              trendLabel="+1"
+            />
+          </Grid>
+          <Grid size={{ xs: 6, lg: 3 }}>
+            <StatCard
+              icon={ShoppingCart}
+              value={isLoading ? '' : `${stats.groceryChecked}/${stats.groceryItems}`}
+              label={t.dashboard.groceryReminders}
+              delay={0.2}
+              isLoading={isLoading}
+              trend="up"
+              trendLabel="+3"
+            />
+          </Grid>
+        </Grid>
+
+        {/* ─── AI Summary ── Secondary ──── */}
+        <Box>
+          {visibleWidgets === 'primary' ? (
+            <DashCard sx={{ p: 2.5 }}>
+              <Stack spacing={1.5}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <MuiSkeleton variant="rounded" width={20} height={20} />
+                  <MuiSkeleton width="30%" height={16} />
+                </Box>
+                <MuiSkeleton height={80} />
+              </Stack>
+            </DashCard>
+          ) : (
+            <AISummaryWidget tasks={tasks} groceryItems={groceryItems} events={events} members={familyMembers} isLoading={isLoading} />
+          )}
+        </Box>
+
+        {/* ─── Weekly Chart + Prayer Times + Weather ── */}
+        <Grid container spacing={{ xs: 2, lg: 3 }}>
+          {/* Weekly Activity Bar Chart */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <DashCard delay={0.22} sx={{ p: 2.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+                  <BarChart sx={{ fontSize: 16, color: 'primary.main' }} />
+                  {isRTL ? 'هذا الأسبوع' : 'This Week'}
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  {isRTL ? 'المهام المنجزة' : 'Tasks completed'}
+                </Typography>
+              </Box>
+              <Box sx={{ height: { xs: 180, lg: 200 }, width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart
+                    data={weeklyActivityData}
+                    margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
+                  >
+                    <Bar
+                      dataKey="tasks"
+                      fill={theme.palette.primary.main}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={32}
+                      animationBegin={200}
+                      animationDuration={600}
+                    />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', px: 0.5, mt: 1 }}>
+                {weeklyActivityData.map((d) => (
+                  <Typography key={d.day} variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
+                    {isRTL ? d.dayAr : d.day}
+                  </Typography>
+                ))}
+              </Box>
+            </DashCard>
+          </Grid>
+
+          {/* Prayer Times + Weather */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Stack spacing={{ xs: 2, lg: 3 }}>
+              {/* Prayer Times Widget */}
+              <DashCard delay={0.24} variant="filled" sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <DarkMode sx={{ fontSize: 16, color: 'secondary.main' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    {isRTL ? 'أوقات الصلاة' : 'Prayer Times'}
+                  </Typography>
+                </Box>
+                <Stack spacing={1}>
+                  {nextPrayers.map((prayer) => (
+                    <Box
+                      key={prayer.name}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: prayer.isNext ? alpha(theme.palette.primary.main, 0.3) : 'divider',
+                        bgcolor: prayer.isNext ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.text.primary, 0.02),
+                        p: 1.25,
+                        transition: 'background-color 0.2s',
+                        '&:hover': {
+                          bgcolor: prayer.isNext ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.text.primary, 0.04),
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 1.5,
+                            bgcolor: prayer.isNext ? alpha(theme.palette.primary.main, 0.15) : 'action.hover',
+                          }}
+                        >
+                          <DarkMode sx={{ fontSize: 12, color: prayer.isNext ? 'primary.main' : 'text.secondary' }} />
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 500, color: prayer.isNext ? 'text.primary' : 'text.secondary' }}
+                        >
+                          {isRTL ? prayer.nameAr : prayer.name}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 600, color: prayer.isNext ? 'primary.main' : 'text.primary' }}
+                        >
+                          {prayer.time}
+                        </Typography>
+                        {prayer.isNext && (
+                          <Chip
+                            size="small"
+                            label={isRTL ? 'التالي' : 'Next'}
                             sx={{
-                              width: 24,
-                              height: 24,
+                              height: 18,
+                              fontSize: 9,
+                              fontWeight: 500,
+                              bgcolor: alpha(theme.palette.primary.main, 0.12),
+                              color: 'primary.main',
+                              '& .MuiChip-label': { px: 0.75 },
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+                <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 1, color: 'text.secondary', opacity: 0.6, fontSize: 10 }}>
+                  {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
+                </Typography>
+              </DashCard>
+
+              {/* Weather Widget ── Secondary */}
+              {visibleWidgets === 'primary' ? (
+                <DashCard sx={{ p: 2.5 }}>
+                  <Stack spacing={1.5}>
+                    <MuiSkeleton width="40%" height={16} />
+                    <MuiSkeleton width="25%" height={32} />
+                    <MuiSkeleton height={16} />
+                  </Stack>
+                </DashCard>
+              ) : (
+                <WeatherWidget />
+              )}
+            </Stack>
+          </Grid>
+        </Grid>
+
+        {/* ─── Activity Timeline + Quick Actions + Upcoming ── */}
+        <Grid container spacing={{ xs: 2, lg: 3 }}>
+          {/* Activity Timeline ── Tertiary */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            {visibleWidgets === 'tertiary' ? (
+              <ActivityTimelineWidget />
+            ) : (
+              <DashCard sx={{ p: 2.5 }}>
+                <Stack spacing={1.5}>
+                  <MuiSkeleton width="30%" height={16} />
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <MuiSkeleton variant="circular" width={32} height={32} />
+                      <Box sx={{ flex: 1 }}>
+                        <MuiSkeleton width="75%" height={12} />
+                        <MuiSkeleton width="50%" height={8} sx={{ mt: 0.5 }} />
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              </DashCard>
+            )}
+          </Grid>
+
+          {/* Right Column: Quick Actions + Upcoming Tasks/Events/Grocery */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Stack spacing={{ xs: 2, lg: 3 }}>
+              {/* Quick Actions */}
+              <DashCard delay={0.3} variant="outlined" sx={{ p: 2.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+                  {t.dashboard.quickActions}
+                </Typography>
+                {isLoading ? (
+                  <Grid container spacing={1}>
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Grid key={i} size={{ xs: 6, sm: 3 }}>
+                        <MuiSkeleton variant="rounded" height={64} sx={{ borderRadius: 3 }} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Grid container spacing={1}>
+                    {quickActions.map((action) => (
+                      <Grid key={action.label} size={{ xs: 6, sm: 3 }}>
+                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                          <Button
+                            fullWidth
+                            onClick={action.onClick}
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: 0.75,
+                              borderRadius: 3,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              bgcolor: alpha(theme.palette.text.primary, 0.02),
+                              py: 1.5,
+                              px: 1,
+                              textTransform: 'none',
+                              color: 'text.secondary',
+                              '&:hover': {
+                                bgcolor: alpha(theme.palette.primary.main, 0.06),
+                                borderColor: alpha(theme.palette.primary.main, 0.2),
+                              },
+                            }}
+                          >
+                            <Box sx={{
+                              width: 40,
+                              height: 40,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              borderRadius: 1.5,
-                              bgcolor: prayer.isNext ? alpha('#0D6B58', 0.15) : 'action.hover',
-                            }}
-                          >
-                            <DarkMode sx={{ fontSize: 12, color: prayer.isNext ? 'primary.main' : 'text.secondary' }} />
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 500, color: prayer.isNext ? 'text.primary' : 'text.secondary' }}
-                          >
-                            {isRTL ? prayer.nameAr : prayer.name}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 600, color: prayer.isNext ? 'primary.main' : 'text.primary' }}
-                          >
-                            {prayer.time}
-                          </Typography>
-                          {prayer.isNext && (
-                            <Chip
-                              size="small"
-                              label={isRTL ? 'التالي' : 'Next'}
-                              sx={{
-                                height: 18,
-                                fontSize: 9,
-                                fontWeight: 500,
-                                bgcolor: alpha('#0D6B58', 0.12),
-                                color: 'primary.main',
-                                '& .MuiChip-label': { px: 0.75 },
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </Box>
+                              borderRadius: 2.5,
+                              bgcolor: alpha(theme.palette.primary.main, 0.12),
+                              transition: 'all 0.2s',
+                              '.MuiButton-root:hover &': { transform: 'scale(1.1)', bgcolor: alpha(theme.palette.primary.main, 0.18) },
+                            }}>
+                              <action.icon sx={{ fontSize: 18, color: 'primary.main' }} />
+                            </Box>
+                            <Typography variant="caption" sx={{ fontSize: 11, fontWeight: 500, lineHeight: 1.2 }}>
+                              {action.label}
+                            </Typography>
+                          </Button>
+                        </motion.div>
+                      </Grid>
                     ))}
-                  </Stack>
-                  <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 1, color: 'text.secondary', opacity: 0.6, fontSize: 10 }}>
-                    {isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
-                  </Typography>
-                </MUICard>
-
-                {/* Weather Widget ── Secondary */}
-                {visibleWidgets === 'primary' ? (
-                  <MUICard sx={{ p: 2.5, lg: { p: 3 } }}>
-                    <Stack spacing={1.5}>
-                      <MuiSkeleton width="40%" height={16} />
-                      <MuiSkeleton width="25%" height={32} />
-                      <MuiSkeleton height={16} />
-                    </Stack>
-                  </MUICard>
-                ) : (
-                  <WeatherWidget />
+                  </Grid>
                 )}
-              </Stack>
-            </Grid>
-          </Grid>
 
-          {/* ─── Activity Timeline + Quick Actions + Upcoming ── */}
-          <Grid container spacing={{ xs: 2, lg: 3 }}>
-            {/* Activity Timeline ── Tertiary */}
-            <Grid size={{ xs: 12, lg: 6 }}>
-              {visibleWidgets === 'tertiary' ? (
-                <ActivityTimelineWidget />
-              ) : (
-                <MUICard sx={{ p: 2.5, lg: { p: 3 } }}>
-                  <Stack spacing={1.5}>
-                    <MuiSkeleton width="30%" height={16} />
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <MuiSkeleton variant="circular" width={32} height={32} />
-                        <Box sx={{ flex: 1 }}>
-                          <MuiSkeleton width="75%" height={12} />
-                          <MuiSkeleton width="50%" height={8} sx={{ mt: 0.5 }} />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Stack>
-                </MUICard>
-              )}
-            </Grid>
-
-            {/* Right Column: Quick Actions + Upcoming Tasks/Events/Grocery */}
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Stack spacing={{ xs: 2, lg: 3 }}>
-                {/* Quick Actions */}
-                <MUICard delay={0.3} variant="outlined" sx={{ p: 2.5, lg: { p: 3 } }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
-                    {t.dashboard.quickActions}
-                  </Typography>
-                  {isLoading ? (
-                    <Grid container spacing={1}>
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <Grid key={i} size={{ xs: 6, sm: 3 }}>
-                          <MuiSkeleton variant="rounded" height={64} sx={{ borderRadius: 3 }} />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Grid container spacing={1}>
-                      {quickActions.map((action) => (
-                        <Grid key={action.label} size={{ xs: 6, sm: 3 }}>
-                          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                            <Button
-                              fullWidth
-                              onClick={action.onClick}
+                {/* Family Members Avatars Row */}
+                {!isLoading && familyMembers.length > 0 && (
+                  <>
+                    <Divider sx={{ my: 1.5 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dashboard.members}:</Typography>
+                      <Box sx={{ display: 'flex', '& > *:not(:first-of-type)': { ml: -0.5 } }}>
+                        {familyMembers.slice(0, 5).map((member) => (
+                          <Tooltip key={member.id} title={member.profiles?.first_name || member.nickname || ''}>
+                            <Avatar
+                              src={member.profiles?.avatar_url || undefined}
                               sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: 0.75,
-                                borderRadius: 3,
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                bgcolor: alpha('#000', 0.02),
-                                py: 1.5,
-                                px: 1,
-                                textTransform: 'none',
-                                color: 'text.secondary',
-                                '&:hover': {
-                                  bgcolor: alpha(action.color, 0.06),
-                                  borderColor: alpha(action.color, 0.2),
-                                },
+                                width: 24,
+                                height: 24,
+                                border: '2px solid',
+                                borderColor: 'background.paper',
+                                fontSize: 9,
+                                bgcolor: alpha(theme.palette.primary.main, 0.15),
+                                color: 'primary.main',
                               }}
                             >
-                              <Box sx={{
-                                width: 40,
-                                height: 40,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: 2.5,
-                                bgcolor: alpha(action.color, 0.12),
-                                transition: 'all 0.2s',
-                                '.MuiButton-root:hover &': { transform: 'scale(1.1)', bgcolor: alpha(action.color, 0.18) },
-                              }}>
-                                <action.icon sx={{ fontSize: 18, color: action.color }} />
-                              </Box>
-                              <Typography variant="caption" sx={{ fontSize: 11, fontWeight: 500, lineHeight: 1.2 }}>
-                                {action.label}
-                              </Typography>
-                            </Button>
-                          </motion.div>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  )}
-
-                  {/* Family Members Avatars Row */}
-                  {!isLoading && familyMembers.length > 0 && (
-                    <>
-                      <Divider sx={{ my: 1.5 }} />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dashboard.members}:</Typography>
-                        <Box sx={{ display: 'flex', '& > *:not(:first-of-type)': { ml: -0.5 } }}>
-                          {familyMembers.slice(0, 5).map((member) => (
-                            <Tooltip key={member.id} title={member.profiles?.first_name || member.nickname || ''}>
-                              <Avatar
-                                src={member.profiles?.avatar_url || undefined}
-                                sx={{
-                                  width: 24,
-                                  height: 24,
-                                  border: '2px solid',
-                                  borderColor: 'background.paper',
-                                  fontSize: 9,
-                                  bgcolor: alpha('#0D6B58', 0.15),
-                                  color: 'primary.main',
-                                }}
-                              >
-                                {member.profiles?.first_name?.[0] || member.nickname?.[0] || '?'}
-                              </Avatar>
-                            </Tooltip>
-                          ))}
-                          {familyMembers.length > 5 && (
-                            <Avatar sx={{
-                              width: 24,
-                              height: 24,
-                              border: '2px solid',
-                              borderColor: 'background.paper',
-                              fontSize: 9,
-                              bgcolor: 'action.hover',
-                              color: 'text.secondary',
-                            }}>
-                              +{familyMembers.length - 5}
+                              {member.profiles?.first_name?.[0] || member.nickname?.[0] || '?'}
                             </Avatar>
-                          )}
-                        </Box>
-                      </Box>
-                    </>
-                  )}
-                </MUICard>
-
-                {/* Upcoming Tasks */}
-                <MUICard delay={0.35} variant="outlined" sx={{ p: 2.5, lg: { p: 3 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t.dashboard.upcomingTasks}</Typography>
-                    <Button
-                      variant="text"
-                      size="small"
-                      endIcon={<ArrowForward sx={{ fontSize: 12 }} />}
-                      onClick={() => setCurrentPage('tasks')}
-                      sx={{ fontSize: 12, textTransform: 'none', color: 'text.secondary', minWidth: 0 }}
-                    >
-                      {t.dashboard.viewAll}
-                    </Button>
-                  </Box>
-                  <Box sx={{ maxHeight: 256, overflowY: 'auto' }}>
-                    {isLoading ? (
-                      <Stack spacing={1}>
-                        {Array.from({ length: 3 }).map((_, i) => (
-                          <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <MuiSkeleton variant="rounded" width={20} height={20} sx={{ borderRadius: 1 }} />
-                            <Box sx={{ flex: 1 }}>
-                              <MuiSkeleton width="75%" height={16} />
-                              <MuiSkeleton width="33%" height={12} sx={{ mt: 0.5 }} />
-                            </Box>
-                          </Box>
+                          </Tooltip>
                         ))}
-                      </Stack>
-                    ) : upcomingTasks.length === 0 ? (
-                      <MUIEmptyState
-                        icon={Dashboard}
-                        title="Welcome to your dashboard"
-                        description="Start by creating your first task or adding family members"
-                      />
-                    ) : (
-                      <Stack spacing={0.75}>
-                        <AnimatePresence>
-                          {upcomingTasks.map((task, index) => {
-                            const priorityOpacity = task.priority === 'urgent' ? 1 : task.priority === 'high' ? 0.78 : task.priority === 'medium' ? 0.55 : 0.3
-                            return (
-                              <motion.div
-                                key={task.id}
-                                initial={{ opacity: 0, x: -8 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                              >
-                                <Box
-                                  sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1.25,
-                                    borderRadius: 3,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    bgcolor: alpha('#000', 0.02),
-                                    p: 1.25,
-                                    transition: 'background-color 0.2s',
-                                    '&:hover': { bgcolor: alpha('#0D6B58', 0.06) },
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      width: 28,
-                                      height: 28,
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      borderRadius: 1.5,
-                                      flexShrink: 0,
-                                      bgcolor: alpha('#0D6B58', priorityOpacity * 0.1),
-                                    }}
-                                  >
-                                    <Checklist sx={{ fontSize: 14, color: alpha('#0D6B58', 0.4 + priorityOpacity * 0.6) }} />
-                                  </Box>
-                                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                                    <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                      {task.title}
-                                    </Typography>
-                                    {task.due_date && (
-                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
-                                        <Schedule sx={{ fontSize: 12, color: 'text.secondary' }} />
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
-                                          {formatDueDate(task.due_date)}
-                                        </Typography>
-                                      </Box>
-                                    )}
-                                  </Box>
-                                  <PriorityBadge priority={task.priority} />
-                                </Box>
-                              </motion.div>
-                            )
-                          })}
-                        </AnimatePresence>
-                      </Stack>
-                    )}
-                  </Box>
-                </MUICard>
+                        {familyMembers.length > 5 && (
+                          <Avatar sx={{
+                            width: 24,
+                            height: 24,
+                            border: '2px solid',
+                            borderColor: 'background.paper',
+                            fontSize: 9,
+                            bgcolor: 'action.hover',
+                            color: 'text.secondary',
+                          }}>
+                            +{familyMembers.length - 5}
+                          </Avatar>
+                        )}
+                      </Box>
+                    </Box>
+                  </>
+                )}
+              </DashCard>
 
-                {/* Upcoming Events */}
-                <MUICard delay={0.4} sx={{ p: 2.5, lg: { p: 3 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t.dashboard.upcomingEvents}</Typography>
-                    <Button
-                      variant="text"
-                      size="small"
-                      endIcon={<ArrowForward sx={{ fontSize: 12 }} />}
-                      onClick={() => setCurrentPage('calendar')}
-                      sx={{ fontSize: 12, textTransform: 'none', color: 'text.secondary', minWidth: 0 }}
-                    >
-                      {t.dashboard.viewAll}
-                    </Button>
-                  </Box>
+              {/* Upcoming Tasks */}
+              <DashCard delay={0.35} variant="outlined" sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t.dashboard.upcomingTasks}</Typography>
+                  <Button
+                    variant="text"
+                    size="small"
+                    endIcon={<ArrowForward sx={{ fontSize: 12 }} />}
+                    onClick={() => setCurrentPage('tasks')}
+                    sx={{ fontSize: 12, textTransform: 'none', color: 'text.secondary', minWidth: 0 }}
+                  >
+                    {t.dashboard.viewAll}
+                  </Button>
+                </Box>
+                <Box sx={{ maxHeight: 256, overflowY: 'auto' }}>
                   {isLoading ? (
-                    <Stack spacing={1.5}>
+                    <Stack spacing={1}>
                       {Array.from({ length: 3 }).map((_, i) => (
                         <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <MuiSkeleton variant="circular" width={12} height={12} />
+                          <MuiSkeleton variant="rounded" width={20} height={20} sx={{ borderRadius: 1 }} />
                           <Box sx={{ flex: 1 }}>
                             <MuiSkeleton width="75%" height={16} />
                             <MuiSkeleton width="33%" height={12} sx={{ mt: 0.5 }} />
@@ -1474,148 +1269,243 @@ export default function DashboardPage() {
                         </Box>
                       ))}
                     </Stack>
-                  ) : upcomingEvents.length === 0 ? (
-                    <MUIEmptyState
-                      icon={CalendarToday}
-                      title={t.dashboard.noEvents}
-                      description="Schedule your first event"
+                  ) : upcomingTasks.length === 0 ? (
+                    <EmptyState
+                      icon={Dashboard}
+                      title="Welcome to your dashboard"
+                      description="Start by creating your first task or adding family members"
                     />
                   ) : (
-                    <Stack spacing={1.25}>
+                    <Stack spacing={0.75}>
                       <AnimatePresence>
-                        {upcomingEvents.map((event, index) => (
-                          <motion.div
-                            key={event.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                          >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                borderRadius: 3,
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                bgcolor: alpha('#000', 0.02),
-                                p: 1.5,
-                                transition: 'background-color 0.2s',
-                                '&:hover': { bgcolor: alpha('#0D6B58', 0.06) },
-                              }}
+                        {upcomingTasks.map((task, index) => {
+                          const priorityOpacity = task.priority === 'urgent' ? 1 : task.priority === 'high' ? 0.78 : task.priority === 'medium' ? 0.55 : 0.3
+                          return (
+                            <motion.div
+                              key={task.id}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.05 }}
                             >
                               <Box
                                 sx={{
-                                  width: 12,
-                                  height: 12,
-                                  borderRadius: '50%',
-                                  flexShrink: 0,
-                                  bgcolor: event.color || '#0D6B58',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1.25,
+                                  borderRadius: 3,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  bgcolor: alpha(theme.palette.text.primary, 0.02),
+                                  p: 1.25,
+                                  transition: 'background-color 0.2s',
+                                  '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.06) },
                                 }}
-                              />
-                              <Box sx={{ minWidth: 0, flex: 1 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {event.title}
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
-                                  <Schedule sx={{ fontSize: 12, color: 'text.secondary' }} />
-                                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
-                                    {formatEventTime(event.start_time)}
+                              >
+                                <Box
+                                  sx={{
+                                    width: 28,
+                                    height: 28,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 1.5,
+                                    flexShrink: 0,
+                                    bgcolor: alpha(theme.palette.primary.main, priorityOpacity * 0.1),
+                                  }}
+                                >
+                                  <Checklist sx={{ fontSize: 14, color: alpha(theme.palette.primary.main, 0.4 + priorityOpacity * 0.6) }} />
+                                </Box>
+                                <Box sx={{ minWidth: 0, flex: 1 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {task.title}
                                   </Typography>
-                                  {event.all_day && (
-                                    <Chip
-                                      size="small"
-                                      label="All day"
-                                      variant="outlined"
-                                      sx={{ height: 16, fontSize: 9, '& .MuiChip-label': { px: 0.5 } }}
-                                    />
+                                  {task.due_date && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                                      <Schedule sx={{ fontSize: 12, color: 'text.secondary' }} />
+                                      <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
+                                        {formatDueDate(task.due_date)}
+                                      </Typography>
+                                    </Box>
                                   )}
                                 </Box>
+                                <PriorityBadge priority={task.priority} />
                               </Box>
-                            </Box>
-                          </motion.div>
-                        ))}
+                            </motion.div>
+                          )
+                        })}
                       </AnimatePresence>
                     </Stack>
                   )}
-                </MUICard>
+                </Box>
+              </DashCard>
 
-                {/* Grocery Reminders */}
-                <MUICard delay={0.45} sx={{ p: 2.5, lg: { p: 3 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t.dashboard.groceryReminders}</Typography>
-                    <Button
-                      variant="text"
-                      size="small"
-                      endIcon={<ArrowForward sx={{ fontSize: 12 }} />}
-                      onClick={() => setCurrentPage('grocery')}
-                      sx={{ fontSize: 12, textTransform: 'none', color: 'text.secondary', minWidth: 0 }}
-                    >
-                      {t.dashboard.viewAll}
-                    </Button>
-                  </Box>
-                  {isLoading ? (
-                    <Stack spacing={1.5}>
-                      <MuiSkeleton height={12} sx={{ borderRadius: 5 }} />
-                      <MuiSkeleton width="50%" height={16} />
-                    </Stack>
-                  ) : (
-                    <>
-                      <Stack spacing={1}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            {stats.groceryChecked} of {stats.groceryItems} items
-                          </Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                            {stats.groceryItems > 0
-                              ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
-                              : 0}
-                            %
-                          </Typography>
+              {/* Upcoming Events */}
+              <DashCard delay={0.4} sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t.dashboard.upcomingEvents}</Typography>
+                  <Button
+                    variant="text"
+                    size="small"
+                    endIcon={<ArrowForward sx={{ fontSize: 12 }} />}
+                    onClick={() => setCurrentPage('calendar')}
+                    sx={{ fontSize: 12, textTransform: 'none', color: 'text.secondary', minWidth: 0 }}
+                  >
+                    {t.dashboard.viewAll}
+                  </Button>
+                </Box>
+                {isLoading ? (
+                  <Stack spacing={1.5}>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <MuiSkeleton variant="circular" width={12} height={12} />
+                        <Box sx={{ flex: 1 }}>
+                          <MuiSkeleton width="75%" height={16} />
+                          <MuiSkeleton width="33%" height={12} sx={{ mt: 0.5 }} />
                         </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={
-                            stats.groceryItems > 0
-                              ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
-                              : 0
-                          }
-                          sx={{
-                            height: 10,
+                      </Box>
+                    ))}
+                  </Stack>
+                ) : upcomingEvents.length === 0 ? (
+                  <EmptyState
+                    icon={CalendarToday}
+                    title={t.dashboard.noEvents}
+                    description="Schedule your first event"
+                  />
+                ) : (
+                  <Stack spacing={1.25}>
+                    <AnimatePresence>
+                      {upcomingEvents.map((event, index) => (
+                        <motion.div
+                          key={event.id}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1.5,
+                              borderRadius: 3,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              bgcolor: alpha(theme.palette.text.primary, 0.02),
+                              p: 1.5,
+                              transition: 'background-color 0.2s',
+                              '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.06) },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                borderRadius: '50%',
+                                flexShrink: 0,
+                                bgcolor: event.color || theme.palette.primary.main,
+                              }}
+                            />
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {event.title}
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
+                                <Schedule sx={{ fontSize: 12, color: 'text.secondary' }} />
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
+                                  {formatEventTime(event.start_time)}
+                                </Typography>
+                                {event.all_day && (
+                                  <Chip
+                                    size="small"
+                                    label="All day"
+                                    variant="outlined"
+                                    sx={{ height: 16, fontSize: 9, '& .MuiChip-label': { px: 0.5 } }}
+                                  />
+                                )}
+                              </Box>
+                            </Box>
+                          </Box>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </Stack>
+                )}
+              </DashCard>
+
+              {/* Grocery Reminders */}
+              <DashCard delay={0.45} sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t.dashboard.groceryReminders}</Typography>
+                  <Button
+                    variant="text"
+                    size="small"
+                    endIcon={<ArrowForward sx={{ fontSize: 12 }} />}
+                    onClick={() => setCurrentPage('grocery')}
+                    sx={{ fontSize: 12, textTransform: 'none', color: 'text.secondary', minWidth: 0 }}
+                  >
+                    {t.dashboard.viewAll}
+                  </Button>
+                </Box>
+                {isLoading ? (
+                  <Stack spacing={1.5}>
+                    <MuiSkeleton height={12} sx={{ borderRadius: 5 }} />
+                    <MuiSkeleton width="50%" height={16} />
+                  </Stack>
+                ) : (
+                  <>
+                    <Stack spacing={1}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {stats.groceryChecked} of {stats.groceryItems} items
+                        </Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                          {stats.groceryItems > 0
+                            ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
+                            : 0}
+                          %
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={
+                          stats.groceryItems > 0
+                            ? Math.round((stats.groceryChecked / stats.groceryItems) * 100)
+                            : 0
+                        }
+                        sx={{
+                          height: 10,
+                          borderRadius: 5,
+                          bgcolor: 'action.hover',
+                          '& .MuiLinearProgress-bar': {
                             borderRadius: 5,
-                            bgcolor: 'action.hover',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 5,
-                              bgcolor: 'secondary.main',
-                            },
-                          }}
-                        />
-                      </Stack>
-                      {stats.groceryItems - stats.groceryChecked > 0 ? (
-                        <Typography variant="caption" sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-                          <ShoppingCart sx={{ fontSize: 12 }} />
-                          {stats.groceryItems - stats.groceryChecked} items still needed
-                        </Typography>
-                      ) : stats.groceryItems > 0 ? (
-                        <Typography variant="caption" sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.5, color: 'primary.main' }}>
-                          <CheckCircle sx={{ fontSize: 12 }} />
-                          All items checked off!
-                        </Typography>
-                      ) : (
-                        <MUIEmptyState
-                          icon={ShoppingBag}
-                          title={t.grocery.noItems}
-                          description={t.grocery.noItemsDesc}
-                        />
-                      )}
-                    </>
-                  )}
-                </MUICard>
-              </Stack>
-            </Grid>
+                            bgcolor: 'secondary.main',
+                          },
+                        }}
+                      />
+                    </Stack>
+                    {stats.groceryItems - stats.groceryChecked > 0 ? (
+                      <Typography variant="caption" sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                        <ShoppingCart sx={{ fontSize: 12 }} />
+                        {stats.groceryItems - stats.groceryChecked} items still needed
+                      </Typography>
+                    ) : stats.groceryItems > 0 ? (
+                      <Typography variant="caption" sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.5, color: 'primary.main' }}>
+                        <CheckCircle sx={{ fontSize: 12 }} />
+                        All items checked off!
+                      </Typography>
+                    ) : (
+                      <EmptyState
+                        icon={ShoppingBag}
+                        title={t.grocery.noItems}
+                        description={t.grocery.noItemsDesc}
+                      />
+                    )}
+                  </>
+                )}
+              </DashCard>
+            </Stack>
           </Grid>
-        </Box>
-      </Box>
-    </ThemeProvider>
+        </Grid>
+      </Stack>
+    </Container>
   )
 }

@@ -15,15 +15,22 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { motion } from 'framer-motion'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
+import Container from '@mui/material/Container'
+import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Grid from '@mui/material/Grid'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Switch from '@mui/material/Switch'
+import Chip from '@mui/material/Chip'
+import Avatar from '@mui/material/Avatar'
+import Divider from '@mui/material/Divider'
+import MenuItem from '@mui/material/MenuItem'
+import IconButton from '@mui/material/IconButton'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -90,7 +97,6 @@ export function ProfileTab() {
       setIsEditing(false)
       toast.success(t.common.success)
     } catch {
-      // Even if Supabase fails (e.g. demo mode), update locally
       const fullPhone = phoneNumber ? `${countryCode}${phoneNumber}` : null
       setUser({ ...user, first_name: firstName, last_name: lastName, phone: fullPhone, country_code: countryCode })
       setIsEditing(false)
@@ -137,7 +143,7 @@ export function ProfileTab() {
           await supabase.from('profiles').update({ language: lang }).eq('id', user.id)
           setUser({ ...user, language: lang })
         } catch {
-          // silently fail - language changed locally already
+          // silently fail
         }
       }
     },
@@ -145,79 +151,83 @@ export function ProfileTab() {
   )
 
   return (
-    <div className="space-y-6">
+    <Stack spacing={3}>
       {/* Profile Card */}
       <SectionCard>
-        <div className="flex items-center gap-4 mb-6">
-          <Avatar className="size-16 border-2 border-primary/30 ring-4 ring-primary/10">
-            <AvatarImage src={user?.avatar_url ?? ''} />
-            <AvatarFallback className="bg-primary/20 text-accent text-xl">
-              {user?.first_name?.[0] ?? user?.email?.[0] ?? '?'}
-            </AvatarFallback>
+        <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 3 }}>
+          <Avatar
+            src={user?.avatar_url ?? ''}
+            sx={{ width: 64, height: 64, border: 2, borderColor: 'primary.light', ring: 4, boxShadow: 2 }}
+          >
+            {user?.first_name?.[0] ?? user?.email?.[0] ?? '?'}
           </Avatar>
-          <div className="flex-1">
-            <h3 className="text-foreground text-lg font-semibold font-display">
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>
               {user?.first_name && user?.last_name
                 ? `${user.first_name} ${user.last_name}`
                 : user?.email ?? 'User'}
-            </h3>
-            <p className="text-muted-foreground text-sm">{user?.email}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline" className="bg-primary/10 text-accent border-primary/20 text-[10px]">
-                {t.settings.owner}
-              </Badge>
-            </div>
-          </div>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">{user?.email}</Typography>
+            <Stack direction="row" alignItems="center" gap={1} sx={{ mt: 0.5 }}>
+              <Chip
+                label={t.settings.owner}
+                size="small"
+                variant="outlined"
+                color="primary"
+                sx={{ fontSize: 10 }}
+              />
+            </Stack>
+          </Box>
           {!isEditing && (
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-primary">
-              <Pencil className="size-4" />
+            <Button
+              variant="text"
+              size="small"
+              color="primary"
+              startIcon={<Pencil size={16} />}
+              onClick={() => setIsEditing(true)}
+            >
               {t.settings.editProfile}
             </Button>
           )}
-        </div>
+        </Stack>
 
         {isEditing ? (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-4"
-          >
+          <Stack spacing={2}>
             {/* Change Photo */}
-            <div>
-              <Label className="text-foreground text-xs mb-1.5 block">
+            <Box>
+              <Typography variant="caption" color="text.primary" sx={{ mb: 1, display: 'block' }}>
                 {t.avatarGen.changePhoto}
-              </Label>
-              <div className="flex items-center gap-3">
-                <Avatar className="size-14 border border-border">
-                  <AvatarImage src={user?.avatar_url ?? ''} />
-                  <AvatarFallback className="bg-primary/20 text-accent text-lg">
-                    {user?.first_name?.[0] ?? '?'}
-                  </AvatarFallback>
+              </Typography>
+              <Stack direction="row" alignItems="center" gap={2}>
+                <Avatar
+                  src={user?.avatar_url ?? ''}
+                  sx={{ width: 56, height: 56 }}
+                >
+                  {user?.first_name?.[0] ?? '?'}
                 </Avatar>
-                <div className="flex flex-col gap-1.5">
+                <Stack spacing={1}>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border bg-background text-foreground hover:bg-muted hover:border-border"
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Wand2 size={14} />}
                     onClick={() => setAvatarGenOpen(true)}
                   >
-                    <Wand2 className="size-3.5 mr-1.5" />
                     {t.avatarGen.changePhoto}
                   </Button>
                   {user?.avatar_url && (
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-[#EF4444]/70 hover:text-[#EF4444] hover:bg-[#EF4444]/10 h-7 text-xs"
+                      variant="text"
+                      size="small"
+                      color="error"
                       onClick={handleRemovePhoto}
+                      sx={{ fontSize: 12, minHeight: 28 }}
                     >
                       {t.avatarGen.removePhoto}
                     </Button>
                   )}
-                </div>
-              </div>
-            </div>
+                </Stack>
+              </Stack>
+            </Box>
 
             <AvatarGenerator
               open={avatarGenOpen}
@@ -227,196 +237,184 @@ export function ProfileTab() {
               context="user"
             />
 
-            <Separator className="bg-muted" />
+            <Divider />
 
             {/* First Name & Last Name */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label className="text-foreground text-xs mb-1.5 block">{t.auth.firstName}</Label>
-                <Input
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  label={t.auth.firstName}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="bg-background border-border text-foreground focus-visible:ring-primary/20 focus-visible:border-primary/50"
                   placeholder={isRTL ? 'الاسم الأول' : 'First name'}
+                  fullWidth
+                  size="small"
                 />
-              </div>
-              <div>
-                <Label className="text-foreground text-xs mb-1.5 block">{t.auth.lastName}</Label>
-                <Input
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  label={t.auth.lastName}
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="bg-background border-border text-foreground focus-visible:ring-primary/20 focus-visible:border-primary/50"
                   placeholder={isRTL ? 'اسم العائلة' : 'Last name'}
+                  fullWidth
+                  size="small"
                 />
-              </div>
-            </div>
+              </Grid>
+            </Grid>
 
             {/* Email (read-only) */}
-            <div>
-              <Label className="text-foreground text-xs mb-1.5 block">{t.auth.email}</Label>
-              <Input
-                value={user?.email ?? ''}
-                readOnly
-                className="bg-background/60 border-border text-muted-foreground cursor-not-allowed focus-visible:ring-0"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1">
-                {isRTL ? 'لا يمكن تغيير البريد الإلكتروني من هنا' : 'Email cannot be changed here'}
-              </p>
-            </div>
+            <TextField
+              label={t.auth.email}
+              value={user?.email ?? ''}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              size="small"
+              helperText={isRTL ? 'لا يمكن تغيير البريد الإلكتروني من هنا' : 'Email cannot be changed here'}
+            />
 
             {/* Phone with country code */}
-            <div>
-              <Label className="text-foreground text-xs mb-1.5 block">{t.auth.phone}</Label>
-              <div className="flex gap-2">
-                <Select value={countryCode} onValueChange={setCountryCode}>
-                  <SelectTrigger className="w-[120px] bg-surface-variant border-outline-variant text-foreground focus:ring-primary/20 focus:border-primary/50 shrink-0 rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-border text-foreground max-h-64 rounded-xl shadow-[var(--elevation-2)]">
-                    {countryCodes.map((cc) => (
-                      <SelectItem
-                        key={cc.code}
-                        value={cc.code}
-                        className="focus:bg-primary-container focus:text-on-primary-container cursor-pointer rounded-lg"
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <span>{cc.flag}</span>
-                          <span>{cc.code}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
+            <Box>
+              <Typography variant="caption" sx={{ mb: 1, display: 'block' }}>{t.auth.phone}</Typography>
+              <Stack direction="row" gap={1}>
+                <TextField
+                  select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  size="small"
+                  sx={{ width: 120, flexShrink: 0 }}
+                >
+                  {countryCodes.map((cc) => (
+                    <MenuItem key={cc.code} value={cc.code}>
+                      {cc.flag} {cc.code}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="flex-1 bg-background border-border text-foreground focus-visible:ring-primary/20 focus-visible:border-primary/50"
                   placeholder="501234567"
+                  fullWidth
+                  size="small"
                 />
-              </div>
-            </div>
+              </Stack>
+            </Box>
 
-            <Separator className="bg-muted" />
+            <Divider />
 
             {/* Save / Cancel */}
-            <div className="flex gap-2">
+            <Stack direction="row" gap={1}>
               <Button
-                size="sm"
+                variant="contained"
+                size="small"
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-primary hover:bg-primary/80 text-white"
+                startIcon={saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               >
-                {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                 {t.common.save}
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleCancel} className="text-muted-foreground hover:text-foreground">
-                <X className="size-4" />
+              <Button
+                variant="text"
+                size="small"
+                color="inherit"
+                onClick={handleCancel}
+                startIcon={<X size={16} />}
+              >
                 {t.common.cancel}
               </Button>
-            </div>
-          </motion.div>
+            </Stack>
+          </Stack>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <span className="text-muted-foreground text-xs">{t.auth.firstName}</span>
-                <p className="text-foreground text-sm">{user?.first_name || 'Not set'}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground text-xs">{t.auth.lastName}</span>
-                <p className="text-foreground text-sm">{user?.last_name || 'Not set'}</p>
-              </div>
-            </div>
-            <div>
-              <span className="text-muted-foreground text-xs">{t.auth.email}</span>
-              <p className="text-foreground text-sm">{user?.email || 'Not set'}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground text-xs">{t.auth.phone}</span>
-              <p className="text-foreground text-sm">{user?.phone || 'Not set'}</p>
-            </div>
-          </motion.div>
+          <Stack spacing={1.5}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="caption" color="text.secondary">{t.auth.firstName}</Typography>
+                <Typography variant="body2">{user?.first_name || 'Not set'}</Typography>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="caption" color="text.secondary">{t.auth.lastName}</Typography>
+                <Typography variant="body2">{user?.last_name || 'Not set'}</Typography>
+              </Grid>
+            </Grid>
+            <Box>
+              <Typography variant="caption" color="text.secondary">{t.auth.email}</Typography>
+              <Typography variant="body2">{user?.email || 'Not set'}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">{t.auth.phone}</Typography>
+              <Typography variant="body2">{user?.phone || 'Not set'}</Typography>
+            </Box>
+          </Stack>
         )}
       </SectionCard>
 
       {/* Language */}
       <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            <Globe className="size-4 text-primary" /> {t.settings.language}
-          </span>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Globe size={16} color="primary" /> {t.settings.language}
+          </Stack>
         </SectionTitle>
         <SectionDescription>Choose your preferred language</SectionDescription>
 
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => handleLanguageChange('en')}
-            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-              language === 'en'
-                ? 'bg-primary/10 border-primary/30 text-accent'
-                : 'bg-muted border-border text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            <span className="text-lg">🇺🇸</span>
-            <span className="text-sm font-medium">English</span>
-            {language === 'en' && <Check className="size-4 ml-auto" />}
-          </button>
-          <button
-            onClick={() => handleLanguageChange('ar')}
-            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-              language === 'ar'
-                ? 'bg-primary/10 border-primary/30 text-accent'
-                : 'bg-muted border-border text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            <span className="text-lg">🇸🇦</span>
-            <span className="text-sm font-medium">العربية</span>
-            {language === 'ar' && <Check className="size-4 ml-auto" />}
-          </button>
-        </div>
+        <Grid container spacing={1.5}>
+          <Grid size={{ xs: 6 }}>
+            <Button
+              fullWidth
+              variant={language === 'en' ? 'contained' : 'outlined'}
+              onClick={() => handleLanguageChange('en')}
+              sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
+            >
+              🇺🇸 English
+              {language === 'en' && <Check size={16} style={{ marginLeft: 'auto' }} />}
+            </Button>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <Button
+              fullWidth
+              variant={language === 'ar' ? 'contained' : 'outlined'}
+              onClick={() => handleLanguageChange('ar')}
+              sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
+            >
+              🇸🇦 العربية
+              {language === 'ar' && <Check size={16} style={{ marginLeft: 'auto' }} />}
+            </Button>
+          </Grid>
+        </Grid>
       </SectionCard>
 
       {/* Theme */}
-      <SectionCard data-tour="theme-toggle">
+      <SectionCard>
         <SectionTitle>
-          <span className="flex items-center gap-2">
-            {theme === 'dark' ? <Moon className="size-4 text-primary" /> : <Sun className="size-4 text-primary" />}
+          <Stack direction="row" alignItems="center" gap={1}>
+            {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
             {t.settings.theme}
-          </span>
+          </Stack>
         </SectionTitle>
         <SectionDescription>{isRTL ? 'خصّص تجربتك البصرية' : 'Customize your visual experience'}</SectionDescription>
 
-        <div className="flex items-center gap-3">
-          <button
+        <Stack direction="row" gap={1.5}>
+          <Button
+            fullWidth
+            variant={theme === 'dark' ? 'contained' : 'outlined'}
             onClick={() => handleThemeChange('dark')}
-            className={`flex items-center gap-3 p-3 rounded-xl border transition-all flex-1 ${
-              theme === 'dark'
-                ? 'bg-primary/10 border-primary/30 text-accent'
-                : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
-            }`}
+            startIcon={<Moon size={18} />}
+            sx={{ textTransform: 'none' }}
           >
-            <Moon className={`size-5 ${theme === 'dark' ? 'theme-icon-animate' : ''}`} />
-            <span className="text-sm font-medium">{isRTL ? 'داكن' : 'Dark'}</span>
-            {theme === 'dark' && <Check className="size-4 ml-auto" />}
-          </button>
-          <button
+            {isRTL ? 'داكن' : 'Dark'}
+            {theme === 'dark' && <Check size={16} style={{ marginLeft: 'auto' }} />}
+          </Button>
+          <Button
+            fullWidth
+            variant={theme === 'light' ? 'contained' : 'outlined'}
             onClick={() => handleThemeChange('light')}
-            className={`flex items-center gap-3 p-3 rounded-xl border transition-all flex-1 ${
-              theme === 'light'
-                ? 'bg-primary/10 border-primary/30 text-accent'
-                : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
-            }`}
+            startIcon={<Sun size={18} />}
+            sx={{ textTransform: 'none' }}
           >
-            <Sun className={`size-5 ${theme === 'light' ? 'theme-icon-animate' : ''}`} />
-            <span className="text-sm font-medium">{isRTL ? 'فاتح' : 'Light'}</span>
-            {theme === 'light' && <Check className="size-4 ml-auto" />}
-          </button>
-        </div>
+            {isRTL ? 'فاتح' : 'Light'}
+            {theme === 'light' && <Check size={16} style={{ marginLeft: 'auto' }} />}
+          </Button>
+        </Stack>
       </SectionCard>
 
       {/* Family Memberships */}
@@ -425,30 +423,42 @@ export function ProfileTab() {
         <SectionDescription>Families you belong to</SectionDescription>
 
         {families.length > 0 ? (
-          <div className="space-y-2">
+          <Stack spacing={1}>
             {families.map((family) => (
-              <div
+              <Stack
                 key={family.id}
-                className="flex items-center gap-3 p-3 rounded-2xl bg-surface-variant/50 border border-outline-variant hover:bg-primary-container transition-all duration-150 cursor-pointer"
+                direction="row"
+                alignItems="center"
+                gap={1.5}
+                sx={{
+                  p: 1.5,
+                  borderRadius: 3,
+                  bgcolor: 'action.hover',
+                  border: 1,
+                  borderColor: 'divider',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  '&:hover': { bgcolor: 'primary.main', color: 'primary.contrastText' },
+                }}
               >
-                <div className="size-9 rounded-xl bg-primary-container flex items-center justify-center">
-                  <Users className="size-4 text-on-primary-container" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-foreground text-sm font-medium truncate">{family.name}</p>
-                  <p className="text-muted-foreground text-xs truncate">{family.description || 'No description'}</p>
-                </div>
-                <ChevronRight className="size-4 text-muted-foreground" />
-              </div>
+                <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Users size={16} color="white" />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>{family.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>{family.description || 'No description'}</Typography>
+                </Box>
+                <ChevronRight size={16} color="text.secondary" />
+              </Stack>
             ))}
-          </div>
+          </Stack>
         ) : (
-          <div className="text-center py-6">
-            <Users className="size-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-muted-foreground text-sm">No family memberships yet</p>
-          </div>
+          <Stack alignItems="center" sx={{ py: 3 }}>
+            <Users size={32} color="text.secondary" />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No family memberships yet</Typography>
+          </Stack>
         )}
       </SectionCard>
-    </div>
+    </Stack>
   )
 }

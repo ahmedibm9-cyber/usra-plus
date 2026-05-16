@@ -13,7 +13,7 @@ import { useAdminAuthStore } from '@/stores/admin-auth-store'
 import { initErrorCapture } from '@/lib/error-capture'
 
 // MUI Components
-import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -21,7 +21,10 @@ import CircularProgress from '@mui/material/CircularProgress'
 import LinearProgress from '@mui/material/LinearProgress'
 import Paper from '@mui/material/Paper'
 import Chip from '@mui/material/Chip'
+import Link from '@mui/material/Link'
+import Box from '@mui/material/Box'
 import { keyframes } from '@mui/system'
+import { alpha } from '@mui/material/styles'
 
 // Layout Components
 const AppSidebar = dynamic(() => import('@/components/layout/app-sidebar').then(m => ({ default: m.AppSidebar })), { ssr: false })
@@ -135,9 +138,9 @@ const fadeInUp = keyframes`
 `
 
 // ─── Hexagon Logo SVG ─────────────────────────────────────────────
-function HexLogo({ size = 40, color }: { size?: number; color?: string }) {
+function HexLogo({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size * 1.1} viewBox="0 0 40 44" fill="none">
+    <svg width={size} height={size * 1.1} viewBox="0 0 40 44" fill="none" aria-hidden="true">
       <path
         d="M20 1L37.3205 10.5V29.5L20 39L2.67949 29.5V10.5L20 1Z"
         fill="currentColor"
@@ -164,10 +167,10 @@ function safeCreateClient() {
 // ─── Chunk loader — MUI CircularProgress ──────────────────────────
 function ChunkLoader() {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+    <Stack sx={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
       <Stack direction="column" spacing={2.5} sx={{ alignItems: 'center' }}>
         <CircularProgress size={40} thickness={3} />
-        <Box sx={{ width: 96, height: 2, borderRadius: 1, bgcolor: 'action.hover', overflow: 'hidden' }}>
+        <Box sx={{ width: 12, height: 0.25, borderRadius: 1, bgcolor: 'action.hover', overflow: 'hidden' }}>
           <Box
             sx={{
               height: '100%',
@@ -178,7 +181,7 @@ function ChunkLoader() {
           />
         </Box>
       </Stack>
-    </Box>
+    </Stack>
   )
 }
 
@@ -201,31 +204,31 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback
       return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
-          <Box sx={{ maxWidth: 384, width: '100%', textAlign: 'center' }}>
-            <Box sx={{ mx: 'auto', mb: 2.5, width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 3, bgcolor: 'primary.main', opacity: 0.1 }}>
+        <Container maxWidth={false} sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+          <Stack spacing={2} sx={{ maxWidth: 384, width: '100%', alignItems: 'center', textAlign: 'center' }}>
+            <Box sx={(theme) => ({ width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 3, bgcolor: alpha(theme.palette.primary.main, 0.1) })}>
               <Box sx={{ color: 'primary.main' }}>
                 <HexLogo size={32} />
               </Box>
             </Box>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
               Something went wrong
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
               A rendering error occurred. Please try refreshing the page.
             </Typography>
             <Button variant="contained" onClick={() => window.location.reload()} sx={{ borderRadius: 3, px: 3, py: 1 }}>
               Refresh Page
             </Button>
-          </Box>
-        </Box>
+          </Stack>
+        </Container>
       )
     }
     return this.props.children
   }
 }
 
-// ─── Auth Screen — MUI ────────────────────────────────────────────
+// ─── Auth Screen — Pure MUI ───────────────────────────────────────
 const AUTH_FEATURES = ['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat'] as const
 
 const TESTIMONIALS = [
@@ -249,22 +252,28 @@ function AuthScreen() {
   const currentTestimonial = TESTIMONIALS[testimonialIdx]
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', position: 'relative', overflow: 'hidden' }}>
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', position: 'relative', overflow: 'hidden' }}
+    >
       {/* LEFT: Decorative panel (hidden on mobile) */}
       <Box
-        sx={{
+        sx={(theme) => ({
           display: { xs: 'none', lg: 'flex' },
           width: { lg: '45%', xl: '50%' },
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #0D6B58, #065F46, #0A5A4A, #1C1B1F)',
+          background: theme.palette.mode === 'dark'
+            ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark}, ${theme.palette.background.paper}, ${theme.palette.background.default})`
+            : `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main}, ${theme.palette.primary.dark}, ${theme.palette.background.default})`,
           backgroundSize: '300% 300%',
           animation: `${gradientShift} 15s ease infinite`,
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           px: 5,
-        }}
+        })}
       >
         {/* Subtle pattern overlay */}
         <Box
@@ -276,45 +285,45 @@ function AuthScreen() {
           }}
         />
 
-        {/* Floating hexagon shapes */}
-        <Box sx={{ position: 'absolute', top: '8%', left: '8%', animation: `${hexFloat1} 20s ease-in-out infinite`, opacity: 0.08, color: '#6EE7B7' }}>
+        {/* Floating hexagon shapes — theme-aware colors */}
+        <Box sx={(theme) => ({ position: 'absolute', top: '8%', left: '8%', animation: `${hexFloat1} 20s ease-in-out infinite`, opacity: 0.08, color: theme.palette.primary.light })}>
           <HexLogo size={60} />
         </Box>
-        <Box sx={{ position: 'absolute', top: '25%', right: '12%', animation: `${hexFloat2} 25s ease-in-out infinite`, opacity: 0.06, color: '#5EEAD4' }}>
+        <Box sx={(theme) => ({ position: 'absolute', top: '25%', right: '12%', animation: `${hexFloat2} 25s ease-in-out infinite`, opacity: 0.06, color: theme.palette.secondary.light })}>
           <HexLogo size={40} />
         </Box>
-        <Box sx={{ position: 'absolute', bottom: '20%', left: '15%', animation: `${hexFloat3} 22s ease-in-out infinite`, opacity: 0.07, color: '#6EE7B7' }}>
+        <Box sx={(theme) => ({ position: 'absolute', bottom: '20%', left: '15%', animation: `${hexFloat3} 22s ease-in-out infinite`, opacity: 0.07, color: theme.palette.primary.light })}>
           <HexLogo size={50} />
         </Box>
-        <Box sx={{ position: 'absolute', bottom: '35%', right: '8%', animation: `${hexFloat1} 18s ease-in-out infinite`, animationDelay: '5s', opacity: 0.05, color: '#A7F3D0' }}>
+        <Box sx={(theme) => ({ position: 'absolute', bottom: '35%', right: '8%', animation: `${hexFloat1} 18s ease-in-out infinite`, animationDelay: '5s', opacity: 0.05, color: theme.palette.success.light })}>
           <HexLogo size={35} />
         </Box>
-        <Box sx={{ position: 'absolute', top: '55%', left: '5%', animation: `${hexFloat2} 28s ease-in-out infinite`, animationDelay: '8s', opacity: 0.04, color: '#6EE7B7' }}>
+        <Box sx={(theme) => ({ position: 'absolute', top: '55%', left: '5%', animation: `${hexFloat2} 28s ease-in-out infinite`, animationDelay: '8s', opacity: 0.04, color: theme.palette.primary.light })}>
           <HexLogo size={28} />
         </Box>
 
-        {/* Floating blobs */}
-        <Box sx={{ position: 'absolute', top: '15%', right: '10%', width: 288, height: 288, borderRadius: '50%', bgcolor: '#6EE7B7', opacity: 0.06, filter: 'blur(80px)', animation: `${floatAnim} 4s ease-in-out infinite` }} />
-        <Box sx={{ position: 'absolute', bottom: '10%', left: '5%', width: 224, height: 224, borderRadius: '50%', bgcolor: '#5EEAD4', opacity: 0.05, filter: 'blur(60px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '2s' }} />
-        <Box sx={{ position: 'absolute', top: '50%', left: '40%', width: 160, height: 160, borderRadius: '50%', bgcolor: '#34D399', opacity: 0.04, filter: 'blur(50px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '4s' }} />
+        {/* Floating blobs — theme-aware colors */}
+        <Box sx={(theme) => ({ position: 'absolute', top: '15%', right: '10%', width: 288, height: 288, borderRadius: '50%', bgcolor: theme.palette.primary.light, opacity: 0.06, filter: 'blur(80px)', animation: `${floatAnim} 4s ease-in-out infinite` })} />
+        <Box sx={(theme) => ({ position: 'absolute', bottom: '10%', left: '5%', width: 224, height: 224, borderRadius: '50%', bgcolor: theme.palette.secondary.light, opacity: 0.05, filter: 'blur(60px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '2s' })} />
+        <Box sx={(theme) => ({ position: 'absolute', top: '50%', left: '40%', width: 160, height: 160, borderRadius: '50%', bgcolor: theme.palette.secondary.light, opacity: 0.04, filter: 'blur(50px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '4s' })} />
 
         {/* Content */}
-        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', px: 5, width: '100%' }}>
+        <Stack sx={{ position: 'relative', zIndex: 10, justifyContent: 'center', alignItems: 'center', px: 5, width: '100%' }}>
           {/* Logo */}
           <Box sx={{ mb: 3, animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` }}>
-            <Box sx={{
+            <Box sx={(theme) => ({
               width: 88,
               height: 88,
               borderRadius: 4,
-              bgcolor: 'rgba(255,255,255,0.08)',
+              bgcolor: alpha(theme.palette.common.white, 0.08),
               backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 40px rgba(110, 231, 183, 0.15)',
-            }}>
-              <Box sx={{ color: '#6EE7B7' }}>
+              boxShadow: `0 0 40px ${alpha(theme.palette.primary.light, 0.15)}`,
+            })}>
+              <Box sx={{ color: 'primary.light' }}>
                 <HexLogo size={52} />
               </Box>
             </Box>
@@ -324,7 +333,7 @@ function AuthScreen() {
           <Typography
             variant="h3"
             sx={{
-              color: '#FFFFFF',
+              color: 'common.white',
               fontWeight: 700,
               letterSpacing: '-0.02em',
               animation: `${textReveal} 0.5s ease-out forwards`,
@@ -336,8 +345,8 @@ function AuthScreen() {
           </Typography>
           <Typography
             variant="body1"
-            sx={{
-              color: 'rgba(255,255,255,0.6)',
+            sx={(theme) => ({
+              color: alpha(theme.palette.common.white, 0.6),
               fontWeight: 300,
               textAlign: 'center',
               maxWidth: 320,
@@ -345,7 +354,7 @@ function AuthScreen() {
               animation: `${textReveal} 0.5s ease-out forwards`,
               animationDelay: '0.4s',
               opacity: 0,
-            }}
+            })}
           >
             Your Family Operating System
           </Typography>
@@ -354,73 +363,76 @@ function AuthScreen() {
           <Stack
             direction="row"
             spacing={1}
-            sx={{
+            sx={(theme) => ({
               mt: 4,
               flexWrap: 'wrap',
               justifyContent: 'center',
               animation: `${textReveal} 0.5s ease-out forwards`,
               animationDelay: '0.6s',
               opacity: 0,
-            }}
+              '& .MuiChip-root': {
+                bgcolor: alpha(theme.palette.common.white, 0.06),
+                color: alpha(theme.palette.common.white, 0.5),
+                border: `1px solid ${alpha(theme.palette.common.white, 0.08)}`,
+                borderRadius: 2,
+                fontWeight: 500,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.light, 0.12),
+                  color: theme.palette.primary.light,
+                  borderColor: alpha(theme.palette.primary.light, 0.3),
+                  boxShadow: `0 0 12px ${alpha(theme.palette.primary.light, 0.2)}`,
+                  transform: 'translateY(-1px)',
+                },
+              },
+            })}
           >
             {AUTH_FEATURES.map((feature) => (
               <Chip
                 key={feature}
                 label={feature}
                 size="small"
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.06)',
-                  color: 'rgba(255,255,255,0.5)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 2,
-                  fontWeight: 500,
-                  fontSize: '0.75rem',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    bgcolor: 'rgba(110, 231, 183, 0.12)',
-                    color: '#6EE7B7',
-                    borderColor: 'rgba(110, 231, 183, 0.3)',
-                    boxShadow: '0 0 12px rgba(110, 231, 183, 0.2)',
-                    transform: 'translateY(-1px)',
-                  },
-                }}
               />
             ))}
           </Stack>
 
-          {/* Testimonial */}
-          <Box
+          {/* Testimonial — MUI Paper with elevation={0} and border */}
+          <Paper
             key={testimonialIdx}
-            sx={{
+            elevation={0}
+            sx={(theme) => ({
               mt: 5,
               maxWidth: 320,
               textAlign: 'center',
+              p: 2.5,
+              bgcolor: 'transparent',
+              border: `1px solid ${alpha(theme.palette.common.white, 0.06)}`,
+              borderRadius: 3,
               animation: `${fadeInUp} 0.6s ease-out forwards`,
-            }}
+            })}
           >
             <Typography
               variant="body2"
-              sx={{
-                color: 'rgba(255,255,255,0.5)',
+              sx={(theme) => ({
+                color: alpha(theme.palette.common.white, 0.5),
                 fontStyle: 'italic',
                 lineHeight: 1.7,
-                fontSize: '0.8125rem',
-              }}
+              })}
             >
               {currentTestimonial.text}
             </Typography>
             <Typography
               variant="caption"
-              sx={{
+              sx={(theme) => ({
                 display: 'block',
                 mt: 1.5,
-                color: 'rgba(255,255,255,0.35)',
+                color: alpha(theme.palette.common.white, 0.35),
                 fontWeight: 500,
-              }}
+              })}
             >
               — {currentTestimonial.author}, {currentTestimonial.role}
             </Typography>
-          </Box>
+          </Paper>
 
           {/* Social proof */}
           <Stack
@@ -435,48 +447,48 @@ function AuthScreen() {
             }}
           >
             <Stack direction="row" spacing={-0.5}>
-              {['#0D6B58', '#065F46', '#047857', '#059669'].map((bg, i) => (
+              {(['primary.main', 'secondary.main', 'success.dark', 'warning.main'] as const).map((paletteKey, i) => (
                 <Box
-                  key={i}
-                  sx={{
+                  key={paletteKey}
+                  sx={(theme) => ({
                     width: 22,
                     height: 22,
                     borderRadius: '50%',
-                    bgcolor: bg,
-                    border: '2px solid rgba(255,255,255,0.2)',
+                    bgcolor: (theme.palette as Record<string, Record<string, string>>)[paletteKey.split('.')[0]]?.[paletteKey.split('.')[1]] ?? theme.palette.primary.main,
+                    border: `2px solid ${alpha(theme.palette.common.white, 0.2)}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.5rem',
                     fontWeight: 700,
-                    color: 'rgba(255,255,255,0.7)',
+                    color: alpha(theme.palette.common.white, 0.7),
                     zIndex: 4 - i,
-                  }}
+                  })}
                 >
                   {['S', 'A', 'F', 'K'][i]}
                 </Box>
               ))}
             </Stack>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+            <Typography variant="caption" sx={(theme) => ({ color: alpha(theme.palette.common.white, 0.4), fontWeight: 500 })}>
               Trusted by 10,000+ families
             </Typography>
           </Stack>
-        </Box>
+        </Stack>
       </Box>
 
       {/* RIGHT: Auth form */}
-      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 2, lg: 4 }, position: 'relative' }}>
+      <Stack sx={{ flex: 1, alignItems: 'center', justifyContent: 'center', p: { xs: 2, lg: 4 }, position: 'relative' }}>
         {/* Dot grid animation background */}
         <Box
-          sx={{
+          sx={(theme) => ({
             position: 'absolute',
             inset: 0,
             opacity: 0.4,
-            backgroundImage: `radial-gradient(circle, rgba(13, 107, 88, 0.08) 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.08)} 1px, transparent 1px)`,
             backgroundSize: '24px 24px',
             animation: `${dotPulse} 4s ease-in-out infinite`,
             pointerEvents: 'none',
-          }}
+          })}
         />
 
         {/* Subtle background blobs */}
@@ -495,16 +507,16 @@ function AuthScreen() {
             {authView === 'forgot-password' && <ForgotPasswordForm />}
           </Box>
         </Box>
-      </Box>
-    </Box>
+      </Stack>
+    </Container>
   )
 }
 
-// ─── Loading Screen — MUI ─────────────────────────────────────────
+// ─── Loading Screen — Pure MUI ────────────────────────────────────
 function LoadingScreen() {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Box sx={{ textAlign: 'center' }}>
+    <Container maxWidth={false} sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Stack spacing={3} sx={{ alignItems: 'center', textAlign: 'center' }}>
         {/* Animated logo */}
         <Box
           sx={{
@@ -513,11 +525,10 @@ function LoadingScreen() {
             justifyContent: 'center',
             width: 64,
             height: 64,
-            mb: 3,
             animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
           }}
         >
-          <Box sx={{ width: 64, height: 64, borderRadius: 3, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={(theme) => ({ width: 64, height: 64, borderRadius: 3, bgcolor: alpha(theme.palette.primary.main, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' })}>
             <Box sx={{ color: 'primary.main' }}>
               <HexLogo size={40} />
             </Box>
@@ -539,7 +550,7 @@ function LoadingScreen() {
         </Typography>
 
         {/* Progress indicator */}
-        <Box sx={{ mt: 3, mx: 'auto', width: 128 }}>
+        <Box sx={{ width: 128 }}>
           <LinearProgress
             sx={{
               height: 2,
@@ -551,8 +562,8 @@ function LoadingScreen() {
             }}
           />
         </Box>
-      </Box>
-    </Box>
+      </Stack>
+    </Container>
   )
 }
 
@@ -561,7 +572,7 @@ const PAGE_ORDER: AppPage[] = ['dashboard', 'tasks', 'calendar', 'milestones', '
 const SWIPE_MIN_DISTANCE = 80
 const SWIPE_MIN_VELOCITY = 0.3
 
-// ─── Main App Layout — MUI ────────────────────────────────────────
+// ─── Main App Layout — Pure MUI ───────────────────────────────────
 function MainApp() {
   const currentPage = useCurrentPage()
   const currentFamily = useCurrentFamily()
@@ -733,36 +744,37 @@ function MainApp() {
   }, [currentPage])
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', overflow: 'hidden' }}>
-      {/* Skip to content (accessibility) */}
-      <a
+    <Stack sx={{ minHeight: '100vh', bgcolor: 'background.default', overflow: 'hidden' }}>
+      {/* Skip to content (accessibility) — MUI Link with sx */}
+      <Link
         href="#main-content"
         tabIndex={0}
-        style={{
+        sx={(theme) => ({
           position: 'absolute',
           left: '-9999px',
           top: 0,
           zIndex: 9999,
-          padding: '0.75rem 1.5rem',
-          background: 'var(--primary)',
-          color: '#fff',
+          px: 3,
+          py: 1.5,
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
           fontWeight: 600,
-          fontSize: '0.875rem',
           textDecoration: 'none',
           borderRadius: '0 0 0.5rem 0',
-        }}
-        onFocus={(e) => { e.currentTarget.style.left = '0' }}
-        onBlur={(e) => { e.currentTarget.style.left = '-9999px' }}
+          '&:focus': {
+            left: 0,
+          },
+        })}
       >
         Skip to main content
-      </a>
+      </Link>
 
       {/* Demo data loading overlay */}
       {!demoDataReady && (
         <Box sx={{ position: 'fixed', inset: 0, zIndex: 9999, bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <Box sx={{ display: 'inline-block', mb: 2, animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: 3, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
+            <Box sx={{ animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` }}>
+              <Box sx={(theme) => ({ width: 48, height: 48, borderRadius: 3, bgcolor: alpha(theme.palette.primary.main, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' })}>
                 <Box sx={{ color: 'primary.main' }}>
                   <HexLogo size={32} />
                 </Box>
@@ -771,10 +783,10 @@ function MainApp() {
             <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
               USRA PLUS
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
               Loading demo data…
             </Typography>
-            <Box sx={{ mt: 2, mx: 'auto', width: 96 }}>
+            <Box sx={{ width: 96 }}>
               <LinearProgress
                 sx={{
                   height: 2,
@@ -784,7 +796,7 @@ function MainApp() {
                 }}
               />
             </Box>
-          </Box>
+          </Stack>
         </Box>
       )}
 
@@ -804,11 +816,9 @@ function MainApp() {
       </Box>
 
       {/* Main content area — offset by sidebar width on desktop */}
-      <Box
+      <Stack
         sx={{
           flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
           minHeight: '100vh',
           overflow: 'hidden',
           marginLeft: isRTL ? 0 : { md: sidebarCollapsed ? 72 : 256 },
@@ -835,14 +845,14 @@ function MainApp() {
           {swipeOffset !== 0 && (
             <>
               <Box sx={{
-                position: 'fixed', top: 0, left: 0, bottom: 0, width: 4, zIndex: 40,
+                position: 'fixed', top: 0, left: 0, bottom: 0, width: 0.5, zIndex: 40,
                 display: { xs: 'block', md: 'none' },
                 bgcolor: 'primary.main',
                 opacity: swipeOffset > 10 ? Math.min(1, (swipeOffset - 10) / 30) : 0,
                 transition: 'opacity 0.15s',
               }} />
               <Box sx={{
-                position: 'fixed', top: 0, right: 0, bottom: 0, width: 4, zIndex: 40,
+                position: 'fixed', top: 0, right: 0, bottom: 0, width: 0.5, zIndex: 40,
                 display: { xs: 'block', md: 'none' },
                 bgcolor: 'primary.main',
                 opacity: swipeOffset < -10 ? Math.min(1, (-swipeOffset - 10) / 30) : 0,
@@ -850,7 +860,8 @@ function MainApp() {
               }} />
             </>
           )}
-          <Box
+          <Container
+            maxWidth="xl"
             sx={{
               p: { xs: 2, md: 3 },
               pb: { xs: 10, md: 3 },
@@ -859,18 +870,31 @@ function MainApp() {
               overflowX: 'hidden',
             }}
           >
-            <h1 tabIndex={-1} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+            {/* Screen-reader-only heading for accessibility */}
+            <Typography
+              variant="h1"
+              component="h1"
+              tabIndex={-1}
+              sx={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                overflow: 'hidden',
+                clip: 'rect(0,0,0,0)',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {currentPage}
-            </h1>
+            </Typography>
             {pageContent}
-          </Box>
+          </Container>
         </Box>
-      </Box>
+      </Stack>
       <BottomNav />
       <CommandPalette />
       <GuidedTour />
       <CookieConsentBanner />
-    </Box>
+    </Stack>
   )
 }
 

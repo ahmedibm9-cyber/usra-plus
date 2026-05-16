@@ -9,6 +9,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Avatar,
   IconButton,
   Menu,
@@ -17,8 +18,13 @@ import {
   Box,
   Typography,
   Tooltip,
-  ButtonBase,
+  Chip,
+  Fab,
+  Paper,
+  Select,
+  SelectChangeEvent,
   alpha,
+  useTheme,
 } from '@mui/material'
 import {
   Dashboard,
@@ -77,38 +83,20 @@ const SECTION_LABELS: Record<string, { en: string; ar: string }> = {
   bottom: { en: '', ar: '' },
 }
 
-function PlanBadgeMUI() {
+// ─── Plan Badge (MUI Chip) ──────────────────────────────────────
+
+function PlanBadge() {
   const plan = useCurrentPlan()
-
-  const config: Record<string, { label: string; color: string; bgcolor: string }> = {
-    free: { label: 'Free', color: 'text.disabled', bgcolor: 'action.hover' },
-    pro: { label: 'Pro', color: 'secondary.main', bgcolor: 'secondary.light' },
-    family_plus: { label: 'Family+', color: 'secondary.main', bgcolor: 'secondary.light' },
+  const config: Record<string, { label: string; color: 'default' | 'primary' | 'secondary'; variant: 'filled' | 'outlined' }> = {
+    free: { label: 'Free', color: 'default', variant: 'outlined' },
+    pro: { label: 'Pro', color: 'secondary', variant: 'filled' },
+    family_plus: { label: 'Family+', color: 'secondary', variant: 'filled' },
   }
-
-  const { label, color, bgcolor } = config[plan] || config.free
-
-  return (
-    <Box
-      sx={{
-        px: 1,
-        py: 0,
-        height: 20,
-        display: 'inline-flex',
-        alignItems: 'center',
-        borderRadius: 1,
-        fontSize: '0.625rem',
-        fontWeight: 600,
-        color,
-        bgcolor,
-        border: '1px solid',
-        borderColor: 'divider',
-      }}
-    >
-      {label}
-    </Box>
-  )
+  const { label, color, variant } = config[plan] || config.free
+  return <Chip label={label} size="small" color={color} variant={variant} sx={{ height: 18, fontSize: '0.625rem', fontWeight: 700 }} />
 }
+
+// ─── Nav Item Button ────────────────────────────────────────────
 
 function NavItemButton({
   item,
@@ -121,6 +109,7 @@ function NavItemButton({
   collapsed: boolean
   onClick: () => void
 }) {
+  const theme = useTheme()
   const { t, isRTL: isRTLActive } = useI18n()
   const label = t.nav[item.labelKey]
   const Icon = item.icon
@@ -139,7 +128,7 @@ function NavItemButton({
           mb: 0.25,
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            bgcolor: isActive ? 'primary.light' : alpha('#0D6B58', 0.04),
+            bgcolor: isActive ? 'primary.light' : alpha(theme.palette.primary.main, 0.04),
             '& .MuiListItemIcon-root .MuiSvgIcon-root': {
               transform: 'scale(1.1)',
             },
@@ -183,43 +172,41 @@ function NavItemButton({
             transition={{ duration: 0.2, ease: 'easeOut' }}
             style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}
           >
-          <ListItemText
-            primary={label}
-            sx={{
-              opacity: 1,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              '& .MuiListItemText-primary': {
-                fontSize: '0.8125rem',
-                fontWeight: isActive ? 600 : 500,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              },
-            }}
-          />
-          {item.pro && !isActive && (
-            <Box
+            <ListItemText
+              primary={label}
               sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.25,
-                px: 0.5,
-                height: 16,
-                borderRadius: 1,
-                bgcolor: alpha('#0D6B58', 0.08),
-                border: '1px solid',
-                borderColor: alpha('#0D6B58', 0.15),
-                flexShrink: 0,
-                ml: 'auto',
+                opacity: 1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                '& .MuiListItemText-primary': {
+                  fontSize: '0.8125rem',
+                  fontWeight: isActive ? 600 : 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                },
               }}
-            >
-              <Lock sx={{ fontSize: 8, color: 'primary.main' }} />
-              <Typography sx={{ fontSize: '0.5rem', fontWeight: 700, color: 'primary.main', lineHeight: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                PRO
-              </Typography>
-            </Box>
-          )}
+            />
+            {item.pro && !isActive && (
+              <Chip
+                size="small"
+                icon={<Lock sx={{ fontSize: 8 }} />}
+                label="PRO"
+                variant="outlined"
+                sx={{
+                  height: 16,
+                  fontSize: '0.5rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  ml: 'auto',
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  borderColor: alpha(theme.palette.primary.main, 0.15),
+                  color: 'primary.main',
+                  '& .MuiChip-icon': { color: 'primary.main' },
+                  '& .MuiChip-label': { px: 0.5 },
+                }}
+              />
+            )}
           </motion.div>
         )}
       </ListItemButton>
@@ -237,7 +224,10 @@ function NavItemButton({
   return button
 }
 
+// ─── Sidebar Content ────────────────────────────────────────────
+
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+  const theme = useTheme()
   const currentPage = useCurrentPage()
   const setCurrentPage = useAppStore((state) => state.setCurrentPage)
   const currentFamily = useCurrentFamily()
@@ -279,7 +269,6 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
     return user.first_name || user.email
   }, [user])
 
-  // Group nav items by section
   const groupedNavItems = useMemo(() => {
     const groups: { section: string; items: NavItem[] }[] = []
     let currentSection = ''
@@ -312,14 +301,24 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         left: 0,
         right: 0,
         height: 120,
-        background: `linear-gradient(180deg, ${alpha('#0D6B58', 0.06)}, transparent)`,
+        background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.06)}, transparent)`,
         pointerEvents: 'none',
       }} />
 
       {/* Logo & Family Selector */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, px: collapsed ? 1.5 : 2, pt: 2.5, pb: 1.5, position: 'relative' }}>
         {/* Logo */}
-        <Box sx={{ display: 'flex', alignItems: collapsed ? 'center' : 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: 1.5, mb: 1 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            display: 'flex',
+            alignItems: collapsed ? 'center' : 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            gap: 1.5,
+            mb: 1,
+            bgcolor: 'transparent',
+          }}
+        >
           <Box
             sx={{
               width: 36,
@@ -331,10 +330,10 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               flexShrink: 0,
-              boxShadow: `0 0 20px ${alpha('#0D6B58', 0.3)}`,
+              boxShadow: `0 0 20px ${alpha(theme.palette.primary.main, 0.3)}`,
               transition: 'box-shadow 0.3s ease',
               '&:hover': {
-                boxShadow: `0 0 28px ${alpha('#0D6B58', 0.4)}`,
+                boxShadow: `0 0 28px ${alpha(theme.palette.primary.main, 0.4)}`,
               },
             }}
           >
@@ -355,83 +354,55 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               USRA PLUS
             </Typography>
           )}
-        </Box>
+        </Paper>
 
-        {/* Family Selector */}
+        {/* Family Selector (MUI Select) */}
         {!collapsed && (
           <>
-            <ButtonBase
-              onClick={(e) => setFamilyMenuAnchor(e.currentTarget)}
+            <Select
+              value={currentFamily?.id || ''}
+              onChange={(e: SelectChangeEvent) => handleFamilySwitch(e.target.value)}
+              size="small"
+              displayEmpty
+              renderValue={() => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 1.5,
+                      bgcolor: 'primary.light',
+                    }}
+                  >
+                    <Group sx={{ fontSize: 12, color: 'primary.dark' }} />
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {currentFamily?.name || t.nav.dashboard}
+                  </Typography>
+                </Box>
+              )}
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
                 borderRadius: 2,
-                px: 1.5,
-                py: 0.75,
-                textAlign: 'left',
-                '&:hover': { bgcolor: 'action.hover' },
-                transition: 'background-color 0.15s',
-                width: '100%',
+                '& .MuiSelect-select': { py: 0.75, px: 1.5, display: 'flex', alignItems: 'center' },
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'divider' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.primary.main, 0.3) },
               }}
             >
-              <Box
-                sx={{
-                  width: 24,
-                  height: 24,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 1.5,
-                  bgcolor: 'primary.light',
-                }}
-              >
-                <Group sx={{ fontSize: 12, color: 'primary.dark' }} />
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  color: 'text.secondary',
-                }}
-              >
-                {currentFamily?.name || t.nav.dashboard}
-              </Typography>
-              <UnfoldMore sx={{ fontSize: 12, color: 'text.disabled' }} />
-            </ButtonBase>
-
-            <Menu
-              anchorEl={familyMenuAnchor}
-              open={Boolean(familyMenuAnchor)}
-              onClose={() => setFamilyMenuAnchor(null)}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-              slotProps={{
-                paper: {
-                  sx: {
-                    width: 224,
-                    mt: 0.5,
-                    borderRadius: 3,
-                    bgcolor: 'background.paper',
-                    backgroundImage: 'none',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    overflow: 'hidden',
-                  },
-                },
-              }}
-            >
-              <Typography variant="caption" sx={{ px: 2, py: 0.75, display: 'block', color: 'text.disabled', fontWeight: 600 }}>
-                {t.settings.family}
-              </Typography>
               {families.map((family) => (
                 <MenuItem
                   key={family.id}
-                  onClick={() => handleFamilySwitch(family.id)}
+                  value={family.id}
                   selected={currentFamily?.id === family.id}
                   sx={{
                     borderRadius: 1.5,
@@ -447,37 +418,41 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                   {family.name}
                 </MenuItem>
               ))}
-            </Menu>
+            </Select>
           </>
         )}
       </Box>
 
       <Divider sx={{ mx: 1.5 }} />
 
-      {/* Navigation with section labels */}
+      {/* Navigation with section labels (ListSubheader) */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1.5, px: 0.5 }}>
         <nav role="navigation" aria-label="Main navigation" data-tour="sidebar">
-          <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+          <List
+            disablePadding
+            subheader={<Box />}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}
+          >
             {groupedNavItems.map((group, groupIdx) => (
               <Box key={group.section}>
-                {/* Section label (not for first group 'main' and 'bottom') */}
+                {/* Section label using ListSubheader */}
                 {!collapsed && group.section && group.section !== 'main' && group.section !== 'bottom' && (
-                  <Typography
-                    variant="caption"
+                  <ListSubheader
                     sx={{
                       px: 2,
                       pt: groupIdx > 1 ? 1.5 : 0,
                       pb: 0.5,
-                      display: 'block',
                       color: 'text.disabled',
                       fontWeight: 600,
                       fontSize: '0.625rem',
                       textTransform: 'uppercase',
                       letterSpacing: 0.8,
+                      bgcolor: 'transparent',
+                      lineHeight: 'inherit',
                     }}
                   >
                     {isRTL ? SECTION_LABELS[group.section]?.ar : SECTION_LABELS[group.section]?.en}
-                  </Typography>
+                  </ListSubheader>
                 )}
                 {group.items.map((item) => (
                   <NavItemButton
@@ -499,29 +474,25 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
       {/* Quick Add FAB */}
       {!collapsed && (
         <Box sx={{ px: 2, py: 1 }}>
-          <ButtonBase
+          <Fab
+            variant="extended"
+            size="medium"
+            color="primary"
             onClick={() => setCurrentPage('tasks')}
             sx={{
               width: '100%',
-              display: 'flex',
-              alignItems: 'center',
+              borderRadius: 3,
               justifyContent: 'center',
               gap: 1,
-              py: 1,
-              borderRadius: 3,
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-              transition: 'all 0.2s ease',
+              boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
               '&:hover': {
-                bgcolor: 'primary.dark',
-                transform: 'translateY(-1px)',
-                boxShadow: `0 4px 12px ${alpha('#0D6B58', 0.3)}`,
+                boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.4)}`,
               },
             }}
           >
             <Add sx={{ fontSize: 16 }} />
             <Typography sx={{ fontSize: '0.75rem', fontWeight: 600 }}>Quick Add</Typography>
-          </ButtonBase>
+          </Fab>
         </Box>
       )}
 
@@ -574,7 +545,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                 >
                   {displayName}
                 </Typography>
-                <PlanBadgeMUI />
+                <PlanBadge />
               </Box>
               <Typography
                 variant="caption"
@@ -639,7 +610,10 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
   )
 }
 
+// ─── App Sidebar Inner ──────────────────────────────────────────
+
 function AppSidebarInner() {
+  const theme = useTheme()
   const sidebarCollapsed = useSidebarCollapsed()
   const sidebarOpen = useAppStore((state) => state.sidebarOpen)
   const setSidebarOpen = useAppStore((state) => state.setSidebarOpen)
@@ -664,7 +638,7 @@ function AppSidebarInner() {
           borderLeft: isRTL ? '1px solid' : 'none',
           borderColor: 'divider',
           bgcolor: 'background.paper',
-          zIndex: (theme) => theme.zIndex.drawer,
+          zIndex: (t) => t.zIndex.drawer,
           transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           overflow: 'hidden',
         }}

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus,
   LayoutGrid,
@@ -18,34 +17,39 @@ import {
   Users,
   BarChart3,
   CalendarDays,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
+  MoreVert,
+} from '@mui/icons-material'
 import {
+  Container,
+  Stack,
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  InputLabel,
+  FormControl,
+  LinearProgress,
+  Avatar,
+  Menu,
+  Tooltip,
+  ToggleButtonGroup,
+  ToggleButton,
+  Divider,
+  Checkbox,
+  FormControlLabel,
+  useTheme,
+} from '@mui/material'
 import { useChoreStore, type Chore } from '@/stores/chore-store'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -66,49 +70,36 @@ const CHORE_ICONS = [
   { emoji: '🧹', label: 'Vacuum' },
 ]
 
-// ─── Person colors for avatars ─────────────────────────────────────
-const PERSON_COLORS = [
-  'bg-[var(--accent-primary)]',
-  'bg-[var(--accent)]',
-  'bg-[#22C55E]',
-  'bg-emerald-500',
-  'bg-teal-500',
-  'bg-[var(--accent-primary)]',
-]
-
-function getPersonColor(index: number) {
-  return PERSON_COLORS[index % PERSON_COLORS.length]
+// ─── Difficulty chip colors ───────────────────────────────────────
+const DIFFICULTY_COLOR = {
+  easy: 'success' as const,
+  medium: 'warning' as const,
+  hard: 'error' as const,
 }
 
-// ─── Difficulty badge colors ───────────────────────────────────────
-const DIFFICULTY_STYLES = {
-  easy: 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/20',
-  medium: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  hard: 'bg-teal-500/15 text-teal-400 border-teal-500/20',
-}
-
-// ─── Frequency badge colors ────────────────────────────────────────
-const FREQUENCY_STYLES = {
-  daily: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20',
-  weekly: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20',
-  biweekly: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20',
-  monthly: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+// ─── Frequency chip colors ────────────────────────────────────────
+const FREQUENCY_COLOR = {
+  daily: 'primary' as const,
+  weekly: 'primary' as const,
+  biweekly: 'primary' as const,
+  monthly: 'secondary' as const,
 }
 
 // ─── Progress Ring Component ───────────────────────────────────────
 function ProgressRing({ percent, size = 36, strokeWidth = 3 }: { percent: number; size?: number; strokeWidth?: number }) {
+  const theme = useTheme()
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (percent / 100) * circumference
 
   return (
-    <svg width={size} height={size} className="transform -rotate-90">
+    <Box sx={{ transform: 'rotate(-90deg)' }} component="svg" width={size} height={size}>
       <circle
         cx={size / 2}
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="var(--border-subtle)"
+        stroke={theme.palette.divider}
         strokeWidth={strokeWidth}
       />
       <circle
@@ -116,30 +107,36 @@ function ProgressRing({ percent, size = 36, strokeWidth = 3 }: { percent: number
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="var(--accent-primary)"
+        stroke={theme.palette.primary.main}
         strokeWidth={strokeWidth}
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         strokeLinecap="round"
-        className="transition-all duration-500"
+        sx={{ transition: 'all 0.5s' }}
       />
-    </svg>
+    </Box>
   )
 }
 
 // ─── Person Avatar Helper ──────────────────────────────────────────
-function PersonAvatar({ personId, members, size = 'sm' }: { personId: string; members: { id: string; user_id: string; nickname?: string | null; profiles?: { first_name?: string | null; last_name?: string | null } }[]; size?: 'sm' | 'md' }) {
+function PersonAvatar({ personId, members, size = 'small' }: { personId: string; members: { id: string; user_id: string; nickname?: string | null; profiles?: { first_name?: string | null; last_name?: string | null } }[]; size?: 'small' | 'medium' }) {
+  const theme = useTheme()
   const member = members.find((m) => m.user_id === personId || m.id === personId)
   const name = member?.nickname || member?.profiles?.first_name || personId.slice(0, 2)
+
+  const avatarColors = [
+    theme.palette.primary.main,
+    theme.palette.secondary.main,
+    theme.palette.success.main,
+    theme.palette.warning.main,
+    theme.palette.info.main,
+  ]
   const idx = members.findIndex((m) => m.user_id === personId || m.id === personId)
-  const colorClass = getPersonColor(idx >= 0 ? idx : 0)
-  const dim = size === 'sm' ? 'h-6 w-6 text-[10px]' : 'h-8 w-8 text-xs'
+  const bgColor = avatarColors[idx >= 0 ? idx % avatarColors.length : 0]
 
   return (
-    <Avatar className={`${dim} ring-1 ring-[--border-subtle]`}>
-      <AvatarFallback className={`${colorClass} text-white font-semibold`}>
-        {name.charAt(0).toUpperCase()}
-      </AvatarFallback>
+    <Avatar sx={{ width: size === 'small' ? 24 : 32, height: size === 'small' ? 24 : 32, bgcolor: bgColor, fontSize: size === 'small' ? 10 : 12, fontWeight: 600 }}>
+      {name.charAt(0).toUpperCase()}
     </Avatar>
   )
 }
@@ -157,25 +154,17 @@ function AddChoreDialog({
   members: { id: string; user_id: string; nickname?: string | null; profiles?: { first_name?: string | null; last_name?: string | null } }[]
 }) {
   const { t, isRTL } = useI18n()
-
-  // Use key to force remount of inner form when dialog opens with different data
   const formKey = `${open}-${editingChore?.id ?? 'new'}`
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] max-w-md" dir={isRTL ? 'rtl' : 'ltr'}>
-        <DialogHeader>
-          <DialogTitle className="text-[--text-primary]">
-            {editingChore ? t.chores.editChore : t.chores.addChore}
-          </DialogTitle>
-        </DialogHeader>
-        <AddChoreForm
-          key={formKey}
-          editingChore={editingChore}
-          members={members}
-          onSave={() => onOpenChange(false)}
-        />
-      </DialogContent>
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
+      <DialogTitle>{editingChore ? t.chores.editChore : t.chores.addChore}</DialogTitle>
+      <AddChoreForm
+        key={formKey}
+        editingChore={editingChore}
+        members={members}
+        onSave={() => onOpenChange(false)}
+      />
     </Dialog>
   )
 }
@@ -190,6 +179,7 @@ function AddChoreForm({
   onSave: () => void
 }) {
   const { t, isRTL } = useI18n()
+  const theme = useTheme()
   const addChoreToSupabase = useChoreStore((s) => s.addChoreToSupabase)
   const updateChoreInSupabase = useChoreStore((s) => s.updateChoreInSupabase)
   const currentFamily = useAppStore((s) => s.currentFamily)
@@ -251,137 +241,119 @@ function AddChoreForm({
 
   return (
     <>
-      <div className="space-y-4 py-2 max-h-[70vh] overflow-y-auto custom-scrollbar">
+      <DialogContent sx={{ p: 2, maxHeight: '70vh', overflowY: 'auto' }}>
+        <Stack spacing={2.5}>
           {/* Icon Selector */}
-          <div className="space-y-2">
-            <Label className="text-[--text-secondary] text-sm">{t.chores.selectIcon}</Label>
-            <div className="flex flex-wrap gap-2">
+          <Stack spacing={1}>
+            <Typography variant="body2" color="text.secondary">{t.chores.selectIcon}</Typography>
+            <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
               {CHORE_ICONS.map((ic) => (
-                <button
+                <IconButton
                   key={ic.emoji + ic.label}
-                  type="button"
                   onClick={() => setIcon(ic.emoji)}
-                  className={`text-xl p-2 rounded-xl transition-all duration-200 ${
-                    icon === ic.emoji
-                      ? 'bg-[--accent-primary]/20 ring-2 ring-[--accent-primary]/50 scale-110'
-                      : 'bg-[--bg-surface-2] hover:bg-[--border-subtle]'
-                  }`}
+                  sx={{
+                    fontSize: 20,
+                    p: 1,
+                    borderRadius: 2,
+                    transition: 'all 0.2s',
+                    ...(icon === ic.emoji
+                      ? { bgcolor: `${theme.palette.primary.main}20`, outline: `2px solid ${theme.palette.primary.main}80`, transform: 'scale(1.1)' }
+                      : { bgcolor: theme.palette.action.hover, '&:hover': { bgcolor: theme.palette.action.selected } }),
+                  }}
                 >
                   {ic.emoji}
-                </button>
+                </IconButton>
               ))}
-            </div>
-          </div>
+            </Stack>
+          </Stack>
 
           {/* Title */}
-          <div className="space-y-2">
-            <Label className="text-[--text-secondary] text-sm">{t.chores.choreTitle}</Label>
-            <Input
+          <Stack spacing={1}>
+            <Typography variant="body2" color="text.secondary">{t.chores.choreTitle}</Typography>
+            <TextField
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={isRTL ? 'مثال: غسل الأطباق' : 'e.g. Wash Dishes'}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted]"
+              size="small"
+              fullWidth
             />
-          </div>
+          </Stack>
 
           {/* Description */}
-          <div className="space-y-2">
-            <Label className="text-[--text-secondary] text-sm">{t.chores.description}</Label>
-            <Input
+          <Stack spacing={1}>
+            <Typography variant="body2" color="text.secondary">{t.chores.description}</Typography>
+            <TextField
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={isRTL ? 'وصف اختياري' : 'Optional description'}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted]"
+              size="small"
+              fullWidth
             />
-          </div>
+          </Stack>
 
           {/* Frequency + Difficulty Row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-[--text-secondary] text-sm">{t.chores.frequency}</Label>
-              <Select value={frequency} onValueChange={(v) => setFrequency(v as Chore['frequency'])}>
-                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-                  <SelectItem value="daily">{t.chores.daily}</SelectItem>
-                  <SelectItem value="weekly">{t.chores.weekly}</SelectItem>
-                  <SelectItem value="biweekly">{t.chores.biweekly}</SelectItem>
-                  <SelectItem value="monthly">{t.chores.monthly}</SelectItem>
-                </SelectContent>
+          <Stack direction="row" spacing={2}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t.chores.frequency}</InputLabel>
+              <Select value={frequency} label={t.chores.frequency} onChange={(e) => setFrequency(e.target.value as Chore['frequency'])}>
+                <MenuItem value="daily">{t.chores.daily}</MenuItem>
+                <MenuItem value="weekly">{t.chores.weekly}</MenuItem>
+                <MenuItem value="biweekly">{t.chores.biweekly}</MenuItem>
+                <MenuItem value="monthly">{t.chores.monthly}</MenuItem>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[--text-secondary] text-sm">{t.chores.difficulty}</Label>
-              <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Chore['difficulty'])}>
-                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-                  <SelectItem value="easy">{t.chores.easy}</SelectItem>
-                  <SelectItem value="medium">{t.chores.medium}</SelectItem>
-                  <SelectItem value="hard">{t.chores.hard}</SelectItem>
-                </SelectContent>
+            </FormControl>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t.chores.difficulty}</InputLabel>
+              <Select value={difficulty} label={t.chores.difficulty} onChange={(e) => setDifficulty(e.target.value as Chore['difficulty'])}>
+                <MenuItem value="easy">{t.chores.easy}</MenuItem>
+                <MenuItem value="medium">{t.chores.medium}</MenuItem>
+                <MenuItem value="hard">{t.chores.hard}</MenuItem>
               </Select>
-            </div>
-          </div>
+            </FormControl>
+          </Stack>
 
           {/* Estimated Minutes */}
-          <div className="space-y-2">
-            <Label className="text-[--text-secondary] text-sm">{t.chores.estimatedMinutes}</Label>
-            <Input
+          <Stack spacing={1}>
+            <Typography variant="body2" color="text.secondary">{t.chores.estimatedMinutes}</Typography>
+            <TextField
               type="number"
               value={estimatedMinutes}
               onChange={(e) => setEstimatedMinutes(parseInt(e.target.value) || 0)}
-              min={1}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]"
+              size="small"
+              fullWidth
+              inputProps={{ min: 1 }}
             />
-          </div>
+          </Stack>
 
           {/* Assignees */}
-          <div className="space-y-2">
-            <Label className="text-[--text-secondary] text-sm">{t.chores.selectAssignees}</Label>
-            <div className="flex flex-wrap gap-2">
+          <Stack spacing={1}>
+            <Typography variant="body2" color="text.secondary">{t.chores.selectAssignees}</Typography>
+            <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
               {members.map((member) => {
                 const userId = member.user_id
                 const name = member.nickname || member.profiles?.first_name || userId.slice(0, 8)
                 const isSelected = selectedAssignees.includes(userId)
-                const idx = members.indexOf(member)
                 return (
-                  <button
+                  <Chip
                     key={member.id}
-                    type="button"
+                    label={name}
                     onClick={() => toggleAssignee(userId)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isSelected
-                        ? 'bg-[--accent-primary]/20 text-[--accent-primary] border border-[--accent-primary]/30'
-                        : 'bg-[--bg-surface-2] text-[--text-muted] border border-transparent hover:border-[--border-subtle]'
-                    }`}
-                  >
-                    <span className={`inline-block w-2 h-2 rounded-full ${getPersonColor(idx)}`} />
-                    {name}
-                  </button>
+                    variant={isSelected ? 'filled' : 'outlined'}
+                    color={isSelected ? 'primary' : 'default'}
+                    sx={{ cursor: 'pointer' }}
+                  />
                 )
               })}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-3 pt-2">
-          <Button
-            onClick={handleSave}
-            className="flex-1 bg-[--accent-primary] hover:bg-[--accent-primary]/90 text-white"
-          >
-            {isEditing ? t.common.save : t.common.add}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onSave}
-            className="border-[--border-subtle] text-[--text-muted]"
-          >
-            {t.common.cancel}
-          </Button>
-        </div>
+            </Stack>
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onSave} color="inherit">{t.common.cancel}</Button>
+        <Button onClick={handleSave} variant="contained" fullWidth>
+          {isEditing ? t.common.save : t.common.add}
+        </Button>
+      </DialogActions>
     </>
   )
 }
@@ -403,6 +375,8 @@ function ChoreCard({
   onTogglePause: (chore: Chore) => void
 }) {
   const { t, isRTL } = useI18n()
+  const theme = useTheme()
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const choreLogs = useChoreStore(s => s.choreLogs)
   const currentAssignee = chore.rotationOrder[chore.currentAssigneeIndex] || chore.assignedTo[0]
   const nextAssigneeIndex = (chore.currentAssigneeIndex + 1) % chore.rotationOrder.length
@@ -412,105 +386,88 @@ function ChoreCard({
   const nextMember = members.find((m) => m.user_id === nextAssignee || m.id === nextAssignee)
   const nextMemberName = nextMember?.nickname || nextMember?.profiles?.first_name || ''
 
-  // Completion rate based on actual chore logs (completed today = 100%, else 0%)
   const today = new Date().toISOString().split('T')[0]
   const completedToday = choreLogs.some((l) => l.choreId === chore.id && l.completedAt.startsWith(today))
   const completionPercent = chore.isPaused ? 0 : (completedToday ? 100 : 0)
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      className={`card-hover glass-card rounded-xl p-4 border border-[--border-subtle] bg-[--bg-surface] space-y-3 ${
-        chore.isPaused ? 'opacity-60' : ''
-      }`}
-    >
-      {/* Top row: icon, title, menu */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-lg shrink-0">{chore.icon}</span>
-          <h3 className="text-sm font-semibold text-[--text-primary] truncate">{chore.title}</h3>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-1 rounded-lg hover:bg-[--bg-surface-2] text-[--text-muted] transition-colors">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="5" r="2" />
-                <circle cx="12" cy="12" r="2" />
-                <circle cx="12" cy="19" r="2" />
-              </svg>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[--border-subtle]">
-            <DropdownMenuItem onClick={() => onEdit(chore)}>
-              <Pencil className="size-3.5 mr-2" />
+    <Card sx={{ opacity: chore.isPaused ? 0.6 : 1 }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+        {/* Top row: icon, title, menu */}
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{ fontSize: 18, flexShrink: 0 }}>{chore.icon}</Typography>
+            <Typography variant="body2" fontWeight={600} noWrap>{chore.title}</Typography>
+          </Stack>
+          <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}>
+            <MoreVert fontSize="small" />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
+            <MenuItem onClick={() => { onEdit(chore); setMenuAnchor(null) }}>
+              <Pencil fontSize="small" sx={{ mr: 1.5 }} />
               {t.common.edit}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onTogglePause(chore)}>
-              {chore.isPaused ? <Play className="size-3.5 mr-2" /> : <Pause className="size-3.5 mr-2" />}
+            </MenuItem>
+            <MenuItem onClick={() => { onTogglePause(chore); setMenuAnchor(null) }}>
+              {chore.isPaused ? <Play fontSize="small" sx={{ mr: 1.5 }} /> : <Pause fontSize="small" sx={{ mr: 1.5 }} />}
               {chore.isPaused ? t.chores.resume : t.chores.pause}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(chore)} className="text-red-400 focus:text-red-300">
-              <Trash2 className="size-3.5 mr-2" />
+            </MenuItem>
+            <MenuItem onClick={() => { onDelete(chore); setMenuAnchor(null) }} sx={{ color: theme.palette.error.main }}>
+              <Trash2 fontSize="small" style={{ width: 14, height: 14, marginRight: 6 }} />
               {t.common.delete}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+            </MenuItem>
+          </Menu>
+        </Stack>
 
-      {/* Current assignee + rotation indicator */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <PersonAvatar personId={currentAssignee} members={members} />
-          <span className="text-sm text-[--text-secondary] truncate">{memberName}</span>
-        </div>
-        {chore.rotationOrder.length > 1 && nextMemberName && (
-          <div className="flex items-center gap-1 text-[10px] text-[--text-muted] shrink-0">
-            <ArrowRight className={`size-3 ${isRTL ? 'rotate-180' : ''}`} />
-            <span className="truncate max-w-[60px]">{nextMemberName}</span>
-          </div>
-        )}
-      </div>
+        {/* Current assignee + rotation indicator */}
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
+            <PersonAvatar personId={currentAssignee} members={members} />
+            <Typography variant="body2" color="text.secondary" noWrap>{memberName}</Typography>
+          </Stack>
+          {chore.rotationOrder.length > 1 && nextMemberName && (
+            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexShrink: 0 }}>
+              <ArrowRight sx={{ fontSize: 12, transform: isRTL ? 'rotate(180deg)' : 'none' }} />
+              <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 60 }}>{nextMemberName}</Typography>
+            </Stack>
+          )}
+        </Stack>
 
-      {/* Badges row */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${DIFFICULTY_STYLES[chore.difficulty]}`}>
-          {t.chores[chore.difficulty]}
-        </Badge>
-        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${FREQUENCY_STYLES[chore.frequency]}`}>
-          {t.chores[chore.frequency]}
-        </Badge>
-        <div className="flex items-center gap-1 text-[10px] text-[--text-muted] ml-auto">
-          <Clock className="size-3" />
-          {chore.estimatedMinutes}{t.chores.minutes}
-        </div>
-      </div>
+        {/* Badges row */}
+        <Stack direction="row" alignItems="center" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+          <Chip label={t.chores[chore.difficulty]} size="small" color={DIFFICULTY_COLOR[chore.difficulty]} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
+          <Chip label={t.chores[chore.frequency]} size="small" color={FREQUENCY_COLOR[chore.frequency]} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 'auto !important' }}>
+            <Clock sx={{ fontSize: 12 }} color="action" />
+            <Typography variant="caption" color="text.secondary">
+              {chore.estimatedMinutes}{t.chores.minutes}
+            </Typography>
+          </Stack>
+        </Stack>
 
-      {/* Progress ring + Done button */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2">
-          <ProgressRing percent={completionPercent} size={30} strokeWidth={3} />
-          <span className="text-[10px] text-[--text-muted]">{completionPercent}%</span>
-        </div>
-        {!chore.isPaused && (
-          <Button
-            size="sm"
-            onClick={() => onDone(chore)}
-            className="bg-[#22C55E]/20 text-[#22C55E] hover:bg-[#22C55E]/30 border border-[#22C55E]/20 h-7 text-xs px-3"
-          >
-            <CheckCircle2 className="size-3 mr-1" />
-            {t.chores.done}
-          </Button>
-        )}
-        {chore.isPaused && (
-          <Badge variant="outline" className="text-[10px] text-[--text-muted] border-[--border-subtle]">
-            {t.chores.paused}
-          </Badge>
-        )}
-      </div>
-    </motion.div>
+        {/* Progress ring + Done button */}
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <ProgressRing percent={completionPercent} size={30} strokeWidth={3} />
+            <Typography variant="caption" color="text.secondary">{completionPercent}%</Typography>
+          </Stack>
+          {!chore.isPaused && (
+            <Button
+              size="small"
+              onClick={() => onDone(chore)}
+              variant="outlined"
+              color="success"
+              startIcon={<CheckCircle2 sx={{ fontSize: 14 }} />}
+              sx={{ fontSize: 12, px: 1.5, py: 0.25, minHeight: 28 }}
+            >
+              {t.chores.done}
+            </Button>
+          )}
+          {chore.isPaused && (
+            <Chip label={t.chores.paused} size="small" variant="outlined" />
+          )}
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -531,6 +488,8 @@ function ChoreListRow({
   onTogglePause: (chore: Chore) => void
 }) {
   const { t, isRTL } = useI18n()
+  const theme = useTheme()
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const { choreLogs } = useChoreStore()
   const currentAssignee = chore.rotationOrder[chore.currentAssigneeIndex] || chore.assignedTo[0]
   const member = members.find((m) => m.user_id === currentAssignee || m.id === currentAssignee)
@@ -542,99 +501,71 @@ function ChoreListRow({
   const lastDone = lastLog ? new Date(lastLog.completedAt).toLocaleDateString() : t.chores.never
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-[--border-subtle] bg-[--bg-surface] card-hover ${
-        chore.isPaused ? 'opacity-60' : ''
-      }`}
-    >
+    <Paper variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 2, py: 1.5, borderRadius: 2, opacity: chore.isPaused ? 0.6 : 1 }}>
       {/* Icon + Title */}
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className="text-lg shrink-0">{chore.icon}</span>
-        <span className="text-sm font-medium text-[--text-primary] truncate">{chore.title}</span>
-      </div>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flex: 1 }}>
+        <Typography sx={{ fontSize: 18, flexShrink: 0 }}>{chore.icon}</Typography>
+        <Typography variant="body2" fontWeight={500} noWrap>{chore.title}</Typography>
+      </Stack>
 
       {/* Assigned To */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexShrink: 0 }}>
         <PersonAvatar personId={currentAssignee} members={members} />
-        <span className="text-xs text-[--text-secondary] hidden sm:inline">{memberName}</span>
-      </div>
+        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'inline' } }}>{memberName}</Typography>
+      </Stack>
 
       {/* Frequency */}
-      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 hidden md:inline-flex ${FREQUENCY_STYLES[chore.frequency]}`}>
-        {t.chores[chore.frequency]}
-      </Badge>
+      <Chip label={t.chores[chore.frequency]} size="small" color={FREQUENCY_COLOR[chore.frequency]} variant="outlined" sx={{ display: { xs: 'none', md: 'inline-flex' }, fontSize: 10, height: 20 }} />
 
       {/* Difficulty */}
-      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 hidden md:inline-flex ${DIFFICULTY_STYLES[chore.difficulty]}`}>
-        {t.chores[chore.difficulty]}
-      </Badge>
+      <Chip label={t.chores[chore.difficulty]} size="small" color={DIFFICULTY_COLOR[chore.difficulty]} variant="outlined" sx={{ display: { xs: 'none', md: 'inline-flex' }, fontSize: 10, height: 20 }} />
 
       {/* Last Done */}
-      <span className="text-xs text-[--text-muted] hidden lg:inline shrink-0">{lastDone}</span>
+      <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', lg: 'inline' }, flexShrink: 0 }}>{lastDone}</Typography>
 
       {/* Status */}
-      <Badge
-        variant="outline"
-        className={`text-[10px] px-1.5 py-0 shrink-0 ${
-          chore.isPaused
-            ? 'text-emerald-400 border-emerald-500/20'
-            : 'text-[#22C55E] border-[#22C55E]/20'
-        }`}
-      >
-        {chore.isPaused ? t.chores.paused : t.chores.active}
-      </Badge>
+      <Chip
+        label={chore.isPaused ? t.chores.paused : t.chores.active}
+        size="small"
+        variant="outlined"
+        color={chore.isPaused ? 'warning' : 'success'}
+        sx={{ fontSize: 10, height: 20, flexShrink: 0 }}
+      />
 
       {/* Actions */}
-      <div className="flex items-center gap-1 shrink-0">
+      <Stack direction="row" alignItems="center" spacing={0} sx={{ flexShrink: 0 }}>
         {!chore.isPaused && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onDone(chore)}
-            className="size-7 p-0 text-[#22C55E] hover:text-[#22C55E] hover:bg-[#22C55E]/10"
-          >
-            <CheckCircle2 className="size-4" />
-          </Button>
+          <Tooltip title={t.chores.done}>
+            <IconButton size="small" color="success" onClick={() => onDone(chore)}>
+              <CheckCircle2 sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
         )}
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => onTogglePause(chore)}
-          className="size-7 p-0 text-[--text-muted] hover:text-[--text-secondary]"
-        >
-          {chore.isPaused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="ghost" className="size-7 p-0 text-[--text-muted]">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="5" r="2" />
-                <circle cx="12" cy="12" r="2" />
-                <circle cx="12" cy="19" r="2" />
-              </svg>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[--border-subtle]">
-            <DropdownMenuItem onClick={() => onEdit(chore)}>
-              <Pencil className="size-3.5 mr-2" />{t.common.edit}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(chore)} className="text-red-400">
-              <Trash2 className="size-3.5 mr-2" />{t.common.delete}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </motion.div>
+        <Tooltip title={chore.isPaused ? t.chores.resume : t.chores.pause}>
+          <IconButton size="small" onClick={() => onTogglePause(chore)} color="inherit">
+            {chore.isPaused ? <Play sx={{ fontSize: 14 }} /> : <Pause sx={{ fontSize: 14 }} />}
+          </IconButton>
+        </Tooltip>
+        <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)} color="inherit">
+          <MoreVert sx={{ fontSize: 14 }} />
+        </IconButton>
+        <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
+          <MenuItem onClick={() => { onEdit(chore); setMenuAnchor(null) }}>
+            <Pencil fontSize="small" sx={{ mr: 1.5 }} />{t.common.edit}
+          </MenuItem>
+          <MenuItem onClick={() => { onDelete(chore); setMenuAnchor(null) }} sx={{ color: theme.palette.error.main }}>
+            <Trash2 fontSize="small" style={{ width: 14, height: 14, marginRight: 6 }} />{t.common.delete}
+          </MenuItem>
+        </Menu>
+      </Stack>
+    </Paper>
   )
 }
 
 // ─── Rotation Schedule Grid ────────────────────────────────────────
 function RotationScheduleGrid({ chores, members }: { chores: Chore[]; members: { id: string; user_id: string; nickname?: string | null; profiles?: { first_name?: string | null; last_name?: string | null } }[] }) {
   const { t, isRTL } = useI18n()
+  const theme = useTheme()
   const days = isRTL
     ? ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']
     : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -648,28 +579,25 @@ function RotationScheduleGrid({ chores, members }: { chores: Chore[]; members: {
   const activeChores = chores.filter((c) => !c.isPaused)
 
   return (
-    <div className="glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4 overflow-x-auto custom-scrollbar">
-      <h3 className="text-sm font-semibold text-[--text-primary] mb-3 flex items-center gap-2">
-        <CalendarDays className="size-4 text-[--accent-primary]" />
-        {t.chores.rotationSchedule}
-      </h3>
-      <div className="min-w-[500px]">
+    <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+        <CalendarDays sx={{ fontSize: 16, color: theme.palette.primary.main }} />
+        <Typography variant="subtitle2">{t.chores.rotationSchedule}</Typography>
+      </Stack>
+      <Box sx={{ minWidth: 500 }}>
         {/* Header row */}
-        <div className="grid grid-cols-8 gap-1 mb-2">
-          <div className="text-[10px] text-[--text-muted] font-medium px-1" />
+        <Stack direction="row" spacing={0} sx={{ mb: 1 }}>
+          <Box sx={{ flex: '0 0 100px', px: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500}></Typography>
+          </Box>
           {days.map((day, i) => (
-            <div
-              key={day}
-              className={`text-[10px] font-medium text-center px-1 py-1 rounded-lg ${
-                weekDates[i].toDateString() === today.toDateString()
-                  ? 'bg-[--accent-primary]/10 text-[--accent-primary]'
-                  : 'text-[--text-muted]'
-              }`}
-            >
-              {day}
-            </div>
+            <Box key={i} sx={{ flex: 1, textAlign: 'center', px: 0.5, py: 0.5, borderRadius: 1, bgcolor: weekDates[i].toDateString() === today.toDateString() ? `${theme.palette.primary.main}15` : 'transparent' }}>
+              <Typography variant="caption" fontWeight={500} color={weekDates[i].toDateString() === today.toDateString() ? 'primary' : 'text.secondary'}>
+                {day}
+              </Typography>
+            </Box>
           ))}
-        </div>
+        </Stack>
         {/* Chore rows */}
         {activeChores.slice(0, 6).map((chore) => {
           const assigneeForDay = (dayIndex: number) => {
@@ -679,38 +607,31 @@ function RotationScheduleGrid({ chores, members }: { chores: Chore[]; members: {
             return m?.nickname || m?.profiles?.first_name || uid.slice(0, 2)
           }
           return (
-            <div key={chore.id} className="grid grid-cols-8 gap-1 mb-1">
-              <div className="flex items-center gap-1 px-1 py-1">
-                <span className="text-xs">{chore.icon}</span>
-                <span className="text-[10px] text-[--text-secondary] truncate">{chore.title}</span>
-              </div>
+            <Stack key={chore.id} direction="row" spacing={0} sx={{ mb: 0.25 }}>
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flex: '0 0 100px', px: 0.5, py: 0.5 }}>
+                <Typography sx={{ fontSize: 12 }}>{chore.icon}</Typography>
+                <Typography variant="caption" color="text.secondary" noWrap>{chore.title}</Typography>
+              </Stack>
               {Array.from({ length: 7 }, (_, i) => (
-                <div
-                  key={i}
-                  className={`text-[10px] text-center py-1 rounded-lg ${
-                    weekDates[i].toDateString() === today.toDateString()
-                      ? 'bg-[--bg-surface-2]'
-                      : ''
-                  }`}
-                >
-                  <span className="text-[--text-muted]">{assigneeForDay(i)}</span>
-                </div>
+                <Box key={i} sx={{ flex: 1, textAlign: 'center', py: 0.5, borderRadius: 1, bgcolor: weekDates[i].toDateString() === today.toDateString() ? theme.palette.action.hover : 'transparent' }}>
+                  <Typography variant="caption" color="text.secondary">{assigneeForDay(i)}</Typography>
+                </Box>
               ))}
-            </div>
+            </Stack>
           )
         })}
-      </div>
-    </div>
+      </Box>
+    </Paper>
   )
 }
 
 // ─── Leaderboard Section ───────────────────────────────────────────
 function LeaderboardSection({ members }: { members: { id: string; user_id: string; nickname?: string | null; profiles?: { first_name?: string | null; last_name?: string | null } }[] }) {
-  const { t, isRTL } = useI18n()
+  const { t } = useI18n()
+  const theme = useTheme()
   const { getLeaderboard, choreLogs } = useChoreStore()
   const leaderboard = getLeaderboard()
 
-  // If no data yet, generate from logs
   const displayData = leaderboard.length > 0
     ? leaderboard
     : members.map((m) => {
@@ -721,50 +642,50 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
   const maxCount = Math.max(...displayData.map((d) => d.count), 1)
 
   return (
-    <div className="glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
-      <h3 className="text-sm font-semibold text-[--text-primary] mb-3 flex items-center gap-2">
-        <Trophy className="size-4 text-emerald-400" />
-        {t.chores.leaderboard}
-        <span className="text-[10px] text-[--text-muted] font-normal ml-1">{t.chores.thisWeek}</span>
-      </h3>
-      <div className="space-y-3">
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+        <Trophy sx={{ fontSize: 16, color: theme.palette.success.main }} />
+        <Typography variant="subtitle2">{t.chores.leaderboard}</Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{t.chores.thisWeek}</Typography>
+      </Stack>
+      <Stack spacing={1.5}>
         {displayData.map((entry, idx) => {
           const member = members.find((m) => m.user_id === entry.personId || m.id === entry.personId)
           const name = member?.nickname || member?.profiles?.first_name || entry.personId.slice(0, 8)
           const pct = maxCount > 0 ? (entry.count / maxCount) * 100 : 0
 
           return (
-            <div key={entry.personId} className="space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${idx === 0 ? 'text-emerald-400' : idx === 1 ? 'text-[--text-muted]' : 'text-[--text-muted]'}`}>
+            <Box key={entry.personId}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="body2" fontWeight={700} color={idx === 0 ? 'success.main' : 'text.secondary'}>
                     #{idx + 1}
-                  </span>
-                  <PersonAvatar personId={entry.personId} members={members} size="md" />
-                  <span className="text-sm text-[--text-secondary]">{name}</span>
-                </div>
-                <span className="text-xs text-[--text-muted]">
+                  </Typography>
+                  <PersonAvatar personId={entry.personId} members={members} size="medium" />
+                  <Typography variant="body2" color="text.secondary">{name}</Typography>
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
                   {entry.count} {t.chores.completions}
-                </span>
-              </div>
-              <Progress value={pct} className="h-1.5 bg-[--border-subtle]" />
-            </div>
+                </Typography>
+              </Stack>
+              <LinearProgress variant="determinate" value={pct} sx={{ mt: 0.5, height: 6, borderRadius: 3 }} />
+            </Box>
           )
         })}
         {displayData.length === 0 && (
-          <p className="text-xs text-[--text-muted] text-center py-4">
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
             {t.chores.noChores}
-          </p>
+          </Typography>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Paper>
   )
 }
 
 // ─── Main Chores Page ──────────────────────────────────────────────
 export default function ChoresPage() {
   const { t, isRTL } = useI18n()
-  // Selector-based subscriptions to avoid unnecessary re-renders
+  const theme = useTheme()
   const chores = useChoreStore((s) => s.chores)
   const choreLogs = useChoreStore((s) => s.choreLogs)
   const fetchFromSupabase = useChoreStore((s) => s.fetchFromSupabase)
@@ -778,25 +699,21 @@ export default function ChoresPage() {
   const currentFamily = useAppStore((s) => s.currentFamily)
   const user = useAuthStore((s) => s.user)
 
-  // Fetch data from Supabase on mount
   const hasFetchedRef = useRef(false)
   useEffect(() => {
     if (!currentFamily?.id || !user?.id) return
     if (hasFetchedRef.current) return
     hasFetchedRef.current = true
-
     fetchFromSupabase(currentFamily.id, user.id).catch((err) => {
       console.warn('[ChoresPage] Initial fetch failed:', err)
     })
   }, [currentFamily?.id, user?.id, fetchFromSupabase])
 
-  // Re-fetch when family changes
   const prevFamilyRef = useRef(currentFamily?.id)
   useEffect(() => {
     if (!currentFamily?.id || !user?.id) return
     if (prevFamilyRef.current === currentFamily.id) return
     prevFamilyRef.current = currentFamily.id
-
     fetchFromSupabase(currentFamily.id, user.id).catch((err) => {
       console.warn('[ChoresPage] Re-fetch on family change failed:', err)
     })
@@ -809,7 +726,6 @@ export default function ChoresPage() {
 
   const members = familyMembers
 
-  // Filtered chores
   const filteredChores = useMemo(() => {
     let result = [...chores]
     switch (filter) {
@@ -831,7 +747,6 @@ export default function ChoresPage() {
     return result
   }, [chores, filter, choreLogs])
 
-  // Group by frequency for board view
   const choresByFrequency = useMemo(() => {
     const groups: Record<string, Chore[]> = {
       daily: [],
@@ -845,7 +760,6 @@ export default function ChoresPage() {
     return groups
   }, [filteredChores])
 
-  // Stats
   const totalChores = chores.length
   const today = new Date().toISOString().split('T')[0]
   const completedToday = choreLogs.filter((l) => l.completedAt.startsWith(today)).length
@@ -855,7 +769,6 @@ export default function ChoresPage() {
   const topContributor = members.find((m) => m.user_id === topContributorId || m.id === topContributorId)
   const topContributorName = topContributor?.nickname || topContributor?.profiles?.first_name || '—'
 
-  // Handlers
   const handleDone = useCallback(async (chore: Chore) => {
     const currentAssignee = chore.rotationOrder[chore.currentAssigneeIndex] || chore.assignedTo[0]
     await logCompletionToSupabase({
@@ -864,7 +777,6 @@ export default function ChoresPage() {
       completedBy: currentAssignee,
       completedAt: new Date().toISOString(),
     })
-    // Update chore rotation in Supabase
     const familyId = currentFamily?.id || 'demo-family-001'
     const nextIndex = chore.rotationOrder.length > 0 ? (chore.currentAssigneeIndex + 1) % chore.rotationOrder.length : 0
     rotateChore(chore.id)
@@ -899,198 +811,123 @@ export default function ChoresPage() {
     setDialogOpen(true)
   }, [])
 
-  // Empty state
   if (chores.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 px-4" dir={isRTL ? 'rtl' : 'ltr'}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4"
-        >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[--accent-primary]/10 mb-2">
-            <Sparkles className="w-10 h-10 text-[--accent-primary]" />
-          </div>
-          <h2 className="text-xl font-semibold text-[--text-primary]">{t.chores.noChores}</h2>
-          <p className="text-sm text-[--text-muted] max-w-sm">{t.chores.noChoresDesc}</p>
-          <Button
-            onClick={handleAddNew}
-            className="relative z-10 bg-[--accent-primary] hover:bg-[--accent-primary]/90 text-white mt-2"
-          >
-            <Plus className="size-4 mr-2" />
-            {t.chores.addChore}
-          </Button>
-        </motion.div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
+        <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
+          <Stack alignItems="center" spacing={2}>
+            <Box sx={{ width: 80, height: 80, borderRadius: 3, bgcolor: `${theme.palette.primary.main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
+              <Sparkles sx={{ fontSize: 40, color: theme.palette.primary.main }} />
+            </Box>
+            <Typography variant="h6" fontWeight={600}>{t.chores.noChores}</Typography>
+            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ maxWidth: 400 }}>{t.chores.noChoresDesc}</Typography>
+            <Button variant="contained" startIcon={<Plus />} onClick={handleAddNew} sx={{ mt: 1 }}>
+              {t.chores.addChore}
+            </Button>
+          </Stack>
+        </Stack>
+      </Container>
     )
   }
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-heading-2 font-display text-[--text-primary]">{t.chores.title}</h2>
-          <p className="text-sm text-[--text-muted] mt-0.5">
-            {totalChores} {t.chores.totalChores.toLowerCase()}
-          </p>
-        </div>
+    <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
+      <Stack spacing={3}>
+        {/* Header */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Box>
+            <Typography variant="h5" fontWeight={700}>{t.chores.title}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {totalChores} {t.chores.totalChores.toLowerCase()}
+            </Typography>
+          </Box>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Filter tabs */}
-          <div className="flex items-center bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-0.5 gap-0.5">
-            {(['all', 'active', 'paused', 'completed'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
-                  filter === f
-                    ? 'bg-[--accent-primary]/15 text-[--accent-primary]'
-                    : 'text-[--text-muted] hover:text-[--text-secondary]'
-                }`}
-              >
-                {t.chores[f]}
-              </button>
-            ))}
-          </div>
+          <Stack direction="row" spacing={1} alignItems="center">
+            {/* Filter tabs */}
+            <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, gap: 0.25, borderRadius: 2 }}>
+              {(['all', 'active', 'paused', 'completed'] as const).map((f) => (
+                <Button
+                  key={f}
+                  size="small"
+                  onClick={() => setFilter(f)}
+                  variant={filter === f ? 'contained' : 'text'}
+                  sx={{ fontSize: 12, px: 1.5, py: 0.25, borderRadius: 1.5, textTransform: 'none' }}
+                >
+                  {t.chores[f]}
+                </Button>
+              ))}
+            </Paper>
 
-          {/* View toggle */}
-          <div className="flex items-center bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-0.5">
-            <button
-              onClick={() => setViewMode('board')}
-              className={`p-1.5 rounded-lg transition-all duration-200 ${
-                viewMode === 'board'
-                  ? 'bg-[--accent-primary]/15 text-[--accent-primary]'
-                  : 'text-[--text-muted]'
-              }`}
-            >
-              <LayoutGrid className="size-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-lg transition-all duration-200 ${
-                viewMode === 'list'
-                  ? 'bg-[--accent-primary]/15 text-[--accent-primary]'
-                  : 'text-[--text-muted]'
-              }`}
-            >
-              <List className="size-4" />
-            </button>
-          </div>
+            {/* View toggle */}
+            <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, borderRadius: 2 }}>
+              <IconButton size="small" onClick={() => setViewMode('board')} color={viewMode === 'board' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
+                <LayoutGrid sx={{ fontSize: 16 }} />
+              </IconButton>
+              <IconButton size="small" onClick={() => setViewMode('list')} color={viewMode === 'list' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
+                <List sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Paper>
 
-          {/* Add Chore */}
-          <AddChoreDialog
-            open={dialogOpen}
-            onOpenChange={(open) => {
-              setDialogOpen(open)
-              if (!open) setEditingChore(null)
-            }}
-            editingChore={editingChore}
-            members={members}
-          />
-          <Button onClick={handleAddNew} size="sm" className="relative z-10 bg-[--accent-primary] hover:bg-[--accent-primary]/90 text-white">
-            <Plus className="size-4 mr-1.5" />
-            {t.chores.addChore}
-          </Button>
-        </div>
-      </div>
+            <Button variant="contained" size="small" startIcon={<Plus sx={{ fontSize: 16 }} />} onClick={handleAddNew}>
+              {t.chores.addChore}
+            </Button>
+          </Stack>
+        </Stack>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="size-4 text-[--accent-primary]" />
-            <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.totalChores}</span>
-          </div>
-          <span className="text-2xl font-bold text-[--text-primary]">{totalChores}</span>
-        </div>
-        <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 className="size-4 text-[#22C55E]" />
-            <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.completedToday}</span>
-          </div>
-          <span className="text-2xl font-bold text-[--text-primary]">{completedToday}</span>
-        </div>
-        <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="size-4 text-[var(--accent-primary)]" />
-            <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.completionRate}</span>
-          </div>
-          <span className="text-2xl font-bold text-[--text-primary]">{completionRate}%</span>
-        </div>
-        <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Trophy className="size-4 text-emerald-400" />
-            <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.topContributor}</span>
-          </div>
-          <span className="text-lg font-bold text-[--text-primary] truncate">{topContributorName}</span>
-        </div>
-      </div>
+        {/* Stats */}
+        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+          {[
+            { label: t.chores.totalChores, value: totalChores, icon: <BarChart3 sx={{ fontSize: 20 }} />, color: theme.palette.primary.main },
+            { label: t.chores.completedToday, value: completedToday, icon: <CheckCircle2 sx={{ fontSize: 20 }} />, color: theme.palette.success.main },
+            { label: t.chores.completionRate, value: `${completionRate}%`, icon: <Trophy sx={{ fontSize: 20 }} />, color: theme.palette.secondary.main },
+            { label: t.chores.topContributor, value: topContributorName, icon: <Users sx={{ fontSize: 20 }} />, color: theme.palette.warning.main },
+          ].map((stat) => (
+            <Paper key={stat.label} variant="outlined" sx={{ flex: '1 1 140px', p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${stat.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: stat.color }}>
+                {stat.icon}
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight={700}>{stat.value}</Typography>
+                <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+              </Box>
+            </Paper>
+          ))}
+        </Stack>
 
-      {/* Rotation Schedule Grid */}
-      <RotationScheduleGrid chores={chores} members={members} />
-
-      {/* Board View or List View */}
-      {viewMode === 'board' ? (
-        <div className="space-y-6">
-          {(['daily', 'weekly', 'monthly'] as const).map((freq) => {
-            const freqChores = choresByFrequency[freq]
-            if (freqChores.length === 0) return null
-            return (
-              <div key={freq}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className={`text-xs px-2 py-0.5 ${FREQUENCY_STYLES[freq]}`}>
+        {/* Board View */}
+        {viewMode === 'board' && (
+          <Stack spacing={3}>
+            {(['daily', 'weekly', 'biweekly', 'monthly'] as const).map((freq) => {
+              const group = choresByFrequency[freq]
+              if (!group || group.length === 0) return null
+              return (
+                <Box key={freq}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 1 }}>
                     {t.chores[freq]}
-                  </Badge>
-                  <span className="text-xs text-[--text-muted]">{freqChores.length}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <AnimatePresence mode="popLayout">
-                    {freqChores.map((chore) => (
-                      <ChoreCard
-                        key={chore.id}
-                        chore={chore}
-                        members={members}
-                        onDone={handleDone}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        onTogglePause={handleTogglePause}
-                      />
+                  </Typography>
+                  <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                    {group.map((chore) => (
+                      <Box key={chore.id} sx={{ flex: '1 1 280px', maxWidth: 360 }}>
+                        <ChoreCard
+                          chore={chore}
+                          members={members}
+                          onDone={handleDone}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          onTogglePause={handleTogglePause}
+                        />
+                      </Box>
                     ))}
-                  </AnimatePresence>
-                </div>
-              </div>
-            )
-          })}
-          {choresByFrequency.biweekly.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className={`text-xs px-2 py-0.5 ${FREQUENCY_STYLES.biweekly}`}>
-                  {t.chores.biweekly}
-                </Badge>
-                <span className="text-xs text-[--text-muted]">{choresByFrequency.biweekly.length}</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <AnimatePresence mode="popLayout">
-                  {choresByFrequency.biweekly.map((chore) => (
-                    <ChoreCard
-                      key={chore.id}
-                      chore={chore}
-                      members={members}
-                      onDone={handleDone}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onTogglePause={handleTogglePause}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <AnimatePresence mode="popLayout">
+                  </Stack>
+                </Box>
+              )
+            })}
+          </Stack>
+        )}
+
+        {/* List View */}
+        {viewMode === 'list' && (
+          <Stack spacing={1}>
             {filteredChores.map((chore) => (
               <ChoreListRow
                 key={chore.id}
@@ -1102,56 +939,31 @@ export default function ChoresPage() {
                 onTogglePause={handleTogglePause}
               />
             ))}
-          </AnimatePresence>
-          {filteredChores.length === 0 && (
-            <div className="text-center py-8 text-[--text-muted] text-sm">{t.chores.noChores}</div>
-          )}
-        </div>
-      )}
-
-      {/* Rotation Preview + Leaderboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
-          <h3 className="text-sm font-semibold text-[--text-primary] mb-3 flex items-center gap-2">
-            <Users className="size-4 text-[--accent-primary]" />
-            {t.chores.rotationPreview}
-            <span className="text-[10px] text-[--text-muted] font-normal">{t.chores.nextTwoWeeks}</span>
-          </h3>
-          <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-            {chores.filter((c) => !c.isPaused && c.rotationOrder.length > 1).map((chore) => {
-              const rotations = Array.from({ length: 14 }, (_, i) => {
-                const idx = (chore.currentAssigneeIndex + i) % chore.rotationOrder.length
-                const uid = chore.rotationOrder[idx]
-                const m = members.find((mm) => mm.user_id === uid || mm.id === uid)
-                return m?.nickname || m?.profiles?.first_name || uid.slice(0, 2)
-              })
-              const week1 = rotations.slice(0, 7)
-              const week2 = rotations.slice(7, 14)
-              return (
-                <div key={chore.id} className="flex items-center gap-2 text-[10px]">
-                  <span className="shrink-0">{chore.icon}</span>
-                  <span className="text-[--text-secondary] font-medium w-24 truncate shrink-0">{chore.title}</span>
-                  <div className="flex items-center gap-0.5 flex-1 overflow-hidden">
-                    {week1.map((name, i) => (
-                      <span
-                        key={i}
-                        className="px-1 py-0.5 rounded bg-[--bg-surface-2] text-[--text-muted] whitespace-nowrap"
-                      >
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-            {chores.filter((c) => !c.isPaused && c.rotationOrder.length > 1).length === 0 && (
-              <p className="text-xs text-[--text-muted] text-center py-4">{t.chores.noChores}</p>
+            {filteredChores.length === 0 && (
+              <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+                {t.chores.noChores}
+              </Typography>
             )}
-          </div>
-        </div>
+          </Stack>
+        )}
 
+        {/* Rotation Schedule */}
+        <RotationScheduleGrid chores={chores} members={members} />
+
+        {/* Leaderboard */}
         <LeaderboardSection members={members} />
-      </div>
-    </div>
+      </Stack>
+
+      {/* Add/Edit Dialog */}
+      <AddChoreDialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) setEditingChore(null)
+        }}
+        editingChore={editingChore}
+        members={members}
+      />
+    </Container>
   )
 }

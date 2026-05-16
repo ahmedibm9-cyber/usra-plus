@@ -5,126 +5,75 @@ import { createClient } from '@/lib/supabase/client'
 import { useTaskStore } from '@/stores/task-store'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { useSubscriptionStore } from '@/stores/subscription-store'
-import { UpgradeModal } from '@/components/shared/upgrade-modal'
-import { UpgradePrompt } from '@/components/shared/plan-badge'
-import { EmptyState } from '@/components/shared/empty-state'
-import { TaskCardSkeleton } from '@/components/shared/skeleton-patterns'
 import { useI18n } from '@/i18n/use-translation'
-import type { Task, TaskPriority, TaskStatus, FamilyMember, UserProfile } from '@/types'
+import type { Task, TaskPriority, TaskStatus, FamilyMember } from '@/types'
 import { format, isToday, isTomorrow, isPast, isThisWeek, formatDistanceToNow, parseISO } from 'date-fns'
 import { toast } from 'sonner'
-import { motion, AnimatePresence } from 'framer-motion'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Calendar } from '@/components/ui/calendar'
 import {
+  Container,
+  Stack,
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import {
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  InputLabel,
+  FormControl,
+  Checkbox,
+  Avatar,
+  Tooltip,
+  Tabs,
+  Tab,
+  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
+  LinearProgress,
+  useTheme,
+  useMediaQuery,
+  Fab,
+  InputAdornment,
+} from '@mui/material'
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Label } from '@/components/ui/label'
-import {
-  Plus,
+  Add,
   Search,
-  Filter,
-  ArrowUpDown,
-  CalendarIcon,
-  CheckCircle2,
-  Circle,
-  Clock,
-  Pencil,
-  Trash2,
-  ClipboardList,
-  AlertTriangle,
-  MoreHorizontal,
-  X,
-  User,
-  GripVertical,
-  MessageCircle,
+  SwapVert,
+  CalendarToday,
+  CheckCircle,
+  RadioButtonUnchecked,
+  AccessTime,
+  Edit,
+  Delete,
+  ChatBubbleOutline,
   Send,
-  CornerDownRight,
-  LayoutList,
-  LayoutGrid,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import {
-  DndContext,
-  DragOverlay,
-  closestCenter,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  KeyboardSensor,
-  useDndContext,
-} from '@dnd-kit/core'
-import type {
-  DragStartEvent,
-  DragEndEvent,
-  DraggableSyntheticListeners,
-} from '@dnd-kit/core'
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable'
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
-import { CSS } from '@dnd-kit/utilities'
-import { triggerConfetti, triggerTaskCompletionConfetti } from '@/lib/confetti'
-import { playCompletionSound } from '@/lib/completion-sound'
-import { announce } from '@/lib/live-announcer'
-import { KanbanBoard } from '@/components/tasks/kanban-board'
-import { useCommentStore } from '@/stores/comment-store'
-import type { TaskComment } from '@/stores/comment-store'
-import { FAB } from '@/components/shared/fab'
+  PlaylistAddCheck,
+  GridView,
+  ViewList,
+  Warning,
+  Person,
+} from '@mui/icons-material'
 
 // ─── Priority Config ────────────────────────────────────────────────
-const PRIORITY_CONFIG: Record<TaskPriority, { color: string; bg: string; border: string; label: string }> = {
-  urgent: { color: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/30', label: 'Urgent' },
-  high: { color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/15', border: 'border-[var(--accent-primary)]/30', label: 'High' },
-  medium: { color: 'text-[var(--accent)]', bg: 'bg-[var(--accent)]/15', border: 'border-[var(--accent)]/30', label: 'Medium' },
-  low: { color: 'text-green-400', bg: 'bg-green-500/15', border: 'border-green-500/30', label: 'Low' },
+const PRIORITY_CONFIG: Record<TaskPriority, { chipColor: 'error' | 'primary' | 'secondary' | 'success'; label: string }> = {
+  urgent: { chipColor: 'error', label: 'Urgent' },
+  high: { chipColor: 'primary', label: 'High' },
+  medium: { chipColor: 'secondary', label: 'Medium' },
+  low: { chipColor: 'success', label: 'Low' },
 }
 
-const STATUS_CONFIG: Record<TaskStatus, { dot: string; label: string; icon: React.ReactNode }> = {
-  todo: {
-    dot: 'bg-gray-400',
-    label: 'To Do',
-    icon: <Circle className="size-3.5 text-[--text-muted]" />,
-  },
-  in_progress: {
-    dot: 'bg-[var(--accent-primary)]',
-    label: 'In Progress',
-    icon: <Clock className="size-3.5 text-[var(--accent-primary)]" />,
-  },
-  done: {
-    dot: 'bg-green-400',
-    label: 'Done',
-    icon: <CheckCircle2 className="size-3.5 text-green-400" />,
-  },
+const STATUS_CONFIG: Record<TaskStatus, { chipColor: 'default' | 'primary' | 'success'; label: string }> = {
+  todo: { chipColor: 'default', label: 'To Do' },
+  in_progress: { chipColor: 'primary', label: 'In Progress' },
+  done: { chipColor: 'success', label: 'Done' },
 }
 
 // ─── Date Grouping ──────────────────────────────────────────────────
@@ -142,13 +91,13 @@ function getDateGroup(task: Task): DateGroup {
 
 const DATE_GROUP_ORDER: DateGroup[] = ['overdue', 'today', 'tomorrow', 'this_week', 'later', 'no_date']
 
-const DATE_GROUP_LABELS: Record<DateGroup, { label: string; color: string }> = {
-  overdue: { label: 'Overdue', color: 'text-red-400' },
-  today: { label: 'Today', color: 'text-[var(--accent-primary)]' },
-  tomorrow: { label: 'Tomorrow', color: 'text-[var(--accent-primary)]/70' },
-  this_week: { label: 'This Week', color: 'text-[var(--accent)]' },
-  later: { label: 'Later', color: 'text-[--text-muted]' },
-  no_date: { label: 'No Due Date', color: 'text-[--text-muted]' },
+const DATE_GROUP_CONFIG: Record<DateGroup, { label: string; color: 'error' | 'primary' | 'primary' | 'secondary' | 'text.secondary' | 'text.secondary' }> = {
+  overdue: { label: 'Overdue', color: 'error' },
+  today: { label: 'Today', color: 'primary' },
+  tomorrow: { label: 'Tomorrow', color: 'primary' },
+  this_week: { label: 'This Week', color: 'secondary' },
+  later: { label: 'Later', color: 'text.secondary' },
+  no_date: { label: 'No Due Date', color: 'text.secondary' },
 }
 
 // ─── Task Form Type ─────────────────────────────────────────────────
@@ -194,292 +143,23 @@ function getRelativeTime(dateStr: string, isRTL: boolean): string {
   return format(date, 'MMM d')
 }
 
-// ─── Comments Panel Component ────────────────────────────────────────
-function CommentsPanel({ taskId }: { taskId: string }) {
-  const { t, isRTL } = useI18n()
-  const { comments, addComment, removeComment, getCommentsForTask, getRepliesForComment, getCommentCountForTask, fetchFromSupabase, addCommentToSupabase, removeCommentFromSupabase, supabaseAvailable } = useCommentStore()
-  const { user } = useAuthStore()
-  const [newComment, setNewComment] = useState('')
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyContent, setReplyContent] = useState('')
-  const [expanded, setExpanded] = useState(true)
-  const hasFetchedRef = useRef(false)
-
-  // Force re-render when comments change
-  const _comments = comments
-  void _comments
-
-  // Fetch comments from Supabase when panel opens
-  useEffect(() => {
-    if (taskId && supabaseAvailable && !hasFetchedRef.current) {
-      hasFetchedRef.current = true
-      fetchFromSupabase(taskId)
-    }
-  }, [taskId, supabaseAvailable, fetchFromSupabase])
-
-  // Reset fetch flag when taskId changes
-  useEffect(() => {
-    hasFetchedRef.current = false
-  }, [taskId])
-
-  const topLevelComments = getCommentsForTask(taskId)
-  const commentCount = getCommentCountForTask(taskId)
-
-  const handleAddComment = async () => {
-    if (!newComment.trim() || !user) return
-    const comment: TaskComment = {
-      id: crypto.randomUUID(),
-      task_id: taskId,
-      parent_id: null,
-      author_id: user.id,
-      author_name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email.split('@')[0],
-      author_avatar: user.avatar_url,
-      content: newComment.trim(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-    if (supabaseAvailable) {
-      await addCommentToSupabase(comment, user.id)
-    } else {
-      addComment(comment)
-    }
-    setNewComment('')
-  }
-
-  const handleAddReply = async (parentId: string) => {
-    if (!replyContent.trim() || !user) return
-    const reply: TaskComment = {
-      id: crypto.randomUUID(),
-      task_id: taskId,
-      parent_id: parentId,
-      author_id: user.id,
-      author_name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email.split('@')[0],
-      author_avatar: user.avatar_url,
-      content: replyContent.trim(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-    if (supabaseAvailable) {
-      await addCommentToSupabase(reply, user.id)
-    } else {
-      addComment(reply)
-    }
-    setReplyContent('')
-    setReplyingTo(null)
-  }
-
-  const handleDeleteComment = async (id: string) => {
-    if (supabaseAvailable) {
-      await removeCommentFromSupabase(id)
-    } else {
-      removeComment(id)
-    }
-  }
-
-  const handleTextareaResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const target = e.target
-    target.style.height = 'auto'
-    target.style.height = `${Math.min(target.scrollHeight, 4 * 24)}px`
-  }
-
-  return (
-    <div className="mt-4 border-t border-[--border-subtle] pt-4">
-      {/* Header */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 w-full text-left mb-3"
-      >
-        <MessageCircle className="size-4 text-[var(--accent-primary)]" />
-        <span className="text-sm font-medium text-[--text-primary]">{t.comments.comments}</span>
-        {commentCount > 0 && (
-          <span className="text-xs text-[--text-muted] bg-[--border-subtle] px-1.5 py-0.5 rounded-full">
-            {commentCount}
-          </span>
-        )}
-        <span className="ml-auto text-[--text-muted] text-xs">{expanded ? '▲' : '▼'}</span>
-      </button>
-
-      {expanded && (
-        <>
-          {/* Comments List */}
-          <div className="max-h-64 overflow-y-auto space-y-3 mb-3 custom-scrollbar">
-            {topLevelComments.length === 0 ? (
-              <div className="text-center py-4">
-                <MessageCircle className="size-8 text-[--text-muted]/40 mx-auto mb-2" />
-                <p className="text-sm text-[--text-muted]">{t.comments.noComments}</p>
-                <p className="text-xs text-[--text-muted]/60">{t.comments.startConversation}</p>
-              </div>
-            ) : (
-              topLevelComments.map((comment) => {
-                const replies = getRepliesForComment(comment.id)
-                return (
-                  <div key={comment.id}>
-                    {/* Top-level comment */}
-                    <div className="flex gap-2.5">
-                      <Avatar className="h-7 w-7 rounded-full border border-[--border-subtle] flex-shrink-0">
-                        {comment.author_avatar && <AvatarImage src={comment.author_avatar} alt="" />}
-                        <AvatarFallback className="text-[10px] bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]">
-                          {comment.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-[--text-primary]">{comment.author_name}</span>
-                          <span className="text-[11px] text-[--text-muted]">{getRelativeTime(comment.created_at, isRTL)}</span>
-                        </div>
-                        <p className="text-sm text-[--text-secondary] mt-0.5 break-words">{comment.content}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <button
-                            onClick={() => {
-                              setReplyingTo(replyingTo === comment.id ? null : comment.id)
-                              setReplyContent('')
-                            }}
-                            className="text-xs text-[--text-muted] hover:text-[var(--accent-primary)] transition-colors"
-                          >
-                            <CornerDownRight className="size-3 inline mr-1" />
-                            {t.comments.reply}
-                          </button>
-                          {comment.author_id === user?.id && (
-                            <button
-                              onClick={() => handleDeleteComment(comment.id)}
-                              className="text-xs text-[--text-muted] hover:text-red-400 transition-colors"
-                            >
-                              {t.comments.delete}
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Inline Reply Input */}
-                        {replyingTo === comment.id && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-2 flex gap-2"
-                          >
-                            <textarea
-                              value={replyContent}
-                              onChange={(e) => {
-                                setReplyContent(e.target.value)
-                                handleTextareaResize(e)
-                              }}
-                              placeholder={`${t.comments.replyTo} ${comment.author_name}...`}
-                              rows={1}
-                              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-1.5 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[var(--accent-primary)]/50 resize-none overflow-hidden min-h-[32px]"
-                            />
-                            <div className="flex gap-1 flex-shrink-0">
-                              <Button
-                                size="sm"
-                                onClick={() => handleAddReply(comment.id)}
-                                disabled={!replyContent.trim()}
-                                className="h-7 px-2 bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white text-xs"
-                              >
-                                <Send className="size-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => { setReplyingTo(null); setReplyContent('') }}
-                                className="h-7 px-2 text-[--text-muted] hover:text-[--text-primary] text-xs"
-                              >
-                                {t.comments.cancel}
-                              </Button>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {/* Replies */}
-                        {replies.length > 0 && (
-                          <div className="ml-8 border-l-2 border-[var(--accent-primary)]/20 pl-3 mt-2 space-y-2">
-                            {replies.map((reply) => (
-                              <div key={reply.id} className="flex gap-2">
-                                <Avatar className="h-5 w-5 rounded-full border border-[--border-subtle] flex-shrink-0">
-                                  {reply.author_avatar && <AvatarImage src={reply.author_avatar} alt="" />}
-                                  <AvatarFallback className="text-[8px] bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]">
-                                    {reply.author_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-medium text-[--text-primary]">{reply.author_name}</span>
-                                    <span className="text-[10px] text-[--text-muted]">{getRelativeTime(reply.created_at, isRTL)}</span>
-                                  </div>
-                                  <p className="text-xs text-[--text-secondary] mt-0.5 break-words">{reply.content}</p>
-                                  {reply.author_id === user?.id && (
-                                    <button
-                                      onClick={() => handleDeleteComment(reply.id)}
-                                      className="text-[10px] text-[--text-muted] hover:text-red-400 transition-colors mt-0.5"
-                                    >
-                                      {t.comments.delete}
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-
-          {/* Comment Input */}
-          <div className="flex gap-2">
-            <textarea
-              value={newComment}
-              onChange={(e) => {
-                setNewComment(e.target.value)
-                handleTextareaResize(e)
-              }}
-              placeholder={t.comments.addComment}
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleAddComment()
-                }
-              }}
-              className="flex-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg px-3 py-2 text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-[var(--accent-primary)]/50 resize-none overflow-hidden min-h-[36px]"
-            />
-            <Button
-              size="sm"
-              onClick={handleAddComment}
-              disabled={!newComment.trim()}
-              className="h-9 px-3 bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white"
-            >
-              <Send className="size-4" />
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
 // ─── Task Card Component ────────────────────────────────────────────
-function TaskCard({
+function TaskCardComponent({
   task,
   onToggleDone,
   onEdit,
   onDelete,
-  dragHandleProps,
-  isDragOverlay,
 }: {
   task: Task
   onToggleDone: (task: Task) => void
   onEdit: (task: Task) => void
   onDelete: (id: string) => void
-  dragHandleProps?: DraggableSyntheticListeners
-  isDragOverlay?: boolean
 }) {
-  const [hovered, setHovered] = useState(false)
+  const theme = useTheme()
   const priority = PRIORITY_CONFIG[task.priority]
-  const status = STATUS_CONFIG[task.status]
+  const statusCfg = STATUS_CONFIG[task.status]
   const isOverdue = task.due_date && task.status !== 'done' && isPast(parseISO(task.due_date)) && !isToday(parseISO(task.due_date))
-  const commentCount = useCommentStore((s) => s.getCommentCountForTask(task.id))
+  const isDone = task.status === 'done'
 
   const dueDateLabel = useMemo(() => {
     if (!task.due_date) return null
@@ -498,219 +178,86 @@ function TaskCard({
   }, [task.assignee])
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8, scale: 0.97 }}
-      transition={{ duration: 0.2 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={cn(
-        'group relative flex items-start gap-3 rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4 transition-all duration-200',
-        hovered && 'border-[--border-medium] bg-[--bg-surface-2] shadow-lg shadow-black/20 -translate-y-px',
-        task.status === 'done' && 'opacity-60',
-        isDragOverlay && 'shadow-2xl shadow-[var(--accent-primary)]/10 ring-1 ring-[var(--accent-primary)]/20 scale-[1.03]'
-      )}
-    >
-      {/* Drag handle */}
-      {dragHandleProps && (
-        <button
-          {...dragHandleProps}
-          className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-[--text-muted] hover:text-[--text-primary]"
-          aria-label="Drag to reorder"
+    <Card sx={{ opacity: isDone ? 0.6 : 1, transition: 'all 0.2s', '&:hover': { boxShadow: theme.shadows[4] } }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+        {/* Checkbox */}
+        <IconButton
+          size="small"
+          onClick={() => onToggleDone(task)}
+          aria-label={isDone ? `Mark ${task.title} as incomplete` : `Mark ${task.title} as complete`}
+          sx={{ mt: 0.25, p: 0.5 }}
         >
-          <GripVertical className="size-5" />
-        </button>
-      )}
-
-      {/* Checkbox */}
-      <motion.button
-        onClick={() => onToggleDone(task)}
-        className="mt-0.5 flex-shrink-0 transition-transform duration-150 hover:scale-110"
-        whileTap={{ scale: 0.8 }}
-        aria-label={task.status === 'done' ? `Mark ${task.title} as incomplete` : `Mark ${task.title} as complete`}
-      >
-        <AnimatePresence mode="wait">
-          {task.status === 'done' ? (
-            <motion.div
-              key="done"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-            >
-              <CheckCircle2 className="size-5 text-green-400" />
-            </motion.div>
+          {isDone ? (
+            <CheckCircle sx={{ fontSize: 20, color: 'success.main' }} />
           ) : (
-            <motion.div
-              key="undone"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+            <RadioButtonUnchecked sx={{ fontSize: 20, color: 'text.disabled' }} />
+          )}
+        </IconButton>
+
+        {/* Content */}
+        <Stack sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} flexWrap="wrap" useFlexGap>
+            <Typography
+              variant="body2"
+              fontWeight={500}
+              noWrap
+              sx={{
+                ...(isDone && { textDecoration: 'line-through', color: 'text.disabled' }),
+              }}
             >
-              <Circle className="size-5 text-[--text-muted] transition-colors hover:text-[var(--accent-primary)]" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+              {task.title}
+            </Typography>
+            <Chip label={priority.label} size="small" color={priority.chipColor} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
+          </Stack>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2 flex-wrap">
-          <h3
-            className={cn(
-              'text-sm font-medium leading-snug text-[--text-primary]',
-              task.status === 'done' && 'line-through text-[--text-muted]'
+          {task.description && (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {task.description}
+            </Typography>
+          )}
+
+          <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
+            <Chip
+              icon={task.status === 'in_progress' ? <AccessTime sx={{ fontSize: 12 }} /> : task.status === 'done' ? <CheckCircle sx={{ fontSize: 12 }} /> : <RadioButtonUnchecked sx={{ fontSize: 12 }} />}
+              label={statusCfg.label}
+              size="small"
+              variant="outlined"
+              color={statusCfg.chipColor}
+              sx={{ fontSize: 10, height: 20 }}
+            />
+
+            {task.due_date && (
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: isOverdue ? 'error.main' : 'text.secondary' }}>
+                <CalendarToday sx={{ fontSize: 12 }} />
+                <Typography variant="caption">{dueDateLabel}</Typography>
+                {isOverdue && <Warning sx={{ fontSize: 12, color: 'error.main' }} />}
+              </Stack>
             )}
-          >
-            {task.title}
-          </h3>
-          <Badge
-            variant="outline"
-            className={cn(
-              'h-5 text-[10px] font-medium px-1.5 border-0 rounded-md',
-              priority.bg,
-              priority.color
-            )}
-          >
-            {priority.label}
-          </Badge>
-          {/* Comment count badge */}
-          {commentCount > 0 && (
-            <span className="text-xs text-[var(--text-muted)] bg-[--border-subtle] px-1.5 py-0.5 rounded-full flex items-center gap-1">
-              <MessageCircle className="size-3" />
-              {commentCount}
-            </span>
-          )}
-        </div>
 
-        {task.description && (
-          <p className="mt-1 text-xs text-[--text-muted] line-clamp-2 leading-relaxed">
-            {task.description}
-          </p>
-        )}
-
-        <div className="mt-2 flex items-center gap-3 flex-wrap">
-          {/* Status indicator */}
-          <div className="flex items-center gap-1.5">
-            {status.icon}
-            <span className="text-[11px] text-[--text-muted]">{status.label}</span>
-          </div>
-
-          {/* Due date */}
-          {task.due_date && (
-            <div className={cn('flex items-center gap-1.5', isOverdue && 'text-red-400')}>
-              <CalendarIcon className="size-3" />
-              <span className="text-[11px]">
-                {dueDateLabel}
-              </span>
-              {isOverdue && (
-                <AlertTriangle className="size-3 text-red-400" />
-              )}
-            </div>
-          )}
-
-          {/* Assignee */}
-          {task.assignee && (
-            <div className="flex items-center gap-1.5 ml-auto">
-              <Avatar className="size-5 border border-[--border-subtle]">
-                {task.assignee.avatar_url && <AvatarImage src={task.assignee.avatar_url} alt="" />}
-                <AvatarFallback className="text-[9px] bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]">
+            {task.assignee && (
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 'auto !important' }}>
+                <Avatar sx={{ width: 20, height: 20, fontSize: 9, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
                   {assigneeInitials}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-[11px] text-[--text-muted]">
-                {task.assignee.first_name || task.assignee.email?.split('@')[0]}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+                </Avatar>
+                <Typography variant="caption" color="text.secondary">
+                  {task.assignee.first_name || task.assignee.email?.split('@')[0]}
+                </Typography>
+              </Stack>
+            )}
+          </Stack>
+        </Stack>
 
-      {/* Hover actions */}
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            initial={{ opacity: 0, x: 4 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 4 }}
-            transition={{ duration: 0.15 }}
-            className="flex items-center gap-1 flex-shrink-0"
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
-              onClick={() => onEdit(task)}
-              aria-label="Edit task"
-            >
-              <Pencil className="size-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-[--text-muted] hover:text-red-400 hover:bg-red-500/10"
-              onClick={() => onDelete(task.id)}
-              aria-label="Delete task"
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  )
-}
-
-// ─── Sortable Task Card (DnD wrapper) ───────────────────────────────
-function SortableTaskCard({
-  task,
-  onToggleDone,
-  onEdit,
-  onDelete,
-}: {
-  task: Task
-  onToggleDone: (task: Task) => void
-  onEdit: (task: Task) => void
-  onDelete: (id: string) => void
-}) {
-  const { over, active } = useDndContext()
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id })
-
-  const isOver = over?.id === task.id && active?.id !== task.id
-
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      className={cn('relative', isDragging && 'opacity-40 z-0')}
-    >
-      {/* Drop indicator line */}
-      {isOver && (
-        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-[var(--accent-primary)] rounded-full z-10" />
-      )}
-      <TaskCard
-        task={task}
-        onToggleDone={onToggleDone}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        dragHandleProps={listeners}
-      />
-    </div>
+        {/* Action buttons */}
+        <Stack direction="row" spacing={0} sx={{ flexShrink: 0 }}>
+          <IconButton size="small" onClick={() => onEdit(task)} aria-label="Edit task">
+            <Edit sx={{ fontSize: 16 }} />
+          </IconButton>
+          <IconButton size="small" onClick={() => onDelete(task.id)} aria-label="Delete task" color="error">
+            <Delete sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -721,21 +268,16 @@ function TaskModal({
   editingTask,
   familyMembers,
   onSave,
-  familyId,
-  userId,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   editingTask: Task | null
   familyMembers: FamilyMember[]
   onSave: (data: TaskFormData) => Promise<void>
-  familyId: string
-  userId: string
 }) {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const [form, setForm] = useState<TaskFormData>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-  const [calendarOpen, setCalendarOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -771,886 +313,447 @@ function TaskModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] sm:max-w-[520px] max-h-[85vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-[--text-primary] font-display">
-            {editingTask ? t.tasks.editTask : t.tasks.addTask}
-          </DialogTitle>
-          <DialogDescription className="text-[--text-muted]">
-            {editingTask ? 'Update the task details below.' : 'Fill in the details to create a new task.'}
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
+      <DialogTitle>{editingTask ? t.tasks.editTask : t.tasks.addTask}</DialogTitle>
+      <DialogContent sx={{ pb: 1 }}>
+        <Stack spacing={2} sx={{ pt: 1 }}>
+          <TextField
+            label={t.tasks.taskTitle}
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            placeholder="Enter task title..."
+            size="small"
+            fullWidth
+          />
 
-        <div className="grid gap-4 py-2 overflow-y-auto flex-1 min-h-0">
-          {/* Title */}
-          <div className="space-y-2">
-            <Label className="text-[--text-primary] text-sm">{t.tasks.taskTitle}</Label>
-            <Input
-              placeholder="Enter task title..."
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[var(--accent-primary)]/50"
-            />
-          </div>
+          <TextField
+            label={t.tasks.description}
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Add a description (optional)..."
+            multiline
+            rows={2}
+            size="small"
+            fullWidth
+          />
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label className="text-[--text-primary] text-sm">{t.tasks.description}</Label>
-            <Textarea
-              placeholder="Add a description (optional)..."
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[var(--accent-primary)]/50 min-h-[80px] resize-none"
-            />
-          </div>
-
-          {/* Priority & Status Row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-[--text-primary] text-sm">{t.tasks.priority}</Label>
+          <Stack direction="row" spacing={2}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t.tasks.priority}</InputLabel>
               <Select
                 value={form.priority}
-                onValueChange={(v) => setForm((f) => ({ ...f, priority: v as TaskPriority }))}
+                label={t.tasks.priority}
+                onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value as TaskPriority }))}
               >
-                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-                  {(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => (
-                    <SelectItem key={p} value={p} className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">
-                      <span className="flex items-center gap-2">
-                        <span className={cn('size-2 rounded-full', PRIORITY_CONFIG[p].bg.replace('/15', ''), {
-                          'bg-red-500': p === 'urgent',
-                          'bg-[var(--accent-primary)]': p === 'high',
-                          'bg-[var(--accent)]': p === 'medium',
-                          'bg-green-500': p === 'low',
-                        })} />
-                        {PRIORITY_CONFIG[p].label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                {(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => (
+                  <MenuItem key={p} value={p}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: `${PRIORITY_CONFIG[p].chipColor}.main` }} />
+                      {PRIORITY_CONFIG[p].label}
+                    </Stack>
+                  </MenuItem>
+                ))}
               </Select>
-            </div>
+            </FormControl>
 
-            <div className="space-y-2">
-              <Label className="text-[--text-primary] text-sm">{t.tasks.status}</Label>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t.tasks.status}</InputLabel>
               <Select
                 value={form.status}
-                onValueChange={(v) => setForm((f) => ({ ...f, status: v as TaskStatus }))}
+                label={t.tasks.status}
+                onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as TaskStatus }))}
               >
-                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-                  {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((s) => (
-                    <SelectItem key={s} value={s} className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">
-                      <span className="flex items-center gap-2">
-                        {STATUS_CONFIG[s].icon}
-                        {STATUS_CONFIG[s].label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((s) => (
+                  <MenuItem key={s} value={s}>{STATUS_CONFIG[s].label}</MenuItem>
+                ))}
               </Select>
-            </div>
-          </div>
+            </FormControl>
+          </Stack>
 
-          {/* Assign To & Due Date Row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-[--text-primary] text-sm">{t.tasks.assignTo}</Label>
+          <Stack direction="row" spacing={2}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t.tasks.assignTo}</InputLabel>
               <Select
-                value={form.assigned_to}
-                onValueChange={(v) => setForm((f) => ({ ...f, assigned_to: v }))}
+                value={form.assigned_to || '__none__'}
+                label={t.tasks.assignTo}
+                onChange={(e) => setForm((f) => ({ ...f, assigned_to: e.target.value === '__none__' ? '' : e.target.value }))}
               >
-                <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] w-full">
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-                  <SelectItem value="__none__" className="text-[--text-muted] focus:bg-[--border-subtle]">
-                    <span className="flex items-center gap-2">
-                      <User className="size-3.5" />
-                      Unassigned
-                    </span>
-                  </SelectItem>
-                  {familyMembers.map((member) => (
-                    <SelectItem
-                      key={member.user_id}
-                      value={member.user_id}
-                      className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Avatar className="size-5 border border-[--border-subtle]">
-                          {member.profiles?.avatar_url && (
-                            <AvatarImage src={member.profiles.avatar_url} alt="" />
-                          )}
-                          <AvatarFallback className="text-[8px] bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]">
-                            {(
-                              (member.profiles?.first_name?.[0] || '') +
-                              (member.profiles?.last_name?.[0] || '')
-                            ).toUpperCase() || '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        {member.profiles?.first_name || member.nickname || member.profiles?.email?.split('@')[0]}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                <MenuItem value="__none__">
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Person sx={{ fontSize: 14 }} />
+                    <Typography variant="body2">Unassigned</Typography>
+                  </Stack>
+                </MenuItem>
+                {familyMembers.map((member) => {
+                  const name = member.profiles?.first_name || member.nickname || member.profiles?.email?.split('@')[0] || 'Member'
+                  const initials = ((member.profiles?.first_name?.[0] || '') + (member.profiles?.last_name?.[0] || '')).toUpperCase() || '?'
+                  return (
+                    <MenuItem key={member.user_id} value={member.user_id}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Avatar sx={{ width: 20, height: 20, fontSize: 8, bgcolor: 'primary.main', color: 'primary.contrastText' }}>{initials}</Avatar>
+                        <Typography variant="body2">{name}</Typography>
+                      </Stack>
+                    </MenuItem>
+                  )
+                })}
               </Select>
-            </div>
+            </FormControl>
 
-            <div className="space-y-2">
-              <Label className="text-[--text-primary] text-sm">{t.tasks.dueDate}</Label>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] hover:bg-[--bg-primary] hover:border-[--border-medium]',
-                      !form.due_date && 'text-[--text-muted]'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 size-4" />
-                    {form.due_date ? format(form.due_date, 'MMM d, yyyy') : 'Pick a date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-[--bg-surface] border-[--border-subtle]" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={form.due_date}
-                    onSelect={(date) => {
-                      setForm((f) => ({ ...f, due_date: date }))
-                      setCalendarOpen(false)
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          {/* Clear Due Date */}
-          {form.due_date && (
-            <button
-              type="button"
-              onClick={() => setForm((f) => ({ ...f, due_date: undefined }))}
-              className="text-[11px] text-[--text-muted] hover:text-[--text-primary] transition-colors flex items-center gap-1"
-            >
-              <X className="size-3" />
-              Clear due date
-            </button>
-          )}
-        </div>
-
-        {/* Comments section - only for existing tasks */}
-        {editingTask && <CommentsPanel taskId={editingTask.id} />}
-
-        <DialogFooter className="gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            className="text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]"
-          >
-            {t.common.cancel}
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving || !form.title.trim()}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white btn-glow btn-press"
-          >
-            {saving ? t.common.loading : t.common.save}
-          </Button>
-        </DialogFooter>
+            <TextField
+              label={t.tasks.dueDate}
+              type="date"
+              value={form.due_date ? format(form.due_date, 'yyyy-MM-dd') : ''}
+              onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value ? parseISO(e.target.value) : undefined }))}
+              size="small"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              InputProps={{
+                endAdornment: form.due_date ? (
+                  <IconButton size="small" onClick={() => setForm((f) => ({ ...f, due_date: undefined }))}>
+                    <Delete sx={{ fontSize: 14 }} />
+                  </IconButton>
+                ) : null,
+              }}
+            />
+          </Stack>
+        </Stack>
       </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={() => onOpenChange(false)} color="inherit">{t.common.cancel}</Button>
+        <Button onClick={handleSave} variant="contained" disabled={saving || !form.title.trim()}>
+          {saving ? t.common.loading : t.common.save}
+        </Button>
+      </DialogActions>
     </Dialog>
   )
 }
 
-// EmptyState is now imported from shared component
-
 // ─── Date Section Header ────────────────────────────────────────────
 function DateSectionHeader({ group, count }: { group: DateGroup; count: number }) {
-  const config = DATE_GROUP_LABELS[group]
+  const theme = useTheme()
+  const config = DATE_GROUP_CONFIG[group]
+  const color = config.color as string
   return (
-    <div className="flex items-center gap-3 mt-6 mb-3 first:mt-0">
-      <span className={cn('text-xs font-semibold uppercase tracking-wider font-display', config.color)}>
+    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mt: 3, mb: 1.5, '&:first-of-type': { mt: 0 } }}>
+      <Typography variant="caption" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: 1, color: config.color }}>
         {config.label}
-      </span>
-      <span className="text-[10px] text-[--text-muted] bg-[--border-subtle] rounded-full px-2 py-0.5 font-metric">
-        {count}
-      </span>
-      <div className="flex-1 h-px bg-[--border-subtle]" />
-    </div>
-  )
-}
-
-// ─── Status Section Header ──────────────────────────────────────────
-function StatusSectionHeader({ status, count }: { status: TaskStatus; count: number }) {
-  const config = STATUS_CONFIG[status]
-  return (
-    <div className="flex items-center gap-3 mt-6 mb-3 first:mt-0">
-      {config.icon}
-      <span className="text-xs font-semibold uppercase tracking-wider text-[--text-primary] font-display">
-        {config.label}
-      </span>
-      <span className="text-[10px] text-[--text-muted] bg-[--border-subtle] rounded-full px-2 py-0.5 font-metric">
-        {count}
-      </span>
-      <div className="flex-1 h-px bg-[--border-subtle]" />
-    </div>
+      </Typography>
+      <Chip label={count} size="small" sx={{ fontSize: 10, height: 18 }} />
+      <Box sx={{ flex: 1, height: 1, bgcolor: 'divider' }} />
+    </Stack>
   )
 }
 
 // ─── Main Tasks Page ────────────────────────────────────────────────
 export default function TasksPage() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   const supabase = useMemo(() => createClient(), [])
   const { currentFamily, familyMembers } = useAppStore()
   const { user } = useAuthStore()
   const {
     tasks,
     isLoading,
-    searchQuery,
-    filterStatus,
-    filterPriority,
-    sortBy,
-    showAddTask,
-    editingTask,
-    setTasks,
+    fetchTasks,
     addTask,
     updateTask,
-    removeTask,
-    setIsLoading,
-    setSearchQuery,
-    setFilterStatus,
-    setFilterPriority,
-    setSortBy,
-    setShowAddTask,
-    setEditingTask,
-    getFilteredTasks,
+    deleteTask,
   } = useTaskStore()
 
-  const [pageView, setPageView] = useState<'list' | 'board'>('list')
-  const [viewMode, setViewMode] = useState<'status' | 'date'>('status')
-  const [members, setMembers] = useState<FamilyMember[]>(familyMembers)
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterTab, setFilterTab] = useState(0) // 0=All, 1=Active, 2=Completed
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
 
-  const { canCreateTask, plan, getFeatureLimit } = useSubscriptionStore()
-  const taskLimit = getFeatureLimit('tasks')
-
-  const handleAddTask = useCallback(() => {
-    if (!canCreateTask(tasks.length)) {
-      setUpgradeModalOpen(true)
-      return
-    }
-    setEditingTask(null)
-    setShowAddTask(true)
-  }, [canCreateTask, tasks.length, setEditingTask, setShowAddTask])
-
-  // ─── DnD State & Handlers ────────────────────────────────────────
-  const [activeId, setActiveId] = useState<string | null>(null)
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
-
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    setActiveId(event.active.id as string)
-  }, [])
-
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event
-    setActiveId(null)
-
-    if (!over || active.id === over.id) return
-
-    const activeTask = tasks.find((t) => t.id === active.id)
-    const overTask = tasks.find((t) => t.id === over.id)
-    if (!activeTask || !overTask) return
-
-    // Only reorder within the same group
-    if (viewMode === 'status' && activeTask.status !== overTask.status) return
-    if (viewMode === 'date' && getDateGroup(activeTask) !== getDateGroup(overTask)) return
-
-    const oldIndex = tasks.findIndex((t) => t.id === active.id)
-    const newIndex = tasks.findIndex((t) => t.id === over.id)
-    const reorderedTasks = arrayMove(tasks, oldIndex, newIndex)
-
-    useTaskStore.getState().setTasks(reorderedTasks)
-    useTaskStore.getState().setSortBy('manual')
-  }, [tasks, viewMode])
-
-  const handleDragCancel = useCallback(() => {
-    setActiveId(null)
-  }, [])
-
-  // Fetch tasks from Supabase
-  const fetchTasks = useCallback(async () => {
-    if (!currentFamily) return
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*, assignee:profiles!tasks_assigned_to_fkey(*), creator:profiles!tasks_created_by_fkey(*)')
-        .eq('family_id', currentFamily.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      if (data) setTasks(data as Task[])
-    } catch (err) {
-      console.error('Failed to fetch tasks:', err)
-      toast.error('Failed to load tasks')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [currentFamily, supabase, setTasks, setIsLoading])
-
-  // Fetch family members
-  const fetchMembers = useCallback(async () => {
-    if (!currentFamily) return
-    try {
-      const { data, error } = await supabase
-        .from('family_members')
-        .select('*, profiles(*)')
-        .eq('family_id', currentFamily.id)
-
-      if (error) throw error
-      if (data) {
-        setMembers(data as FamilyMember[])
-        useAppStore.getState().setFamilyMembers(data as FamilyMember[])
-      }
-    } catch (err) {
-      console.error('Failed to fetch family members:', err)
-    }
-  }, [currentFamily, supabase])
+  const hasFetchedRef = useRef(false)
 
   useEffect(() => {
-    fetchTasks()
-    fetchMembers()
-  }, [fetchTasks, fetchMembers])
-
-  // Toggle task done
-  const handleToggleDone = useCallback(
-    async (task: Task) => {
-      const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done'
-      const completedAt = newStatus === 'done' ? new Date().toISOString() : null
-      const isCompleting = task.status !== 'done' && newStatus === 'done'
-      try {
-        const { error } = await supabase
-          .from('tasks')
-          .update({ status: newStatus, completed_at: completedAt })
-          .eq('id', task.id)
-
-        if (error) throw error
-        updateTask({ ...task, status: newStatus, completed_at: completedAt })
-        if (isCompleting) {
-          triggerTaskCompletionConfetti()
-          playCompletionSound()
-          announce(`Task '${task.title}' marked as complete`)
-          toast.success('🎉 Task completed!')
-        } else {
-          announce(`Task '${task.title}' marked as incomplete`)
-          toast.success('Task reopened')
-        }
-      } catch {
-        // Fallback for demo mode
-        updateTask({ ...task, status: newStatus, completed_at: completedAt })
-        if (isCompleting) {
-          triggerTaskCompletionConfetti()
-          playCompletionSound()
-          announce(`Task '${task.title}' marked as complete`)
-          toast.success('🎉 Task completed!')
-        } else {
-          announce(`Task '${task.title}' marked as incomplete`)
-          toast.success('Task reopened')
-        }
-      }
-    },
-    [supabase, updateTask]
-  )
-
-  // Save task (create or update)
-  const handleSaveTask = useCallback(
-    async (formData: TaskFormData) => {
-      if (!currentFamily || !user) return
-
-      const assignedTo = formData.assigned_to === '__none__' ? null : formData.assigned_to || null
-      const dueDate = formData.due_date ? formData.due_date.toISOString() : null
-
-      if (editingTask) {
-        // Update existing task
-        const { data, error } = await supabase
-          .from('tasks')
-          .update({
-            title: formData.title.trim(),
-            description: formData.description.trim() || null,
-            priority: formData.priority,
-            status: formData.status,
-            assigned_to: assignedTo,
-            due_date: dueDate,
-            completed_at: formData.status === 'done' ? new Date().toISOString() : null,
-          })
-          .eq('id', editingTask.id)
-          .select('*, assignee:profiles!tasks_assigned_to_fkey(*), creator:profiles!tasks_created_by_fkey(*)')
-          .single()
-
-        if (error) throw error
-        if (data) {
-          updateTask(data as Task)
-          toast.success('Task updated!')
-        }
-      } else {
-        // Create new task
-        const { data, error } = await supabase
-          .from('tasks')
-          .insert({
-            family_id: currentFamily.id,
-            title: formData.title.trim(),
-            description: formData.description.trim() || null,
-            priority: formData.priority,
-            status: formData.status,
-            assigned_to: assignedTo,
-            due_date: dueDate,
-            created_by: user.id,
-          })
-          .select('*, assignee:profiles!tasks_assigned_to_fkey(*), creator:profiles!tasks_created_by_fkey(*)')
-          .single()
-
-        if (error) throw error
-        if (data) {
-          addTask(data as Task)
-          toast.success('Task created!')
-        }
-      }
-    },
-    [currentFamily, user, editingTask, supabase, addTask, updateTask]
-  )
-
-  // Delete task
-  const handleDeleteTask = useCallback(
-    async (taskId: string) => {
-      try {
-        const { error } = await supabase.from('tasks').delete().eq('id', taskId)
-        if (error) throw error
-        removeTask(taskId)
-        toast.success('Task deleted')
-      } catch {
-        toast.error('Failed to delete task')
-      }
-    },
-    [supabase, removeTask]
-  )
-
-  // Handle kanban status change (drag between columns)
-  const handleKanbanStatusChange = useCallback(
-    async (taskId: string, newStatus: TaskStatus) => {
-      const task = tasks.find((t) => t.id === taskId)
-      if (!task || task.status === newStatus) return
-      const completedAt = newStatus === 'done' ? new Date().toISOString() : null
-      try {
-        const { error } = await supabase
-          .from('tasks')
-          .update({ status: newStatus, completed_at: completedAt })
-          .eq('id', taskId)
-        if (error) throw error
-        updateTask({ ...task, status: newStatus, completed_at: completedAt })
-        if (newStatus === 'done') {
-          triggerConfetti()
-          toast.success('🎉 Task completed!')
-        } else {
-          toast.success(t.tasks.moveToStatus.replace('{status}', STATUS_CONFIG[newStatus].label))
-        }
-      } catch {
-        toast.error('Failed to update task')
-      }
-    },
-    [supabase, tasks, updateTask, t]
-  )
-
-  // Handle add task from kanban column
-  const handleKanbanAddTask = useCallback((status: TaskStatus) => {
-    if (!canCreateTask(tasks.length)) {
-      setUpgradeModalOpen(true)
-      return
+    if (currentFamily?.id && user?.id && !hasFetchedRef.current) {
+      hasFetchedRef.current = true
+      fetchTasks(currentFamily.id, user.id).catch(() => {})
     }
-    setEditingTask(null)
-    // Set default status when adding from kanban column
-    setShowAddTask(true)
-  }, [canCreateTask, tasks.length, setEditingTask, setShowAddTask])
+  }, [currentFamily?.id, user?.id, fetchTasks])
+
+  // Reset on family change
+  const prevFamilyRef = useRef(currentFamily?.id)
+  useEffect(() => {
+    if (prevFamilyRef.current !== currentFamily?.id && currentFamily?.id && user?.id) {
+      prevFamilyRef.current = currentFamily.id
+      fetchTasks(currentFamily.id, user.id).catch(() => {})
+    }
+  }, [currentFamily?.id, user?.id, fetchTasks])
 
   // Filtered tasks
-  const filteredTasks = useMemo(() => getFilteredTasks(), [tasks, searchQuery, filterStatus, filterPriority, sortBy, getFilteredTasks])
-
-  // Grouped tasks by status
-  const groupedByStatus = useMemo(() => {
-    const groups: Record<TaskStatus, Task[]> = { todo: [], in_progress: [], done: [] }
-    filteredTasks.forEach((task) => {
-      groups[task.status].push(task)
-    })
-    return groups
-  }, [filteredTasks])
-
-  // Grouped tasks by date
-  const groupedByDate = useMemo(() => {
-    const groups: Record<DateGroup, Task[]> = {
-      overdue: [],
-      today: [],
-      tomorrow: [],
-      this_week: [],
-      later: [],
-      no_date: [],
+  const filteredTasks = useMemo(() => {
+    let result = [...tasks]
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter((task) =>
+        task.title.toLowerCase().includes(q) ||
+        task.description?.toLowerCase().includes(q)
+      )
     }
-    filteredTasks.forEach((task) => {
+    switch (filterTab) {
+      case 1: result = result.filter((t) => t.status !== 'done'); break
+      case 2: result = result.filter((t) => t.status === 'done'); break
+    }
+    return result
+  }, [tasks, searchQuery, filterTab])
+
+  // Group by date
+  const groupedTasks = useMemo(() => {
+    const groups = new Map<DateGroup, Task[]>()
+    for (const group of DATE_GROUP_ORDER) groups.set(group, [])
+    for (const task of filteredTasks) {
       const group = getDateGroup(task)
-      groups[group].push(task)
-    })
+      groups.get(group)?.push(task)
+    }
     return groups
   }, [filteredTasks])
 
-  // Task counts for filter badges
-  const taskCounts = useMemo(() => {
-    const counts = { all: tasks.length, todo: 0, in_progress: 0, done: 0, low: 0, medium: 0, high: 0, urgent: 0 }
-    tasks.forEach((task) => {
-      counts[task.status]++
-      counts[task.priority]++
-    })
-    return counts
-  }, [tasks])
+  const handleToggleDone = useCallback(async (task: Task) => {
+    const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done'
+    try {
+      const familyId = currentFamily?.id
+      if (familyId) {
+        await supabase.from('tasks').update({ status: newStatus }).eq('id', task.id)
+      }
+      updateTask(task.id, { status: newStatus })
+      if (newStatus === 'done') {
+        toast.success('Task completed!')
+      }
+    } catch {
+      updateTask(task.id, { status: newStatus })
+    }
+  }, [supabase, currentFamily?.id, updateTask])
 
-  // Modal open state
-  const modalOpen = showAddTask || !!editingTask
+  const handleSave = useCallback(async (data: TaskFormData) => {
+    const familyId = currentFamily?.id || 'demo-family-001'
+    const userId = user?.id || 'demo-user-001'
+    const isEditing = !!editingTask
+
+    const taskData = {
+      title: data.title.trim(),
+      description: data.description.trim() || null,
+      priority: data.priority,
+      status: data.status,
+      assigned_to: data.assigned_to || null,
+      due_date: data.due_date ? format(data.due_date, 'yyyy-MM-dd') : null,
+    }
+
+    if (isEditing) {
+      await supabase.from('tasks').update(taskData).eq('id', editingTask.id)
+      updateTask(editingTask.id, taskData)
+      toast.success('Task updated')
+    } else {
+      const { data: inserted, error } = await supabase.from('tasks').insert({
+        family_id: familyId,
+        created_by: userId,
+        ...taskData,
+      }).select().single()
+      if (error) throw error
+      if (inserted) addTask(inserted as Task)
+      toast.success('Task created')
+    }
+  }, [editingTask, supabase, currentFamily?.id, user?.id, updateTask, addTask])
+
+  const handleEdit = useCallback((task: Task) => {
+    setEditingTask(task)
+    setModalOpen(true)
+  }, [])
+
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      await supabase.from('tasks').delete().eq('id', id)
+    } catch { /* fallback */ }
+    deleteTask(id)
+    toast.success('Task deleted')
+  }, [supabase, deleteTask])
+
+  const handleAddNew = useCallback(() => {
+    setEditingTask(null)
+    setModalOpen(true)
+  }, [])
+
+  // Stats
+  const totalTasks = tasks.length
+  const completedTasks = tasks.filter((t) => t.status === 'done').length
+  const activeTasks = totalTasks - completedTasks
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* ─── Header ─────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold text-[--text-primary] tracking-tight font-display">{t.tasks.title}</h1>
-            <p className="text-sm text-[--text-muted] mt-0.5">
-              {tasks.length} task{tasks.length !== 1 ? 's' : ''} &middot; {taskCounts.done} completed
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {plan === 'free' && taskLimit !== null && (
-              <UpgradePrompt
-                feature="tasks"
-                currentCount={tasks.length}
-                limit={taskLimit}
-              />
-            )}
-            <Button
-              onClick={handleAddTask}
-              className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white gap-2 rounded-xl btn-glow btn-press btn-click-ripple"
-            >
-              <Plus className="size-4" />
+    <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
+      <Stack spacing={3}>
+        {/* Header */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30`, display: 'flex' }}>
+              <PlaylistAddCheck sx={{ color: 'primary.main' }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" fontWeight={700}>{t.tasks.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{activeTasks} active, {completedTasks} completed</Typography>
+            </Box>
+          </Stack>
+
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, borderRadius: 2 }}>
+              <IconButton size="small" onClick={() => setViewMode('list')} color={viewMode === 'list' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
+                <ViewList sx={{ fontSize: 16 }} />
+              </IconButton>
+              <IconButton size="small" onClick={() => setViewMode('kanban')} color={viewMode === 'kanban' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
+                <GridView sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Paper>
+            <Button variant="contained" startIcon={<Add sx={{ fontSize: 16}} />} onClick={handleAddNew}>
               {t.tasks.addTask}
             </Button>
-          </div>
-        </div>
+          </Stack>
+        </Stack>
 
-        {/* Search bar */}
-        <div className="relative mt-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[--text-muted]" />
-          <Input
-            placeholder={t.tasks.search}
+        {/* Stats */}
+        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+          {[
+            { label: 'Total', value: totalTasks, color: theme.palette.primary.main },
+            { label: 'Active', value: activeTasks, color: theme.palette.secondary.main },
+            { label: 'Done', value: completedTasks, color: theme.palette.success.main },
+          ].map((stat) => (
+            <Paper key={stat.label} variant="outlined" sx={{ flex: '1 1 120px', p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${stat.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: stat.color }}>
+                <PlaylistAddCheck sx={{ fontSize: 20 }} />
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight={700}>{stat.value}</Typography>
+                <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+              </Box>
+            </Paper>
+          ))}
+          <Paper variant="outlined" sx={{ flex: '1 1 140px', p: 2 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Typography variant="caption" color="text.secondary">Progress</Typography>
+              <Typography variant="caption" fontWeight={600} color="primary">{completionRate}%</Typography>
+            </Stack>
+            <LinearProgress variant="determinate" value={completionRate} sx={{ height: 8, borderRadius: 4 }} />
+          </Paper>
+        </Stack>
+
+        {/* Search + Filter */}
+        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+          <TextField
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] focus-visible:ring-[var(--accent-primary)]/50 h-10 rounded-xl"
+            placeholder={t.tasks.search}
+            size="small"
+            sx={{ flex: '1 1 200px' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ fontSize: 18, color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+            }}
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary] transition-colors"
+          <Paper variant="outlined" sx={{ display: 'flex', borderRadius: 2 }}>
+            <Tabs
+              value={filterTab}
+              onChange={(_, v) => setFilterTab(v)}
+              variant="scrollable"
+              scrollButtons="auto"
             >
-              <X className="size-4" />
-            </button>
-          )}
-        </div>
-      </div>
+              <Tab label={`All (${tasks.length})`} sx={{ textTransform: 'none', minHeight: 40 }} />
+              <Tab label={`Active (${activeTasks})`} sx={{ textTransform: 'none', minHeight: 40 }} />
+              <Tab label={`Done (${completedTasks})`} sx={{ textTransform: 'none', minHeight: 40 }} />
+            </Tabs>
+          </Paper>
+        </Stack>
 
-      {/* ─── Filter Bar ─────────────────────────────────────────── */}
-      <div className="flex-shrink-0 px-4 sm:px-6 pb-3" aria-label="Task filters">
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Status filter */}
-          <div className="flex items-center gap-1 bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5">
-            {(['all', 'todo', 'in_progress', 'done'] as const).map((status) => {
-              const isActive = filterStatus === status
-              const label = status === 'all' ? 'All' : STATUS_CONFIG[status as TaskStatus].label
-              const count = status === 'all' ? taskCounts.all : taskCounts[status as TaskStatus]
+        {/* Task List */}
+        {viewMode === 'list' && (
+          <Stack spacing={1}>
+            {DATE_GROUP_ORDER.map((group) => {
+              const groupTasks = groupedTasks.get(group) || []
+              if (groupTasks.length === 0) return null
               return (
-                <button
-                  key={status}
-                  onClick={() => setFilterStatus(status)}
-                  aria-pressed={isActive}
-                  className={cn(
-                    'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
-                    isActive
-                      ? 'bg-[var(--accent-primary)] text-white shadow-sm'
-                      : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
-                  )}
-                >
-                  {label}
-                  <span className="ml-1.5 text-[10px] opacity-70">{count}</span>
-                </button>
+                <Box key={group}>
+                  <DateSectionHeader group={group} count={groupTasks.length} />
+                  <Stack spacing={1}>
+                    {groupTasks.map((task) => (
+                      <TaskCardComponent
+                        key={task.id}
+                        task={task}
+                        onToggleDone={handleToggleDone}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
               )
             })}
-          </div>
 
-          {/* Priority filter */}
-          <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v as TaskPriority | 'all')}>
-            <SelectTrigger className="h-8 text-xs bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] w-[130px] rounded-lg">
-              <Filter className="size-3 mr-1 text-[--text-muted]" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-              <SelectItem value="all" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">All Priorities</SelectItem>
-              {(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => (
-                <SelectItem key={p} value={p} className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">
-                  <span className="flex items-center gap-2">
-                    <span className={cn('size-2 rounded-full', {
-                      'bg-red-500': p === 'urgent',
-                      'bg-[var(--accent-primary)]': p === 'high',
-                      'bg-[var(--accent)]': p === 'medium',
-                      'bg-green-500': p === 'low',
-                    })} />
-                    {PRIORITY_CONFIG[p].label}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Sort */}
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'due_date' | 'priority' | 'created_at' | 'status' | 'manual')}>
-            <SelectTrigger className="h-8 text-xs bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] w-[150px] rounded-lg">
-              <ArrowUpDown className="size-3 mr-1 text-[--text-muted]" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[--bg-surface] border-[--border-subtle]">
-              <SelectItem value="created_at" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Created Date</SelectItem>
-              <SelectItem value="due_date" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Due Date</SelectItem>
-              <SelectItem value="priority" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Priority</SelectItem>
-              <SelectItem value="status" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Status</SelectItem>
-              <SelectItem value="manual" className="text-[--text-primary] focus:bg-[--border-subtle] focus:text-[--text-primary]">Manual Order</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* View toggle: List / Board */}
-          <div className="flex items-center gap-1 bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-0.5 ml-auto">
-            <button
-              onClick={() => setPageView('list')}
-              title={t.tasks.listView}
-              className={cn(
-                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
-                pageView === 'list'
-                  ? 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]'
-                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
-              )}
-            >
-              <LayoutList className="size-3.5" />
-              <span className="hidden sm:inline">{t.tasks.listView}</span>
-            </button>
-            <button
-              onClick={() => setPageView('board')}
-              title={t.tasks.boardView}
-              className={cn(
-                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center gap-1.5',
-                pageView === 'board'
-                  ? 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]'
-                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
-              )}
-            >
-              <LayoutGrid className="size-3.5" />
-              <span className="hidden sm:inline">{t.tasks.boardView}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Sub-toggle: By Status / By Date (only in list view) */}
-        {pageView === 'list' && (
-          <div className="flex items-center gap-1 mt-2">
-            <button
-              onClick={() => setViewMode('status')}
-              className={cn(
-                'px-3 py-1 rounded-md text-xs font-medium transition-all duration-150',
-                viewMode === 'status'
-                  ? 'bg-[--border-subtle] text-[--text-primary]'
-                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
-              )}
-            >
-              By Status
-            </button>
-            <button
-              onClick={() => setViewMode('date')}
-              className={cn(
-                'px-3 py-1 rounded-md text-xs font-medium transition-all duration-150',
-                viewMode === 'date'
-                  ? 'bg-[--border-subtle] text-[--text-primary]'
-                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle]'
-              )}
-            >
-              By Date
-            </button>
-          </div>
+            {filteredTasks.length === 0 && (
+              <Stack alignItems="center" sx={{ py: 8 }}>
+                <PlaylistAddCheck sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                <Typography variant="body2" color="text.secondary">No tasks found</Typography>
+                <Button variant="outlined" startIcon={<Add sx={{ fontSize: 16}} />} onClick={handleAddNew} sx={{ mt: 2 }}>
+                  {t.tasks.addTask}
+                </Button>
+              </Stack>
+            )}
+          </Stack>
         )}
-      </div>
 
-      {/* ─── Task Content: List or Board ─────────────────────── */}
-      {pageView === 'board' ? (
-        /* ─── Board View ────────────────────────────────────── */
-        <div className="flex-1 min-h-0 px-4 sm:px-6 pb-6">
-          {isLoading ? (
-            <div className="space-y-2">
-              <TaskCardSkeleton count={5} />
-            </div>
-          ) : filteredTasks.length === 0 ? (
-            <EmptyState
-              icon={ClipboardList}
-              title="No tasks yet"
-              description="Create your first task to get started"
-              action={{ label: 'Add Task', onClick: handleAddTask }}
-            />
-          ) : (
-            <KanbanBoard
-              tasks={filteredTasks}
-              onStatusChange={handleKanbanStatusChange}
-              onAddTask={handleKanbanAddTask}
-            />
-          )}
-        </div>
-      ) : (
-        /* ─── List View ─────────────────────────────────────── */
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-        <div className="flex-1 min-h-0 px-4 sm:px-6 pb-6">
-          {isLoading ? (
-            <div className="space-y-2">
-              <TaskCardSkeleton count={5} />
-            </div>
-          ) : filteredTasks.length === 0 ? (
-            <EmptyState
-              icon={ClipboardList}
-              title="No tasks yet"
-              description="Create your first task to get started"
-              action={{ label: 'Add Task', onClick: handleAddTask }}
-            />
-          ) : (
-            <ScrollArea className="h-full">
-              <AnimatePresence mode="popLayout">
-                <div role="list">
-                {viewMode === 'status' ? (
-                  // Group by status
-                  (['todo', 'in_progress', 'done'] as TaskStatus[]).map((status) => {
-                    const group = groupedByStatus[status]
-                    if (group.length === 0) return null
-                    return (
-                      <div key={status}>
-                        <StatusSectionHeader status={status} count={group.length} />
-                        <SortableContext items={group.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-                          <div className="space-y-2">
-                            {group.map((task) => (
-                              <SortableTaskCard
-                                key={task.id}
-                                task={task}
-                                onToggleDone={handleToggleDone}
-                                onEdit={(task) => setEditingTask(task)}
-                                onDelete={handleDeleteTask}
-                              />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </div>
-                    )
-                  })
-                ) : (
-                  // Group by date
-                  DATE_GROUP_ORDER.map((group) => {
-                    const tasksInGroup = groupedByDate[group]
-                    if (tasksInGroup.length === 0) return null
-                    return (
-                      <div key={group}>
-                        <DateSectionHeader group={group} count={tasksInGroup.length} />
-                        <SortableContext items={tasksInGroup.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-                          <div className="space-y-2">
-                            {tasksInGroup.map((task) => (
-                              <SortableTaskCard
-                                key={task.id}
-                                task={task}
-                                onToggleDone={handleToggleDone}
-                                onEdit={(task) => setEditingTask(task)}
-                                onDelete={handleDeleteTask}
-                              />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </div>
-                    )
-                  })
-                )}
-              </div>
-              </AnimatePresence>
-            </ScrollArea>
-          )}
-        </div>
+        {/* Kanban View */}
+        {viewMode === 'kanban' && (
+          <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
+            {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((status) => {
+              const statusTasks = filteredTasks.filter((t) => t.status === status)
+              const cfg = STATUS_CONFIG[status]
+              return (
+                <Paper key={status} variant="outlined" sx={{ minWidth: 280, maxWidth: 360, flex: '0 0 300px', p: 2, borderRadius: 2 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <Chip label={cfg.label} size="small" color={cfg.chipColor} />
+                    <Typography variant="caption" color="text.secondary">{statusTasks.length}</Typography>
+                  </Stack>
+                  <Stack spacing={1} sx={{ maxHeight: 500, overflowY: 'auto' }}>
+                    {statusTasks.map((task) => (
+                      <TaskCardComponent
+                        key={task.id}
+                        task={task}
+                        onToggleDone={handleToggleDone}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                    {statusTasks.length === 0 && (
+                      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ py: 4 }}>No tasks</Typography>
+                    )}
+                  </Stack>
+                </Paper>
+              )
+            })}
+          </Stack>
+        )}
+      </Stack>
 
-        {/* ─── Drag Overlay ───────────────────────────────────── */}
-        <DragOverlay>
-          {activeId ? (
-            <TaskCard
-              task={filteredTasks.find((t) => t.id === activeId)!}
-              onToggleDone={handleToggleDone}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              isDragOverlay
-            />
-          ) : null}
-        </DragOverlay>
-        </DndContext>
-      )}
-
-      {/* ─── Upgrade Modal ─────────────────────────────────────── */}
-      <UpgradeModal
-        open={upgradeModalOpen}
-        onOpenChange={setUpgradeModalOpen}
-        feature="tasks"
-        currentCount={tasks.length}
-        limit={taskLimit ?? 10}
-      />
-
-      {/* ─── Add/Edit Task Modal ────────────────────────────────── */}
+      {/* Task Modal */}
       <TaskModal
         open={modalOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowAddTask(false)
-            setEditingTask(null)
-          }
-        }}
+        onOpenChange={(open) => { setModalOpen(open); if (!open) setEditingTask(null) }}
         editingTask={editingTask}
-        familyMembers={members}
-        onSave={handleSaveTask}
-        familyId={currentFamily?.id || ''}
-        userId={user?.id || ''}
+        familyMembers={familyMembers}
+        onSave={handleSave}
       />
 
-      {/* ─── FAB for mobile ─────────────────────────────────────── */}
-      <FAB onClick={handleAddTask} label="Add task" />
-    </div>
+      {/* FAB for mobile */}
+      {isMobile && (
+        <Fab color="primary" onClick={handleAddNew} sx={{ position: 'fixed', bottom: 80, right: 16 }}>
+          <Add />
+        </Fab>
+      )}
+    </Container>
   )
 }

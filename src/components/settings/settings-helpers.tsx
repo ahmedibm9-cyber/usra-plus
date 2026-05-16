@@ -1,34 +1,59 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import Paper from '@mui/material/Paper'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
 
 export function SectionCard({
   children,
-  className,
+  sx,
 }: {
   children: React.ReactNode
-  className?: string
+  sx?: object
 }) {
   return (
-    <Card
-      className={`bg-card border border-outline-variant rounded-2xl shadow-[var(--elevation-1)] transition-shadow duration-200 ${className ?? ''}`}
+    <Paper
+      elevation={0}
+      variant="outlined"
+      sx={{
+        borderRadius: 4,
+        p: 3,
+        transition: 'box-shadow 0.2s',
+        ...sx,
+      }}
     >
-      <CardContent className="p-6">
-        {children}
-      </CardContent>
-    </Card>
+      {children}
+    </Paper>
   )
 }
 
-export function SectionTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+export function SectionTitle({ children, sx }: { children: React.ReactNode; sx?: object }) {
   return (
-    <h3 className={`text-foreground text-base font-semibold mb-1 ${className ?? ''}`}>{children}</h3>
+    <Typography
+      variant="subtitle1"
+      sx={{
+        fontWeight: 600,
+        mb: 0.5,
+        ...sx,
+      }}
+    >
+      {children}
+    </Typography>
   )
 }
 
 export function SectionDescription({ children }: { children: React.ReactNode }) {
-  return <p className="text-muted-foreground text-sm mb-4">{children}</p>
+  return (
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      sx={{ mb: 2 }}
+    >
+      {children}
+    </Typography>
+  )
 }
 
 export function SettingRow({
@@ -41,12 +66,32 @@ export function SettingRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 border-b border-border/50 last:border-0 last:pb-0">
-      <div className="flex-1 min-w-0">
-        <p className="text-foreground text-sm font-medium">{label}</p>
-        {description && <p className="text-muted-foreground text-xs mt-0.5">{description}</p>}
-      </div>
-      <div className="shrink-0">{children}</div>
-    </div>
+    <Stack
+      direction="row"
+      alignItems="center"
+      justifyContent="space-between"
+      gap={2}
+      sx={{
+        py: 1.5,
+        borderBottom: 1,
+        borderColor: 'divider',
+        '&:last-child': {
+          borderBottom: 0,
+          pb: 0,
+        },
+      }}
+    >
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          {label}
+        </Typography>
+        {description && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25 }}>
+            {description}
+          </Typography>
+        )}
+      </Box>
+      <Box sx={{ flexShrink: 0 }}>{children}</Box>
+    </Stack>
   )
 }

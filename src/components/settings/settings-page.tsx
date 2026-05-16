@@ -1,9 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
+import Container from '@mui/material/Container'
+import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import Skeleton from '@mui/material/Skeleton'
+import dynamic from 'next/dynamic'
+
+import { useI18n } from '@/i18n/use-translation'
+import { OtpActivation } from '@/components/settings/otp-activation'
 import {
+  User as UserIcon,
   Users,
-  User,
   Lock,
   Bell,
   ShieldCheck,
@@ -11,15 +23,8 @@ import {
   SlidersHorizontal,
   KeyRound,
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'framer-motion'
-import dynamic from 'next/dynamic'
-
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { useI18n } from '@/i18n/use-translation'
-import { OtpActivation } from '@/components/settings/otp-activation'
 
 // ─── Lazy-loaded Tab Components ──────────────────────────────────────────────
-// Tabs are loaded on demand so the initial bundle only includes the active tab.
 const ProfileTab = dynamic(() => import('./tabs/profile-tab').then(m => ({ default: m.ProfileTab })), { ssr: false, loading: () => <TabSkeleton /> })
 const SubscriptionTab = dynamic(() => import('./tabs/subscription-tab').then(m => ({ default: m.SubscriptionTab })), { ssr: false, loading: () => <TabSkeleton /> })
 const FamilyTab = dynamic(() => import('./tabs/family-tab').then(m => ({ default: m.FamilyTab })), { ssr: false, loading: () => <TabSkeleton /> })
@@ -30,18 +35,18 @@ const AdvancedTab = dynamic(() => import('./tabs/advanced-tab').then(m => ({ def
 
 function TabSkeleton() {
   return (
-    <div className="animate-pulse space-y-4 p-4">
-      <div className="h-8 bg-muted rounded-lg w-1/3" />
-      <div className="h-32 bg-muted rounded-xl" />
-      <div className="h-24 bg-muted rounded-xl" />
-    </div>
+    <Stack spacing={2} sx={{ p: 2 }}>
+      <Skeleton variant="rounded" width="33%" height={32} />
+      <Skeleton variant="rounded" height={128} />
+      <Skeleton variant="rounded" height={96} />
+    </Stack>
   )
 }
 
 // ─── Tab Configuration ───────────────────────────────────────────────────────
 
 const settingsTabs = [
-  { id: 'profile', icon: User, labelKey: 'user' as const },
+  { id: 'profile', icon: UserIcon, labelKey: 'user' as const },
   { id: 'family', icon: Users, labelKey: 'family' as const },
   { id: 'subscription', icon: Crown, labelKey: 'premium' as const },
   { id: 'notifications', icon: Bell, labelKey: 'notifications' as const },
@@ -68,82 +73,105 @@ const tabComponents: Record<string, React.ComponentType> = {
 
 export default function SettingsPage() {
   const { t } = useI18n()
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState(settingsTabs[0].id)
 
   const ActiveTabComponent = tabComponents[activeTab] ?? ProfileTab
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-foreground text-2xl sm:text-3xl font-bold font-display">{t.settings.title}</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your account, family, and preferences</p>
-        </div>
+        <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
+          {t.settings.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Manage your account, family, and preferences
+        </Typography>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Navigation - Desktop */}
-          <div className="hidden lg:block w-64 shrink-0">
-            <nav role="tablist" aria-label="Settings tabs" className="bg-card border border-border rounded-2xl p-2 sticky top-6">
-              {settingsTabs.map((tab) => (
-                <button
+        <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
+          {/* Desktop Sidebar Nav */}
+          <Paper
+            variant="outlined"
+            sx={{ display: { xs: 'none', md: 'block' }, width: 256, flexShrink: 0, p: 1, position: 'sticky', top: 24, alignSelf: 'flex-start' }}
+          >
+            <Tabs
+              orientation="vertical"
+              value={activeTab}
+              onChange={(_, v) => setActiveTab(v)}
+              aria-label="Settings tabs"
+              sx={{
+                '& .MuiTabs-indicator': {
+                  left: 0,
+                  width: 3,
+                  borderRadius: 1,
+                },
+                '& .MuiTab-root': {
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  minHeight: 40,
+                  textAlign: 'left',
+                  px: 2,
+                  py: 1.25,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  '&.Mui-selected': {
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                  },
+                },
+              }}
+            >
+              {settingsTabs.map(tab => (
+                <Tab
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  role="tab"
-                  aria-selected={activeTab === tab.id}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all relative ${
-                    activeTab === tab.id
-                      ? 'bg-primary/15 text-primary border-b-2 border-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  }`}
-                >
-                  <tab.icon className={`size-4 ${activeTab === tab.id ? 'text-primary' : ''}`} />
-                  {t.settings[tab.labelKey]}
-                </button>
+                  value={tab.id}
+                  icon={<tab.icon size={16} />}
+                  iconPosition="start"
+                  label={t.settings[tab.labelKey]}
+                  sx={{ '& .MuiTab-iconWrapper': { mr: 1.5, mb: 0 } }}
+                />
               ))}
-            </nav>
-          </div>
+            </Tabs>
+          </Paper>
 
-          {/* Mobile Tabs - Horizontal Scroll */}
-          <div className="lg:hidden w-full">
-            <ScrollArea className="w-full">
-              <div role="tablist" aria-label="Settings tabs" className="flex gap-1 pb-2 mb-4 border-b border-border">
-                {settingsTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    role="tab"
-                    aria-selected={activeTab === tab.id}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
-                      activeTab === tab.id
-                        ? 'bg-primary/15 text-primary border-b-2 border-primary'
-                        : 'text-muted-foreground bg-muted border border-border hover:text-foreground'
-                    }`}
-                  >
-                    <tab.icon className={`size-3.5 ${activeTab === tab.id ? 'text-primary' : ''}`} />
-                    {t.settings[tab.labelKey]}
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
+          {/* Mobile Tabs — Horizontal Scroll */}
+          <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 2 }}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, v) => setActiveTab(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              aria-label="Settings tabs"
+              sx={{
+                '& .MuiTab-root': {
+                  minHeight: 44,
+                  textTransform: 'none',
+                  px: 2,
+                },
+              }}
+            >
+              {settingsTabs.map(tab => (
+                <Tab
+                  key={tab.id}
+                  value={tab.id}
+                  icon={<tab.icon size={14} />}
+                  iconPosition="start"
+                  label={t.settings[tab.labelKey]}
+                />
+              ))}
+            </Tabs>
+          </Box>
 
           {/* Content Area */}
-          <div className="flex-1 min-w-0" role="tabpanel" aria-label={`${t.settings[settingsTabs.find(tb => tb.id === activeTab)?.labelKey || 'user']} settings`}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-              >
-                <ActiveTabComponent />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Box
+            sx={{ flex: 1, minWidth: 0 }}
+            role="tabpanel"
+            aria-label={`${t.settings[settingsTabs.find(t => t.id === activeTab)?.labelKey || 'user']} settings`}
+          >
+            <ActiveTabComponent />
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   )
 }

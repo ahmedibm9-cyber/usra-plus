@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,29 +20,37 @@ import {
   Link as LinkIcon,
   Users,
   ExternalLink,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Checkbox } from '@/components/ui/checkbox'
+} from '@mui/icons-material'
 import {
+  Container,
+  Stack,
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Avatar,
+  Tabs,
+  Tab,
+  Divider,
+  Checkbox,
+  FormControlLabel,
+  Tooltip,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material'
 import { useMealStore, type Meal, type MealType } from '@/stores/meal-store'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -72,97 +79,243 @@ function addDays(d: Date, n: number): Date {
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
-const MEAL_TYPE_CONFIG: Record<MealType, { icon: React.ElementType; colorClass: string; bgClass: string; borderClass: string }> = {
-  breakfast: { icon: Sunrise, colorClass: 'text-emerald-400', bgClass: 'bg-emerald-500/10', borderClass: 'border-emerald-500/20' },
-  lunch: { icon: Sun, colorClass: 'text-[#22C55E]', bgClass: 'bg-[#22C55E]/10', borderClass: 'border-[#22C55E]/20' },
-  dinner: { icon: Moon, colorClass: 'text-[var(--accent-primary)]', bgClass: 'bg-[var(--accent-primary)]/10', borderClass: 'border-[var(--accent-primary)]/20' },
-  snack: { icon: Cookie, colorClass: 'text-[var(--accent)]', bgClass: 'bg-[var(--accent)]/10', borderClass: 'border-[var(--accent)]/20' },
+const MEAL_TYPE_ICON: Record<MealType, React.ElementType> = {
+  breakfast: Sunrise,
+  lunch: Sun,
+  dinner: Moon,
+  snack: Cookie,
+}
+
+const MEAL_TYPE_COLOR: Record<MealType, 'success' | 'primary' | 'secondary' | 'warning'> = {
+  breakfast: 'success',
+  lunch: 'primary',
+  dinner: 'secondary',
+  snack: 'warning',
 }
 
 // ─── Meal Card ─────────────────────────────────────────────────────
 function MealCard({ meal, onClick }: { meal: Meal; onClick: () => void }) {
   const { t } = useI18n()
-  const config = MEAL_TYPE_CONFIG[meal.mealType]
-  const Icon = config.icon
+  const theme = useTheme()
+  const Icon = MEAL_TYPE_ICON[meal.mealType]
+  const chipColor = MEAL_TYPE_COLOR[meal.mealType]
 
   return (
-    <motion.button
-      layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.15 }}
+    <Card
+      sx={{
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        '&:hover': { transform: 'scale(1.02)', boxShadow: theme.shadows[4] },
+        borderLeft: `3px solid ${theme.palette[chipColor].main}`,
+      }}
       onClick={onClick}
-      className={`
-        w-full text-left rounded-2xl p-3 transition-all duration-200 card-hover
-        ${config.bgClass} ${config.borderClass} border
-        hover:scale-[1.02] hover:shadow-lg hover:shadow-black/20
-        cursor-pointer group
-      `}
     >
-      <div className="flex items-start justify-between gap-1.5">
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <Icon className={`size-3.5 shrink-0 ${config.colorClass}`} />
-          <span className="text-xs font-medium text-[--text-primary] truncate">
-            {meal.title}
-          </span>
-        </div>
-      </div>
+      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={0.5}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
+            <Icon sx={{ fontSize: 14, flexShrink: 0, color: `${theme.palette[chipColor].main}` }} />
+            <Typography variant="body2" fontWeight={500} noWrap>{meal.title}</Typography>
+          </Stack>
+        </Stack>
 
-      <div className="flex items-center gap-2 mt-2 flex-wrap">
-        {meal.prepTime && (
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-[--bg-surface-2] text-[--text-muted] border-0">
-            <Clock className="size-2.5 mr-0.5" />
-            {meal.prepTime} {t.mealPlan.minutes}
-          </Badge>
-        )}
-        {meal.calories && (
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-[--bg-surface-2] text-[--text-muted] border-0">
-            <Flame className="size-2.5 mr-0.5" />
-            {meal.calories} {t.mealPlan.kcal}
-          </Badge>
-        )}
-      </div>
-
-      {meal.assignedTo.length > 0 && (
-        <div className="flex items-center mt-2 -space-x-1.5 rtl:space-x-reverse">
-          {meal.assignedTo.slice(0, 3).map((userId) => (
-            <Avatar key={userId} className="size-5 ring-1 ring-[--bg-primary]">
-              <AvatarFallback className="text-[8px] bg-[--bg-surface-2] text-[--text-muted]">
-                {userId.slice(-1).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-          {meal.assignedTo.length > 3 && (
-            <span className="text-[9px] text-[--text-muted] ml-2 rtl:mr-2">+{meal.assignedTo.length - 3}</span>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
+          {meal.prepTime && (
+            <Chip icon={<Clock sx={{ fontSize: 12 }} />} label={`${meal.prepTime} ${t.mealPlan.minutes}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
           )}
-        </div>
-      )}
-    </motion.button>
+          {meal.calories && (
+            <Chip icon={<Flame sx={{ fontSize: 12 }} />} label={`${meal.calories} ${t.mealPlan.kcal}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
+          )}
+        </Stack>
+
+        {meal.assignedTo.length > 0 && (
+          <Stack direction="row" spacing={-0.5} sx={{ mt: 1 }}>
+            {meal.assignedTo.slice(0, 3).map((userId) => (
+              <Avatar key={userId} sx={{ width: 20, height: 20, fontSize: 8, border: `1px solid ${theme.palette.background.paper}`, bgcolor: theme.palette.action.hover }}>
+                {userId.slice(-1).toUpperCase()}
+              </Avatar>
+            ))}
+            {meal.assignedTo.length > 3 && (
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                +{meal.assignedTo.length - 3}
+              </Typography>
+            )}
+          </Stack>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
 // ─── Add Meal Slot ─────────────────────────────────────────────────
 function AddMealSlot({ mealType, date, onClick }: { mealType: MealType; date: string; onClick: (mt: MealType, d: string) => void }) {
   const { t } = useI18n()
-  const config = MEAL_TYPE_CONFIG[mealType]
-  const Icon = config.icon
+  const theme = useTheme()
+  const Icon = MEAL_TYPE_ICON[mealType]
 
   return (
-    <button
+    <Button
+      variant="outlined"
+      fullWidth
       onClick={() => onClick(mealType, date)}
-      className={`
-        w-full flex items-center justify-center gap-1.5 rounded-xl p-2.5
-        border border-dashed border-[--border-subtle]
-        text-[--text-muted] hover:text-[--text-secondary]
-        hover:border-[--border-medium] hover:bg-[--bg-surface-2]
-        transition-all duration-200 cursor-pointer
-      `}
+      sx={{
+        borderStyle: 'dashed',
+        py: 1,
+        justifyContent: 'center',
+        gap: 0.5,
+        color: theme.palette.text.secondary,
+        '&:hover': { borderStyle: 'dashed', bgcolor: theme.palette.action.hover },
+      }}
     >
-      <Icon className="size-3.5" />
-      <span className="text-[10px] font-medium">{t.mealPlan[mealType]}</span>
-      <Plus className="size-3" />
-    </button>
+      <Icon sx={{ fontSize: 14 }} />
+      <Typography variant="caption" fontWeight={500}>{t.mealPlan[mealType]}</Typography>
+      <Plus sx={{ fontSize: 12 }} />
+    </Button>
+  )
+}
+
+// ─── Meal Detail Sheet ─────────────────────────────────────────────
+function MealDetailSheet({
+  meal,
+  open,
+  onOpenChange,
+  onEdit,
+  onDelete,
+}: {
+  meal: Meal | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onEdit: (meal: Meal) => void
+  onDelete: (id: string) => void
+}) {
+  const { t, isRTL } = useI18n()
+  const theme = useTheme()
+  const { familyMembers } = useAppStore()
+
+  const handleAddToGrocery = useCallback(() => {
+    if (!meal) return
+    const count = useMealStore.getState().addIngredientsToGrocery(meal.id)
+    toast.success(t.mealPlan.addedToGrocery.replace('{count}', count.toString()))
+  }, [meal, t])
+
+  if (!meal) return null
+
+  const Icon = MEAL_TYPE_ICON[meal.mealType]
+  const chipColor = MEAL_TYPE_COLOR[meal.mealType]
+
+  return (
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
+      <DialogTitle>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: `${theme.palette[chipColor].main}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon sx={{ fontSize: 16, color: theme.palette[chipColor].main }} />
+          </Box>
+          {meal.title}
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ pt: 1 }}>
+          {meal.description && (
+            <Typography variant="body2" color="text.secondary">{meal.description}</Typography>
+          )}
+
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+            {meal.prepTime && (
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Clock sx={{ fontSize: 14 }} color="action" />
+                <Typography variant="caption" color="text.secondary">{meal.prepTime} {t.mealPlan.minutes}</Typography>
+              </Stack>
+            )}
+            {meal.calories && (
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Flame sx={{ fontSize: 14 }} color="action" />
+                <Typography variant="caption" color="text.secondary">{meal.calories} {t.mealPlan.kcal}</Typography>
+              </Stack>
+            )}
+            <Chip label={t.mealPlan[meal.mealType]} size="small" color={chipColor} />
+          </Stack>
+
+          {meal.ingredients.length > 0 && (
+            <Stack spacing={1}>
+              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600 }}>
+                {t.mealPlan.ingredients}
+              </Typography>
+              <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                {meal.ingredients.map((ing, idx) => (
+                  <Chip key={idx} label={ing} size="small" variant="outlined" />
+                ))}
+              </Stack>
+              <Button
+                variant="outlined"
+                size="small"
+                fullWidth
+                startIcon={<ShoppingCart sx={{ fontSize: 14 }} />}
+                onClick={handleAddToGrocery}
+                sx={{ mt: 1 }}
+              >
+                {t.mealPlan.addToGrocery}
+              </Button>
+            </Stack>
+          )}
+
+          {meal.assignedTo.length > 0 && (
+            <Stack spacing={1}>
+              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600 }}>
+                {t.mealPlan.assignedTo}
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {meal.assignedTo.map((userId) => {
+                  const member = familyMembers.find((m) => m.user_id === userId)
+                  const name = member?.nickname || member?.profiles?.first_name || userId
+                  return (
+                    <Stack key={userId} direction="row" alignItems="center" spacing={0.5}>
+                      <Avatar sx={{ width: 20, height: 20, fontSize: 8 }}>
+                        {name[0]}
+                      </Avatar>
+                      <Typography variant="caption" color="text.secondary">{name}</Typography>
+                    </Stack>
+                  )
+                })}
+              </Stack>
+            </Stack>
+          )}
+
+          {meal.recipeUrl && (
+            <Stack spacing={1}>
+              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600 }}>
+                {t.mealPlan.recipeUrl}
+              </Typography>
+              <Button
+                variant="text"
+                size="small"
+                startIcon={<ExternalLink sx={{ fontSize: 12 }} />}
+                href={meal.recipeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ textTransform: 'none' }}
+              >
+                {meal.recipeUrl}
+              </Button>
+            </Stack>
+          )}
+
+          <Divider />
+
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              fullWidth
+              startIcon={<Pencil sx={{ fontSize: 14 }} />}
+              onClick={() => { onEdit(meal); onOpenChange(false) }}
+            >
+              {t.mealPlan.editMeal}
+            </Button>
+            <IconButton color="error" onClick={() => { onDelete(meal.id); onOpenChange(false) }}>
+              <Trash2 sx={{ fontSize: 14 }} />
+            </IconButton>
+          </Stack>
+        </Stack>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -183,6 +336,7 @@ function MealDialogInner({
   familyMembers: { id: string; nickname?: string | null; user_id?: string; profiles?: { first_name?: string | null } }[]
 }) {
   const { t, isRTL } = useI18n()
+  const theme = useTheme()
   const { user } = useAuthStore()
   const { items: groceryItems } = useGroceryStore()
   const [title, setTitle] = useState(meal?.title || '')
@@ -253,263 +407,130 @@ function MealDialogInner({
   ]
 
   return (
-    <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
-      <DialogHeader>
-        <DialogTitle className="text-[--text-primary]">
-          {meal ? t.mealPlan.editMeal : t.mealPlan.addMeal}
-        </DialogTitle>
-      </DialogHeader>
-
-        <div className="space-y-4 py-2">
+    <Dialog open onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
+      <DialogTitle>{meal ? t.mealPlan.editMeal : t.mealPlan.addMeal}</DialogTitle>
+      <DialogContent sx={{ pb: 1 }}>
+        <Stack spacing={2} sx={{ pt: 1 }}>
           {/* Title */}
-          <div className="space-y-1.5">
-            <Label className="text-[--text-secondary] text-xs">{t.mealPlan.title_field}</Label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={t.mealPlan.title_field}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]"
-            />
-          </div>
+          <TextField label={t.mealPlan.title_field} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t.mealPlan.title_field} size="small" fullWidth />
 
           {/* Meal Type */}
-          <div className="space-y-1.5">
-            <Label className="text-[--text-secondary] text-xs">{t.mealPlan.mealType}</Label>
-            <div className="grid grid-cols-4 gap-2">
+          <Stack spacing={1}>
+            <Typography variant="body2" color="text.secondary">{t.mealPlan.mealType}</Typography>
+            <Stack direction="row" spacing={1}>
               {mealTypeOptions.map((opt) => {
                 const Icon = opt.icon
-                const config = MEAL_TYPE_CONFIG[opt.value]
+                const isSelected = mealType === opt.value
                 return (
-                  <button
+                  <Button
                     key={opt.value}
-                    type="button"
+                    variant={isSelected ? 'contained' : 'outlined'}
+                    color={MEAL_TYPE_COLOR[opt.value]}
+                    size="small"
                     onClick={() => setMealType(opt.value)}
-                    className={`
-                      flex flex-col items-center gap-1 p-2 rounded-xl border transition-all duration-200
-                      ${mealType === opt.value
-                        ? `${config.bgClass} ${config.borderClass} ${config.colorClass}`
-                        : 'border-[--border-subtle] text-[--text-muted] hover:border-[--border-medium]'
-                      }
-                    `}
+                    startIcon={<Icon sx={{ fontSize: 14 }} />}
+                    sx={{ textTransform: 'none', flex: 1 }}
                   >
-                    <Icon className="size-4" />
-                    <span className="text-[10px] font-medium">{opt.label}</span>
-                  </button>
+                    {opt.label}
+                  </Button>
                 )
               })}
-            </div>
-          </div>
+            </Stack>
+          </Stack>
 
           {/* Date */}
-          <div className="space-y-1.5">
-            <Label className="text-[--text-secondary] text-xs">{t.mealPlan.date}</Label>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]"
-            />
-          </div>
+          <TextField type="date" label={t.mealPlan.date} value={date} onChange={(e) => setDate(e.target.value)} size="small" fullWidth InputLabelProps={{ shrink: true }} />
 
           {/* Description */}
-          <div className="space-y-1.5">
-            <Label className="text-[--text-secondary] text-xs">{t.mealPlan.description}</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t.mealPlan.description}
-              rows={2}
-              className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] resize-none"
-            />
-          </div>
+          <TextField label={t.mealPlan.description} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t.mealPlan.description} multiline rows={2} size="small" fullWidth />
 
           {/* Prep Time + Calories */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-[--text-secondary] text-xs">{t.mealPlan.prepTime} ({t.mealPlan.minutes})</Label>
-              <Input
-                type="number"
-                value={prepTime}
-                onChange={(e) => setPrepTime(e.target.value)}
-                placeholder="30"
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[--text-secondary] text-xs">{t.mealPlan.calories} ({t.mealPlan.kcal})</Label>
-              <Input
-                type="number"
-                value={calories}
-                onChange={(e) => setCalories(e.target.value)}
-                placeholder="450"
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary]"
-              />
-            </div>
-          </div>
+          <Stack direction="row" spacing={2}>
+            <TextField label={`${t.mealPlan.prepTime} (${t.mealPlan.minutes})`} type="number" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} placeholder="30" size="small" fullWidth />
+            <TextField label={`${t.mealPlan.calories} (${t.mealPlan.kcal})`} type="number" value={calories} onChange={(e) => setCalories(e.target.value)} placeholder="450" size="small" fullWidth />
+          </Stack>
 
           {/* Ingredients */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-[--text-secondary] text-xs">{t.mealPlan.ingredients}</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-[10px] h-6 text-[var(--accent-primary)] hover:text-[var(--primary)]"
-                onClick={() => setShowGroceryImport(!showGroceryImport)}
-              >
-                <ShoppingCart className="size-3 mr-1" />
+          <Stack spacing={1}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant="body2" color="text.secondary">{t.mealPlan.ingredients}</Typography>
+              <Button size="small" startIcon={<ShoppingCart sx={{ fontSize: 12 }} />} onClick={() => setShowGroceryImport(!showGroceryImport)}>
                 {t.mealPlan.importFromGrocery}
               </Button>
-            </div>
+            </Stack>
 
-            {/* Grocery import panel */}
-            <AnimatePresence>
-              {showGroceryImport && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="max-h-32 overflow-y-auto rounded-lg border border-[--border-subtle] bg-[--bg-primary] p-2 space-y-1">
-                    {groceryItems.length === 0 ? (
-                      <p className="text-xs text-[--text-muted] text-center py-2">{isRTL ? 'لا توجد عناصر' : 'No items'}</p>
-                    ) : (
-                      groceryItems.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => handleImportFromGrocery(item.name)}
-                          className={`
-                            w-full text-left text-xs px-2 py-1.5 rounded-md transition-colors
-                            ${ingredients.includes(item.name)
-                              ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
-                              : 'text-[--text-secondary] hover:bg-[--bg-surface-2]'
-                            }
-                          `}
-                        >
-                          {item.name}
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {showGroceryImport && (
+              <Paper variant="outlined" sx={{ maxHeight: 120, overflowY: 'auto', p: 1 }}>
+                {groceryItems.length === 0 ? (
+                  <Typography variant="caption" color="text.secondary" textAlign="center" display="block" sx={{ py: 1 }}>{isRTL ? 'لا توجد عناصر' : 'No items'}</Typography>
+                ) : (
+                  groceryItems.map((item) => (
+                    <MenuItem
+                      key={item.id}
+                      onClick={() => handleImportFromGrocery(item.name)}
+                      selected={ingredients.includes(item.name)}
+                      dense
+                    >
+                      {item.name}
+                    </MenuItem>
+                  ))
+                )}
+              </Paper>
+            )}
 
-            {/* Ingredient tags */}
-            <div className="flex flex-wrap gap-1.5">
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
               {ingredients.map((ing, idx) => (
-                <Badge
-                  key={idx}
-                  variant="secondary"
-                  className="bg-[--bg-surface-2] text-[--text-secondary] border-0 pr-1 gap-0.5"
-                >
-                  {ing}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveIngredient(idx)}
-                    className="hover:text-red-400 transition-colors p-0.5"
-                  >
-                    <X className="size-2.5" />
-                  </button>
-                </Badge>
+                <Chip key={idx} label={ing} size="small" onDelete={() => handleRemoveIngredient(idx)} />
               ))}
-            </div>
+            </Stack>
 
-            {/* Add ingredient input */}
-            <div className="flex gap-2">
-              <Input
+            <Stack direction="row" spacing={1}>
+              <TextField
                 value={ingredientInput}
                 onChange={(e) => setIngredientInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    handleAddIngredient()
-                  }
-                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddIngredient() } }}
                 placeholder={t.mealPlan.addIngredient}
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-xs"
+                size="small"
+                fullWidth
               />
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={handleAddIngredient}
-                className="shrink-0 border-[--border-subtle]"
-              >
-                <Plus className="size-3" />
-              </Button>
-            </div>
-          </div>
+              <IconButton onClick={handleAddIngredient} color="primary">
+                <Plus sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Stack>
+          </Stack>
 
           {/* Assigned To */}
           {familyMembers.length > 0 && (
-            <div className="space-y-1.5">
-              <Label className="text-[--text-secondary] text-xs">{t.mealPlan.assignedTo}</Label>
-              <div className="flex flex-wrap gap-2">
+            <Stack spacing={1}>
+              <Typography variant="body2" color="text.secondary">{t.mealPlan.assignedTo}</Typography>
+              <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                 {familyMembers.map((member) => {
                   const name = member.nickname || member.profiles?.first_name || member.id
                   const isSelected = assignedTo.includes(member.user_id ?? '')
                   return (
-                    <label
+                    <Chip
                       key={member.id}
-                      className={`
-                        flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border cursor-pointer transition-all
-                        ${isSelected
-                          ? 'bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/30 text-[var(--accent-primary)]'
-                          : 'border-[--border-subtle] text-[--text-muted] hover:border-[--border-medium]'
-                        }
-                      `}
-                    >
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => handleToggleAssign(member.user_id ?? '')}
-                        className="size-3"
-                      />
-                      <span className="text-xs">{name}</span>
-                    </label>
+                      label={name}
+                      onClick={() => handleToggleAssign(member.user_id ?? '')}
+                      variant={isSelected ? 'filled' : 'outlined'}
+                      color={isSelected ? 'primary' : 'default'}
+                      sx={{ cursor: 'pointer' }}
+                    />
                   )
                 })}
-              </div>
-            </div>
+              </Stack>
+            </Stack>
           )}
 
           {/* Recipe URL */}
-          <div className="space-y-1.5">
-            <Label className="text-[--text-secondary] text-xs">{t.mealPlan.recipeUrl}</Label>
-            <div className="relative">
-              <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[--text-muted]" />
-              <Input
-                value={recipeUrl}
-                onChange={(e) => setRecipeUrl(e.target.value)}
-                placeholder="https://..."
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] pl-9"
-              />
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="border-[--border-subtle]"
-          >
-            {t.common.cancel}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white"
-          >
-            {t.common.save}
-          </Button>
-        </DialogFooter>
+          <TextField label={t.mealPlan.recipeUrl} value={recipeUrl} onChange={(e) => setRecipeUrl(e.target.value)} placeholder="https://..." size="small" fullWidth />
+        </Stack>
       </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={() => onOpenChange(false)} color="inherit">{t.common.cancel}</Button>
+        <Button onClick={handleSave} variant="contained">{t.common.save}</Button>
+      </DialogActions>
+    </Dialog>
   )
 }
 
@@ -531,183 +552,15 @@ function MealDialog({
   familyMembers: { id: string; nickname?: string | null; user_id?: string; profiles?: { first_name?: string | null } }[]
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <MealDialogInner
-        key={meal?.id || 'new'}
-        meal={meal}
-        mealType={defaultMealType}
-        date={defaultDate}
-        onSave={onSave}
-        onOpenChange={onOpenChange}
-        familyMembers={familyMembers}
-      />
-    </Dialog>
-  )
-}
-
-// ─── Meal Detail Sheet ─────────────────────────────────────────────
-function MealDetailSheet({
-  meal,
-  open,
-  onOpenChange,
-  onEdit,
-  onDelete,
-}: {
-  meal: Meal | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit: (meal: Meal) => void
-  onDelete: (id: string) => void
-}) {
-  const { t, isRTL } = useI18n()
-  const { familyMembers } = useAppStore()
-
-  const handleAddToGrocery = useCallback(() => {
-    if (!meal) return
-    const count = useMealStore.getState().addIngredientsToGrocery(meal.id)
-    toast.success(t.mealPlan.addedToGrocery.replace('{count}', count.toString()))
-  }, [meal, t])
-
-  if (!meal) return null
-
-  const config = MEAL_TYPE_CONFIG[meal.mealType]
-  const Icon = config.icon
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side={isRTL ? 'right' : 'bottom'}
-        className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] max-h-[85vh] overflow-y-auto"
-        dir={isRTL ? 'rtl' : 'ltr'}
-      >
-        <SheetHeader>
-          <SheetTitle className="text-[--text-primary] flex items-center gap-2">
-            <div className={`flex items-center justify-center size-8 rounded-lg ${config.bgClass}`}>
-              <Icon className={`size-4 ${config.colorClass}`} />
-            </div>
-            {meal.title}
-          </SheetTitle>
-        </SheetHeader>
-
-        <div className="space-y-4 mt-4 px-1 pb-4">
-          {meal.description && (
-            <p className="text-sm text-[--text-secondary]">{meal.description}</p>
-          )}
-
-          <div className="flex items-center gap-3 flex-wrap">
-            {meal.prepTime && (
-              <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-                <Clock className="size-3.5" />
-                {meal.prepTime} {t.mealPlan.minutes}
-              </div>
-            )}
-            {meal.calories && (
-              <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-                <Flame className="size-3.5" />
-                {meal.calories} {t.mealPlan.kcal}
-              </div>
-            )}
-            <Badge className={`${config.bgClass} ${config.colorClass} border-0 text-xs`}>
-              {t.mealPlan[meal.mealType]}
-            </Badge>
-          </div>
-
-          {meal.ingredients.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider">
-                {t.mealPlan.ingredients}
-              </h4>
-              <div className="flex flex-wrap gap-1.5">
-                {meal.ingredients.map((ing, idx) => (
-                  <Badge key={idx} variant="secondary" className="bg-[--bg-surface-2] text-[--text-secondary] border-0">
-                    {ing}
-                  </Badge>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddToGrocery}
-                className="w-full border-[--border-subtle] text-[var(--accent-primary)] hover:text-[var(--primary)] hover:border-[var(--accent-primary)]/30"
-              >
-                <ShoppingCart className="size-3.5 mr-1.5" />
-                {t.mealPlan.addToGrocery}
-              </Button>
-            </div>
-          )}
-
-          {meal.assignedTo.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider">
-                {t.mealPlan.assignedTo}
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {meal.assignedTo.map((userId) => {
-                  const member = familyMembers.find((m) => m.user_id === userId)
-                  const name = member?.nickname || member?.profiles?.first_name || userId
-                  return (
-                    <div key={userId} className="flex items-center gap-1.5 text-xs text-[--text-secondary]">
-                      <Avatar className="size-5">
-                        <AvatarFallback className="text-[8px] bg-[--bg-surface-2] text-[--text-muted]">
-                          {name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      {name}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {meal.recipeUrl && (
-            <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider">
-                {t.mealPlan.recipeUrl}
-              </h4>
-              <a
-                href={meal.recipeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-[var(--accent-primary)] hover:text-[var(--primary)] transition-colors"
-              >
-                <ExternalLink className="size-3" />
-                {meal.recipeUrl}
-              </a>
-            </div>
-          )}
-
-          <Separator className="bg-[--border-subtle]" />
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                onEdit(meal)
-                onOpenChange(false)
-              }}
-              className="flex-1 border-[--border-subtle]"
-            >
-              <Pencil className="size-3.5 mr-1.5" />
-              {t.mealPlan.editMeal}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                onDelete(meal.id)
-                onOpenChange(false)
-              }}
-              className="border-red-500/20 text-red-400 hover:text-red-300 hover:border-red-500/30 hover:bg-red-500/10"
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+    <MealDialogInner
+      key={meal?.id || 'new'}
+      meal={meal}
+      mealType={defaultMealType}
+      date={defaultDate}
+      onSave={onSave}
+      onOpenChange={onOpenChange}
+      familyMembers={familyMembers}
+    />
   )
 }
 
@@ -722,9 +575,9 @@ function AISuggestionsDialog({
   onSelect: (suggestion: { title: string; description: string; prepTime: number; calories: number; ingredients: string[] }) => void
 }) {
   const { t, isRTL } = useI18n()
-  const { items: groceryItems } = useGroceryStore()
   const [suggestions, setSuggestions] = useState<Array<{ title: string; description: string; prepTime: number; calories: number; ingredients: string[] }>>([])
   const [isLoading, setIsLoading] = useState(false)
+  const { items: groceryItems } = useGroceryStore()
 
   const fetchSuggestions = useCallback(async () => {
     setIsLoading(true)
@@ -733,40 +586,15 @@ function AISuggestionsDialog({
       const res = await fetch('/api/ai/meal-suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          groceryItems: groceryNames,
-          mealType: 'any',
-          language: isRTL ? 'ar' : 'en',
-        }),
+        body: JSON.stringify({ groceryItems: groceryNames, mealType: 'any', language: isRTL ? 'ar' : 'en' }),
       })
       const data = await safeJsonResponse<{ suggestions?: Array<{ title: string; description: string; prepTime: number; calories: number; ingredients: string[] }> }>(res)
-      if (data?.suggestions) {
-        setSuggestions(data.suggestions)
-      }
+      if (data?.suggestions) setSuggestions(data.suggestions)
     } catch {
-      // Fallback suggestions
       setSuggestions([
-        {
-          title: isRTL ? 'كبسة دجاج' : 'Chicken Kabsa',
-          description: isRTL ? 'أرز بسمتي مع دجاج متبل بالتوابل العربية' : 'Basmati rice with spiced chicken',
-          prepTime: 60,
-          calories: 650,
-          ingredients: [isRTL ? 'أرز بسمتي' : 'Basmati Rice', isRTL ? 'دجاج' : 'Chicken', isRTL ? 'توابل' : 'Spices'],
-        },
-        {
-          title: isRTL ? 'سلطة خضراء' : 'Green Salad',
-          description: isRTL ? 'سلطة طازجة مع خضروات متنوعة' : 'Fresh salad with mixed vegetables',
-          prepTime: 10,
-          calories: 120,
-          ingredients: [isRTL ? 'خضروات' : 'Vegetables', isRTL ? 'زيت زيتون' : 'Olive Oil'],
-        },
-        {
-          title: isRTL ? 'شوربة عدس' : 'Lentil Soup',
-          description: isRTL ? 'شوربة عدس دافئة ومغذية' : 'Warm and nutritious lentil soup',
-          prepTime: 30,
-          calories: 280,
-          ingredients: [isRTL ? 'عدس' : 'Lentils', isRTL ? 'بصل' : 'Onion', isRTL ? 'ثوم' : 'Garlic'],
-        },
+        { title: isRTL ? 'كبسة دجاج' : 'Chicken Kabsa', description: isRTL ? 'أرز بسمتي مع دجاج متبل بالتوابل العربية' : 'Basmati rice with spiced chicken', prepTime: 60, calories: 650, ingredients: [isRTL ? 'أرز بسمتي' : 'Basmati Rice', isRTL ? 'دجاج' : 'Chicken', isRTL ? 'توابل' : 'Spices'] },
+        { title: isRTL ? 'سلطة خضراء' : 'Green Salad', description: isRTL ? 'سلطة طازجة مع خضروات متنوعة' : 'Fresh salad with mixed vegetables', prepTime: 10, calories: 120, ingredients: [isRTL ? 'خضروات' : 'Vegetables', isRTL ? 'زيت زيتون' : 'Olive Oil'] },
+        { title: isRTL ? 'شوربة عدس' : 'Lentil Soup', description: isRTL ? 'شوربة عدس دافئة ومغذية' : 'Warm and nutritious lentil soup', prepTime: 30, calories: 280, ingredients: [isRTL ? 'عدس' : 'Lentils', isRTL ? 'بصل' : 'Onion', isRTL ? 'ثوم' : 'Garlic'] },
       ])
     } finally {
       setIsLoading(false)
@@ -774,76 +602,53 @@ function AISuggestionsDialog({
   }, [groceryItems, isRTL])
 
   useEffect(() => {
-    if (open) {
-      fetchSuggestions()
-    }
+    if (open) fetchSuggestions()
   }, [open, fetchSuggestions])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] max-w-lg rounded-2xl shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
-        <DialogHeader>
-          <DialogTitle className="text-[--text-primary] flex items-center gap-2">
-            <Sparkles className="size-4 text-[var(--accent-primary)]" />
-            {t.mealPlan.suggestMeals}
-          </DialogTitle>
-        </DialogHeader>
-
-        <p className="text-xs text-[--text-muted]">{t.mealPlan.suggestDesc}</p>
-
-        <div className="space-y-3 mt-2">
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth dir={isRTL ? 'rtl' : 'ltr'}>
+      <DialogTitle>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Sparkles sx={{ fontSize: 16, color: 'primary.main' }} />
+          {t.mealPlan.suggestMeals}
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{t.mealPlan.suggestDesc}</Typography>
+        <Stack spacing={1.5}>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="flex flex-col items-center gap-2">
-                <Sparkles className="size-6 text-[var(--accent-primary)] animate-pulse" />
-                <p className="text-xs text-[--text-muted]">{isRTL ? 'جاري التحميل...' : 'Loading...'}</p>
-              </div>
-            </div>
+            <Stack alignItems="center" sx={{ py: 4 }}>
+              <Sparkles sx={{ fontSize: 24, color: 'primary.main', animation: 'pulse 2s infinite' }} />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>{isRTL ? 'جاري التحميل...' : 'Loading...'}</Typography>
+            </Stack>
           ) : (
             suggestions.map((suggestion, idx) => (
-              <motion.button
+              <Paper
                 key={idx}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                onClick={() => {
-                  onSelect(suggestion)
-                  onOpenChange(false)
-                }}
-                className="w-full text-left p-4 rounded-2xl border border-[--border-subtle] bg-[--bg-primary] hover:border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)]/5 transition-all duration-200 cursor-pointer card-hover"
+                variant="outlined"
+                sx={{ p: 2, cursor: 'pointer', transition: 'all 0.2s', '&:hover': { borderColor: 'primary.light', bgcolor: 'primary.50' } }}
+                onClick={() => { onSelect(suggestion); onOpenChange(false) }}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-medium text-[--text-primary]">{suggestion.title}</h3>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {suggestion.prepTime > 0 && (
-                      <Badge variant="secondary" className="text-[10px] bg-[--bg-surface-2] text-[--text-muted] border-0 h-5">
-                        <Clock className="size-2.5 mr-0.5" />{suggestion.prepTime} {t.mealPlan.minutes}
-                      </Badge>
-                    )}
-                    {suggestion.calories > 0 && (
-                      <Badge variant="secondary" className="text-[10px] bg-[--bg-surface-2] text-[--text-muted] border-0 h-5">
-                        <Flame className="size-2.5 mr-0.5" />{suggestion.calories} {t.mealPlan.kcal}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <p className="text-xs text-[--text-muted] mt-1">{suggestion.description}</p>
-                <div className="flex flex-wrap gap-1 mt-2">
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+                  <Typography variant="body2" fontWeight={500}>{suggestion.title}</Typography>
+                  <Stack direction="row" spacing={0.5}>
+                    {suggestion.prepTime > 0 && <Chip icon={<Clock sx={{ fontSize: 10 }} />} label={`${suggestion.prepTime} ${t.mealPlan.minutes}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />}
+                    {suggestion.calories > 0 && <Chip icon={<Flame sx={{ fontSize: 10 }} />} label={`${suggestion.calories} ${t.mealPlan.kcal}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 20 }} />}
+                  </Stack>
+                </Stack>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>{suggestion.description}</Typography>
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                   {suggestion.ingredients.slice(0, 5).map((ing, i) => (
-                    <Badge key={i} variant="secondary" className="text-[10px] bg-[--bg-surface-2] text-[--text-muted] border-0">
-                      {ing}
-                    </Badge>
+                    <Chip key={i} label={ing} size="small" variant="outlined" sx={{ fontSize: 10, height: 18 }} />
                   ))}
                   {suggestion.ingredients.length > 5 && (
-                    <Badge variant="secondary" className="text-[10px] bg-[--bg-surface-2] text-[--text-muted] border-0">
-                      +{suggestion.ingredients.length - 5}
-                    </Badge>
+                    <Chip label={`+${suggestion.ingredients.length - 5}`} size="small" variant="outlined" sx={{ fontSize: 10, height: 18 }} />
                   )}
-                </div>
-              </motion.button>
+                </Stack>
+              </Paper>
             ))
           )}
-        </div>
+        </Stack>
       </DialogContent>
     </Dialog>
   )
@@ -852,7 +657,8 @@ function AISuggestionsDialog({
 // ─── Main Meal Plan Page ───────────────────────────────────────────
 export default function MealPlanPage() {
   const { t, isRTL } = useI18n()
-  // Selector-based subscriptions to avoid unnecessary re-renders
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const meals = useMealStore((s) => s.meals)
   const selectedWeekStart = useMealStore((s) => s.selectedWeekStart)
   const setSelectedWeek = useMealStore((s) => s.setSelectedWeek)
@@ -866,29 +672,26 @@ export default function MealPlanPage() {
   const currentFamily = useAppStore((s) => s.currentFamily)
   const user = useAuthStore((s) => s.user)
 
-  // Fetch data from Supabase on mount
   const hasFetchedRef = useRef(false)
   useEffect(() => {
     if (!currentFamily?.id || !user?.id) return
     if (hasFetchedRef.current) return
     hasFetchedRef.current = true
-
     fetchFromSupabase(currentFamily.id, user.id).catch((err) => {
       console.warn('[MealPlanPage] Initial fetch failed:', err)
     })
   }, [currentFamily?.id, user?.id, fetchFromSupabase])
 
-  // Re-fetch when family changes
   const prevFamilyRef = useRef(currentFamily?.id)
   useEffect(() => {
     if (!currentFamily?.id || !user?.id) return
     if (prevFamilyRef.current === currentFamily.id) return
     prevFamilyRef.current = currentFamily.id
-
     fetchFromSupabase(currentFamily.id, user.id).catch((err) => {
       console.warn('[MealPlanPage] Re-fetch on family change failed:', err)
     })
   }, [currentFamily?.id, user?.id, fetchFromSupabase])
+
   const [mealDialogOpen, setMealDialogOpen] = useState(false)
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [defaultMealType, setDefaultMealType] = useState<MealType>('breakfast')
@@ -903,12 +706,7 @@ export default function MealPlanPage() {
   const weekDays = useMemo(() => {
     return DAY_KEYS.map((key, idx) => {
       const d = addDays(weekStart, idx)
-      return {
-        key,
-        date: formatDateStr(d),
-        label: t.mealPlan[key],
-        isToday: formatDateStr(d) === today,
-      }
+      return { key, date: formatDateStr(d), label: t.mealPlan[key], isToday: formatDateStr(d) === today }
     })
   }, [weekStart, t, today])
 
@@ -996,7 +794,6 @@ export default function MealPlanPage() {
     setDefaultDate(today)
     const familyId = currentFamily?.id || 'demo-family-001'
     const userId = user?.id || 'demo-user-001'
-    // Pre-fill with suggestion data
     const prefillMeal: Meal = {
       id: crypto.randomUUID(),
       title: suggestion.title,
@@ -1014,176 +811,97 @@ export default function MealPlanPage() {
     toast.success(isRTL ? 'تمت إضافة الوجبة!' : 'Meal added!')
   }, [today, addMealToSupabase, currentFamily?.id, user?.id, isRTL])
 
-  // Week date range label
   const weekEnd = addDays(weekStart, 6)
   const weekLabel = `${weekStart.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}`
 
   return (
-    <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-10 rounded-2xl bg-[var(--accent-primary)]/10">
-            <UtensilsCrossed className="size-5 text-[var(--accent-primary)]" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold font-display text-[--text-primary]">{t.mealPlan.title}</h1>
-            <p className="text-xs text-[--text-muted]">{t.mealPlan.weekOf.replace('{date}', weekLabel)}</p>
-          </div>
-        </div>
+    <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
+      <Stack spacing={3}>
+        {/* Header */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <UtensilsCrossed sx={{ color: 'primary.main' }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" fontWeight={700}>{t.mealPlan.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{weekLabel}</Typography>
+            </Box>
+          </Stack>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Week Navigator */}
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="size-8 border-[--border-subtle]" onClick={handlePrevWeek}>
-              {isRTL ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconButton onClick={handlePrevWeek}><ChevronLeft /></IconButton>
+            <Button size="small" variant="outlined" onClick={handleToday}>{isRTL ? 'اليوم' : 'Today'}</Button>
+            <IconButton onClick={handleNextWeek}><ChevronRight /></IconButton>
+            <Button size="small" variant="outlined" startIcon={<Sparkles sx={{ fontSize: 14 }} />} onClick={() => setAiDialogOpen(true)}>
+              {t.mealPlan.suggestMeals}
             </Button>
-            <Button variant="outline" size="sm" className="border-[--border-subtle] text-xs h-8" onClick={handleToday}>
-              {t.mealPlan.today}
+            <Button variant="contained" size="small" startIcon={<Plus sx={{ fontSize: 14 }} />} onClick={handleAddNew}>
+              {t.mealPlan.addMeal}
             </Button>
-            <Button variant="outline" size="icon" className="size-8 border-[--border-subtle]" onClick={handleNextWeek}>
-              {isRTL ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
-            </Button>
-          </div>
+          </Stack>
+        </Stack>
 
-          {/* AI Suggestions */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAiDialogOpen(true)}
-            className="border-[var(--accent-primary)]/20 text-[var(--accent-primary)] hover:text-[var(--primary)] hover:border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)]/5"
-          >
-            <Sparkles className="size-3.5 mr-1.5" />
-            {t.mealPlan.suggestMeals}
+        {/* Stats */}
+        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+          {[
+            { label: t.mealPlan.mealsThisWeek, value: weekMeals.length, color: 'primary' },
+            { label: t.mealPlan.ingredients, value: totalIngredients, color: 'secondary' },
+          ].map((stat) => (
+            <Paper key={stat.label} variant="outlined" sx={{ flex: '1 1 120px', p: 2, textAlign: 'center' }}>
+              <Typography variant="h6" fontWeight={700} color={`${stat.color}.main`}>{stat.value}</Typography>
+              <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+            </Paper>
+          ))}
+        </Stack>
+
+        {/* Week Grid */}
+        <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 1 : 7}, 1fr)`, gap: 2, minWidth: isMobile ? 0 : 900 }}>
+            {weekDays.map((day) => {
+              const dayMeals = getMealsForDate(day.date)
+              return (
+                <Stack key={day.key} spacing={1}>
+                  {/* Day header */}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                    <Stack>
+                      <Typography variant="caption" fontWeight={600} color={day.isToday ? 'primary' : 'text.secondary'}>{day.label}</Typography>
+                      <Typography variant="caption" color="text.secondary">{day.date.slice(5)}</Typography>
+                    </Stack>
+                    {day.isToday && <Chip label="Today" size="small" color="primary" sx={{ fontSize: 10, height: 18 }} />}
+                  </Stack>
+
+                  {/* Meal slots */}
+                  {mealTypes.map((mt) => {
+                    const mtMeals = dayMeals.filter((m) => m.mealType === mt)
+                    return (
+                      <Stack key={mt} spacing={0.5}>
+                        {mtMeals.length > 0 ? (
+                          mtMeals.map((meal) => <MealCard key={meal.id} meal={meal} onClick={() => handleViewMeal(meal)} />)
+                        ) : (
+                          <AddMealSlot mealType={mt} date={day.date} onClick={handleAddSlot} />
+                        )}
+                      </Stack>
+                    )
+                  })}
+                </Stack>
+              )
+            })}
+          </Box>
+        </Paper>
+
+        {/* Actions */}
+        <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Button variant="outlined" size="small" startIcon={<ShoppingCart sx={{ fontSize: 14 }} />} onClick={handleAddAllToGrocery}>
+            {t.mealPlan.addToGrocery}
           </Button>
-
-          {/* Add Meal */}
-          <Button
-            size="sm"
-            onClick={handleAddNew}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white"
-          >
-            <Plus className="size-3.5 mr-1.5" />
-            {t.mealPlan.addMeal}
-          </Button>
-        </div>
-      </div>
-
-      {/* Weekly Grid */}
-      {weekMeals.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center py-16"
-        >
-          <div className="flex items-center justify-center size-16 rounded-2xl bg-[--bg-surface-2] mb-4">
-            <UtensilsCrossed className="size-7 text-[--text-muted]" />
-          </div>
-          <p className="text-sm text-[--text-muted] text-center max-w-sm">{t.mealPlan.noMeals}</p>
-          <Button
-            size="sm"
-            onClick={handleAddNew}
-            className="mt-4 bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white"
-          >
-            <Plus className="size-3.5 mr-1.5" />
-            {t.mealPlan.addMeal}
-          </Button>
-        </motion.div>
-      ) : (
-        <>
-          {/* Desktop: 7-column grid, Mobile: horizontal scroll */}
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="min-w-[700px] md:min-w-0 grid grid-cols-7 gap-2">
-              {/* Day Headers */}
-              {weekDays.map((day) => (
-                <div
-                  key={day.key}
-                  className={`
-                    flex flex-col items-center py-2 px-1 rounded-2xl shadow-lg
-                    ${day.isToday ? 'bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20' : 'bg-[--bg-surface-2]'}
-                  `}
-                >
-                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${day.isToday ? 'text-[var(--accent-primary)]' : 'text-[--text-muted]'}`}>
-                    {day.label}
-                  </span>
-                  <span className={`text-sm font-bold ${day.isToday ? 'text-[var(--accent-primary)]' : 'text-[--text-primary]'}`}>
-                    {new Date(day.date + 'T00:00:00').getDate()}
-                  </span>
-                  {day.isToday && (
-                    <Badge className="text-[8px] px-1 py-0 h-3.5 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-0 mt-0.5">
-                      {t.mealPlan.today}
-                    </Badge>
-                  )}
-                </div>
-              ))}
-
-              {/* Meal Slots */}
-              {mealTypes.map((mealType) =>
-                weekDays.map((day) => {
-                  const dayMeals = getMealsForDate(day.date).filter((m) => m.mealType === mealType)
-                  return (
-                    <div key={`${day.key}-${mealType}`} className="min-h-[70px]">
-                      {dayMeals.length > 0 ? (
-                        <div className="space-y-1.5">
-                          {dayMeals.map((meal) => (
-                            <MealCard
-                              key={meal.id}
-                              meal={meal}
-                              onClick={() => handleViewMeal(meal)}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <AddMealSlot
-                          mealType={mealType}
-                          date={day.date}
-                          onClick={handleAddSlot}
-                        />
-                      )}
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Week Summary Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-[--bg-surface-2] border border-[--border-subtle] card-hover"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <UtensilsCrossed className="size-4 text-[var(--accent-primary)]" />
-                <span className="text-xs text-[--text-muted]">{t.mealPlan.totalMeals}:</span>
-                <span className="text-sm font-semibold text-[--text-primary]">{weekMeals.length}</span>
-              </div>
-              <Separator orientation="vertical" className="h-4 bg-[--border-subtle]" />
-              <div className="flex items-center gap-1.5">
-                <ShoppingCart className="size-4 text-[#22C55E]" />
-                <span className="text-xs text-[--text-muted]">{t.mealPlan.totalIngredients}:</span>
-                <span className="text-sm font-semibold text-[--text-primary]">{totalIngredients}</span>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleAddAllToGrocery}
-              className="border-[#22C55E]/20 text-[#22C55E] hover:text-[#22C55E] hover:border-[#22C55E]/30 hover:bg-[#22C55E]/5"
-              disabled={totalIngredients === 0}
-            >
-              <ShoppingCart className="size-3.5 mr-1.5" />
-              {t.mealPlan.addAllToGrocery}
-            </Button>
-          </motion.div>
-        </>
-      )}
+        </Stack>
+      </Stack>
 
       {/* Meal Dialog */}
       <MealDialog
         open={mealDialogOpen}
-        onOpenChange={setMealDialogOpen}
+        onOpenChange={(open) => { setMealDialogOpen(open); if (!open) setEditingMeal(null) }}
         meal={editingMeal}
         mealType={defaultMealType}
         date={defaultDate}
@@ -1191,7 +909,7 @@ export default function MealPlanPage() {
         familyMembers={familyMembers}
       />
 
-      {/* Detail Sheet */}
+      {/* Meal Detail Sheet */}
       <MealDetailSheet
         meal={detailMeal}
         open={detailOpen}
@@ -1206,6 +924,6 @@ export default function MealPlanPage() {
         onOpenChange={setAiDialogOpen}
         onSelect={handleAISuggestion}
       />
-    </div>
+    </Container>
   )
 }

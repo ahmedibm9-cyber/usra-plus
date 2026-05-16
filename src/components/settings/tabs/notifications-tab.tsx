@@ -13,17 +13,21 @@ import {
   Volume2,
   Vibrate,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import Stack from '@mui/material/Stack'
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Switch from '@mui/material/Switch'
+import Button from '@mui/material/Button'
+import Paper from '@mui/material/Paper'
+import Divider from '@mui/material/Divider'
+import MenuItem from '@mui/material/MenuItem'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
 import { useI18n } from '@/i18n/use-translation'
-import type { Notification } from '@/types'
 
 import { SectionCard } from '../settings-helpers'
 
@@ -52,7 +56,6 @@ export function NotificationsTab() {
   const setPreference = useNotificationPreferencesStore(s => s.setPreference)
   const setCategoryGroup = useNotificationPreferencesStore(s => s.setCategoryGroup)
 
-  // Map for dynamic key access (store[item.key])
   const categoryPrefs: Record<string, boolean> = {
     taskAssigned, taskCompleted, taskDueReminder,
     eventReminder, eventStarting,
@@ -118,218 +121,212 @@ export function NotificationsTab() {
     { value: 1440, label: t.notifications.day1 },
   ]
 
+  const channelCards = [
+    { key: 'pushEnabled', icon: Bell, title: t.notifications.pushNotifications, desc: t.notifications.pushDesc, enabled: pushEnabled },
+    { key: 'emailEnabled', icon: Mail, title: t.notifications.emailNotifications, desc: t.notifications.emailDesc, enabled: emailEnabled },
+    { key: 'inAppEnabled', icon: Monitor, title: t.notifications.inAppNotifications, desc: t.notifications.inAppDesc, enabled: inAppEnabled },
+  ]
+
   return (
-    <div className="space-y-6">
+    <Stack spacing={3}>
       {/* Section 1: Channels */}
       <SectionCard>
-        <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-3">
+        <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, mb: 2, display: 'block' }}>
           {t.notifications.channels}
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Push */}
-          <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted border border-border">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Bell className="size-5 text-accent" />
-            </div>
-            <span className="text-foreground text-sm font-medium text-center">{t.notifications.pushNotifications}</span>
-            <p className="text-muted-foreground text-xs text-center">{t.notifications.pushDesc}</p>
-            <Switch
-              checked={pushEnabled}
-              onCheckedChange={(v) => setPreference('pushEnabled', v)}
-              className="data-[state=checked]:bg-primary"
-            />
-          </div>
-          {/* Email */}
-          <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted border border-border">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Mail className="size-5 text-accent" />
-            </div>
-            <span className="text-foreground text-sm font-medium text-center">{t.notifications.emailNotifications}</span>
-            <p className="text-muted-foreground text-xs text-center">{t.notifications.emailDesc}</p>
-            <Switch
-              checked={emailEnabled}
-              onCheckedChange={(v) => setPreference('emailEnabled', v)}
-              className="data-[state=checked]:bg-primary"
-            />
-          </div>
-          {/* In-App */}
-          <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted border border-border">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Monitor className="size-5 text-accent" />
-            </div>
-            <span className="text-foreground text-sm font-medium text-center">{t.notifications.inAppNotifications}</span>
-            <p className="text-muted-foreground text-xs text-center">{t.notifications.inAppDesc}</p>
-            <Switch
-              checked={inAppEnabled}
-              onCheckedChange={(v) => setPreference('inAppEnabled', v)}
-              className="data-[state=checked]:bg-primary"
-            />
-          </div>
-        </div>
+        </Typography>
+        <Grid container spacing={2}>
+          {channelCards.map((channel) => {
+            const Icon = channel.icon
+            return (
+              <Grid key={channel.key} size={{ xs: 12, sm: 4 }}>
+                <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={20} />
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500, textAlign: 'center' }}>{channel.title}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>{channel.desc}</Typography>
+                  <Switch
+                    checked={channel.enabled}
+                    onChange={(e) => setPreference(channel.key as 'pushEnabled' | 'emailEnabled' | 'inAppEnabled', e.target.checked)}
+                  />
+                </Paper>
+              </Grid>
+            )
+          })}
+        </Grid>
       </SectionCard>
 
       {/* Section 2: Categories */}
       <SectionCard>
-        <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-3">
+        <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, mb: 2, display: 'block' }}>
           {t.notifications.categories}
-        </h4>
-        <div className="space-y-4">
+        </Typography>
+        <Stack spacing={2}>
           {categoryGroups.map((group) => {
             const allEnabled = group.items.every((item) => categoryPrefs[item.key])
+            const Icon = group.icon
             return (
-              <div key={group.id}>
+              <Box key={group.id}>
                 {/* Group Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <group.icon className="size-4 text-primary" />
-                    <span className="text-foreground text-sm font-semibold">{group.label}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Stack direction="row" alignItems="center" gap={1}>
+                    <Icon size={16} color="primary" />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{group.label}</Typography>
+                  </Stack>
+                  <Stack direction="row" gap={0.5}>
+                    <Button
+                      size="small"
+                      variant={allEnabled ? 'contained' : 'text'}
                       onClick={() => setCategoryGroup(group.id, true)}
-                      className={`text-xs px-2 py-0.5 rounded-md transition-colors ${
-                        allEnabled
-                          ? 'text-primary bg-primary/10'
-                          : 'text-muted-foreground hover:text-accent hover:bg-muted'
-                      }`}
+                      sx={{ fontSize: 11, minWidth: 0, px: 1.5, py: 0.25, textTransform: 'none' }}
                     >
                       {t.notifications.enableAll}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="small"
+                      variant={!allEnabled ? 'outlined' : 'text'}
+                      color="error"
                       onClick={() => setCategoryGroup(group.id, false)}
-                      className={`text-xs px-2 py-0.5 rounded-md transition-colors ${
-                        !allEnabled
-                          ? 'text-[#EF4444] bg-[#EF4444]/10'
-                          : 'text-muted-foreground hover:text-[#EF4444] hover:bg-muted'
-                      }`}
+                      sx={{ fontSize: 11, minWidth: 0, px: 1.5, py: 0.25, textTransform: 'none' }}
                     >
                       {t.notifications.disableAll}
-                    </button>
-                  </div>
-                </div>
+                    </Button>
+                  </Stack>
+                </Stack>
                 {/* Category Items */}
-                <div className="space-y-0">
+                <Stack>
                   {group.items.map((item, idx) => (
-                    <div
+                    <Stack
                       key={item.key}
-                      className={`flex items-center justify-between py-3 ${idx < group.items.length - 1 ? 'border-b border-border' : ''}`}
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{
+                        py: 1.5,
+                        borderBottom: idx < group.items.length - 1 ? 1 : 0,
+                        borderColor: 'divider',
+                      }}
                     >
-                      <span className="text-foreground text-sm">{item.label}</span>
+                      <Typography variant="body2">{item.label}</Typography>
                       <Switch
                         checked={categoryPrefs[item.key]}
-                        onCheckedChange={(v) => setPreference(item.key, v)}
-                        className="data-[state=checked]:bg-primary"
+                        onChange={(e) => setPreference(item.key, e.target.checked)}
+                        size="small"
                       />
-                    </div>
+                    </Stack>
                   ))}
-                </div>
-              </div>
+                </Stack>
+              </Box>
             )
           })}
-        </div>
+        </Stack>
       </SectionCard>
 
       {/* Section 3: Schedule & Sound */}
       <SectionCard>
-        <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-3">
+        <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, mb: 2, display: 'block' }}>
           {t.notifications.scheduleAndSound}
-        </h4>
+        </Typography>
 
-        <div className="space-y-0">
+        <Stack>
           {/* Quiet Hours */}
-          <div className="flex items-center justify-between py-3 border-b border-border">
-            <div className="flex-1 min-w-0">
-              <p className="text-foreground text-sm font-medium">{t.notifications.quietHours}</p>
-              <p className="text-muted-foreground text-xs mt-0.5">{t.notifications.quietHoursDesc}</p>
-            </div>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.quietHours}</Typography>
+              <Typography variant="caption" color="text.secondary">{t.notifications.quietHoursDesc}</Typography>
+            </Box>
             <Switch
               checked={quietHoursEnabled}
-              onCheckedChange={(v) => setPreference('quietHoursEnabled', v)}
-              className="data-[state=checked]:bg-primary"
+              onChange={(e) => setPreference('quietHoursEnabled', e.target.checked)}
+              size="small"
             />
-          </div>
+          </Stack>
 
           {/* Quiet Hours Time Pickers */}
           {quietHoursEnabled && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="flex items-center gap-4 py-3 border-b border-border pl-2"
-            >
-              <div className="flex-1">
-                <Label className="text-muted-foreground text-xs mb-1 block">{t.notifications.startTime}</Label>
-                <Input
-                  type="time"
-                  value={quietHoursStart}
-                  onChange={(e) => setPreference('quietHoursStart', e.target.value)}
-                  className="bg-background border-border text-foreground w-full"
-                />
-              </div>
-              <div className="flex-1">
-                <Label className="text-muted-foreground text-xs mb-1 block">{t.notifications.endTime}</Label>
-                <Input
-                  type="time"
-                  value={quietHoursEnd}
-                  onChange={(e) => setPreference('quietHoursEnd', e.target.value)}
-                  className="bg-background border-border text-foreground w-full"
-                />
-              </div>
-            </motion.div>
+            <Stack direction="row" gap={2} sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider', pl: 1 }}>
+              <TextField
+                label={t.notifications.startTime}
+                type="time"
+                value={quietHoursStart}
+                onChange={(e) => setPreference('quietHoursStart', e.target.value)}
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label={t.notifications.endTime}
+                type="time"
+                value={quietHoursEnd}
+                onChange={(e) => setPreference('quietHoursEnd', e.target.value)}
+                size="small"
+                fullWidth
+              />
+            </Stack>
           )}
 
           {/* Reminder Advance */}
-          <div className="flex items-center justify-between py-3 border-b border-border">
-            <span className="text-foreground text-sm font-medium">{t.notifications.reminderAdvance}</span>
-            <Select
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.reminderAdvance}</Typography>
+            <TextField
+              select
               value={String(reminderAdvanceMinutes)}
-              onValueChange={(v) => setPreference('reminderAdvanceMinutes', Number(v))}
+              onChange={(e) => setPreference('reminderAdvanceMinutes', Number(e.target.value))}
+              size="small"
+              sx={{ width: 140 }}
             >
-              <SelectTrigger className="w-[140px] bg-background border-border text-foreground text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {reminderAdvanceOptions.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={String(option.value)}
-                    className="text-foreground text-sm focus:bg-primary/10 focus:text-accent"
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              {reminderAdvanceOptions.map((option) => (
+                <MenuItem key={option.value} value={String(option.value)}>{option.label}</MenuItem>
+              ))}
+            </TextField>
+          </Stack>
 
           {/* Sound */}
-          <div className="flex items-center justify-between py-3 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Volume2 className="size-4 text-muted-foreground" />
-              <span className="text-foreground text-sm font-medium">{t.notifications.sound}</span>
-            </div>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Stack direction="row" alignItems="center" gap={1}>
+              <Volume2 size={16} color="text.secondary" />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.sound}</Typography>
+            </Stack>
             <Switch
               checked={soundEnabled}
-              onCheckedChange={(v) => setPreference('soundEnabled', v)}
-              className="data-[state=checked]:bg-primary"
+              onChange={(e) => setPreference('soundEnabled', e.target.checked)}
+              size="small"
             />
-          </div>
+          </Stack>
 
           {/* Vibration */}
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-2">
-              <Vibrate className="size-4 text-muted-foreground" />
-              <span className="text-foreground text-sm font-medium">{t.notifications.vibration}</span>
-            </div>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ py: 1.5 }}
+          >
+            <Stack direction="row" alignItems="center" gap={1}>
+              <Vibrate size={16} color="text.secondary" />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.vibration}</Typography>
+            </Stack>
             <Switch
               checked={vibrationEnabled}
-              onCheckedChange={(v) => setPreference('vibrationEnabled', v)}
-              className="data-[state=checked]:bg-primary"
+              onChange={(e) => setPreference('vibrationEnabled', e.target.checked)}
+              size="small"
             />
-          </div>
-        </div>
+          </Stack>
+        </Stack>
       </SectionCard>
-    </div>
+    </Stack>
   )
 }

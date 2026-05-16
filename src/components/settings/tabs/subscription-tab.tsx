@@ -6,17 +6,21 @@ import {
   Check,
   X,
   Sparkles,
-  Infinity,
   Zap,
   BarChart3,
   Settings,
   Loader2,
+  Infinity,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { motion } from 'framer-motion'
 
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import Stack from '@mui/material/Stack'
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import Paper from '@mui/material/Paper'
 
 import { useAuthStore } from '@/stores/auth-store'
 import { useSubscriptionStore } from '@/stores/subscription-store'
@@ -37,8 +41,6 @@ export function SubscriptionTab() {
   const handleUpgrade = useCallback(
     async (targetPlan: SubscriptionPlan) => {
       if (targetPlan === subscriptionPlan) return
-
-      // If user wants to downgrade, open Stripe billing portal for cancellation
       if (targetPlan === 'free') {
         try {
           await useSubscriptionStore.getState().openBillingPortal()
@@ -47,8 +49,6 @@ export function SubscriptionTab() {
         }
         return
       }
-
-      // Upgrade — initiate Stripe checkout
       try {
         await useSubscriptionStore.getState().initiateCheckout(targetPlan)
       } catch {
@@ -133,149 +133,156 @@ export function SubscriptionTab() {
   ]
 
   return (
-    <div className="space-y-6">
+    <Stack spacing={3}>
       {/* Current Plan */}
       <SectionCard>
-        <div className="flex items-center justify-between">
-          <div>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Box>
             <SectionTitle>
-              <span className="flex items-center gap-2">
-                <Crown className="size-4 text-accent" /> {t.settings.currentPlan}
-              </span>
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Crown size={16} /> {t.settings.currentPlan}
+              </Stack>
             </SectionTitle>
             <SectionDescription>{isRTL ? 'تفاصيل اشتراكك' : 'Your subscription details'}</SectionDescription>
-          </div>
+          </Box>
           <PlanBadge />
-        </div>
+        </Stack>
       </SectionCard>
 
-      {/* Manage Subscription Button — visible for paid plans */}
+      {/* Manage Subscription Button */}
       {subscriptionPlan !== 'free' && (
         <SectionCard>
-          <div className="flex items-center justify-between">
-            <div>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box>
               <SectionTitle>{isRTL ? 'إدارة الاشتراك' : 'Manage Subscription'}</SectionTitle>
               <SectionDescription>{isRTL ? 'تحديث خطة الدفع أو إلغاؤها' : 'Update your plan or cancel subscription'}</SectionDescription>
-            </div>
+            </Box>
             <Button
-              variant="outline"
+              variant="outlined"
               onClick={handleManageBilling}
               disabled={isPortalLoading}
+              startIcon={isPortalLoading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
             >
-              {isPortalLoading ? <Loader2 className="size-4 animate-spin" /> : <Settings className="size-4" />}
               {isRTL ? 'إدارة الفوترة' : 'Manage Billing'}
             </Button>
-          </div>
+          </Stack>
         </SectionCard>
       )}
 
       {/* Plan Comparison */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Grid container spacing={2}>
         {plans.map((plan) => {
           const isCurrentPlan = subscriptionPlan === plan.id
           const buttonContent = isCheckoutLoading
             ? (isRTL ? 'جارٍ التحميل...' : 'Loading...')
             : plan.cta
           const buttonIcon = isCheckoutLoading
-            ? <Loader2 className="size-4 animate-spin" />
-            : <Zap className="size-4" />
+            ? <Loader2 size={16} className="animate-spin" />
+            : <Zap size={16} />
 
           return (
-            <motion.div
-              key={plan.id}
-              whileHover={{ y: -2 }}
-              className={`relative bg-card border rounded-2xl p-5 flex flex-col ${
-                plan.popular
-                  ? 'border-primary/50 shadow-[0_0_24px_-4px_rgba(13,148,136,0.15)]'
-                  : 'border-border'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-white border-0 text-xs px-3">
-                    <Sparkles className="size-3 mr-1" /> {isRTL ? 'موصى به' : 'Popular'}
-                  </Badge>
-                </div>
-              )}
+            <Grid key={plan.id} size={{ xs: 12, md: 4 }}>
+              <Paper
+                elevation={0}
+                variant="outlined"
+                sx={{
+                  p: 2.5,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 4,
+                  position: 'relative',
+                  borderColor: plan.popular ? 'primary.main' : 'divider',
+                  boxShadow: plan.popular ? '0 0 24px -4px rgba(13,148,136,0.15)' : 'none',
+                  height: '100%',
+                }}
+              >
+                {plan.popular && (
+                  <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}>
+                    <Chip
+                      icon={<Sparkles size={12} />}
+                      label={isRTL ? 'موصى به' : 'Popular'}
+                      color="primary"
+                      size="small"
+                    />
+                  </Box>
+                )}
 
-              <div className="mb-4">
-                <h3 className="text-foreground text-lg font-semibold font-display">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm">{plan.period}</span>
-                </div>
-              </div>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>{plan.name}</Typography>
+                  <Stack direction="row" alignItems="baseline" gap={0.5} sx={{ mt: 0.5 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>{plan.price}</Typography>
+                    <Typography variant="body2" color="text.secondary">{plan.period}</Typography>
+                  </Stack>
+                </Box>
 
-              <div className="flex-1 space-y-2 mb-5">
-                {plan.features.map((feature) => (
-                  <div key={feature.label} className="flex items-center gap-2">
-                    {feature.included ? (
-                      <Check className="size-3.5 text-green-400 shrink-0" />
-                    ) : (
-                      <X className="size-3.5 text-muted-foreground/50 shrink-0" />
-                    )}
-                    <span
-                      className={`text-xs ${
-                        feature.included ? 'text-foreground' : 'text-muted-foreground/50'
-                      }`}
-                    >
-                      {feature.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                <Stack spacing={1} sx={{ flex: 1, mb: 2 }}>
+                  {plan.features.map((feature) => (
+                    <Stack key={feature.label} direction="row" alignItems="center" gap={1}>
+                      {feature.included ? (
+                        <Check size={14} color="success" />
+                      ) : (
+                        <X size={14} color="disabled" />
+                      )}
+                      <Typography
+                        variant="caption"
+                        color={feature.included ? 'text.primary' : 'text.disabled'}
+                      >
+                        {feature.label}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
 
-              {isCurrentPlan ? (
-                <Button
-                  variant="outline"
-                  disabled
-                  className="w-full border-border text-muted-foreground"
-                >
-                  {isRTL ? 'الخطة الحالية' : 'Current Plan'}
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => handleUpgrade(plan.id)}
-                  disabled={isCheckoutLoading}
-                  className={`w-full ${
-                    plan.popular
-                      ? 'bg-primary hover:bg-primary/80 text-white'
-                      : 'bg-muted border border-border text-foreground hover:bg-border'
-                  }`}
-                  variant={plan.popular ? 'default' : 'outline'}
-                >
-                  {buttonIcon}
-                  {buttonContent}
-                </Button>
-              )}
-            </motion.div>
+                {isCurrentPlan ? (
+                  <Button variant="outlined" disabled fullWidth>
+                    {isRTL ? 'الخطة الحالية' : 'Current Plan'}
+                  </Button>
+                ) : (
+                  <Button
+                    fullWidth
+                    onClick={() => handleUpgrade(plan.id)}
+                    disabled={isCheckoutLoading}
+                    variant={plan.popular ? 'contained' : 'outlined'}
+                    startIcon={buttonIcon}
+                  >
+                    {buttonContent}
+                  </Button>
+                )}
+              </Paper>
+            </Grid>
           )
         })}
-      </div>
+      </Grid>
 
       {/* Feature Highlights */}
       <SectionCard>
         <SectionTitle>{isRTL ? 'ميزات مميزة' : 'Feature Highlights'}</SectionTitle>
         <SectionDescription>{isRTL ? 'ما تحصل عليه مع الخطط المميزة' : 'What you get with premium plans'}</SectionDescription>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 rounded-xl bg-muted border border-border">
-            <Infinity className="size-6 text-primary mb-2" />
-            <p className="text-foreground text-sm font-medium">{isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}</p>
-            <p className="text-muted-foreground text-xs">{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</p>
-          </div>
-          <div className="p-3 rounded-xl bg-muted border border-border">
-            <Zap className="size-6 text-accent mb-2" />
-            <p className="text-foreground text-sm font-medium">{isRTL ? 'مزامنة فورية' : 'Real-time Sync'}</p>
-            <p className="text-muted-foreground text-xs">{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</p>
-          </div>
-          <div className="p-3 rounded-xl bg-muted border border-border">
-            <BarChart3 className="size-6 text-accent mb-2" />
-            <p className="text-foreground text-sm font-medium">{isRTL ? 'التحليلات' : 'Analytics'}</p>
-            <p className="text-muted-foreground text-xs">{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</p>
-          </div>
-        </div>
+        <Grid container spacing={1.5}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+              <Infinity size={24} color="primary" />
+              <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>{isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}</Typography>
+              <Typography variant="caption" color="text.secondary">{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+              <Zap size={24} color="secondary" />
+              <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>{isRTL ? 'مزامنة فورية' : 'Real-time Sync'}</Typography>
+              <Typography variant="caption" color="text.secondary">{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+              <BarChart3 size={24} color="secondary" />
+              <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>{isRTL ? 'التحليلات' : 'Analytics'}</Typography>
+              <Typography variant="caption" color="text.secondary">{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</Typography>
+            </Paper>
+          </Grid>
+        </Grid>
       </SectionCard>
-    </div>
+    </Stack>
   )
 }

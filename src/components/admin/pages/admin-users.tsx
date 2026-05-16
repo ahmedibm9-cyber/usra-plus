@@ -35,6 +35,8 @@ import { UserDetailDrawer } from '@/components/admin/user-detail-drawer'
 import { AdminTablePageSkeleton } from '@/components/shared/skeleton-patterns'
 import type { UserRecord } from '@/types/admin'
 import { safeJsonResponse } from '@/lib/safe-fetch'
+import { Alert as MuiAlert } from '@mui/material'
+
 
 // ─── API Response Types ──────────────────────────────────────────────────────
 
@@ -180,26 +182,26 @@ function StatCard({ icon: Icon, label, value, trend, trendLabel, delay = 0, ring
       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.3 }}
       className="relative bg-gradient-to-br from-[var(--accent)]/[0.03] to-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.12] rounded-xl p-5 hover:border-[var(--accent)]/[0.25] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group"
     >
-      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+      <Box className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(20,184,166,0.04))' }} />
-      <div className="relative z-10 flex items-start justify-between">
-        <div className="flex items-start gap-3">
+      <Box className="relative z-10 flex items-start justify-between">
+        <Box className="flex items-start gap-3">
           <RadialProgressRing value={ringValue} max={ringMax} size={48} strokeWidth={3} color={ringColor || 'var(--accent)'} />
-          <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
+          <Box>
+            <Box className="flex items-center gap-1.5 mb-0.5">
               <Icon className="w-3.5 h-3.5 text-[var(--accent)]" />
               <span className="text-[10px] text-[--text-muted] uppercase tracking-wider">{label}</span>
-            </div>
+            </Box>
             <p className="text-2xl font-bold text-[var(--accent)]">{value}</p>
             {trendLabel && <p className="text-[10px] text-[--text-muted] mt-0.5">{trendLabel}</p>}
-          </div>
-        </div>
+          </Box>
+        </Box>
         {trend && (
           <span className={`text-xs font-medium flex items-center gap-0.5 ${trend.startsWith('+') || trend.startsWith('↑') ? 'text-[var(--accent)]' : 'text-[--status-danger]'}`}>
             <TrendingUp className="w-3 h-3" />{trend}
           </span>
         )}
-      </div>
+      </Box>
     </motion.div>
   )
 }
@@ -216,7 +218,7 @@ function LifecycleRing({ stage, count, color, pct }: { stage: string; count: num
   return (
     <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
       className="flex flex-col items-center gap-2">
-      <div className="relative">
+      <Box className="relative">
         <svg width={size} height={size}>
           <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border-subtle)" strokeWidth={strokeWidth} />
           <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
@@ -224,11 +226,11 @@ function LifecycleRing({ stage, count, color, pct }: { stage: string; count: num
             transform={`rotate(-90 ${size / 2} ${size / 2})`} className="transition-all duration-700"
             style={{ filter: `drop-shadow(0 0 6px ${color}40)` }} />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <Box className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-lg font-bold text-[--text-primary]">{count}</span>
           <span className="text-[9px] text-[--text-muted]">{pct}%</span>
-        </div>
-      </div>
+        </Box>
+      </Box>
       <span className="text-xs text-[--text-muted] font-medium">{stage}</span>
     </motion.div>
   )
@@ -264,20 +266,20 @@ function UserCard({ user, onAction, selected, onToggleSelect }: {
         {selected ? <CheckSquare className="w-4 h-4 text-[var(--accent)]" /> : <Square className="w-4 h-4" />}
       </button>
 
-      <div className="flex items-start gap-3 pl-5">
+      <Box className="flex items-start gap-3 pl-5">
         {/* Avatar with activity ring */}
-        <div className="relative shrink-0" onClick={() => onAction(user, 'view')}>
-          <div className={`w-11 h-11 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-sm font-medium text-[var(--accent)] ring-2 ${isActive ? 'ring-[var(--accent)]/30' : 'ring-white/[0.06]'}`}>
+        <Box className="relative shrink-0" onClick={() => onAction(user, 'view')}>
+          <Box className={`w-11 h-11 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-sm font-medium text-[var(--accent)] ring-2 ${isActive ? 'ring-[var(--accent)]/30' : 'ring-white/[0.06]'}`}>
             {user.name.charAt(0)}
-          </div>
+          </Box>
           {/* Online indicator */}
           {isActive && (
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-primary)]" />
           )}
-        </div>
+        </Box>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
+        <Box className="flex-1 min-w-0">
+          <Box className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium text-[--text-primary] truncate">{user.name}</p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -321,20 +323,20 @@ function UserCard({ user, onAction, selected, onToggleSelect }: {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </Box>
 
-          <div className="flex items-center gap-1.5 mt-0.5">
+          <Box className="flex items-center gap-1.5 mt-0.5">
             <Mail className="w-3 h-3 text-[--text-muted]" />
             <p className="text-xs text-[--text-muted] truncate">{user.email}</p>
-          </div>
+          </Box>
 
-          <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+          <Box className="flex items-center gap-2 mt-2.5 flex-wrap">
             <PlanBadge plan={user.plan} />
             <StatusBadge status={user.status} />
             <VerificationBadge verified={user.emailVerified ?? false} />
-          </div>
+          </Box>
 
-          <div className="flex items-center gap-3 mt-2.5 text-[10px] text-[--text-muted]">
+          <Box className="flex items-center gap-3 mt-2.5 text-[10px] text-[--text-muted]">
             <span className="flex items-center gap-1" title="Joined">
               <CalendarDays className="w-3 h-3" />{formatDate(user.createdAt)}
             </span>
@@ -347,9 +349,9 @@ function UserCard({ user, onAction, selected, onToggleSelect }: {
             <span className="flex items-center gap-1">
               <Globe className="w-3 h-3" />{user.language === 'ar' ? 'العربية' : 'EN'}
             </span>
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
     </motion.div>
   )
 }
@@ -361,14 +363,14 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
       className="flex flex-col items-center justify-center py-20 px-4">
       {/* Telescope illustration */}
-      <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent)]/10 flex items-center justify-center border border-[var(--accent)]/15">
+      <Box className="relative mb-6">
+        <Box className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent)]/10 flex items-center justify-center border border-[var(--accent)]/15">
           <Telescope className="w-10 h-10 text-[--text-muted]" />
-        </div>
+        </Box>
         {/* Decorative orbit ring */}
-        <div className="absolute -inset-3 border border-[var(--accent)]/[0.06] rounded-full" />
-        <div className="absolute -inset-6 border border-[var(--accent)]/[0.03] rounded-full" />
-      </div>
+        <Box className="absolute -inset-3 border border-[var(--accent)]/[0.06] rounded-full" />
+        <Box className="absolute -inset-6 border border-[var(--accent)]/[0.03] rounded-full" />
+      </Box>
       <h3 className="text-lg font-semibold text-[--text-secondary] mb-2">
         {isFiltered ? 'No users match your filters' : 'No users yet'}
       </h3>
@@ -379,10 +381,10 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
         }
       </p>
       {!isFiltered && (
-        <div className="mt-6 flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)]/[0.04] border border-[var(--accent)]/[0.08]">
+        <Box className="mt-6 flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)]/[0.04] border border-[var(--accent)]/[0.08]">
           <Shield className="w-4 h-4 text-[--text-muted]" />
           <span className="text-xs text-[--text-muted]">Privacy-safe — only aggregate profile data is shown</span>
-        </div>
+        </Box>
       )}
     </motion.div>
   )
@@ -1053,7 +1055,7 @@ export function AdminUsers() {
   }
 
   return (
-    <div className="space-y-6">
+    <Box className="space-y-6">
       {/* Show skeleton while data is loading */}
       {isLoading && users.length === 0 ? (
         <AdminTablePageSkeleton />
@@ -1061,21 +1063,21 @@ export function AdminUsers() {
       <>
       {/* ─── Page Title: People Observatory ──────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center border border-[var(--accent)]/20">
+        <Box className="flex items-center justify-between">
+          <Box className="flex items-center gap-3 mb-2">
+            <Box className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center border border-[var(--accent)]/20">
               <Telescope className="w-5 h-5 text-[var(--accent)]" />
-            </div>
-            <div>
+            </Box>
+            <Box>
               <h2 className="text-xl font-semibold text-[--text-primary] flex items-center gap-2">
                 People Observatory
                 <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-normal ${dataSource === 'live' ? 'bg-[var(--accent)]/10 text-[--text-secondary] border-[var(--accent)]/20' : 'bg-[var(--accent)]/10 text-[--text-muted] border-[var(--accent)]/10'}`}>
                   {dataSource === 'live' ? 'Live Data' : 'No Live Data'}
                 </span>
               </h2>
-              <div className="h-[2px] w-32 rounded-full bg-gradient-to-r from-[var(--accent)]/80 via-[var(--accent)]/60 to-transparent mt-1" />
-            </div>
-          </div>
+              <Box className="h-[2px] w-32 rounded-full bg-gradient-to-r from-[var(--accent)]/80 via-[var(--accent)]/60 to-transparent mt-1" />
+            </Box>
+          </Box>
           {/* Refresh button */}
           <Button
             variant="ghost"
@@ -1087,45 +1089,45 @@ export function AdminUsers() {
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="text-xs">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </Button>
-        </div>
+        </Box>
         <p className="text-sm text-[--text-muted] mt-1">Explore user demographics, engagement patterns, and lifecycle stages</p>
       </motion.div>
 
       {/* ─── Top Stats: 2x2 Grid with Radial Progress ──────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Total Users" value={stats.total} delay={0} ringValue={stats.total} ringMax={Math.max(stats.total * 1.5, 10)} ringColor="var(--accent)" />
         <StatCard icon={UserPlus} label="New This Month" value={stats.newThisMonth} delay={0.05} ringValue={stats.newThisMonth} ringMax={Math.max(stats.total, 10)} ringColor="var(--accent)" />
         <StatCard icon={Activity} label="Active Rate" value={`${stats.activeRate}%`} delay={0.1} ringValue={stats.activeRate} ringMax={100} ringColor="var(--accent)" />
         <StatCard icon={Shield} label="Verified" value={`${stats.verifiedRate}%`} delay={0.15} ringValue={stats.verifiedRate} ringMax={100} ringColor="var(--accent)" />
-      </div>
+      </Box>
 
       {/* ─── Main Content: Sidebar + User Explorer ──────────────────── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-1 space-y-4">
+        <Box className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <Box className="lg:col-span-1 space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.08] rounded-xl p-5 animate-pulse">
-                <div className="h-4 bg-[var(--accent)]/10 rounded w-2/3 mb-3" />
-                <div className="h-2 bg-[var(--accent)]/5 rounded w-full mb-2" />
-                <div className="h-2 bg-[var(--accent)]/5 rounded w-4/5" />
-              </div>
+              <Box key={i} className="bg-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.08] rounded-xl p-5 animate-pulse">
+                <Box className="h-4 bg-[var(--accent)]/10 rounded w-2/3 mb-3" />
+                <Box className="h-2 bg-[var(--accent)]/5 rounded w-full mb-2" />
+                <Box className="h-2 bg-[var(--accent)]/5 rounded w-4/5" />
+              </Box>
             ))}
-          </div>
-          <div className="lg:col-span-3 bg-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.08] rounded-xl p-8 animate-pulse">
-            <div className="h-8 bg-[var(--accent)]/10 rounded w-1/3 mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          </Box>
+          <Box className="lg:col-span-3 bg-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.08] rounded-xl p-8 animate-pulse">
+            <Box className="h-8 bg-[var(--accent)]/10 rounded w-1/3 mb-4" />
+            <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-32 bg-[var(--accent)]/5 rounded-xl" />
+                <Box key={i} className="h-32 bg-[var(--accent)]/5 rounded-xl" />
               ))}
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
       ) : users.length === 0 ? (
         <EmptyState isFiltered={isFiltered} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <Box className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* ─── Left Sidebar: Distribution Breakdowns ────────────── */}
-          <div className="lg:col-span-1 space-y-4">
+          <Box className="lg:col-span-1 space-y-4">
             {/* Plan Distribution */}
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.3 }}
               className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-5">
@@ -1133,20 +1135,20 @@ export function AdminUsers() {
                 <Filter className="w-3.5 h-3.5 text-[--text-secondary]" />
                 Plan Distribution
               </h3>
-              <div className="space-y-3">
+              <Box className="space-y-3">
                 {planDistribution.map(p => (
-                  <div key={p.plan}>
-                    <div className="flex items-center justify-between mb-1">
+                  <Box key={p.plan}>
+                    <Box className="flex items-center justify-between mb-1">
                       <span className="text-xs text-[--text-muted]">{p.plan}</span>
                       <span className="text-xs text-[--text-muted]">{p.count} · {p.pct}%</span>
-                    </div>
-                    <div className="h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
+                    </Box>
+                    <Box className="h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${p.pct}%` }} transition={{ delay: 0.3, duration: 0.6 }}
                         className="h-full rounded-full" style={{ backgroundColor: p.color }} />
-                    </div>
-                  </div>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
+              </Box>
             </motion.div>
 
             {/* Country Distribution */}
@@ -1156,15 +1158,15 @@ export function AdminUsers() {
                 <MapPin className="w-3.5 h-3.5 text-[--text-secondary]" />
                 Countries
               </h3>
-              <div className="space-y-2">
+              <Box className="space-y-2">
                 {countryBreakdown.map(([country, count]) => (
-                  <div key={country} className="flex items-center justify-between">
+                  <Box key={country} className="flex items-center justify-between">
                     <span className="text-xs text-[--text-muted]">{country}</span>
                     <span className="text-xs font-metric text-[--text-muted]">{count}</span>
-                  </div>
+                  </Box>
                 ))}
                 {countryBreakdown.length === 0 && <p className="text-xs text-[--text-muted]">No data</p>}
-              </div>
+              </Box>
             </motion.div>
 
             {/* Language Split */}
@@ -1174,40 +1176,40 @@ export function AdminUsers() {
                 <Globe className="w-3.5 h-3.5 text-[--text-secondary]" />
                 Languages
               </h3>
-              <div className="space-y-2">
+              <Box className="space-y-2">
                 {languageBreakdown.map(l => (
-                  <div key={l.lang}>
-                    <div className="flex items-center justify-between mb-1">
+                  <Box key={l.lang}>
+                    <Box className="flex items-center justify-between mb-1">
                       <span className="text-xs text-[--text-muted]">{l.lang}</span>
                       <span className="text-xs text-[--text-muted]">{l.pct}%</span>
-                    </div>
-                    <div className="h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
+                    </Box>
+                    <Box className="h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${l.pct}%` }} transition={{ delay: 0.35, duration: 0.6 }}
                         className="h-full rounded-full bg-[var(--accent)]/40" />
-                    </div>
-                  </div>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
+              </Box>
             </motion.div>
-          </div>
+          </Box>
 
           {/* ─── Main Area: User Explorer ────────────────────────── */}
-          <div className="lg:col-span-3 space-y-4">
+          <Box className="lg:col-span-3 space-y-4">
             {/* Toolbar */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}
               className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-4">
               {/* Row 1: Search + Actions */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <Box className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 {/* Search */}
-                <div className="relative flex-1 w-full sm:max-w-xs">
+                <Box className="relative flex-1 w-full sm:max-w-xs">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted]" />
                   <input type="text" placeholder="Search by name or email..." value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[var(--accent)]/[0.08] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30 transition-colors" />
-                </div>
+                </Box>
 
                 {/* Action buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <Box className="flex items-center gap-2 flex-wrap">
                   {/* Export Users Button */}
                   <Button
                     variant="outline"
@@ -1255,13 +1257,13 @@ export function AdminUsers() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-              </div>
+                </Box>
+              </Box>
 
               {/* Row 2: Filters + Sort + View + Count */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-3">
+              <Box className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-3">
                 {/* Filters */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <Box className="flex items-center gap-2 flex-wrap">
                   <Select value={planFilter} onValueChange={handlePlanFilterChange}>
                     <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[var(--accent)]/[0.08] text-[--text-secondary] w-[110px]">
                       <SelectValue placeholder="Plan" />
@@ -1313,20 +1315,20 @@ export function AdminUsers() {
                       <SelectItem value="email_az" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Email A → Z</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                </Box>
 
                 {/* User count display */}
-                <div className="flex items-center gap-2 ml-auto">
+                <Box className="flex items-center gap-2 ml-auto">
                   <span className="text-xs text-[--text-muted]">
                     {filteredUsers.length !== users.length
                       ? `${filteredUsers.length} of ${users.length} users`
                       : `${users.length} user${users.length !== 1 ? 's' : ''}`
                     }
                   </span>
-                </div>
+                </Box>
 
                 {/* View toggle */}
-                <div className="flex items-center gap-1 border border-[var(--accent)]/[0.08] rounded-lg p-0.5">
+                <Box className="flex items-center gap-1 border border-[var(--accent)]/[0.08] rounded-lg p-0.5">
                   <button onClick={() => setViewMode('cards')}
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'cards' ? 'bg-[var(--accent)]/15 text-[var(--accent)]' : 'text-[--text-muted] hover:text-[--text-muted]'}`}>
                     <LayoutGrid className="w-4 h-4" />
@@ -1335,8 +1337,8 @@ export function AdminUsers() {
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-[var(--accent)]/15 text-[var(--accent)]' : 'text-[--text-muted] hover:text-[--text-muted]'}`}>
                     <List className="w-4 h-4" />
                   </button>
-                </div>
-              </div>
+                </Box>
+              </Box>
             </motion.div>
 
             {/* ─── Cards View ──────────────────────────────────────── */}
@@ -1365,8 +1367,8 @@ export function AdminUsers() {
               /* ─── Table View ──────────────────────────────────────── */
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.3 }}
                 className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl overflow-hidden">
-                <div className="max-h-[500px] overflow-y-auto">
-                <div className="overflow-x-auto">
+                <Box className="max-h-[500px] overflow-y-auto">
+                <Box className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-[var(--accent)]/[0.06] hover:bg-transparent">
@@ -1404,15 +1406,15 @@ export function AdminUsers() {
                               </button>
                             </TableCell>
                             <TableCell className="py-3">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-xs font-medium text-[var(--accent)] shrink-0 ring-2 ring-[var(--accent)]/20">
+                              <Box className="flex items-center gap-3">
+                                <Box className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-xs font-medium text-[var(--accent)] shrink-0 ring-2 ring-[var(--accent)]/20">
                                   {user.name.charAt(0)}
-                                </div>
-                                <div>
+                                </Box>
+                                <Box>
                                   <p className="text-sm font-medium text-[--text-primary]">{user.name}</p>
                                   <p className="text-[10px] text-[--text-muted]">{user.country || 'SA'} · {user.language === 'ar' ? 'العربية' : 'EN'}</p>
-                                </div>
-                              </div>
+                                </Box>
+                              </Box>
                             </TableCell>
                             <TableCell className="text-sm text-[--text-muted]">{user.email}</TableCell>
                             <TableCell><PlanBadge plan={user.plan} /></TableCell>
@@ -1458,31 +1460,31 @@ export function AdminUsers() {
                       {paginatedUsers.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={9} className="h-32 text-center">
-                            <div className="flex flex-col items-center gap-2">
+                            <Box className="flex flex-col items-center gap-2">
                               <Users className="w-8 h-8 text-[var(--accent)]/10" />
                               <p className="text-sm text-[--text-muted]">No users found</p>
                               <p className="text-xs text-[--text-muted]">Try adjusting your search or filters</p>
-                            </div>
+                            </Box>
                           </TableCell>
                         </TableRow>
                       )}
                     </TableBody>
                   </Table>
-                </div>
-                </div>
+                </Box>
+                </Box>
               </motion.div>
             )}
 
             {/* Pagination */}
             {filteredUsers.length > pageSize && (
-              <div className="flex items-center justify-between px-2">
+              <Box className="flex items-center justify-between px-2">
                 <p className="text-xs text-[--text-muted]">
                   Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredUsers.length)} of {filteredUsers.length}
                   {filteredUsers.length !== users.length && (
                     <span className="text-[--text-muted] ml-1">(filtered from {users.length} total)</span>
                   )}
                 </p>
-                <div className="flex items-center gap-1">
+                <Box className="flex items-center gap-1">
                   <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
                     className="p-1.5 rounded-md text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                     <ChevronLeft className="w-4 h-4" />
@@ -1513,39 +1515,39 @@ export function AdminUsers() {
                     className="p-1.5 rounded-md text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                     <ChevronRight className="w-4 h-4" />
                   </button>
-                </div>
-              </div>
+                </Box>
+              </Box>
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
       )}
 
       {/* ─── User Lifecycle Stages: Individual Progress Rings ──────── */}
       {users.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.3 }}
           className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-5">
-          <div className="flex items-center justify-between mb-6">
-            <div>
+          <Box className="flex items-center justify-between mb-6">
+            <Box>
               <h3 className="text-sm font-semibold text-[--text-primary]">User Lifecycle Stages</h3>
               <p className="text-xs text-[--text-muted] mt-0.5">Distribution across engagement stages</p>
-            </div>
-            <div className="flex items-center gap-3">
+            </Box>
+            <Box className="flex items-center gap-3">
               {lifecycleStages.map(stage => (
-                <div key={stage.stage} className="flex items-center gap-1.5">
+                <Box key={stage.stage} className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: stage.color }} />
                   <span className="text-[10px] text-[--text-muted]">{stage.stage}</span>
-                </div>
+                </Box>
               ))}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            </Box>
+          </Box>
+          <Box className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {lifecycleStages.map((stage, i) => (
               <motion.div key={stage.stage} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + i * 0.1, duration: 0.4 }} className="flex justify-center">
                 <LifecycleRing stage={stage.stage} count={stage.count} color={stage.color} pct={stage.pct} />
               </motion.div>
             ))}
-          </div>
+          </Box>
         </motion.div>
       )}
 
@@ -1553,13 +1555,13 @@ export function AdminUsers() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
         className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08]">
         <Shield className="w-4 h-4 text-[var(--accent)] mt-0.5 shrink-0" />
-        <div>
+        <Box>
           <p className="text-xs font-medium text-[--text-muted]">Privacy-First Observatory</p>
           <p className="text-[10px] text-[--text-muted] mt-0.5 leading-relaxed">
             This view displays only privacy-safe profile fields: name, email, plan, status, and aggregate engagement metrics.
             Private messages, files, task content, and personal data are never accessible.
           </p>
-        </div>
+        </Box>
       </motion.div>
 
       {/* ─── Confirmation Dialog ────────────────────────────────────── */}
@@ -1628,6 +1630,6 @@ export function AdminUsers() {
       />
       </>
       )}
-    </div>
+    </Box>
   )
 }
