@@ -367,7 +367,7 @@ export function GroceryPage() {
               <Typography variant="caption" color="text.secondary">x{item.quantity}</Typography>
               <Chip label={item.category ? t.grocery.categories[item.category as keyof typeof t.grocery.categories] ?? item.category : 'Other'} size="small" color={getCategoryChipColor(item.category)} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
               <IconButton size="small" color="error" onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
-                <Trash2 sx={{ fontSize: 14 }} />
+                <Trash2 size={14} />
               </IconButton>
             </Paper>
           ))}
@@ -387,7 +387,7 @@ export function GroceryPage() {
                   <Typography variant="body2" sx={{ flex: 1, textDecoration: 'line-through', color: 'text.disabled' }} noWrap>{item.name}</Typography>
                   <Typography variant="caption" color="text.disabled">x{item.quantity}</Typography>
                   <IconButton size="small" color="error" onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
-                    <Trash2 sx={{ fontSize: 14 }} />
+                    <Trash2 size={14} />
                   </IconButton>
                 </Paper>
               ))}
@@ -396,7 +396,7 @@ export function GroceryPage() {
 
           {filteredItems.length === 0 && (
             <Stack alignItems="center" sx={{ py: 6 }}>
-              <ShoppingBag sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+              <ShoppingBag size={48} style={{ color: theme.palette.text.disabled, marginBottom: 4 }} />
               <Typography variant="body2" color="text.secondary">No items found</Typography>
             </Stack>
           )}

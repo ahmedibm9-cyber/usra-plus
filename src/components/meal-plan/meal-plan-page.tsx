@@ -306,7 +306,7 @@ function MealDetailSheet({
             <Button
               variant="outlined"
               fullWidth
-              startIcon={<Pencil size={14} }/>
+              startIcon={<Pencil size={14} />}
               onClick={() => { onEdit(meal); onOpenChange(false) }}
             >
               {t.mealPlan.editMeal}

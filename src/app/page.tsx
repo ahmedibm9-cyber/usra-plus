@@ -913,6 +913,13 @@ export default function RootPage() {
   useEffect(() => {
     setMounted(true)
     initErrorCapture()
+
+    // Safety timeout: if auth check takes too long (slow compilation, network issues),
+    // force isLoading to false so the user sees the login screen instead of being stuck
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 8000)
+
     const checkSession = async () => {
       // ALWAYS check local auth session first (usra-auth-token cookie)
       try {
@@ -972,8 +979,10 @@ export default function RootPage() {
       }
 
       setIsLoading(false)
+      clearTimeout(safetyTimeout)
     }
     checkSession()
+    return () => clearTimeout(safetyTimeout)
   }, [supabase, setIsLoading, setIsAuthenticated, setUser])
 
   useEffect(() => {

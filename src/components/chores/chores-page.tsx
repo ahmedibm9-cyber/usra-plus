@@ -17,7 +17,7 @@ import {
   Users,
   BarChart3,
   CalendarDays,
-  MoreVert,
+  MoreVertical,
 } from 'lucide-react'
 import {
   Container,
@@ -400,19 +400,19 @@ function ChoreCard({
             <Typography variant="body2" fontWeight={600} noWrap>{chore.title}</Typography>
           </Stack>
           <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}>
-            <MoreVert size={20} />
+            <MoreVertical size={20} />
           </IconButton>
           <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
             <MenuItem onClick={() => { onEdit(chore); setMenuAnchor(null) }}>
-              <Pencil fontSize="small" sx={{ mr: 1.5 }} />
+              <Pencil size={20} style={{ marginRight: 12 }} />
               {t.common.edit}
             </MenuItem>
             <MenuItem onClick={() => { onTogglePause(chore); setMenuAnchor(null) }}>
-              {chore.isPaused ? <Play fontSize="small" sx={{ mr: 1.5 }} /> : <Pause fontSize="small" sx={{ mr: 1.5 }} />}
+              {chore.isPaused ? <Play size={20} style={{ marginRight: 12 }} /> : <Pause size={20} style={{ marginRight: 12 }} />}
               {chore.isPaused ? t.chores.resume : t.chores.pause}
             </MenuItem>
             <MenuItem onClick={() => { onDelete(chore); setMenuAnchor(null) }} sx={{ color: theme.palette.error.main }}>
-              <Trash2 fontSize="small" style={{ width: 14, height: 14, marginRight: 6 }} />
+              <Trash2 size={14} style={{ marginRight: 6 }} />
               {t.common.delete}
             </MenuItem>
           </Menu>
@@ -426,7 +426,7 @@ function ChoreCard({
           </Stack>
           {chore.rotationOrder.length > 1 && nextMemberName && (
             <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexShrink: 0 }}>
-              <ArrowRight sx={{ fontSize: 12, transform: isRTL ? 'rotate(180deg)' : 'none' }} />
+              <ArrowRight size={12} style={{ transform: isRTL ? 'rotate(180deg)' : 'none' }} />
               <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 60 }}>{nextMemberName}</Typography>
             </Stack>
           )}
@@ -437,7 +437,7 @@ function ChoreCard({
           <Chip label={t.chores[chore.difficulty]} size="small" color={DIFFICULTY_COLOR[chore.difficulty]} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
           <Chip label={t.chores[chore.frequency]} size="small" color={FREQUENCY_COLOR[chore.frequency]} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 'auto !important' }}>
-            <Clock sx={{ fontSize: 12 }} color="action" />
+            <Clock size={12} style={{ color: theme.palette.action.active }} />
             <Typography variant="caption" color="text.secondary">
               {chore.estimatedMinutes}{t.chores.minutes}
             </Typography>
@@ -456,7 +456,7 @@ function ChoreCard({
               onClick={() => onDone(chore)}
               variant="outlined"
               color="success"
-              startIcon={<CheckCircle2 sx={{ fontSize: 14 }} />}
+              startIcon={<CheckCircle2 size={14} />}
               sx={{ fontSize: 12, px: 1.5, py: 0.25, minHeight: 28 }}
             >
               {t.chores.done}
@@ -537,24 +537,24 @@ function ChoreListRow({
         {!chore.isPaused && (
           <Tooltip title={t.chores.done}>
             <IconButton size="small" color="success" onClick={() => onDone(chore)}>
-              <CheckCircle2 sx={{ fontSize: 16 }} />
+              <CheckCircle2 size={16} />
             </IconButton>
           </Tooltip>
         )}
         <Tooltip title={chore.isPaused ? t.chores.resume : t.chores.pause}>
           <IconButton size="small" onClick={() => onTogglePause(chore)} color="inherit">
-            {chore.isPaused ? <Play sx={{ fontSize: 14 }} /> : <Pause sx={{ fontSize: 14 }} />}
+            {chore.isPaused ? <Play size={14} /> : <Pause size={14} />}
           </IconButton>
         </Tooltip>
         <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)} color="inherit">
-          <MoreVert sx={{ fontSize: 14 }} />
+          <MoreVertical size={14} />
         </IconButton>
         <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
           <MenuItem onClick={() => { onEdit(chore); setMenuAnchor(null) }}>
-            <Pencil fontSize="small" sx={{ mr: 1.5 }} />{t.common.edit}
+            <Pencil size={20} style={{ marginRight: 12 }} />{t.common.edit}
           </MenuItem>
           <MenuItem onClick={() => { onDelete(chore); setMenuAnchor(null) }} sx={{ color: theme.palette.error.main }}>
-            <Trash2 fontSize="small" style={{ width: 14, height: 14, marginRight: 6 }} />{t.common.delete}
+            <Trash2 size={14} style={{ marginRight: 6 }} />{t.common.delete}
           </MenuItem>
         </Menu>
       </Stack>
@@ -581,7 +581,7 @@ function RotationScheduleGrid({ chores, members }: { chores: Chore[]; members: {
   return (
     <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-        <CalendarDays sx={{ fontSize: 16, color: theme.palette.primary.main }} />
+        <CalendarDays size={16} style={{ color: theme.palette.primary.main }} />
         <Typography variant="subtitle2">{t.chores.rotationSchedule}</Typography>
       </Stack>
       <Box sx={{ minWidth: 500 }}>
@@ -644,7 +644,7 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-        <Trophy sx={{ fontSize: 16, color: theme.palette.success.main }} />
+        <Trophy size={16} style={{ color: theme.palette.success.main }} />
         <Typography variant="subtitle2">{t.chores.leaderboard}</Typography>
         <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{t.chores.thisWeek}</Typography>
       </Stack>
@@ -817,11 +817,11 @@ export default function ChoresPage() {
         <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
           <Stack alignItems="center" spacing={2}>
             <Box sx={{ width: 80, height: 80, borderRadius: 3, bgcolor: `${theme.palette.primary.main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-              <Sparkles sx={{ fontSize: 40, color: theme.palette.primary.main }} />
+              <Sparkles size={40} style={{ color: theme.palette.primary.main }} />
             </Box>
             <Typography variant="h6" fontWeight={600}>{t.chores.noChores}</Typography>
             <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ maxWidth: 400 }}>{t.chores.noChoresDesc}</Typography>
-            <Button variant="contained" startIcon={<Plus />} onClick={handleAddNew} sx={{ mt: 1 }}>
+            <Button variant="contained" startIcon={<Plus size={16} />} onClick={handleAddNew} sx={{ mt: 1 }}>
               {t.chores.addChore}
             </Button>
           </Stack>
@@ -861,14 +861,14 @@ export default function ChoresPage() {
             {/* View toggle */}
             <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, borderRadius: 2 }}>
               <IconButton size="small" onClick={() => setViewMode('board')} color={viewMode === 'board' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
-                <LayoutGrid sx={{ fontSize: 16 }} />
+                <LayoutGrid size={16} />
               </IconButton>
               <IconButton size="small" onClick={() => setViewMode('list')} color={viewMode === 'list' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
-                <List sx={{ fontSize: 16 }} />
+                <List size={16} />
               </IconButton>
             </Paper>
 
-            <Button variant="contained" size="small" startIcon={<Plus sx={{ fontSize: 16 }} />} onClick={handleAddNew}>
+            <Button variant="contained" size="small" startIcon={<Plus size={16} />} onClick={handleAddNew}>
               {t.chores.addChore}
             </Button>
           </Stack>
@@ -877,10 +877,10 @@ export default function ChoresPage() {
         {/* Stats */}
         <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
           {[
-            { label: t.chores.totalChores, value: totalChores, icon: <BarChart3 sx={{ fontSize: 20 }} />, color: theme.palette.primary.main },
-            { label: t.chores.completedToday, value: completedToday, icon: <CheckCircle2 sx={{ fontSize: 20 }} />, color: theme.palette.success.main },
-            { label: t.chores.completionRate, value: `${completionRate}%`, icon: <Trophy sx={{ fontSize: 20 }} />, color: theme.palette.secondary.main },
-            { label: t.chores.topContributor, value: topContributorName, icon: <Users sx={{ fontSize: 20 }} />, color: theme.palette.warning.main },
+            { label: t.chores.totalChores, value: totalChores, icon: <BarChart3 size={20} />, color: theme.palette.primary.main },
+            { label: t.chores.completedToday, value: completedToday, icon: <CheckCircle2 size={20} />, color: theme.palette.success.main },
+            { label: t.chores.completionRate, value: `${completionRate}%`, icon: <Trophy size={20} />, color: theme.palette.secondary.main },
+            { label: t.chores.topContributor, value: topContributorName, icon: <Users size={20} />, color: theme.palette.warning.main },
           ].map((stat) => (
             <Paper key={stat.label} variant="outlined" sx={{ flex: '1 1 140px', p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${stat.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: stat.color }}>
