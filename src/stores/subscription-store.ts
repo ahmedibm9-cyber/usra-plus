@@ -64,11 +64,6 @@ interface SubscriptionState {
   // RevenueCat integration
   isRevenueCatPro: boolean
   revenuecatEntitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>
-  // Stripe checkout/portal state
-  checkoutUrl: string | null
-  portalUrl: string | null
-  isCheckoutLoading: boolean
-  isPortalLoading: boolean
   // Setters
   setPlan: (plan: SubscriptionPlan) => void
   fetchPlanFromServer: (userId: string) => Promise<void>
@@ -76,9 +71,6 @@ interface SubscriptionState {
   setRevenueCatPro: (isPro: boolean) => void
   setRevenueCatEntitlements: (entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>) => void
   syncWithRevenueCat: (isPro: boolean, entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>, plan?: SubscriptionPlan) => void
-  // Stripe integration
-  initiateCheckout: (planId: string) => Promise<void>
-  openBillingPortal: () => Promise<void>
   // Tier checks — use resolveEffectivePlan instead of raw isRevenueCatPro bypass
   isPro: () => boolean
   isPremium: () => boolean
@@ -120,10 +112,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       lastFetched: null,
       isRevenueCatPro: false,
       revenuecatEntitlements: {},
-      checkoutUrl: null,
-      portalUrl: null,
-      isCheckoutLoading: false,
-      isPortalLoading: false,
 
       setPlan: (plan) => set({ plan }),
 
@@ -186,73 +174,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           updates.plan = 'free'
         }
         set(updates)
-      },
-
-      // ─── Stripe Integration ──────────────────────────────────────────────
-
-      initiateCheckout: async (planId: string) => {
-        set({ isCheckoutLoading: true, checkoutUrl: null })
-        try {
-          const response = await fetch('/api/stripe/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ planId }),
-          })
-
-          const data = await safeJsonResponse<{ url?: string; error?: string }>(response)
-
-          if (response.ok && data?.url) {
-            set({ checkoutUrl: data.url })
-            // Redirect to Stripe Checkout
-            window.location.href = data.url
-          } else {
-            const errorMsg = data?.error || 'Failed to create checkout session'
-            console.error('[SubscriptionStore] Checkout error:', errorMsg)
-            // If Stripe is not configured, show a user-friendly message
-            if (response.status === 503) {
-              const { toast } = await import('sonner')
-              toast.error('Payment processing is not available yet. Please try again later.')
-            } else {
-              const { toast } = await import('sonner')
-              toast.error(errorMsg)
-            }
-          }
-        } catch (err) {
-          console.error('[SubscriptionStore] Checkout error:', err)
-          const { toast } = await import('sonner')
-          toast.error('Failed to initiate checkout. Please try again.')
-        } finally {
-          set({ isCheckoutLoading: false })
-        }
-      },
-
-      openBillingPortal: async () => {
-        set({ isPortalLoading: true, portalUrl: null })
-        try {
-          const response = await fetch('/api/stripe/portal', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-          })
-
-          const data = await safeJsonResponse<{ url?: string; error?: string }>(response)
-
-          if (response.ok && data?.url) {
-            set({ portalUrl: data.url })
-            // Redirect to Stripe Billing Portal
-            window.location.href = data.url
-          } else {
-            const errorMsg = data?.error || 'Failed to create portal session'
-            console.error('[SubscriptionStore] Portal error:', errorMsg)
-            const { toast } = await import('sonner')
-            toast.error(errorMsg)
-          }
-        } catch (err) {
-          console.error('[SubscriptionStore] Portal error:', err)
-          const { toast } = await import('sonner')
-          toast.error('Failed to open billing portal. Please try again.')
-        } finally {
-          set({ isPortalLoading: false })
-        }
       },
 
       // ─── Tier Checks ──────────────────────────────────────────────────────

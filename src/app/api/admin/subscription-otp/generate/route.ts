@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate planSlug
-    const validPlans = ['free', 'pro', 'family_plus', 'max', 'ultimate']
+    // Validate planSlug — only paid plans can be granted via OTP
+    const validPlans = ['pro', 'family_plus', 'max', 'ultimate']
     if (!validPlans.includes(planSlug)) {
       return NextResponse.json(
         { error: `Invalid planSlug. Must be one of: ${validPlans.join(', ')}` },

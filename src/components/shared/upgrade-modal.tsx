@@ -21,11 +21,11 @@ import {
  ShieldCheck,
  BarChart3,
  MessageSquare,
- Loader2,
 } from 'lucide-react'
 import { useI18n } from '@/i18n/use-translation'
 import { useSubscriptionStore } from '@/stores/subscription-store'
 import type { SubscriptionPlan } from '@/types'
+import { toast } from 'sonner'
 
 interface UpgradeModalProps {
  open: boolean
@@ -48,7 +48,7 @@ const PLAN_FEATURES = [
 
 export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit }: UpgradeModalProps) {
  const { t, isRTL } = useI18n()
- const { plan, initiateCheckout, isCheckoutLoading } = useSubscriptionStore()
+ const { plan } = useSubscriptionStore()
  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
 
  const featureLabels: Record<string, { en: string; ar: string }> = {
@@ -63,12 +63,12 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
  const handleUpgrade = async (targetPlan: SubscriptionPlan) => {
   setSelectedPlan(targetPlan)
   try {
-   await initiateCheckout(targetPlan)
-   // After initiateCheckout, the browser will redirect to Stripe Checkout.
-   // No need to close the modal here — the redirect will navigate away.
-   // If the redirect fails (e.g. Stripe not configured), the store will show a toast.
+   // Manual OTP subscription: navigate to settings subscription page
+   // or show a toast directing the user to the subscription management flow
+   toast.info(isRTL ? 'يرجى الذهاب إلى الإعدادات > الاشتراك لتفعيل خطتك باستخدام رمز OTP' : 'Please go to Settings > Subscription to activate your plan using an OTP code')
+   onOpenChange(false)
   } catch {
-   // Error is handled in the store
+   // Error handling
   } finally {
    setSelectedPlan(null)
   }
@@ -220,14 +220,9 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            <Button
             onClick={() => handleUpgrade('pro')}
             className="w-full mt-3 h-8 text-xs bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
-            disabled={plan === 'pro' || isCheckoutLoading}
+            disabled={plan === 'pro'}
            >
-            {isCheckoutLoading && selectedPlan === 'pro' ? (
-             <>
-              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-              {isRTL ? 'جارٍ التحويل...' : 'Redirecting...'}
-             </>
-            ) : plan === 'pro' ? (
+            {plan === 'pro' ? (
              isRTL ? 'الخطة الحالية' : 'Current Plan'
             ) : (
              isRTL ? 'الترقية إلى Pro' : 'Upgrade to Pro'
@@ -270,14 +265,9 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            onClick={() => handleUpgrade('family_plus')}
            variant="outline"
            className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-           disabled={plan === 'family_plus' || isCheckoutLoading}
+           disabled={plan === 'family_plus'}
           >
-           {isCheckoutLoading && selectedPlan === 'family_plus' ? (
-            <>
-             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-             {isRTL ? 'جارٍ التحويل...' : 'Redirecting...'}
-            </>
-           ) : plan === 'family_plus' ? (
+           {plan === 'family_plus' ? (
             isRTL ? 'الخطة الحالية' : 'Current Plan'
            ) : (
             isRTL ? 'الترقية إلى Family+' : 'Upgrade to Family+'

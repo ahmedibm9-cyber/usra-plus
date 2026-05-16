@@ -13,16 +13,14 @@ import {
   Restaurant,
   Link as LinkIcon,
   People,
+  WbTwilight,
+  WbSunny,
+  DarkMode,
+  BakeryDining,
+  OpenInNew,
+  Delete,
+  Edit as EditIcon,
 } from '@mui/icons-material'
-import {
-  Sunrise,
-  Sun,
-  Moon,
-  Cookie,
-  Trash2,
-  Pencil,
-  ExternalLink,
-} from 'lucide-react'
 import {
   Container,
   Stack,
@@ -82,10 +80,10 @@ function addDays(d: Date, n: number): Date {
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
 const MEAL_TYPE_ICON: Record<MealType, React.ElementType> = {
-  breakfast: Sunrise,
-  lunch: Sun,
-  dinner: Moon,
-  snack: Cookie,
+  breakfast: WbTwilight,
+  lunch: WbSunny,
+  dinner: DarkMode,
+  snack: BakeryDining,
 }
 
 const MEAL_TYPE_COLOR: Record<MealType, 'success' | 'primary' | 'secondary' | 'warning'> = {
@@ -115,7 +113,7 @@ function MealCard({ meal, onClick }: { meal: Meal; onClick: () => void }) {
       <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
         <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={0.5}>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
-            <Icon size={14} style={{ flexShrink: 0, color: theme.palette[chipColor].main }} />
+            <Icon sx={{ fontSize: 14, flexShrink: 0, color: theme.palette[chipColor].main }} />
             <Typography variant="body2" fontWeight={500} noWrap>{meal.title}</Typography>
           </Stack>
         </Stack>
@@ -168,7 +166,7 @@ function AddMealSlot({ mealType, date, onClick }: { mealType: MealType; date: st
         '&:hover': { borderStyle: 'dashed', bgcolor: theme.palette.action.hover },
       }}
     >
-      <Icon size={14} />
+      <Icon sx={{ fontSize: 14 }} />
       <Typography variant="caption" fontWeight={500}>{t.mealPlan[mealType]}</Typography>
       <Add sx={{ fontSize: 12 }} />
     </Button>
@@ -209,7 +207,7 @@ function MealDetailSheet({
       <DialogTitle>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: `${theme.palette[chipColor].main}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon size={16} style={{ color: theme.palette[chipColor].main }} />
+            <Icon sx={{ fontSize: 16, color: theme.palette[chipColor].main }} />
           </Box>
           {meal.title}
         </Stack>
@@ -289,7 +287,7 @@ function MealDetailSheet({
               <Button
                 variant="text"
                 size="small"
-                startIcon={<ExternalLink size={12} />}
+                startIcon={<OpenInNew sx={{ fontSize: 12 }} />}
                 href={meal.recipeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -306,13 +304,13 @@ function MealDetailSheet({
             <Button
               variant="outlined"
               fullWidth
-              startIcon={<Pencil size={14} />}
+              startIcon={<EditIcon sx={{ fontSize: 14 }} />}
               onClick={() => { onEdit(meal); onOpenChange(false) }}
             >
               {t.mealPlan.editMeal}
             </Button>
             <IconButton color="error" onClick={() => { onDelete(meal.id); onOpenChange(false) }}>
-              <Trash2 size={14} />
+              <Delete sx={{ fontSize: 14 }} />
             </IconButton>
           </Stack>
         </Stack>
@@ -430,7 +428,7 @@ function MealDialogInner({
                     color={MEAL_TYPE_COLOR[opt.value]}
                     size="small"
                     onClick={() => setMealType(opt.value)}
-                    startIcon={<Icon size={14} />}
+                    startIcon={<Icon sx={{ fontSize: 14 }} />}
                     sx={{ textTransform: 'none', flex: 1 }}
                   >
                     {opt.label}

@@ -27,12 +27,6 @@ const ENV_SPECS: EnvVarSpec[] = [
   { name: 'RESEND_API_KEY', required: false, critical: false, description: 'Resend API key for email delivery (OTP, welcome, billing)', validate: (v) => v.startsWith('re_') },
   { name: 'EMAIL_FROM', required: false, critical: false, description: 'Sender email address (e.g., noreply@usraplus.com)' },
   
-  // Stripe
-  { name: 'STRIPE_SECRET_KEY', required: false, critical: false, description: 'Stripe secret key for payment processing', validate: (v) => v.startsWith('sk_') },
-  { name: 'STRIPE_WEBHOOK_SECRET', required: false, critical: false, description: 'Stripe webhook signing secret', validate: (v) => v.startsWith('whsec_') },
-  { name: 'STRIPE_PRO_PRICE_ID', required: false, critical: false, description: 'Stripe price ID for Pro plan' },
-  { name: 'STRIPE_FAMILY_PLUS_PRICE_ID', required: false, critical: false, description: 'Stripe price ID for Family+ plan' },
-  
   // Monitoring
   { name: 'NEXT_PUBLIC_SENTRY_DSN', required: false, critical: false, description: 'Sentry DSN for error tracking' },
   
@@ -80,9 +74,6 @@ export function validateEnvironment(): EnvValidationResult {
 
   // Production-specific warnings
   if (isProduction) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      warnings.push('⚠️  STRIPE_SECRET_KEY not set — payment processing will be disabled')
-    }
     if (!process.env.RESEND_API_KEY) {
       warnings.push('⚠️  RESEND_API_KEY not set — email delivery will be disabled, OTP verification will not work')
     }

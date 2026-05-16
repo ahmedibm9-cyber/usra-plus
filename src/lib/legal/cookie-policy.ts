@@ -117,7 +117,6 @@ Some cookies are set by third-party services we use:
 
 | Service | Purpose | Privacy Policy |
 |---------|---------|---------------|
-| Stripe | Payment processing | stripe.com/privacy |
 | RevenueCat | Subscription management | revenuecat.com/privacy |
 | Sentry | Error monitoring | sentry.io/privacy |
 | Google Analytics | Usage analytics | policies.google.com/privacy |

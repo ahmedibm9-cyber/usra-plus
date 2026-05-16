@@ -53,7 +53,7 @@ import {
   AccessTime,
   Edit,
   Delete,
-  ChatBubbleOutline,
+  ChatBubbleOutlined,
   Send,
   PlaylistAddCheck,
   GridView,

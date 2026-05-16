@@ -8,8 +8,7 @@ import {
   Sparkles,
   Zap,
   BarChart3,
-  Settings,
-  Loader2,
+  KeyRound,
   Infinity,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -22,7 +21,6 @@ import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Paper from '@mui/material/Paper'
 
-import { useAuthStore } from '@/stores/auth-store'
 import { useSubscriptionStore } from '@/stores/subscription-store'
 import { PlanBadge } from '@/components/shared/plan-badge'
 import { useI18n } from '@/i18n/use-translation'
@@ -32,39 +30,17 @@ import { SectionCard, SectionTitle, SectionDescription } from '../settings-helpe
 
 export function SubscriptionTab() {
   const { t, isRTL } = useI18n()
-  const { user } = useAuthStore()
   const { plan: subscriptionPlan } = useSubscriptionStore()
 
-  const isCheckoutLoading = useSubscriptionStore((s) => s.isCheckoutLoading)
-  const isPortalLoading = useSubscriptionStore((s) => s.isPortalLoading)
-
+  // OTP-based subscription: no checkout/portal needed
+  // Users activate via the OTP tab in Settings
   const handleUpgrade = useCallback(
-    async (targetPlan: SubscriptionPlan) => {
-      if (targetPlan === subscriptionPlan) return
-      if (targetPlan === 'free') {
-        try {
-          await useSubscriptionStore.getState().openBillingPortal()
-        } catch {
-          toast.error(isRTL ? 'فشل فتح بوابة الفوترة' : 'Failed to open billing portal')
-        }
-        return
-      }
-      try {
-        await useSubscriptionStore.getState().initiateCheckout(targetPlan)
-      } catch {
-        toast.error(isRTL ? 'فشل بدء عملية الدفع' : 'Failed to initiate checkout')
-      }
+    (_targetPlan: SubscriptionPlan) => {
+      // Redirect user to OTP activation tab
+      toast.info(isRTL ? 'انتقل إلى علامة تبويب OTP لتفعيل اشتراكك' : 'Go to the OTP tab to activate your subscription')
     },
-    [subscriptionPlan, isRTL]
+    [isRTL]
   )
-
-  const handleManageBilling = useCallback(async () => {
-    try {
-      await useSubscriptionStore.getState().openBillingPortal()
-    } catch {
-      toast.error(isRTL ? 'فشل فتح بوابة الفوترة' : 'Failed to open billing portal')
-    }
-  }, [isRTL])
 
   const plans: {
     id: SubscriptionPlan
@@ -149,36 +125,27 @@ export function SubscriptionTab() {
         </Stack>
       </SectionCard>
 
-      {/* Manage Subscription Button */}
-      {subscriptionPlan !== 'free' && (
-        <SectionCard>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Box>
-              <SectionTitle>{isRTL ? 'إدارة الاشتراك' : 'Manage Subscription'}</SectionTitle>
-              <SectionDescription>{isRTL ? 'تحديث خطة الدفع أو إلغاؤها' : 'Update your plan or cancel subscription'}</SectionDescription>
+      {/* OTP Activation Notice */}
+      {subscriptionPlan === 'free' && (
+        <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: 4, borderColor: 'primary.light' }}>
+          <Stack direction="row" alignItems="center" gap={2}>
+            <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <KeyRound size={20} color="primary" />
             </Box>
-            <Button
-              variant="outlined"
-              onClick={handleManageBilling}
-              disabled={isPortalLoading}
-              startIcon={isPortalLoading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
-            >
-              {isRTL ? 'إدارة الفوترة' : 'Manage Billing'}
-            </Button>
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{isRTL ? 'ترقية خطتك' : 'Upgrade Your Plan'}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {isRTL ? 'انتقل إلى علامة تبويب OTP في الإعدادات وأدخل الرمز الذي قدمه المسؤول' : 'Go to the OTP tab in Settings and enter the code provided by your administrator'}
+              </Typography>
+            </Box>
           </Stack>
-        </SectionCard>
+        </Paper>
       )}
 
       {/* Plan Comparison */}
       <Grid container spacing={2}>
         {plans.map((plan) => {
           const isCurrentPlan = subscriptionPlan === plan.id
-          const buttonContent = isCheckoutLoading
-            ? (isRTL ? 'جارٍ التحميل...' : 'Loading...')
-            : plan.cta
-          const buttonIcon = isCheckoutLoading
-            ? <Loader2 size={16} className="animate-spin" />
-            : <Zap size={16} />
 
           return (
             <Grid key={plan.id} size={{ xs: 12, md: 4 }}>
@@ -241,11 +208,10 @@ export function SubscriptionTab() {
                   <Button
                     fullWidth
                     onClick={() => handleUpgrade(plan.id)}
-                    disabled={isCheckoutLoading}
                     variant={plan.popular ? 'contained' : 'outlined'}
-                    startIcon={buttonIcon}
+                    startIcon={<KeyRound size={16} />}
                   >
-                    {buttonContent}
+                    {isRTL ? 'تفعيل عبر OTP' : 'Activate via OTP'}
                   </Button>
                 )}
               </Paper>
