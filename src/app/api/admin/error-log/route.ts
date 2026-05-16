@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { verifyAdminAuth } from '@/lib/admin-auth'
 
 // ─── In-Memory Fallback Storage ───────────────────────────────────────
 
@@ -236,6 +237,9 @@ export async function POST(request: NextRequest) {
 // ─── GET: Retrieve Error Logs & Health Checks ────────────────────────
 
 export async function GET(request: NextRequest) {
+  // Auth check — error logs contain stack traces and user info
+  const authResult = await verifyAdminAuth(request)
+  if (authResult) return authResult
   try {
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action')

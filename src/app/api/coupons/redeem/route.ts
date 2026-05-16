@@ -1,20 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { getAuthenticatedUserId } from '@/lib/auth-utils'
 
 /**
  * POST /api/coupons/redeem
  *
  * User-facing coupon redemption endpoint.
  *
- * Body: { code: string, userId: string }
+ * Body: { code: string, userId?: string }
  *
  * Validates coupon: exists, active, not expired, not max redemptions, not already used by this user.
  * On success, creates CouponRedemption record and returns discount details.
  * Rate limited: 3 attempts per hour per user.
+ * Auth required: userId is verified from session, body userId ignored for security.
  */
 export async function POST(request: NextRequest) {
   try {
+    // Auth check — verify the requesting user is authenticated
+    const authenticatedUserId = await getAuthenticatedUserId(request)
+    if (!authenticatedUserId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
     // Rate limit: 3 attempts per hour per user
     const rateLimitResult = checkRateLimit(request, {
       maxRequests: 3,
@@ -39,14 +47,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
     }
 
-    const { code, userId } = body
+    const { code } = body
+    // Use authenticated user ID, ignore body userId for security
+    const userId = authenticatedUserId
 
     if (!code || typeof code !== 'string') {
       return NextResponse.json({ error: 'Coupon code is required' }, { status: 400 })
-    }
-
-    if (!userId || typeof userId !== 'string') {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
     // Look up coupon by code (case-insensitive)
@@ -103,20 +109,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // All validations passed — create redemption record
-    const redemption = await db.couponRedemption.create({
-      data: {
-        couponId: coupon.id,
-        userId,
-        discountApplied: coupon.discountValue,
-      },
-    })
-
-    // Increment coupon's currentRedemptions counter
-    await db.coupon.update({
-      where: { id: coupon.id },
-      data: { currentRedemptions: { increment: 1 } },
-    })
+    // All validations passed — create redemption + increment counter atomically
+    const [redemption] = await db.$transaction([
+      db.couponRedemption.create({
+        data: {
+          couponId: coupon.id,
+          userId,
+          discountApplied: coupon.discountValue,
+        },
+      }),
+      db.coupon.update({
+        where: { id: coupon.id },
+        data: { currentRedemptions: { increment: 1 } },
+      }),
+    ])
 
     // Return success with discount details
     return NextResponse.json({

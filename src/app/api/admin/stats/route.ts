@@ -1,8 +1,12 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { startOfDay } from 'date-fns'
+import { verifyAdminAuth } from '@/lib/admin-auth'
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Auth check — stats contain sensitive platform data
+  const authResult = await verifyAdminAuth(request)
+  if (authResult) return authResult
   try {
     const now = new Date()
     const todayStart = startOfDay(now)

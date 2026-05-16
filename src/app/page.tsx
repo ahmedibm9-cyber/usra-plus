@@ -505,7 +505,7 @@ function MainApp() {
     return () => data?.subscription?.unsubscribe()
   }, [supabase, setUser])
 
-  if (showOnboarding && !currentFamily) return <OnboardingFlow />
+  if (showOnboarding && !currentFamily && demoDataReady) return <OnboardingFlow />
 
   const pageContent = useMemo(() => {
     switch (currentPage) {

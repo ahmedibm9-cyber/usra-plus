@@ -80,7 +80,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   showCreateFamily: false,
   showJoinFamily: false,
   familyAvatar: '🏠',
-  familyColor: 'red',
+  familyColor: 'teal',
   theme: 'light', // Default to 'light' to avoid hydration mismatch; hydrateTheme() sets the real value in useEffect
   demoDataReady: true, // true by default for non-demo users; set to false during demo seeding
   setCurrentPage: (page) => set({ currentPage: page }),

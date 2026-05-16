@@ -483,6 +483,28 @@ select:focus-visible {
   opacity: 0.8 !important;
 }
 
+/* ─── Semantic Aliases (used by shadcn components, charts, SVGs) ── */
+.light {
+  --accent-primary: #0D6B58;
+  --bg-surface: #FFFFFF;
+  --bg-surface-2: #F7F4F0;
+  --text-primary: #1C1B1F;
+  --text-secondary: #49454F;
+  --text-muted: #79747E;
+  --border-subtle: rgba(28, 27, 31, 0.08);
+  --border-medium: rgba(28, 27, 31, 0.15);
+}
+.dark {
+  --accent-primary: #6EE7B7;
+  --bg-surface: #2B2930;
+  --bg-surface-2: #161518;
+  --text-primary: #E6E1E5;
+  --text-secondary: #B8B5BC;
+  --text-muted: #938F99;
+  --border-subtle: rgba(230, 225, 229, 0.06);
+  --border-medium: rgba(230, 225, 229, 0.12);
+}
+
 /* ─── RTL Support ────────────────────────────────────────────── */
 html[dir="rtl"] .sidebar-item-icon {
   margin-right: 0;
