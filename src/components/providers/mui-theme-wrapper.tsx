@@ -81,24 +81,22 @@ export default function MuiThemeWrapper({ children }: { children: React.ReactNod
     return () => observer.disconnect()
   }, [mode, mounted])
 
-  // Also poll localStorage for changes (cross-tab sync + app-store sync)
+  // Cross-tab theme sync via storage events (no polling needed)
   useEffect(() => {
     if (!mounted) return
 
-    const interval = setInterval(() => {
-      try {
-        const stored = localStorage.getItem('usra-theme')
-        if (stored === 'dark' && mode !== 'dark') {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'usra-theme') {
+        if (e.newValue === 'dark' && mode !== 'dark') {
           setMode('dark')
-        } else if (stored === 'light' && mode !== 'light') {
+        } else if (e.newValue === 'light' && mode !== 'light') {
           setMode('light')
         }
-      } catch {
-        // ignore
       }
-    }, 1000)
+    }
 
-    return () => clearInterval(interval)
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
   }, [mode, mounted])
 
   const toggleTheme = useCallback(() => {

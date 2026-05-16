@@ -486,6 +486,7 @@ select:focus-visible {
 /* ─── Semantic Aliases (used by shadcn components, charts, SVGs) ── */
 .light {
   --accent-primary: #0D6B58;
+  --bg-primary: #FEFCF9;
   --bg-surface: #FFFFFF;
   --bg-surface-2: #F7F4F0;
   --text-primary: #1C1B1F;
@@ -496,6 +497,7 @@ select:focus-visible {
 }
 .dark {
   --accent-primary: #6EE7B7;
+  --bg-primary: #1C1B1F;
   --bg-surface: #2B2930;
   --bg-surface-2: #161518;
   --text-primary: #E6E1E5;
