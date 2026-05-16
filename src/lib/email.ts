@@ -15,6 +15,7 @@ import {
   paymentFailedTemplate,
   trialEndingTemplate,
 } from './email/templates'
+import { logger } from '@/lib/logger'
 
 type Language = 'en' | 'ar'
 
@@ -69,14 +70,14 @@ async function sendEmail(
     })
 
     if (error) {
-      console.error('[Email] Resend error:', error.message)
+      logger.error('[Email]', 'Resend error', new Error(error.message))
       return { success: false, error: error.message }
     }
 
     return { success: true, messageId: data?.id }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown email error'
-    console.error('[Email] Send failed:', message)
+    logger.error('[Email]', 'Send failed', err instanceof Error ? err : new Error(message))
     return { success: false, error: message }
   }
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import ZAI from 'z-ai-web-dev-sdk'
+import { logger } from '@/lib/logger'
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -23,82 +23,15 @@ interface ForecastDay {
   icon: string
 }
 
-// ─── Static Mock Weather Data ─────────────────────────────────────
+// ─── City Coordinates ────────────────────────────────────────────
 
-const MOCK_WEATHER: Record<string, WeatherData> = {
-  riyadh: {
-    city: 'Riyadh',
-    temp: 34,
-    feelsLike: 36,
-    condition: 'sunny',
-    humidity: 18,
-    windSpeed: 12,
-    icon: 'sun',
-    forecast: [
-      { day: 'Thu', dayAr: 'خميس', high: 36, low: 22, condition: 'sunny', icon: 'sun' },
-      { day: 'Fri', dayAr: 'جمعة', high: 35, low: 21, condition: 'partlyCloudy', icon: 'cloud-sun' },
-      { day: 'Sat', dayAr: 'سبت', high: 37, low: 23, condition: 'sunny', icon: 'sun' },
-    ],
-  },
-  jeddah: {
-    city: 'Jeddah',
-    temp: 31,
-    feelsLike: 35,
-    condition: 'partlyCloudy',
-    humidity: 65,
-    windSpeed: 18,
-    icon: 'cloud-sun',
-    forecast: [
-      { day: 'Thu', dayAr: 'خميس', high: 33, low: 24, condition: 'partlyCloudy', icon: 'cloud-sun' },
-      { day: 'Fri', dayAr: 'جمعة', high: 32, low: 25, condition: 'cloudy', icon: 'cloud' },
-      { day: 'Sat', dayAr: 'سبت', high: 34, low: 24, condition: 'sunny', icon: 'sun' },
-    ],
-  },
-  mecca: {
-    city: 'Mecca',
-    temp: 38,
-    feelsLike: 42,
-    condition: 'sunny',
-    humidity: 22,
-    windSpeed: 8,
-    icon: 'sun',
-    forecast: [
-      { day: 'Thu', dayAr: 'خميس', high: 40, low: 27, condition: 'sunny', icon: 'sun' },
-      { day: 'Fri', dayAr: 'جمعة', high: 39, low: 26, condition: 'partlyCloudy', icon: 'cloud-sun' },
-      { day: 'Sat', dayAr: 'سبت', high: 41, low: 28, condition: 'sunny', icon: 'sun' },
-    ],
-  },
-  medina: {
-    city: 'Medina',
-    temp: 33,
-    feelsLike: 34,
-    condition: 'clear',
-    humidity: 15,
-    windSpeed: 10,
-    icon: 'sun',
-    forecast: [
-      { day: 'Thu', dayAr: 'خميس', high: 35, low: 20, condition: 'clear', icon: 'sun' },
-      { day: 'Fri', dayAr: 'جمعة', high: 34, low: 19, condition: 'sunny', icon: 'sun' },
-      { day: 'Sat', dayAr: 'سبت', high: 36, low: 21, condition: 'partlyCloudy', icon: 'cloud-sun' },
-    ],
-  },
-  dammam: {
-    city: 'Dammam',
-    temp: 30,
-    feelsLike: 33,
-    condition: 'partlyCloudy',
-    humidity: 45,
-    windSpeed: 22,
-    icon: 'cloud-sun',
-    forecast: [
-      { day: 'Thu', dayAr: 'خميس', high: 32, low: 22, condition: 'partlyCloudy', icon: 'cloud-sun' },
-      { day: 'Fri', dayAr: 'جمعة', high: 31, low: 21, condition: 'cloudy', icon: 'cloud' },
-      { day: 'Sat', dayAr: 'سبت', high: 33, low: 23, condition: 'sunny', icon: 'sun' },
-    ],
-  },
+const CITY_COORDS: Record<string, { lat: number; lon: number; name: string; nameAr: string }> = {
+  riyadh: { lat: 24.7136, lon: 46.6753, name: 'Riyadh', nameAr: 'الرياض' },
+  jeddah: { lat: 21.5433, lon: 39.1728, name: 'Jeddah', nameAr: 'جدة' },
+  mecca: { lat: 21.3891, lon: 39.8579, name: 'Mecca', nameAr: 'مكة المكرمة' },
+  medina: { lat: 24.5247, lon: 39.5692, name: 'Medina', nameAr: 'المدينة المنورة' },
+  dammam: { lat: 26.3927, lon: 49.9777, name: 'Dammam', nameAr: 'الدمام' },
 }
-
-const VALID_CITIES = ['riyadh', 'jeddah', 'mecca', 'medina', 'dammam']
 
 function getDayName(daysFromNow: number): { day: string; dayAr: string } {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -109,67 +42,23 @@ function getDayName(daysFromNow: number): { day: string; dayAr: string } {
   return { day: days[dayIndex], dayAr: daysAr[dayIndex] }
 }
 
-function parseWeatherFromSearch(city: string, searchResult: string): WeatherData | null {
-  try {
-    // Try to extract temperature from search result
-    const tempMatch = searchResult.match(/(\d{1,3})\s*°C/i) || searchResult.match(/(\d{1,3})\s*°/i)
-    const feelsLikeMatch = searchResult.match(/feels?\s*like\s*(\d{1,3})/i) || searchResult.match(/يُشعر\s*(\d{1,3})/i)
-    const humidityMatch = searchResult.match(/humidity[:\s]*(\d{1,3})%/i) || searchResult.match(/الرطوبة[:\s]*(\d{1,3})%/i)
-    const windMatch = searchResult.match(/wind[:\s]*(\d{1,3})\s*km\/h/i) || searchResult.match(/الرياح[:\s]*(\d{1,3})/i)
+// ─── WMO Weather Code Mapping ────────────────────────────────────
 
-    // Determine condition from text
-    const lowerResult = searchResult.toLowerCase()
-    let condition = 'sunny'
-    let icon = 'sun'
-    if (lowerResult.includes('rain') || lowerResult.includes('ماطر')) {
-      condition = 'rainy'
-      icon = 'cloud-rain'
-    } else if (lowerResult.includes('cloud') || lowerResult.includes('غائم')) {
-      if (lowerResult.includes('partly') || lowerResult.includes('جزئيا')) {
-        condition = 'partlyCloudy'
-        icon = 'cloud-sun'
-      } else {
-        condition = 'cloudy'
-        icon = 'cloud'
-      }
-    } else if (lowerResult.includes('clear') || lowerResult.includes('صاف')) {
-      condition = 'clear'
-      icon = 'sun'
-    }
-
-    const temp = tempMatch ? parseInt(tempMatch[1], 10) : null
-    if (temp === null) return null // Can't parse any weather data
-
-    const cityKey = city.toLowerCase()
-    const mockData = MOCK_WEATHER[cityKey] || MOCK_WEATHER.riyadh
-
-    // Build forecast with real day names
-    const forecast: ForecastDay[] = [1, 2, 3].map((offset) => {
-      const { day, dayAr } = getDayName(offset)
-      const baseForecast = mockData.forecast[offset - 1] || mockData.forecast[0]
-      return {
-        day,
-        dayAr,
-        high: baseForecast.high + Math.floor(Math.random() * 3) - 1,
-        low: baseForecast.low + Math.floor(Math.random() * 3) - 1,
-        condition: offset === 2 ? 'partlyCloudy' : 'sunny',
-        icon: offset === 2 ? 'cloud-sun' : 'sun',
-      }
-    })
-
-    return {
-      city: mockData.city,
-      temp,
-      feelsLike: feelsLikeMatch ? parseInt(feelsLikeMatch[1], 10) : temp + 2,
-      condition,
-      humidity: humidityMatch ? parseInt(humidityMatch[1], 10) : mockData.humidity,
-      windSpeed: windMatch ? parseInt(windMatch[1], 10) : mockData.windSpeed,
-      icon,
-      forecast,
-    }
-  } catch {
-    return null
-  }
+function mapWeatherCode(code: number): { condition: string; icon: string } {
+  // Open-Meteo uses WMO weather interpretation codes
+  if (code === 0) return { condition: 'sunny', icon: 'sun' }
+  if (code === 1) return { condition: 'clear', icon: 'sun' }
+  if (code === 2) return { condition: 'partlyCloudy', icon: 'cloud-sun' }
+  if (code === 3) return { condition: 'cloudy', icon: 'cloud' }
+  if (code >= 45 && code <= 48) return { condition: 'cloudy', icon: 'cloud' }
+  if (code >= 51 && code <= 57) return { condition: 'rainy', icon: 'cloud-rain' }
+  if (code >= 61 && code <= 67) return { condition: 'rainy', icon: 'cloud-rain' }
+  if (code >= 71 && code <= 77) return { condition: 'cloudy', icon: 'cloud' }
+  if (code >= 80 && code <= 82) return { condition: 'rainy', icon: 'cloud-rain' }
+  if (code >= 85 && code <= 86) return { condition: 'cloudy', icon: 'cloud' }
+  if (code >= 95 && code <= 99) return { condition: 'rainy', icon: 'cloud-rain' }
+  // Default
+  return { condition: 'sunny', icon: 'sun' }
 }
 
 // ─── API Route Handler ─────────────────────────────────────────────
@@ -177,65 +66,128 @@ function parseWeatherFromSearch(city: string, searchResult: string): WeatherData
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const city = (searchParams.get('city') || 'riyadh').toLowerCase()
+    const city = (searchParams.get('city') || '').toLowerCase()
 
-    // Validate city
-    if (!VALID_CITIES.includes(city)) {
+    // Accept both `latitude`/`longitude` and `lat`/`lon` parameters
+    const latitudeParam = searchParams.get('latitude') || searchParams.get('lat') || ''
+    const longitudeParam = searchParams.get('longitude') || searchParams.get('lon') || ''
+    const lat = parseFloat(latitudeParam)
+    const lon = parseFloat(longitudeParam)
+
+    // Determine coordinates: explicit latitude/longitude take priority, then city lookup, then Riyadh fallback
+    let latitude = 24.7136
+    let longitude = 46.6753
+    let cityName = 'Riyadh'
+    let cityNameAr = 'الرياض'
+
+    if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+      latitude = lat
+      longitude = lon
+      // Try to find a matching city name for display
+      const matchingCity = Object.values(CITY_COORDS).find(
+        c => Math.abs(c.lat - lat) < 0.5 && Math.abs(c.lon - lon) < 0.5
+      )
+      if (matchingCity) {
+        cityName = matchingCity.name
+        cityNameAr = matchingCity.nameAr
+      } else {
+        cityName = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`
+        cityNameAr = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`
+      }
+    } else if (city && CITY_COORDS[city]) {
+      const coords = CITY_COORDS[city]
+      latitude = coords.lat
+      longitude = coords.lon
+      cityName = coords.name
+      cityNameAr = coords.nameAr
+    } else {
+      // No valid coords or city provided — fall back to Riyadh (default)
+      // This allows callers that provide no params at all to get Riyadh weather
+      if (city && !CITY_COORDS[city]) {
+        return NextResponse.json(
+          { error: `Invalid city. Supported cities: ${Object.keys(CITY_COORDS).join(', ')}. Or provide latitude/longitude parameters.` },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Fetch real weather from Open-Meteo (FREE, no API key needed)
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4`
+
+    const response = await fetch(url, {
+      next: { revalidate: 600 }, // Cache for 10 minutes
+    })
+
+    if (!response.ok) {
+      logger.error('[Weather API]', 'Open-Meteo returned non-OK status', response.status)
       return NextResponse.json(
-        { error: 'Invalid city. Supported cities: riyadh, jeddah, mecca, medina, dammam' },
-        { status: 400 }
+        { error: 'Failed to fetch weather data from provider' },
+        { status: 502 }
       )
     }
 
-    // Try to fetch real weather data using z-ai-web-dev-sdk
-    try {
-      const zai = await ZAI.create()
-      const cityName = MOCK_WEATHER[city].city
-      const searchResult = await zai.functions.invoke('web_search', {
-        query: `current weather in ${cityName} Saudi Arabia today temperature`,
-      })
-
-      if (searchResult && searchResult.length > 0) {
-        // Combine search snippets
-        const combinedText = searchResult
-          .slice(0, 3)
-          .map((r) => `${r.name || ''} ${r.snippet || ''}`)
-          .join(' ')
-
-        const parsedWeather = parseWeatherFromSearch(city, combinedText)
-        if (parsedWeather) {
-          return NextResponse.json(parsedWeather)
-        }
+    const data = await response.json() as {
+      current?: {
+        temperature_2m?: number
+        apparent_temperature?: number
+        relative_humidity_2m?: number
+        weather_code?: number
+        wind_speed_10m?: number
       }
-    } catch {
-      // z-ai-web-dev-sdk call failed, fall back to static data
+      daily?: {
+        weather_code?: number[]
+        temperature_2m_max?: number[]
+        temperature_2m_min?: number[]
+      }
     }
 
-    // Fall back to static mock weather data
-    const mockData = MOCK_WEATHER[city]
+    const current = data.current
+    const daily = data.daily
 
-    // Use real day names for forecast
-    const forecast: ForecastDay[] = [1, 2, 3].map((offset, idx) => {
-      const { day, dayAr } = getDayName(offset)
-      const baseForecast = mockData.forecast[idx]
-      return {
-        ...baseForecast,
-        day,
-        dayAr,
+    if (!current || !daily) {
+      logger.error('[Weather API]', 'Incomplete weather data received from Open-Meteo')
+      return NextResponse.json(
+        { error: 'Incomplete weather data received' },
+        { status: 502 }
+      )
+    }
+
+    const currentWeather = mapWeatherCode(current.weather_code ?? 0)
+
+    // Build forecast for next 3 days (skip index 0 which is today)
+    const forecast: ForecastDay[] = []
+    if (daily.weather_code && daily.temperature_2m_max && daily.temperature_2m_min) {
+      for (let i = 1; i <= Math.min(3, (daily.weather_code.length || 1) - 1); i++) {
+        const { day, dayAr } = getDayName(i)
+        const fw = mapWeatherCode(daily.weather_code[i] ?? 0)
+        forecast.push({
+          day,
+          dayAr,
+          high: Math.round(daily.temperature_2m_max[i] ?? 30),
+          low: Math.round(daily.temperature_2m_min[i] ?? 20),
+          condition: fw.condition,
+          icon: fw.icon,
+        })
       }
-    })
+    }
 
-    return NextResponse.json({
-      ...mockData,
+    const weatherData: WeatherData = {
+      city: cityName,
+      temp: Math.round(current.temperature_2m ?? 30),
+      feelsLike: Math.round(current.apparent_temperature ?? 32),
+      condition: currentWeather.condition,
+      humidity: current.relative_humidity_2m ?? 30,
+      windSpeed: Math.round(current.wind_speed_10m ?? 10),
+      icon: currentWeather.icon,
       forecast,
-    })
+    }
+
+    return NextResponse.json(weatherData)
   } catch (error) {
-    console.error('[Weather API] Error:', error)
-    // Return static Riyadh data as ultimate fallback
-    const riyadh = MOCK_WEATHER.riyadh
-    return NextResponse.json({
-      ...riyadh,
-      forecast: riyadh.forecast,
-    })
+    logger.error('[Weather API]', 'Error fetching weather data', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch weather data. Please try again later.' },
+      { status: 500 }
+    )
   }
 }

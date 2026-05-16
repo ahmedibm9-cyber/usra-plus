@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
 import { sendOTP, isEmailConfigured } from '@/lib/email'
+import { logger } from '@/lib/logger'
 import crypto from 'crypto'
 
 // In-memory OTP send rate limiting per email
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
       if (result.success) {
         emailSent = true
       } else {
-        console.warn('[OTP Send] Resend email failed, falling back:', result.error)
+        logger.warn('[OTP Send]', `Resend email failed, falling back: ${result.error}`)
       }
     }
 
@@ -137,14 +138,14 @@ export async function POST(req: NextRequest) {
             })
 
             if (resendError) {
-              console.error('[OTP Send] Supabase resend error:', resendError.message)
+              logger.error('[OTP Send]', 'Supabase resend error', resendError)
             } else {
               emailSent = true
             }
           }
         }
       } catch (supabaseError) {
-        console.error('[OTP Send] Supabase error:', supabaseError)
+        logger.error('[OTP Send]', 'Supabase error', supabaseError)
       }
     }
 
@@ -163,7 +164,7 @@ export async function POST(req: NextRequest) {
       expiresIn: 600, // seconds
     })
   } catch (error) {
-    console.error('[OTP Send] Error:', error)
+    logger.error('[OTP Send]', 'Error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

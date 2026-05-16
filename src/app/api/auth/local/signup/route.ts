@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
 import { sendOTP, sendWelcome, isEmailConfigured } from '@/lib/email'
+import { logger } from '@/lib/logger'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 
@@ -149,12 +150,12 @@ export async function POST(req: NextRequest) {
         if (otpResult.success) {
           otpEmailSent = true
         } else {
-          console.warn('[Signup] OTP email failed:', otpResult.error)
+          logger.warn('[Signup]', `OTP email failed: ${otpResult.error}`)
         }
 
         // Send welcome email (fire-and-forget — don't block signup on this)
         sendWelcome(emailLower, userName || 'User', lang).catch(err => {
-          console.warn('[Signup] Welcome email failed:', err instanceof Error ? err.message : err)
+          logger.warn('[Signup]', `Welcome email failed: ${err instanceof Error ? err.message : err}`)
         })
       }
 
@@ -173,7 +174,7 @@ export async function POST(req: NextRequest) {
 
     } catch (prismaError) {
       // Prisma failed (likely on Vercel) — use Supabase REST API
-      console.log('[Local Auth] Prisma unavailable, using Supabase REST API')
+      logger.warn('[Local Auth]', 'Prisma unavailable, using Supabase REST API')
       const supabase = getSupabaseAdmin()
       if (!supabase) {
         throw new Error('No database available')
@@ -207,7 +208,7 @@ export async function POST(req: NextRequest) {
       })
 
       if (authError) {
-        console.error('[Local Auth] Supabase auth error:', authError)
+        logger.error('[Local Auth]', 'Supabase auth error', authError)
         return NextResponse.json(
           { error: authError.message || 'Failed to create account' },
           { status: 400 }
@@ -264,12 +265,12 @@ export async function POST(req: NextRequest) {
         if (otpResult.success) {
           otpEmailSent = true
         } else {
-          console.warn('[Signup] OTP email failed:', otpResult.error)
+          logger.warn('[Signup]', `OTP email failed: ${otpResult.error}`)
         }
 
         // Send welcome email (fire-and-forget)
         sendWelcome(emailLower, userName || 'User', 'en').catch(err => {
-          console.warn('[Signup] Welcome email failed:', err instanceof Error ? err.message : err)
+          logger.warn('[Signup]', `Welcome email failed: ${err instanceof Error ? err.message : err}`)
         })
       }
 
@@ -287,7 +288,7 @@ export async function POST(req: NextRequest) {
       }, { status: 201 })
     }
   } catch (error) {
-    console.error('[Local Auth] Signup error:', error)
+    logger.error('[Local Auth]', 'Signup error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

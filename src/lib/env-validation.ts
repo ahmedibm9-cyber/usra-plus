@@ -6,6 +6,8 @@
  * In production, missing critical vars will throw and prevent startup.
  */
 
+import { logger } from '@/lib/logger'
+
 interface EnvVarSpec {
   name: string
   required: boolean
@@ -90,7 +92,7 @@ export function validateEnvironment(): EnvValidationResult {
   }
 
   if (errors.length > 0 || missing.length > 0) {
-    console.error('\n🔴 ENVIRONMENT VALIDATION FAILED:\n')
+    logger.error('[Env]', 'ENVIRONMENT VALIDATION FAILED')
     errors.forEach(e => console.error(`  ${e}`))
     warnings.forEach(w => console.warn(`  ${w}`))
     console.error('')
@@ -103,7 +105,7 @@ export function validateEnvironment(): EnvValidationResult {
     warnings.forEach(w => console.warn(`  ${w}`))
     console.warn('')
   } else {
-    console.log('✅ Environment validation passed')
+    logger.info('[Env]', 'Environment validation passed')
   }
 
   return {

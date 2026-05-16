@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
+import { logger } from '@/lib/logger'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
       return response
     } catch (prismaError) {
       // Prisma failed (likely on Vercel) — use Supabase Auth API
-      console.log('[Local Auth] Prisma unavailable, using Supabase Auth API')
+      logger.warn('[Local Auth]', 'Prisma unavailable, using Supabase Auth API')
       const supabase = getSupabaseAdmin()
       if (!supabase) {
         throw new Error('No database available')
@@ -229,7 +230,7 @@ export async function POST(req: NextRequest) {
       return response
     }
   } catch (error) {
-    console.error('[Local Auth] Login error:', error)
+    logger.error('[Local Auth]', 'Login error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

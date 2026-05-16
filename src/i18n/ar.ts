@@ -436,7 +436,7 @@ export const ar = {
     tasksOnFree: 'مهام في الخطة المجانية',
     storageOnFree: 'تخزين في الخطة المجانية',
     upgradeForUnlimited: 'قم بالترقية للحصول على غير المحدود',
-    subscriptionComingSoon: 'إدارة الاشتراك قريبًا!',
+    subscriptionComingSoon: 'إدارة خطة الاشتراك',
     planUpgraded: 'تمت ترقية الخطة بنجاح!',
     // RevenueCat integration
     proPlusTitle: 'USRA PRO+',

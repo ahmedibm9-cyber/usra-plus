@@ -16,6 +16,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * Get the expected origin(s) for this server.
@@ -84,7 +85,7 @@ export function validateCSRF(request: NextRequest): NextResponse | null {
     })
 
     if (!originAllowed) {
-      console.warn(`[CSRF] Blocked request with Origin: ${origin}`)
+      logger.warn('[CSRF]', `Blocked request with Origin: ${origin}`)
       return NextResponse.json(
         { error: 'Request blocked — invalid origin' },
         { status: 403 }
@@ -108,7 +109,7 @@ export function validateCSRF(request: NextRequest): NextResponse | null {
     })
 
     if (!refererAllowed) {
-      console.warn(`[CSRF] Blocked request with Referer: ${referer}`)
+      logger.warn('[CSRF]', `Blocked request with Referer: ${referer}`)
       return NextResponse.json(
         { error: 'Request blocked — invalid referer' },
         { status: 403 }
@@ -121,7 +122,7 @@ export function validateCSRF(request: NextRequest): NextResponse | null {
   // No Origin or Referer — in production, require at least one
   // In development, allow through for API testing (curl, Postman)
   if (process.env.NODE_ENV === 'production') {
-    console.warn('[CSRF] Blocked request with no Origin or Referer header')
+    logger.warn('[CSRF]', 'Blocked request with no Origin or Referer header')
     return NextResponse.json(
       { error: 'Request blocked — missing origin validation' },
       { status: 403 }

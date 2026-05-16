@@ -19,6 +19,7 @@ import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
 import { safeJsonResponse } from '@/lib/safe-fetch'
+import { logger } from '@/lib/logger'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -684,7 +685,7 @@ export function AdminContent() {
   // ─── Send Test Email ────────────────────────────────────────────────
   const handleSendTestEmail = async (templateType: string) => {
     try {
-      console.log(`[Test Email] Would send ${templateType} email to admin@usraplus.com`)
+      logger.info('[Test Email]', `Would send ${templateType} email to admin@usraplus.com`)
       toast.success(`Test ${templateType} email logged to console (email service not configured)`)
       addAuditLog('test_email_sent', 'email', null, { templateType })
     } catch {

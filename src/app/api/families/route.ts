@@ -4,15 +4,16 @@ import { requireAuth } from '@/lib/auth-utils'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getUserPlan, checkPlanLimit, getCurrentFamilyCount } from '@/lib/plan-limits'
 import type { PlanResource } from '@/lib/plan-limits'
+import { logger } from '@/lib/logger'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
-/** Generate a random 8-character alphanumeric uppercase invite code */
+/** Generate a cryptographically secure random 8-character alphanumeric uppercase invite code */
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let code = ''
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
+    code += chars.charAt(crypto.randomInt(chars.length))
   }
   return code
 }
@@ -142,7 +143,7 @@ export async function POST(req: NextRequest) {
       )
     } catch (prismaError) {
       // Prisma unavailable (likely on Vercel) — use Supabase REST API
-      console.log('[Families API] Prisma unavailable, using Supabase REST API')
+      logger.warn('[Families API]', 'Prisma unavailable, using Supabase REST API')
       const supabase = getSupabaseAdmin()
       if (!supabase) {
         throw new Error('No database available')
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (familyError || !family) {
-        console.error('[Families API] Supabase family creation error:', familyError)
+        logger.error('[Families API]', 'Supabase family creation error', familyError)
         return NextResponse.json(
           { error: familyError?.message || 'Failed to create family' },
           { status: 500 }
@@ -206,7 +207,7 @@ export async function POST(req: NextRequest) {
         })
 
       if (memberError) {
-        console.error('[Families API] Supabase member insert error:', memberError)
+        logger.error('[Families API]', 'Supabase member insert error', memberError)
         // Try to clean up the family if member insert fails
         await supabase.from('families').delete().eq('id', family.id)
         return NextResponse.json(
@@ -221,7 +222,7 @@ export async function POST(req: NextRequest) {
       )
     }
   } catch (error) {
-    console.error('[Families API] Create error:', error)
+    logger.error('[Families API]', 'Create error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -315,7 +316,7 @@ export async function PUT(req: NextRequest) {
       )
     } catch (prismaError) {
       // Prisma unavailable — use Supabase REST API
-      console.log('[Families API] Prisma unavailable, using Supabase REST API')
+      logger.warn('[Families API]', 'Prisma unavailable, using Supabase REST API')
       const supabase = getSupabaseAdmin()
       if (!supabase) {
         throw new Error('No database available')
@@ -381,7 +382,7 @@ export async function PUT(req: NextRequest) {
         })
 
       if (memberError) {
-        console.error('[Families API] Supabase join error:', memberError)
+        logger.error('[Families API]', 'Supabase join error', memberError)
         return NextResponse.json(
           { error: memberError.message || 'Failed to join family' },
           { status: 500 }
@@ -394,7 +395,7 @@ export async function PUT(req: NextRequest) {
       )
     }
   } catch (error) {
-    console.error('[Families API] Join error:', error)
+    logger.error('[Families API]', 'Join error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -430,7 +431,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ families })
     } catch (prismaError) {
       // Prisma unavailable — use Supabase REST API
-      console.log('[Families API] Prisma unavailable, using Supabase REST API')
+      logger.warn('[Families API]', 'Prisma unavailable, using Supabase REST API')
       const supabase = getSupabaseAdmin()
       if (!supabase) {
         throw new Error('No database available')
@@ -444,7 +445,7 @@ export async function GET(req: NextRequest) {
         .order('joined_at', { ascending: false })
 
       if (memberError) {
-        console.error('[Families API] Supabase list error:', memberError)
+        logger.error('[Families API]', 'Supabase list error', memberError)
         return NextResponse.json(
           { error: memberError.message || 'Failed to list families' },
           { status: 500 }
@@ -464,7 +465,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ families })
     }
   } catch (error) {
-    console.error('[Families API] List error:', error)
+    logger.error('[Families API]', 'List error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -27,6 +27,7 @@ import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
 import { db } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit-logger'
+import { logger } from '@/lib/logger'
 
 // Account deletion is a destructive action — very strict rate limit
 const ACCOUNT_DELETE_RATE_LIMIT = { maxRequests: 1, windowMs: 60 * 60 * 1000, key: 'user:delete' }
@@ -129,7 +130,7 @@ export async function DELETE(request: NextRequest) {
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error('[User Delete API] Error:', errorMessage)
+    logger.error('[User Delete API]', 'Error:', errorMessage)
 
     return NextResponse.json(
       { error: 'Failed to delete account. Please try again or contact support.' },

@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   // ─── Rate Limit: 1 request per hour ──────────────────────────
@@ -195,7 +196,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (err) {
-    console.error('[User Export] Error:', err)
+    logger.error('[User Export]', 'Error:', err)
     return NextResponse.json(
       { error: 'Failed to export user data' },
       { status: 500 }

@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 const VALID_CONSENT_TYPES = ['terms', 'privacy', 'marketing', 'cookies'] as const
 type ConsentType = typeof VALID_CONSENT_TYPES[number]
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ consent }, { status: 201 })
   } catch (err) {
-    console.error('[Consent POST] Error:', err)
+    logger.error('[Consent POST]', 'Error:', err)
     return NextResponse.json(
       { error: 'Failed to record consent' },
       { status: 500 }
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
       total: consents.length,
     })
   } catch (err) {
-    console.error('[Consent GET] Error:', err)
+    logger.error('[Consent GET]', 'Error:', err)
     return NextResponse.json(
       { error: 'Failed to fetch consents' },
       { status: 500 }

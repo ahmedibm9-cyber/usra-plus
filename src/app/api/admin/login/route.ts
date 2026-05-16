@@ -9,6 +9,7 @@ import {
 } from '@/lib/admin-session'
 import { db } from '@/lib/db'
 import { logAuditEvent } from '@/lib/audit-logger'
+import { logger } from '@/lib/logger'
 
 // ─── Server-Side Admin Authentication ──────────────────────────────────────
 // Single admin credential with role selector.
@@ -63,13 +64,13 @@ export async function POST(request: NextRequest) {
 
     // Refuse default password in production
     if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
-      console.error('[AdminLogin] ADMIN_PASSWORD env var is not set — admin login is disabled in production')
+      logger.error('[AdminLogin]', 'ADMIN_PASSWORD env var is not set — admin login is disabled in production')
       return NextResponse.json({ success: false, error: 'Admin login is disabled — set ADMIN_PASSWORD env var' }, { status: 403 })
     }
 
     // Warn if using default dev password (not configured via env var)
     if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV !== 'production') {
-      console.warn('[AdminLogin] Using default dev password — set ADMIN_PASSWORD env var for production')
+      logger.warn('[AdminLogin]', 'Using default dev password — set ADMIN_PASSWORD env var for production')
     }
 
     const { email, password, role } = await request.json()
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
             emailVerified: true,
           },
         }).catch(() => {})
-        console.log('[AdminLogin] Seeded initial admin user in database')
+        logger.info('[AdminLogin]', 'Seeded initial admin user in database')
       }
     } catch {
       // Non-critical: DB seed failure should not block login
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error('[AdminLogin] Error:', error)
+    logger.error('[AdminLogin]', 'Error', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }

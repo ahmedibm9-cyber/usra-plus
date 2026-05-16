@@ -9,6 +9,7 @@
 
 import Stripe from 'stripe'
 import { db } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 // ─── Stripe Initialization ────────────────────────────────────────────────────
 
@@ -333,7 +334,7 @@ export async function handleCheckoutCompleted(
   const planId = session.metadata?.planId as StripePlanId | undefined
 
   if (!userId || !planId) {
-    console.error('[Stripe] Missing userId or planId in checkout session metadata')
+    logger.error('[Stripe]', 'Missing userId or planId in checkout session metadata')
     return
   }
 
@@ -402,7 +403,7 @@ export async function handleCheckoutCompleted(
     })
   }
 
-  console.log(`[Stripe] Checkout completed: user=${userId}, plan=${planId}`)
+  logger.info('[Stripe]', `Checkout completed: user=${userId}, plan=${planId}`)
 }
 
 /**
@@ -414,7 +415,7 @@ export async function handleSubscriptionCreated(
   const userId = subscription.metadata?.userId
 
   if (!userId) {
-    console.error('[Stripe] Missing userId in subscription metadata')
+    logger.error('[Stripe]', 'Missing userId in subscription metadata')
     return
   }
 
@@ -462,7 +463,7 @@ export async function handleSubscriptionCreated(
     })
   }
 
-  console.log(`[Stripe] Subscription created: id=${subscription.id}, plan=${planId}`)
+  logger.info('[Stripe]', `Subscription created: id=${subscription.id}, plan=${planId}`)
 }
 
 /**
@@ -482,7 +483,7 @@ export async function handleSubscriptionUpdated(
       where: { stripeCustomerId: subscription.customer as string },
     })
     if (!byCustomer) {
-      console.warn('[Stripe] Subscription updated but no matching record found:', subscription.id)
+      logger.warn('[Stripe]', `Subscription updated but no matching record found: ${subscription.id}`)
       return
     }
   }
@@ -519,7 +520,7 @@ export async function handleSubscriptionUpdated(
     })
   }
 
-  console.log(`[Stripe] Subscription updated: id=${subscription.id}, status=${subscription.status}`)
+  logger.info('[Stripe]', `Subscription updated: id=${subscription.id}, status=${subscription.status}`)
 }
 
 /**
@@ -533,7 +534,7 @@ export async function handleSubscriptionDeleted(
   })
 
   if (!existingSub) {
-    console.warn('[Stripe] Subscription deleted but no matching record found:', subscription.id)
+    logger.warn('[Stripe]', `Subscription deleted but no matching record found: ${subscription.id}`)
     return
   }
 
@@ -549,7 +550,7 @@ export async function handleSubscriptionDeleted(
     },
   })
 
-  console.log(`[Stripe] Subscription deleted: id=${subscription.id}, user=${existingSub.userId}`)
+  logger.info('[Stripe]', `Subscription deleted: id=${subscription.id}, user=${existingSub.userId}`)
 }
 
 /**
@@ -566,7 +567,7 @@ export async function handlePaymentSucceeded(
   })
 
   if (!sub) {
-    console.warn('[Stripe] Payment succeeded but no subscription found for customer:', customerId)
+    logger.warn('[Stripe]', `Payment succeeded but no subscription found for customer: ${customerId}`)
     return
   }
 
@@ -589,7 +590,7 @@ export async function handlePaymentSucceeded(
     },
   })
 
-  console.log(`[Stripe] Payment succeeded: invoice=${invoice.id}, amount=${invoice.amount_paid}`)
+  logger.info('[Stripe]', `Payment succeeded: invoice=${invoice.id}, amount=${invoice.amount_paid}`)
 }
 
 /**
@@ -605,7 +606,7 @@ export async function handlePaymentFailed(
   })
 
   if (!sub) {
-    console.warn('[Stripe] Payment failed but no subscription found for customer:', customerId)
+    logger.warn('[Stripe]', `Payment failed but no subscription found for customer: ${customerId}`)
     return
   }
 
@@ -632,7 +633,7 @@ export async function handlePaymentFailed(
     },
   })
 
-  console.log(`[Stripe] Payment failed: invoice=${invoice.id}, customer=${customerId}`)
+  logger.info('[Stripe]', `Payment failed: invoice=${invoice.id}, customer=${customerId}`)
 }
 
 /**
@@ -655,7 +656,7 @@ export async function handleTrialWillEnd(
     },
   })
 
-  console.log(`[Stripe] Trial will end: subscription=${subscription.id}, user=${existingSub.userId}`)
+  logger.info('[Stripe]', `Trial will end: subscription=${subscription.id}, user=${existingSub.userId}`)
 }
 
 /**
@@ -686,7 +687,7 @@ export async function handleCustomerDeleted(
     },
   })
 
-  console.log(`[Stripe] Customer deleted: id=${customerId}, user=${sub.userId}`)
+  logger.info('[Stripe]', `Customer deleted: id=${customerId}, user=${sub.userId}`)
 }
 
 // ─── Helper: Map Stripe Status to Our Status ──────────────────────────────────

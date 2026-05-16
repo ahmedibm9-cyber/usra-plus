@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
 
   try {
   // Verify authentication
-  const auth = await requireAuth(request)
-  if (auth.error) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  const { userId, error: authError } = await requireAuth(request)
+  if (authError) return authError
 
   // ─── Server-side plan check: Image generation requires Pro+ ──────────
   const imgPlanAccess = await requirePlanAccess(request, 'pro')
@@ -110,7 +110,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
 
-    console.error('[src.app.api.ai.generate-image] Error:', error)
+    const { logger } = await import('@/lib/logger')
+    logger.error('[AI Generate Image]', 'Error:', error)
 
     if (error instanceof Error && error.message.includes('Unauthorized')) {
 

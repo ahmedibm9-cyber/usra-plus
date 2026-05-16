@@ -10,6 +10,7 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import type { RateLimitConfig, RateLimitResult } from './rate-limit'
+import { logger } from '@/lib/logger'
 
 /**
  * Check if Upstash Redis is configured.
@@ -34,7 +35,7 @@ function getRedis(): Redis | null {
       token: process.env.UPSTASH_REDIS_REST_TOKEN!,
     })
   } catch (err) {
-    console.error('[Redis Rate Limit] Failed to initialize Redis:', err)
+    logger.error('[Redis Rate Limit]', 'Failed to initialize Redis', err)
     _redis = null
   }
 
@@ -118,7 +119,7 @@ export async function checkRedisRateLimit(
       retryAfterMs: result.success ? 0 : (resetTime - now),
     }
   } catch (err) {
-    console.error('[Redis Rate Limit] Check failed, falling back to in-memory:', err)
+    logger.error('[Redis Rate Limit]', 'Check failed, falling back to in-memory', err)
     return null // Fall back to in-memory
   }
 }

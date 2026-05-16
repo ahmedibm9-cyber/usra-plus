@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 // Lazy-initialized anon client for JWT validation (not admin)
 let _anonClient: ReturnType<typeof createClient> | null = null
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
         await db.session.delete({ where: { id: session.id } }).catch(() => {})
       }
     } catch (prismaError) {
-      console.log('[Local Auth] Prisma unavailable for session check, trying Supabase')
+      logger.warn('[Local Auth]', 'Prisma unavailable for session check, trying Supabase')
     }
 
     // ─── Fallback: Validate the Supabase Auth JWT token ───
@@ -96,7 +97,7 @@ export async function GET(req: NextRequest) {
           })
         }
       } catch (supabaseError) {
-        console.error('[Local Auth] Supabase session check failed:', supabaseError)
+        logger.error('[Local Auth]', 'Supabase session check failed', supabaseError)
       }
     }
 
@@ -136,7 +137,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ user: null }, { status: 401 })
   } catch (error) {
-    console.error('[Local Auth] Me error:', error)
+    logger.error('[Local Auth]', 'Me error', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

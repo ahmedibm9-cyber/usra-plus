@@ -42,7 +42,7 @@ import { createClient } from '@/lib/supabase/client'
 import { SectionCard, SectionTitle, SectionDescription, SettingRow } from '../settings-helpers'
 
 export function SecurityTab() {
-  const { t } = useI18n()
+  const { t, isRTL } = useI18n()
   const { user } = useAuthStore()
 
   // Email change state
@@ -192,7 +192,7 @@ export function SecurityTab() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-emerald-500/10 text-accent border-emerald-500/20 text-xs">
-              Coming Soon
+              {isRTL ? 'المصادقة الثانية وإدارة الجلسات' : '2FA & Session Management'}
             </Badge>
             <Switch
               checked={false}

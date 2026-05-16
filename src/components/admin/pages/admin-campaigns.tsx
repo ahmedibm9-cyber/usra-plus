@@ -160,12 +160,27 @@ interface EmailTemplate {
   bodyHtml: string
 }
 
-const MOCK_TEMPLATES: EmailTemplate[] = [
-  { id: 'welcome', name: 'Welcome Email', subject: 'Welcome to USRA PLUS!', bodyHtml: '<h1>Welcome!</h1><p>We\'re excited to have you on board.</p>' },
-  { id: 'trial_expiry', name: 'Trial Expiring Soon', subject: 'Your trial is ending soon', bodyHtml: '<h1>Don\'t miss out!</h1><p>Your free trial expires in 3 days.</p>' },
-  { id: 'upgrade', name: 'Upgrade Offer', subject: 'Unlock premium features', bodyHtml: '<h1>Go Premium</h1><p>Upgrade now and get 20% off.</p>' },
-  { id: 'reactivation', name: 'Re-engagement', subject: 'We miss you!', bodyHtml: '<h1>Come back!</h1><p>Here\'s what you\'ve been missing.</p>' },
-]
+// NOTE: Templates should come from the EmailCampaign table in Prisma via /api/admin/campaigns.
+// For now, we fetch from the campaigns API and use campaign data as templates.
+const DEFAULT_TEMPLATES: EmailTemplate[] = []
+
+// ─── Fetch templates from API ───────────────────────────────────────
+
+async function fetchTemplates(): Promise<EmailTemplate[]> {
+  try {
+    const data = await apiFetch('/api/admin/campaigns?pageSize=100')
+    const campaigns = data.data || []
+    // Convert campaigns to template format
+    return campaigns.map((c: EmailCampaign) => ({
+      id: c.id,
+      name: c.name,
+      subject: c.subject,
+      bodyHtml: c.bodyHtml || '',
+    }))
+  } catch {
+    return DEFAULT_TEMPLATES
+  }
+}
 
 // ─── Rich Text Editor ──────────────────────────────────────────────────
 
@@ -446,6 +461,7 @@ function EmailCampaignsTab() {
   const [confirmAction, setConfirmAction] = useState<{ type: 'delete' | 'status'; id: string; newStatus?: EmailCampaignStatus; campaign?: EmailCampaign } | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState('')
+  const [templates, setTemplates] = useState<EmailTemplate[]>([])
 
   // Form state
   const [formName, setFormName] = useState('')
@@ -469,6 +485,11 @@ function EmailCampaignsTab() {
   }, [statusFilter])
 
   useEffect(() => { fetchCampaigns() }, [fetchCampaigns])
+
+  // Fetch templates from API
+  useEffect(() => {
+    fetchTemplates().then(setTemplates)
+  }, [])
 
   // Aggregate stats
   const stats = useMemo(() => {
@@ -515,7 +536,7 @@ function EmailCampaignsTab() {
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId)
-    const template = MOCK_TEMPLATES.find(t => t.id === templateId)
+    const template = templates.find(t => t.id === templateId)
     if (template) {
       setFormSubject(template.subject)
       setFormBodyHtml(template.bodyHtml)
@@ -752,7 +773,10 @@ function EmailCampaignsTab() {
                   <select value={selectedTemplate} onChange={e => handleTemplateSelect(e.target.value)}
                     className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
                     <option value="">Custom (no template)</option>
-                    {MOCK_TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    {templates.length > 0
+                      ? templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)
+                      : <option value="" disabled>No saved templates yet</option>
+                    }
                   </select>
                 </div>
                 <div className="sm:col-span-2">

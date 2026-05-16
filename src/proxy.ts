@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { verifyAdminSessionToken, getAdminCookieName } from '@/lib/admin-session'
 import { timingSafeEqual } from 'crypto'
+import { logger } from '@/lib/logger'
 
 // Routes that are public (no auth required) even under /api/admin/
 const ADMIN_PUBLIC_ROUTES = ['/api/admin/login', '/api/admin/logout']
@@ -87,7 +88,7 @@ export async function proxy(request: NextRequest) {
     )
     response.headers.set(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://api.aladhan.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
     )
 
     // 3. Check for the usra-auth-token cookie — if it exists, the user is
@@ -103,11 +104,20 @@ export async function proxy(request: NextRequest) {
     return response
   } catch (error) {
     // If proxy fails, still apply basic security headers but pass through
-    console.error('[Proxy] Error:', error)
+    logger.error('[Proxy]', 'Error', error)
     const safeResponse = NextResponse.next({ request })
     safeResponse.headers.set('X-Frame-Options', 'DENY')
     safeResponse.headers.set('X-Content-Type-Options', 'nosniff')
     safeResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    safeResponse.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    safeResponse.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
+    )
+    safeResponse.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    )
     return safeResponse
   }
 }

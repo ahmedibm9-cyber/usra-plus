@@ -1276,7 +1276,7 @@ function IntegrationsSection() {
           </span>
         </SectionTitle>
         <SectionDescription>
-          {isRTL ? 'تطبيقات خارجية متصلة بعائلتك' : 'External apps connected to your family'}
+          {isRTL ? 'المزيد من التكاملات في الطريق. استكشف الميزات المتاحة مع خطتك الحالية.' : 'More integrations are on the way. Explore the features available with your current plan.'}
         </SectionDescription>
 
         <div className="space-y-3">
@@ -1307,8 +1307,8 @@ function IntegrationsSection() {
         <Sparkles className="size-4 text-accent" />
         <AlertDescription className="text-accent text-sm">
           {isRTL
-            ? 'المزيد من التكاملات قريبًا! ترقب دعم تقويم جوجل، وصحة أبل، والمنزل الذكي.'
-            : 'More integrations are coming soon! Stay tuned for Google Calendar, Apple Health, and Smart Home support.'}
+            ? 'اربط تطبيقاتك المفضلة بـ USRA PLUS. يدعم حاليًا رموز QR العائلية ومشاركة واتساب.'
+            : 'Connect your favorite apps to USRA PLUS. Currently supporting Family QR codes and WhatsApp sharing.'}
         </AlertDescription>
       </Alert>
     </>

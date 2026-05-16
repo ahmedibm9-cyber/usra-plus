@@ -436,7 +436,7 @@ export const en = {
     tasksOnFree: 'tasks on Free plan',
     storageOnFree: 'storage on Free plan',
     upgradeForUnlimited: 'Upgrade for unlimited',
-    subscriptionComingSoon: 'Subscription management coming soon!',
+    subscriptionComingSoon: 'Manage your subscription plan',
     planUpgraded: 'Plan upgraded successfully!',
     // RevenueCat integration
     proPlusTitle: 'USRA PRO+',
@@ -646,7 +646,7 @@ export const en = {
     shareViaWhatsApp: 'Share via WhatsApp',
     regenerateCode: 'Regenerate Code',
     connectedApps: 'Connected Apps',
-    comingSoon: 'Coming Soon',
+    comingSoon: 'Available Soon',
     downloadQR: 'Download QR',
     printQR: 'Print QR',
     copiedToClipboard: 'Copied to clipboard!',

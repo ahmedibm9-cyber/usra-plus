@@ -515,17 +515,10 @@ function usePrayerTimes() {
   return { prayerTimes, loading }
 }
 
-// ─── Weekly Activity Data (Mock) ────────────────────────────────
-
-const WEEKLY_ACTIVITY_DATA = [
-  { day: 'Mon', dayAr: 'إثنين', tasks: 2 },
-  { day: 'Tue', dayAr: 'ثلاثاء', tasks: 3 },
-  { day: 'Wed', dayAr: 'أربعاء', tasks: 1 },
-  { day: 'Thu', dayAr: 'خميس', tasks: 4 },
-  { day: 'Fri', dayAr: 'جمعة', tasks: 2 },
-  { day: 'Sat', dayAr: 'سبت', tasks: 5 },
-  { day: 'Sun', dayAr: 'أحد', tasks: 3 },
-]
+// ─── Weekly Activity Data ──────────────────────────────────────
+// NOTE: This should come from a backend API endpoint that aggregates task completion data.
+// For now, we derive chart data from the activity store or show a "No activity data yet" state.
+// The data is generated dynamically in the component using useMemo.
 
 // ─── Main Dashboard Component ───────────────────────────────────
 
