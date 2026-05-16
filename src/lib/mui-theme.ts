@@ -109,11 +109,16 @@ export const lightTheme = createTheme({
           borderRadius: 12,
           fontWeight: 600,
           padding: '8px 20px',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         },
         contained: {
           boxShadow: '0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06)',
           '&:hover': {
             boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            transform: 'translateY(0)',
           },
         },
       },
@@ -124,6 +129,10 @@ export const lightTheme = createTheme({
           borderRadius: 16,
           boxShadow: '0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06)',
           border: '1px solid rgba(28, 27, 31, 0.08)',
+          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            boxShadow: '0 8px 25px -5px rgba(13, 107, 88, 0.08), 0 4px 10px -4px rgba(13, 107, 88, 0.04)',
+          },
         },
       },
     },
@@ -222,12 +231,20 @@ export const lightTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           '&.Mui-selected': {
             backgroundColor: 'rgba(13, 107, 88, 0.08)',
             '&:hover': {
               backgroundColor: 'rgba(13, 107, 88, 0.14)',
             },
           },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         },
       },
     },
@@ -301,11 +318,16 @@ export const darkTheme = createTheme({
           borderRadius: 12,
           fontWeight: 600,
           padding: '8px 20px',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         },
         contained: {
           boxShadow: '0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.2)',
           '&:hover': {
             boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            transform: 'translateY(0)',
           },
         },
       },
@@ -316,6 +338,10 @@ export const darkTheme = createTheme({
           borderRadius: 16,
           boxShadow: '0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.2)',
           border: '1px solid rgba(230, 225, 229, 0.06)',
+          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            boxShadow: '0 8px 25px -5px rgba(110, 231, 183, 0.06), 0 4px 10px -4px rgba(110, 231, 183, 0.03)',
+          },
         },
       },
     },
@@ -414,12 +440,20 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           '&.Mui-selected': {
             backgroundColor: 'rgba(110, 231, 183, 0.08)',
             '&:hover': {
               backgroundColor: 'rgba(110, 231, 183, 0.14)',
             },
           },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         },
       },
     },

@@ -15,7 +15,7 @@ import {
   Radio, Monitor, ScrollText, FileText, Paintbrush,
   Zap, AlertTriangle, CheckCircle2, Sun, Moon,
   Database, Clock, Wifi, MegaphoneOff, Trash2, RefreshCw,
-  ArrowRight, Download, Ban, Heart, Wrench
+  ArrowRight, Download, Ban, Heart, Wrench, KeyRound
 } from 'lucide-react'
 import type { AdminPage } from '@/types/admin'
 import { safeJsonResponse } from '@/lib/safe-fetch'
@@ -39,6 +39,7 @@ const AdminActivity = dynamic(() => import('./pages/admin-activity').then(m => (
 const AdminSessions = dynamic(() => import('./pages/admin-sessions').then(m => ({ default: m.AdminSessions })), { ssr: false, loading: () => <AdminPageLoader /> })
 const AdminAudit = dynamic(() => import('./pages/admin-audit').then(m => ({ default: m.AdminAudit })), { ssr: false, loading: () => <AdminPageLoader /> })
 const AdminContent = dynamic(() => import('./pages/admin-content').then(m => ({ default: m.AdminContent })), { ssr: false, loading: () => <AdminPageLoader /> })
+const AdminSubscriptionOtp = dynamic(() => import('./pages/admin-subscription-otp').then(m => ({ default: m.AdminSubscriptionOtp })), { ssr: false, loading: () => <AdminPageLoader /> })
 const DemoModeBanner = dynamic(() => import('./demo-mode-banner').then(m => ({ default: m.DemoModeBanner })), { ssr: false })
 
 function AdminPageLoader() {
@@ -61,6 +62,7 @@ const NAV_ITEMS: { id: AdminPage; label: string; icon: React.ReactNode; group: s
   { id: 'activity', label: 'Activity Monitor', icon: <Radio className="w-4 h-4" />, group: 'Analytics', accent: 'founder' },
   // Founder-level: Business — revenue, financial tools
   { id: 'subscriptions', label: 'Subscriptions', icon: <CreditCard className="w-4 h-4" />, group: 'Business', accent: 'founder' },
+  { id: 'subscription_otp', label: 'Subscription OTP', icon: <KeyRound className="w-4 h-4" />, group: 'Business', accent: 'founder' },
   { id: 'coupons', label: 'Coupons', icon: <Ticket className="w-4 h-4" />, group: 'Business', accent: 'founder' },
   { id: 'referrals', label: 'Referrals', icon: <Gift className="w-4 h-4" />, group: 'Business', accent: 'founder' },
   { id: 'revenue', label: 'Revenue', icon: <DollarSign className="w-4 h-4" />, group: 'Business', accent: 'founder' },
@@ -131,13 +133,13 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
 
   useEffect(() => {
     fetch('/api/admin/notifications', { credentials: 'same-origin' })
-      .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
+      .then(async (res) => res.ok ? await safeJsonResponse<{ data?: NotificationData }>(res) : null)
       .then(json => { if (json?.data) setData(json.data) })
       .catch(() => {})
     // Refresh every 60s
     const interval = setInterval(() => {
       fetch('/api/admin/notifications', { credentials: 'same-origin' })
-        .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
+        .then(async (res) => res.ok ? await safeJsonResponse<{ data?: NotificationData }>(res) : null)
         .then(json => { if (json?.data) setData(json.data) })
         .catch(() => {})
     }, 60000)
@@ -568,6 +570,7 @@ export function AdminLayout() {
       case 'features': return <AdminFeatures />
       case 'activity': return <AdminActivity />
       case 'subscriptions': return <AdminSubscriptions />
+      case 'subscription_otp': return <AdminSubscriptionOtp />
       case 'infrastructure': return <AdminInfrastructure />
       case 'sessions': return <AdminSessions />
       case 'audit': return <AdminAudit />

@@ -9,12 +9,14 @@ import {
   ShieldCheck,
   Crown,
   SlidersHorizontal,
+  KeyRound,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useI18n } from '@/i18n/use-translation'
+import { OtpActivation } from '@/components/settings/otp-activation'
 
 // ─── Lazy-loaded Tab Components ──────────────────────────────────────────────
 // Tabs are loaded on demand so the initial bundle only includes the active tab.
@@ -46,6 +48,7 @@ const settingsTabs = [
   { id: 'security', icon: Lock, labelKey: 'security' as const },
   { id: 'privacy', icon: ShieldCheck, labelKey: 'privacy' as const },
   { id: 'advanced', icon: SlidersHorizontal, labelKey: 'preferences' as const },
+  { id: 'otp', icon: KeyRound, labelKey: 'otp' as const },
 ]
 
 // ─── Tab Content Map ─────────────────────────────────────────────────────────
@@ -58,6 +61,7 @@ const tabComponents: Record<string, React.ComponentType> = {
   security: SecurityTab,
   privacy: PrivacyTab,
   advanced: AdvancedTab,
+  otp: OtpActivation as unknown as React.ComponentType,
 }
 
 // ─── Main Settings Page ──────────────────────────────────────────────────────

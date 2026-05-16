@@ -357,6 +357,7 @@ export const ar = {
     data: 'التحكم في البيانات',
     integrations: 'التكاملات',
     premium: 'الاشتراك المميز',
+    otp: 'تفعيل OTP',
     language: 'اللغة',
     theme: 'المظهر',
     darkMode: 'الوضع الداكن',

@@ -18,6 +18,7 @@ import {
   Typography,
   Tooltip,
   ButtonBase,
+  alpha,
 } from '@mui/material'
 import {
   Dashboard,
@@ -36,6 +37,8 @@ import {
   Restaurant,
   Cake,
   Brush,
+  Add,
+  Lock,
 } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -48,21 +51,31 @@ interface NavItem {
   page: AppPage
   icon: ElementType
   labelKey: keyof typeof import('@/i18n/en').en.nav
+  section?: string
+  pro?: boolean
 }
 
 const navItems: NavItem[] = [
-  { page: 'dashboard', icon: Dashboard, labelKey: 'dashboard' },
-  { page: 'tasks', icon: CheckBox, labelKey: 'tasks' },
-  { page: 'calendar', icon: CalendarMonth, labelKey: 'calendar' },
-  { page: 'milestones', icon: Cake, labelKey: 'milestones' },
-  { page: 'chores', icon: Brush, labelKey: 'chores' },
-  { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery' },
-  { page: 'meal-plan', icon: Restaurant, labelKey: 'mealPlan' },
-  { page: 'chat', icon: Chat, labelKey: 'chat' },
-  { page: 'files', icon: FolderOpen, labelKey: 'files' },
-  { page: 'budget', icon: AccountBalanceWallet, labelKey: 'budget' },
-  { page: 'settings', icon: Settings, labelKey: 'settings' },
+  { page: 'dashboard', icon: Dashboard, labelKey: 'dashboard', section: 'main' },
+  { page: 'tasks', icon: CheckBox, labelKey: 'tasks', section: 'organize' },
+  { page: 'calendar', icon: CalendarMonth, labelKey: 'calendar', section: 'organize' },
+  { page: 'milestones', icon: Cake, labelKey: 'milestones', section: 'organize' },
+  { page: 'chores', icon: Brush, labelKey: 'chores', section: 'organize' },
+  { page: 'grocery', icon: ShoppingCart, labelKey: 'grocery', section: 'plan' },
+  { page: 'meal-plan', icon: Restaurant, labelKey: 'mealPlan', section: 'plan', pro: true },
+  { page: 'budget', icon: AccountBalanceWallet, labelKey: 'budget', section: 'plan', pro: true },
+  { page: 'chat', icon: Chat, labelKey: 'chat', section: 'connect' },
+  { page: 'files', icon: FolderOpen, labelKey: 'files', section: 'connect' },
+  { page: 'settings', icon: Settings, labelKey: 'settings', section: 'bottom' },
 ]
+
+const SECTION_LABELS: Record<string, { en: string; ar: string }> = {
+  main: { en: 'Home', ar: 'الرئيسية' },
+  organize: { en: 'Organize', ar: 'تنظيم' },
+  plan: { en: 'Plan', ar: 'تخطيط' },
+  connect: { en: 'Connect', ar: 'تواصل' },
+  bottom: { en: '', ar: '' },
+}
 
 function PlanBadgeMUI() {
   const plan = useCurrentPlan()
@@ -124,6 +137,13 @@ function NavItemButton({
           borderRadius: 3,
           mx: 0.5,
           mb: 0.25,
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            bgcolor: isActive ? 'primary.light' : alpha('#0D6B58', 0.04),
+            '& .MuiListItemIcon-root .MuiSvgIcon-root': {
+              transform: 'scale(1.1)',
+            },
+          },
           '&.Mui-selected': {
             bgcolor: 'primary.light',
             color: 'primary.dark',
@@ -150,7 +170,7 @@ function NavItemButton({
             minWidth: collapsed ? 0 : 36,
             justifyContent: 'center',
             color: isActive ? 'primary.main' : 'text.secondary',
-            '& .MuiSvgIcon-root': { fontSize: 18 },
+            '& .MuiSvgIcon-root': { fontSize: 18, transition: 'transform 0.2s ease' },
           }}
         >
           <Icon />
@@ -161,7 +181,7 @@ function NavItemButton({
             animate={{ opacity: 1, width: 'auto' }}
             exit={{ opacity: 0, width: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            style={{ overflow: 'hidden' }}
+            style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}
           >
           <ListItemText
             primary={label}
@@ -172,9 +192,34 @@ function NavItemButton({
               '& .MuiListItemText-primary': {
                 fontSize: '0.8125rem',
                 fontWeight: isActive ? 600 : 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
               },
             }}
           />
+          {item.pro && !isActive && (
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.25,
+                px: 0.5,
+                height: 16,
+                borderRadius: 1,
+                bgcolor: alpha('#0D6B58', 0.08),
+                border: '1px solid',
+                borderColor: alpha('#0D6B58', 0.15),
+                flexShrink: 0,
+                ml: 'auto',
+              }}
+            >
+              <Lock sx={{ fontSize: 8, color: 'primary.main' }} />
+              <Typography sx={{ fontSize: '0.5rem', fontWeight: 700, color: 'primary.main', lineHeight: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                PRO
+              </Typography>
+            </Box>
+          )}
           </motion.div>
         )}
       </ListItemButton>
@@ -234,6 +279,21 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
     return user.first_name || user.email
   }, [user])
 
+  // Group nav items by section
+  const groupedNavItems = useMemo(() => {
+    const groups: { section: string; items: NavItem[] }[] = []
+    let currentSection = ''
+    for (const item of navItems) {
+      if (item.section !== currentSection) {
+        currentSection = item.section || ''
+        groups.push({ section: currentSection, items: [item] })
+      } else {
+        groups[groups.length - 1].items.push(item)
+      }
+    }
+    return groups
+  }, [])
+
   return (
     <Box
       sx={{
@@ -242,10 +302,22 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
         height: '100%',
         bgcolor: 'background.paper',
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
+      {/* Subtle gradient accent at top */}
+      <Box sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 120,
+        background: `linear-gradient(180deg, ${alpha('#0D6B58', 0.06)}, transparent)`,
+        pointerEvents: 'none',
+      }} />
+
       {/* Logo & Family Selector */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, px: collapsed ? 1.5 : 2, pt: 2.5, pb: 1.5 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, px: collapsed ? 1.5 : 2, pt: 2.5, pb: 1.5, position: 'relative' }}>
         {/* Logo */}
         <Box sx={{ display: 'flex', alignItems: collapsed ? 'center' : 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: 1.5, mb: 1 }}>
           <Box
@@ -259,6 +331,11 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               flexShrink: 0,
+              boxShadow: `0 0 20px ${alpha('#0D6B58', 0.3)}`,
+              transition: 'box-shadow 0.3s ease',
+              '&:hover': {
+                boxShadow: `0 0 28px ${alpha('#0D6B58', 0.4)}`,
+              },
             }}
           >
             <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1 }}>U+</Typography>
@@ -377,24 +454,76 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       <Divider sx={{ mx: 1.5 }} />
 
-      {/* Navigation */}
+      {/* Navigation with section labels */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1.5, px: 0.5 }}>
         <nav role="navigation" aria-label="Main navigation" data-tour="sidebar">
           <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-            {navItems.map((item) => (
-              <NavItemButton
-                key={item.page}
-                item={item}
-                isActive={currentPage === item.page}
-                collapsed={collapsed}
-                onClick={() => handleNavClick(item.page)}
-              />
+            {groupedNavItems.map((group, groupIdx) => (
+              <Box key={group.section}>
+                {/* Section label (not for first group 'main' and 'bottom') */}
+                {!collapsed && group.section && group.section !== 'main' && group.section !== 'bottom' && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      px: 2,
+                      pt: groupIdx > 1 ? 1.5 : 0,
+                      pb: 0.5,
+                      display: 'block',
+                      color: 'text.disabled',
+                      fontWeight: 600,
+                      fontSize: '0.625rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.8,
+                    }}
+                  >
+                    {isRTL ? SECTION_LABELS[group.section]?.ar : SECTION_LABELS[group.section]?.en}
+                  </Typography>
+                )}
+                {group.items.map((item) => (
+                  <NavItemButton
+                    key={item.page}
+                    item={item}
+                    isActive={currentPage === item.page}
+                    collapsed={collapsed}
+                    onClick={() => handleNavClick(item.page)}
+                  />
+                ))}
+              </Box>
             ))}
           </List>
         </nav>
       </Box>
 
       <Divider sx={{ mx: 1.5 }} />
+
+      {/* Quick Add FAB */}
+      {!collapsed && (
+        <Box sx={{ px: 2, py: 1 }}>
+          <ButtonBase
+            onClick={() => setCurrentPage('tasks')}
+            sx={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              py: 1,
+              borderRadius: 3,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+                transform: 'translateY(-1px)',
+                boxShadow: `0 4px 12px ${alpha('#0D6B58', 0.3)}`,
+              },
+            }}
+          >
+            <Add sx={{ fontSize: 16 }} />
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600 }}>Quick Add</Typography>
+          </ButtonBase>
+        </Box>
+      )}
 
       {/* User Profile */}
       <Box sx={{ p: 1.5 }}>
@@ -457,7 +586,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           )}
         </Box>
 
-        {/* User Menu */}
+        {/* User menu */}
         <Menu
           anchorEl={userMenuAnchor}
           open={Boolean(userMenuAnchor)}

@@ -357,6 +357,7 @@ export const en = {
     data: 'Data Control',
     integrations: 'Integrations',
     premium: 'Premium',
+    otp: 'Activate OTP',
     language: 'Language',
     theme: 'Theme',
     darkMode: 'Dark Mode',

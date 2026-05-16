@@ -23,6 +23,9 @@ import {
   TrendingDown,
   Dashboard,
   BarChart,
+  LocalFireDepartment,
+  EmojiEvents,
+  FormatQuote,
 } from '@mui/icons-material'
 import {
   Card,
@@ -197,8 +200,12 @@ function MUICard({
         sx={{
           borderRadius: 4,
           overflow: 'hidden',
-          transition: 'all 0.2s',
-          '&:hover': variant === 'elevated' ? { transform: 'translateY(-2px)' } : {},
+          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': variant === 'elevated' ? {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 8px 25px -5px rgba(13, 107, 88, 0.12), 0 4px 10px -4px rgba(13, 107, 88, 0.06)',
+            borderColor: alpha('#0D6B58', 0.15),
+          } : {},
           ...sx,
         }}
       >
@@ -520,6 +527,16 @@ function usePrayerTimes() {
 // For now, we derive chart data from the activity store or show a "No activity data yet" state.
 // The data is generated dynamically in the component using useMemo.
 
+// ─── Motivational Quotes (Bilingual) ────────────────────────────────
+
+const MOTIVATIONAL_QUOTES = [
+  { en: 'The best time to plant a tree was 20 years ago. The second best time is now.', ar: 'خير وقت لزراعة شجرة كان قبل 20 عاماً. ثاني أفضل وقت هو الآن.' },
+  { en: 'A smooth sea never made a skilled sailor.', ar: 'البحر الهادئ لا يصنع بحاراً ماهراً.' },
+  { en: 'Small daily improvements lead to stunning results.', ar: 'التحسينات اليومية الصغيرة تؤدي لنتائج مذهلة.' },
+  { en: 'Family is not an important thing. It\'s everything.', ar: 'العائلة ليست شيئاً مهماً. إنها كل شيء.' },
+  { en: 'The secret of getting ahead is getting started.', ar: 'سر التقدم هو البدء.' },
+] as const
+
 // ─── Main Dashboard Component ───────────────────────────────────
 
 export default function DashboardPage() {
@@ -747,6 +764,18 @@ export default function DashboardPage() {
     return result
   }, [prayerTimes])
 
+  // ─── Motivational Quote of the Day ─────────────────────────────
+  const dailyQuote = useMemo(() => {
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
+    return MOTIVATIONAL_QUOTES[dayOfYear % MOTIVATIONAL_QUOTES.length]
+  }, [])
+
+  // ─── Streak (mock for now, can be persisted later) ─────────────
+  const streak = useMemo(() => {
+    // Simulate streak based on completion rate
+    return stats.completionRate > 0 ? Math.max(1, Math.min(30, Math.floor(stats.completionRate / 10) + 3)) : 0
+  }, [stats.completionRate])
+
   // ─── Quick Actions ──────────────────────────────────────────
 
   const quickActions = [
@@ -754,21 +783,25 @@ export default function DashboardPage() {
       label: t.dashboard.addTask,
       icon: Add,
       onClick: () => setCurrentPage('tasks'),
+      color: '#0D6B58',
     },
     {
       label: t.dashboard.addEvent,
       icon: CalendarMonth,
       onClick: () => setCurrentPage('calendar'),
+      color: '#047857',
     },
     {
       label: t.dashboard.addGrocery,
       icon: ShoppingCart,
       onClick: () => setCurrentPage('grocery'),
+      color: '#059669',
     },
     {
       label: 'Send Message',
       icon: Chat,
       onClick: () => setCurrentPage('chat'),
+      color: '#065F46',
     },
   ]
 
@@ -854,7 +887,9 @@ export default function DashboardPage() {
             position: 'relative',
             overflow: 'hidden',
             borderRadius: 4,
-            bgcolor: alpha('#0D6B58', 0.06),
+            background: `linear-gradient(135deg, ${alpha('#0D6B58', 0.08)}, ${alpha('#065F46', 0.04)}, ${alpha('#34D399', 0.06)})`,
+            border: '1px solid',
+            borderColor: alpha('#0D6B58', 0.1),
           }}>
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -863,30 +898,115 @@ export default function DashboardPage() {
             >
               <Box sx={{
                 display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: { sm: 'flex-end' },
-                justifyContent: { sm: 'space-between' },
-                gap: 1,
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: { md: 'center' },
+                justifyContent: { md: 'space-between' },
+                gap: 2,
                 px: { xs: 2, lg: 3 },
-                py: 2,
+                py: { xs: 2, lg: 2.5 },
               }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.875rem' } }}>
-                    {greeting}{userName ? `, ` : ''}{userName && <Box component="span" sx={{ color: 'primary.main' }}>{userName}</Box>} 👋
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
-                    {currentDate} · <Box component="span" sx={{ color: 'primary.main', fontWeight: 500 }}>{currentFamily.name}</Box>
-                  </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {/* Productivity Ring */}
+                  {!isLoading && (
+                    <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                      <CircularProgress
+                        value={stats.productivityScore}
+                        size={64}
+                        strokeWidth={5}
+                        color="#0D6B58"
+                        trackColor={alpha('#0D6B58', 0.1)}
+                      />
+                      <Box sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.875rem', color: 'primary.main' }}>
+                          {stats.productivityScore}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  <Box>
+                    <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.875rem' } }}>
+                      {greeting}{userName ? `, ` : ''}{userName && (
+                        <Box
+                          component="span"
+                          sx={{
+                            background: 'linear-gradient(135deg, #0D6B58, #34D399)',
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                          }}
+                        >
+                          {userName}
+                        </Box>
+                      )} 👋
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5, flexWrap: 'wrap' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {currentDate} · <Box component="span" sx={{ color: 'primary.main', fontWeight: 500 }}>{currentFamily.name}</Box>
+                      </Typography>
+                      {streak > 0 && (
+                        <Chip
+                          size="small"
+                          icon={<LocalFireDepartment sx={{ fontSize: 12, color: '#F59E0B !important' }} />}
+                          label={`${streak} day streak`}
+                          sx={{
+                            height: 22,
+                            fontSize: '0.6875rem',
+                            fontWeight: 600,
+                            bgcolor: alpha('#F59E0B', 0.1),
+                            color: '#D97706',
+                            border: '1px solid',
+                            borderColor: alpha('#F59E0B', 0.2),
+                            '& .MuiChip-icon': { color: '#F59E0B' },
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
                 </Box>
-                <Button
-                  variant="text"
-                  startIcon={<AutoAwesome sx={{ color: 'primary.main', fontSize: 16 }} />}
-                  onClick={() => setCurrentPage('settings')}
-                  sx={{ mt: { xs: 1, sm: 0 }, alignSelf: { xs: 'flex-start', sm: 'auto' }, borderRadius: 2, textTransform: 'none', color: 'text.secondary' }}
-                >
-                  {currentFamily.name}
-                </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Button
+                    variant="text"
+                    startIcon={<AutoAwesome sx={{ color: 'primary.main', fontSize: 16 }} />}
+                    onClick={() => setCurrentPage('settings')}
+                    sx={{ mt: { xs: 1, md: 0 }, alignSelf: { xs: 'flex-start', md: 'auto' }, borderRadius: 2, textTransform: 'none', color: 'text.secondary' }}
+                  >
+                    {currentFamily.name}
+                  </Button>
+                </Box>
               </Box>
+
+              {/* Motivational Quote */}
+              {!isLoading && (
+                <Box sx={{
+                  px: { xs: 2, lg: 3 },
+                  pb: { xs: 2, lg: 2.5 },
+                  pt: 0,
+                }}>
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 1,
+                    p: 1.5,
+                    borderRadius: 3,
+                    bgcolor: alpha('#0D6B58', 0.04),
+                    border: '1px solid',
+                    borderColor: alpha('#0D6B58', 0.06),
+                  }}>
+                    <FormatQuote sx={{ fontSize: 16, color: 'primary.main', opacity: 0.6, mt: 0.25, flexShrink: 0 }} />
+                    <Box>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', lineHeight: 1.6, display: 'block' }}>
+                        {isRTL ? dailyQuote.ar : dailyQuote.en}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
             </motion.div>
           </Box>
 
@@ -1159,23 +1279,23 @@ export default function DashboardPage() {
                                 textTransform: 'none',
                                 color: 'text.secondary',
                                 '&:hover': {
-                                  bgcolor: alpha('#0D6B58', 0.08),
-                                  borderColor: alpha('#0D6B58', 0.2),
+                                  bgcolor: alpha(action.color, 0.06),
+                                  borderColor: alpha(action.color, 0.2),
                                 },
                               }}
                             >
                               <Box sx={{
-                                width: 36,
-                                height: 36,
+                                width: 40,
+                                height: 40,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                borderRadius: 2,
-                                bgcolor: alpha('#0D6B58', 0.1),
-                                transition: 'transform 0.2s',
-                                '.MuiButton-root:hover &': { transform: 'scale(1.1)' },
+                                borderRadius: 2.5,
+                                bgcolor: alpha(action.color, 0.12),
+                                transition: 'all 0.2s',
+                                '.MuiButton-root:hover &': { transform: 'scale(1.1)', bgcolor: alpha(action.color, 0.18) },
                               }}>
-                                <action.icon sx={{ fontSize: 16, color: 'primary.main' }} />
+                                <action.icon sx={{ fontSize: 18, color: action.color }} />
                               </Box>
                               <Typography variant="caption" sx={{ fontSize: 11, fontWeight: 500, lineHeight: 1.2 }}>
                                 {action.label}

@@ -15,6 +15,7 @@ import {
   Box,
   Breadcrumbs,
   Chip,
+  alpha,
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -26,6 +27,7 @@ import {
   LightMode,
   DarkMode,
 } from '@mui/icons-material'
+import { keyframes } from '@mui/system'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useCurrentPage, useIsDarkMode, useCurrentUser } from '@/stores/selectors'
@@ -33,6 +35,16 @@ import { useI18n } from '@/i18n/use-translation'
 import { MuiLayoutProvider } from './mui-layout-provider'
 import { NotificationPanel } from './notification-panel'
 import type { AppPage } from '@/types'
+
+const notifPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(13, 107, 88, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(13, 107, 88, 0); }
+`
+
+const searchExpand = keyframes`
+  from { width: 180px; }
+  to { width: 256px; }
+`
 
 const pageTitles: Record<AppPage, keyof import('@/i18n/en').TranslationKeys['nav']> = {
   dashboard: 'dashboard',
@@ -105,6 +117,16 @@ function AppHeaderInner() {
         borderBottom: '1px solid',
         borderColor: 'divider',
         backdropFilter: 'blur(20px)',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 1,
+          background: `linear-gradient(90deg, transparent, ${alpha('#0D6B58', 0.3)}, ${alpha('#34D399', 0.2)}, transparent)`,
+          pointerEvents: 'none',
+        },
       }}
     >
       <Toolbar sx={{ gap: 1.5, minHeight: { xs: 52, sm: 56 }, px: { xs: 1.5, sm: 2 } }}>
@@ -178,9 +200,16 @@ function AppHeaderInner() {
               borderColor: 'divider',
               borderRadius: 3,
               cursor: 'pointer',
-              '&:hover': { borderColor: 'text.disabled' },
-              '&:focus-within': { borderColor: 'primary.main', boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}20` },
-              transition: 'all 0.2s',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                borderColor: alpha('#0D6B58', 0.3),
+                bgcolor: alpha('#0D6B58', 0.04),
+                boxShadow: `0 0 0 3px ${alpha('#0D6B58', 0.06)}`,
+              },
+              '&:focus-within': {
+                borderColor: 'primary.main',
+                boxShadow: (t) => `0 0 0 3px ${t.palette.primary.main}20`,
+              },
             }}
           >
             <Search sx={{ position: 'absolute', [isRTL ? 'right' : 'left']: 12, fontSize: 14, color: 'text.disabled', pointerEvents: 'none' }} />
@@ -248,6 +277,7 @@ function AppHeaderInner() {
               color: 'text.secondary',
               '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
               borderRadius: 2,
+              transition: 'all 0.2s',
             }}
           >
             {isDark ? <LightMode sx={{ fontSize: 18 }} /> : <DarkMode sx={{ fontSize: 18 }} />}
@@ -271,7 +301,7 @@ function AppHeaderInner() {
           </IconButton>
         </Tooltip>
 
-        {/* Notification Bell */}
+        {/* Notification Bell with pulse */}
         <Box data-tour="header-notifications">
           <NotificationPanel />
         </Box>

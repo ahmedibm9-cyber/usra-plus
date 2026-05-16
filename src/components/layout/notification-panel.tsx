@@ -439,6 +439,13 @@ function NotificationPanelInner() {
                 height: 16,
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText',
+                ...(unreadCount > 0 ? {
+                  animation: 'notifPulse 2s ease-in-out infinite',
+                  '@keyframes notifPulse': {
+                    '0%, 100%': { boxShadow: '0 0 0 0 rgba(13, 107, 88, 0.4)' },
+                    '50%': { boxShadow: '0 0 0 4px rgba(13, 107, 88, 0)' },
+                  },
+                } : {}),
               },
             }}
           >

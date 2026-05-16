@@ -9,6 +9,7 @@ export type AdminPage =
   | 'features' 
   | 'activity'
   | 'subscriptions' 
+  | 'subscription_otp'
   | 'infrastructure' 
   | 'sessions'
   | 'audit'

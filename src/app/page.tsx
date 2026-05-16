@@ -90,6 +90,50 @@ const progressLine = keyframes`
   100% { width: 100%; }
 `
 
+const gradientShift = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`
+
+const hexFloat1 = keyframes`
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.08; }
+  25% { transform: translate(30px, -20px) rotate(60deg); opacity: 0.12; }
+  50% { transform: translate(-10px, -40px) rotate(120deg); opacity: 0.06; }
+  75% { transform: translate(-30px, -15px) rotate(200deg); opacity: 0.10; }
+  100% { transform: translate(0, 0) rotate(360deg); opacity: 0.08; }
+`
+
+const hexFloat2 = keyframes`
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.06; }
+  25% { transform: translate(-25px, 15px) rotate(-60deg); opacity: 0.10; }
+  50% { transform: translate(15px, 35px) rotate(-120deg); opacity: 0.04; }
+  75% { transform: translate(25px, 10px) rotate(-200deg); opacity: 0.08; }
+  100% { transform: translate(0, 0) rotate(-360deg); opacity: 0.06; }
+`
+
+const hexFloat3 = keyframes`
+  0% { transform: translate(0, 0) rotate(30deg); opacity: 0.05; }
+  33% { transform: translate(20px, -30px) rotate(150deg); opacity: 0.09; }
+  66% { transform: translate(-20px, 20px) rotate(270deg); opacity: 0.04; }
+  100% { transform: translate(0, 0) rotate(390deg); opacity: 0.05; }
+`
+
+const dotPulse = keyframes`
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.08; }
+`
+
+const glowPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 8px rgba(110, 231, 183, 0); }
+  50% { box-shadow: 0 0 16px rgba(110, 231, 183, 0.3); }
+`
+
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+`
+
 // ─── Hexagon Logo SVG ─────────────────────────────────────────────
 function HexLogo({ size = 40, color }: { size?: number; color?: string }) {
   return (
@@ -184,8 +228,25 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
 // ─── Auth Screen — MUI ────────────────────────────────────────────
 const AUTH_FEATURES = ['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat'] as const
 
+const TESTIMONIALS = [
+  { text: '"USRA PLUS transformed how our family stays organized. We never miss an event now!"', author: 'Sara M.', role: 'Mother of 3' },
+  { text: '"التنسيق العائلي أصبح أسهل بكثير مع أسرا بلس"', author: 'أحمد خ.', role: 'Father of 4' },
+  { text: '"The meal planning and budget features saved us hours every week."', author: 'Fatima A.', role: 'Family Manager' },
+] as const
+
 function AuthScreen() {
-  const authView = useAuthStore((state) => state.authView)
+  const { authView } = useAuthStore()
+  const [testimonialIdx, setTestimonialIdx] = useState(0)
+
+  // Rotate testimonials
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTestimonialIdx((prev) => (prev + 1) % TESTIMONIALS.length)
+    }, 6000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const currentTestimonial = TESTIMONIALS[testimonialIdx]
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', position: 'relative', overflow: 'hidden' }}>
@@ -196,7 +257,9 @@ function AuthScreen() {
           width: { lg: '45%', xl: '50%' },
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, var(--primary), var(--secondary), #1C1B1F)',
+          background: 'linear-gradient(135deg, #0D6B58, #065F46, #0A5A4A, #1C1B1F)',
+          backgroundSize: '300% 300%',
+          animation: `${gradientShift} 15s ease infinite`,
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
@@ -213,18 +276,46 @@ function AuthScreen() {
           }}
         />
 
+        {/* Floating hexagon shapes */}
+        <Box sx={{ position: 'absolute', top: '8%', left: '8%', animation: `${hexFloat1} 20s ease-in-out infinite`, opacity: 0.08, color: '#6EE7B7' }}>
+          <HexLogo size={60} />
+        </Box>
+        <Box sx={{ position: 'absolute', top: '25%', right: '12%', animation: `${hexFloat2} 25s ease-in-out infinite`, opacity: 0.06, color: '#5EEAD4' }}>
+          <HexLogo size={40} />
+        </Box>
+        <Box sx={{ position: 'absolute', bottom: '20%', left: '15%', animation: `${hexFloat3} 22s ease-in-out infinite`, opacity: 0.07, color: '#6EE7B7' }}>
+          <HexLogo size={50} />
+        </Box>
+        <Box sx={{ position: 'absolute', bottom: '35%', right: '8%', animation: `${hexFloat1} 18s ease-in-out infinite`, animationDelay: '5s', opacity: 0.05, color: '#A7F3D0' }}>
+          <HexLogo size={35} />
+        </Box>
+        <Box sx={{ position: 'absolute', top: '55%', left: '5%', animation: `${hexFloat2} 28s ease-in-out infinite`, animationDelay: '8s', opacity: 0.04, color: '#6EE7B7' }}>
+          <HexLogo size={28} />
+        </Box>
+
         {/* Floating blobs */}
         <Box sx={{ position: 'absolute', top: '15%', right: '10%', width: 288, height: 288, borderRadius: '50%', bgcolor: '#6EE7B7', opacity: 0.06, filter: 'blur(80px)', animation: `${floatAnim} 4s ease-in-out infinite` }} />
         <Box sx={{ position: 'absolute', bottom: '10%', left: '5%', width: 224, height: 224, borderRadius: '50%', bgcolor: '#5EEAD4', opacity: 0.05, filter: 'blur(60px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '2s' }} />
-        <Box sx={{ position: 'absolute', top: '50%', left: '40%', width: 160, height: 160, borderRadius: '50%', bgcolor: '#C7BFFF', opacity: 0.04, filter: 'blur(50px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '4s' }} />
+        <Box sx={{ position: 'absolute', top: '50%', left: '40%', width: 160, height: 160, borderRadius: '50%', bgcolor: '#34D399', opacity: 0.04, filter: 'blur(50px)', animation: `${floatAnim} 4s ease-in-out infinite`, animationDelay: '4s' }} />
 
         {/* Content */}
         <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', px: 5, width: '100%' }}>
           {/* Logo */}
           <Box sx={{ mb: 3, animation: `${logoReveal} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` }}>
-            <Box sx={{ width: 80, height: 80, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{
+              width: 88,
+              height: 88,
+              borderRadius: 4,
+              bgcolor: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 40px rgba(110, 231, 183, 0.15)',
+            }}>
               <Box sx={{ color: '#6EE7B7' }}>
-                <HexLogo size={48} />
+                <HexLogo size={52} />
               </Box>
             </Box>
           </Box>
@@ -246,7 +337,7 @@ function AuthScreen() {
           <Typography
             variant="body1"
             sx={{
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(255,255,255,0.6)',
               fontWeight: 300,
               textAlign: 'center',
               maxWidth: 320,
@@ -259,7 +350,7 @@ function AuthScreen() {
             Your Family Operating System
           </Typography>
 
-          {/* Feature pills */}
+          {/* Feature pills with glow */}
           <Stack
             direction="row"
             spacing={1}
@@ -278,30 +369,131 @@ function AuthScreen() {
                 label={feature}
                 size="small"
                 sx={{
-                  bgcolor: 'rgba(255,255,255,0.08)',
-                  color: 'rgba(255,255,255,0.4)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  bgcolor: 'rgba(255,255,255,0.06)',
+                  color: 'rgba(255,255,255,0.5)',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: 2,
                   fontWeight: 500,
                   fontSize: '0.75rem',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' },
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: 'rgba(110, 231, 183, 0.12)',
+                    color: '#6EE7B7',
+                    borderColor: 'rgba(110, 231, 183, 0.3)',
+                    boxShadow: '0 0 12px rgba(110, 231, 183, 0.2)',
+                    transform: 'translateY(-1px)',
+                  },
                 }}
               />
             ))}
+          </Stack>
+
+          {/* Testimonial */}
+          <Box
+            key={testimonialIdx}
+            sx={{
+              mt: 5,
+              maxWidth: 320,
+              textAlign: 'center',
+              animation: `${fadeInUp} 0.6s ease-out forwards`,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                fontStyle: 'italic',
+                lineHeight: 1.7,
+                fontSize: '0.8125rem',
+              }}
+            >
+              {currentTestimonial.text}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                mt: 1.5,
+                color: 'rgba(255,255,255,0.35)',
+                fontWeight: 500,
+              }}
+            >
+              — {currentTestimonial.author}, {currentTestimonial.role}
+            </Typography>
+          </Box>
+
+          {/* Social proof */}
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{
+              mt: 4,
+              animation: `${textReveal} 0.5s ease-out forwards`,
+              animationDelay: '0.8s',
+              opacity: 0,
+            }}
+          >
+            <Stack direction="row" spacing={-0.5}>
+              {['#0D6B58', '#065F46', '#047857', '#059669'].map((bg, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: '50%',
+                    bgcolor: bg,
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.5rem',
+                    fontWeight: 700,
+                    color: 'rgba(255,255,255,0.7)',
+                    zIndex: 4 - i,
+                  }}
+                >
+                  {['S', 'A', 'F', 'K'][i]}
+                </Box>
+              ))}
+            </Stack>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+              Trusted by 10,000+ families
+            </Typography>
           </Stack>
         </Box>
       </Box>
 
       {/* RIGHT: Auth form */}
       <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 2, lg: 4 }, position: 'relative' }}>
-        {/* Subtle background pattern for mobile */}
+        {/* Dot grid animation background */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            opacity: 0.4,
+            backgroundImage: `radial-gradient(circle, rgba(13, 107, 88, 0.08) 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+            animation: `${dotPulse} 4s ease-in-out infinite`,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Subtle background blobs */}
         <Box sx={{ position: 'absolute', top: 0, right: 0, width: 500, height: 500, borderRadius: '50%', bgcolor: 'primary.main', opacity: 0.03, filter: 'blur(100px)', pointerEvents: 'none' }} />
         <Box sx={{ position: 'absolute', bottom: 0, left: 0, width: 400, height: 400, borderRadius: '50%', bgcolor: 'secondary.main', opacity: 0.03, filter: 'blur(100px)', pointerEvents: 'none' }} />
 
         <Box sx={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 448 }}>
-          {authView === 'login' && <LoginForm />}
-          {authView === 'signup' && <SignupForm />}
-          {authView === 'forgot-password' && <ForgotPasswordForm />}
+          <Box
+            key={authView}
+            sx={{
+              animation: `${fadeInUp} 0.35s ease-out forwards`,
+            }}
+          >
+            {authView === 'login' && <LoginForm />}
+            {authView === 'signup' && <SignupForm />}
+            {authView === 'forgot-password' && <ForgotPasswordForm />}
+          </Box>
         </Box>
       </Box>
     </Box>

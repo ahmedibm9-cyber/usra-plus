@@ -484,3 +484,34 @@ model PlatformStats {
   revenue         Float    @default(0)
   timestamp       DateTime @default(now())
 }
+
+model SubscriptionOtp {
+  id           String    @id @default(uuid())
+  code         String    @unique
+  userId       String
+  planSlug     String
+  startDate    DateTime
+  endDate      DateTime
+  generatedBy  String    // admin user id
+  status       String    @default("pending") // pending, used, expired, revoked
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime  // OTP code expiry (e.g. 7 days after generation)
+
+  @@index([code])
+  @@index([userId])
+  @@index([status])
+}
+
+model AdminOtpAction {
+  id           String   @id @default(uuid())
+  adminId      String
+  action       String   // generated, revoked
+  otpId        String
+  targetUserId String
+  details      String   @default("{}")
+  createdAt    DateTime @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+}
