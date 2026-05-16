@@ -151,14 +151,14 @@ export async function POST(req: NextRequest) {
     // If email was sent successfully (Resend or Supabase), do NOT return devCode.
     // If email failed entirely, return devCode as a fallback so the user
     // can still verify (especially in dev environments without email setup).
-    const shouldReturnCode = !emailSent
+    const shouldReturnCode = !emailSent && process.env.NODE_ENV !== 'production'
 
     return NextResponse.json({
       success: true,
       message: emailSent
         ? 'A verification code has been sent to your email.'
         : 'Verification code generated.',
-      ...(shouldReturnCode ? { devCode: code } : {}),
+      ...(process.env.NODE_ENV !== 'production' && shouldReturnCode ? { devCode: code } : {}),
       emailSent,
       expiresIn: 600, // seconds
     })

@@ -56,6 +56,14 @@ const CookieConsentBanner = dynamic(() => import('@/components/shared/cookie-con
 // Admin
 const AdminLayout = dynamic(() => import('@/components/admin/admin-layout').then(m => ({ default: m.AdminLayout })), { ssr: false, loading: () => <ChunkLoader /> })
 
+// Legal Pages
+const PrivacyPolicyPage = dynamic(() => import('@/components/legal/privacy-policy-page').then(m => ({ default: m.PrivacyPolicyPage })), { ssr: false, loading: () => <ChunkLoader /> })
+const TermsOfServicePage = dynamic(() => import('@/components/legal/terms-of-service-page').then(m => ({ default: m.TermsOfServicePage })), { ssr: false, loading: () => <ChunkLoader /> })
+const CookiePolicyPage = dynamic(() => import('@/components/legal/cookie-policy-page').then(m => ({ default: m.CookiePolicyPage })), { ssr: false, loading: () => <ChunkLoader /> })
+
+// Checkout Success Modal (lazy — only shown after Stripe redirect)
+const CheckoutSuccessModal = dynamic(() => import('@/components/shared/checkout-success-modal').then(m => ({ default: m.CheckoutSuccessModal })), { ssr: false })
+
 import type { AppPage } from '@/types'
 
 // ─── Keyframe Animations ──────────────────────────────────────────
@@ -760,9 +768,55 @@ export default function RootPage() {
     }
   }, [language, mounted])
 
+  // Checkout success modal state
+  const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false)
+
+  // Handle Stripe checkout redirect (success/cancel) query params
+  useEffect(() => {
+    if (!mounted || !isAuthenticated) return
+    const params = new URLSearchParams(window.location.search)
+    const checkoutStatus = params.get('checkout')
+    if (!checkoutStatus) return
+
+    if (checkoutStatus === 'success') {
+      // Show checkout success modal
+      setShowCheckoutSuccess(true)
+      // Refresh subscription plan from server
+      const userId = useAuthStore.getState().user?.id
+      if (userId) {
+        import('@/stores/subscription-store').then(m => m.useSubscriptionStore.getState().fetchPlanFromServer(userId))
+      }
+    } else if (checkoutStatus === 'cancelled') {
+      import('sonner').then(({ toast }) => {
+        toast.info('Checkout cancelled.')
+      })
+    }
+
+    // Clean up URL — remove checkout query params
+    const url = new URL(window.location.href)
+    url.searchParams.delete('checkout')
+    url.searchParams.delete('session_id')
+    window.history.replaceState({}, '', url.pathname)
+  }, [mounted, isAuthenticated])
+
+  // Legal page routing — accessible without authentication
+  const [legalPage] = useState(() => {
+    if (typeof window === 'undefined') return null
+    const params = new URLSearchParams(window.location.search)
+    return params.get('page')
+  })
+  if (legalPage === 'privacy') return <RenderErrorBoundary><PrivacyPolicyPage /></RenderErrorBoundary>
+  if (legalPage === 'terms') return <RenderErrorBoundary><TermsOfServicePage /></RenderErrorBoundary>
+  if (legalPage === 'cookies') return <RenderErrorBoundary><CookiePolicyPage /></RenderErrorBoundary>
+
+  // Checkout success modal (shown after Stripe redirect)
+  const checkoutModal = showCheckoutSuccess ? (
+    <CheckoutSuccessModal onClose={() => setShowCheckoutSuccess(false)} />
+  ) : null
+
   // Auth gate: must be authenticated to see the app
   if (!mounted || isLoading) return <LoadingScreen />
-  if (isAdminAuthenticated && isSessionValid()) return <RenderErrorBoundary><AdminLayout /></RenderErrorBoundary>
-  if (!isAuthenticated || showAdminLogin) return <RenderErrorBoundary><AuthScreen /></RenderErrorBoundary>
-  return <RenderErrorBoundary><MainApp /></RenderErrorBoundary>
+  if (isAdminAuthenticated && isSessionValid()) return <RenderErrorBoundary><AdminLayout />{checkoutModal}</RenderErrorBoundary>
+  if (!isAuthenticated || showAdminLogin) return <RenderErrorBoundary><AuthScreen />{checkoutModal}</RenderErrorBoundary>
+  return <RenderErrorBoundary><MainApp />{checkoutModal}</RenderErrorBoundary>
 }

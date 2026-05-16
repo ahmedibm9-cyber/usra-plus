@@ -11,12 +11,25 @@ import {
   Mail,
   ChevronRight,
   FileJson,
+  CheckCircle2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 import { useI18n } from '@/i18n/use-translation'
 
@@ -25,6 +38,7 @@ import { SectionCard, SectionTitle, SectionDescription } from '../settings-helpe
 export function PrivacyTab() {
   const { isRTL } = useI18n()
   const [exporting, setExporting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [consents, setConsents] = useState<Array<{ type: string; granted: boolean; createdAt: string }>>([])
   const [loadingConsents, setLoadingConsents] = useState(false)
 
@@ -33,7 +47,7 @@ export function PrivacyTab() {
     const fetchConsents = async () => {
       setLoadingConsents(true)
       try {
-        const res = await fetch('/api/consent')
+        const res = await fetch('/api/consent', { credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
           setConsents(data.consents ?? [])
@@ -50,7 +64,7 @@ export function PrivacyTab() {
   const handleExportData = useCallback(async () => {
     setExporting(true)
     try {
-      const res = await fetch('/api/user/export')
+      const res = await fetch('/api/user/export', { credentials: 'include' })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error || 'Export failed')
@@ -70,17 +84,42 @@ export function PrivacyTab() {
     }
   }, [isRTL])
 
+  const handleDeleteAccount = useCallback(async () => {
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/user/delete', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (res.ok) {
+        toast.success(isRTL ? 'تم حذف حسابك نهائيًا' : 'Your account has been permanently deleted')
+        setTimeout(() => {
+          window.location.href = '/'
+        }, 2000)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || (isRTL ? 'فشل حذف الحساب' : 'Failed to delete account'))
+      }
+    } catch {
+      toast.error(isRTL ? 'فشل حذف الحساب' : 'Failed to delete account')
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [isRTL])
+
   const handleUpdateConsent = useCallback(async (type: string, granted: boolean) => {
     try {
       const res = await fetch('/api/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ type, granted, version: '1.0' }),
       })
       if (!res.ok) throw new Error('Failed to update consent')
       toast.success(isRTL ? 'تم تحديث التفضيل' : 'Preference updated')
       // Refresh consent list
-      const fetchRes = await fetch('/api/consent')
+      const fetchRes = await fetch('/api/consent', { credentials: 'include' })
       if (fetchRes.ok) {
         const data = await fetchRes.json()
         setConsents(data.consents ?? [])
@@ -90,21 +129,68 @@ export function PrivacyTab() {
     }
   }, [isRTL])
 
-  // Group consents by type
+  // Group consents by type — get the latest consent per type
   const latestConsents = consents.reduce<Record<string, { type: string; granted: boolean; createdAt: string }>>((acc, c) => {
     if (!acc[c.type]) acc[c.type] = c
     return acc
   }, {})
 
   const consentTypes = [
-    { type: 'terms', labelEn: 'Terms of Service', labelAr: 'شروط الخدمة' },
-    { type: 'privacy', labelEn: 'Privacy Policy', labelAr: 'سياسة الخصوصية' },
-    { type: 'marketing', labelEn: 'Marketing Communications', labelAr: 'التواصل التسويقي' },
-    { type: 'cookies', labelEn: 'Cookie Consent', labelAr: 'موافقة ملفات تعريف الارتباط' },
+    { type: 'terms', labelEn: 'Terms of Service', labelAr: 'شروط الخدمة', descEn: 'Agreement to terms of service', descAr: 'الموافقة على شروط استخدام الخدمة', required: true },
+    { type: 'privacy', labelEn: 'Privacy Policy', labelAr: 'سياسة الخصوصية', descEn: 'Agreement to privacy policy', descAr: 'الموافقة على سياسة الخصوصية', required: true },
+    { type: 'marketing', labelEn: 'Marketing', labelAr: 'التسويق', descEn: 'Receive promotional emails', descAr: 'تلقي رسائل بريد إلكتروني ترويجية', required: false },
+    { type: 'cookies', labelEn: 'Cookies', labelAr: 'ملفات تعريف الارتباط', descEn: 'Accept analytics cookies', descAr: 'قبول ملفات تعريف الارتباط التحليلية', required: false },
   ]
 
   return (
     <div className="space-y-6">
+      {/* Consent Management */}
+      <SectionCard>
+        <SectionTitle>
+          <span className="flex items-center gap-2">
+            <ShieldCheck className="size-4 text-primary" />
+            {isRTL ? 'إدارة الموافقة' : 'Consent Management'}
+          </span>
+        </SectionTitle>
+        <SectionDescription>
+          {isRTL ? 'تحكم في بياناتك وتفضيلات الموافقة' : 'Control your data and consent preferences'}
+        </SectionDescription>
+
+        {loadingConsents ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="size-5 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {consentTypes.map(({ type, labelEn, labelAr, descEn, descAr, required }) => {
+              const latest = latestConsents[type]
+              const isChecked = latest?.granted ?? (type === 'terms' || type === 'privacy')
+              return (
+                <div key={type} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border">
+                  <div className="space-y-0.5">
+                    <Label className="text-foreground text-sm font-medium">
+                      {isRTL ? labelAr : labelEn}
+                      {required && <span className="text-muted-foreground text-xs ml-1">({isRTL ? 'مطلوب' : 'required'})</span>}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">{isRTL ? descAr : descEn}</p>
+                    {latest && (
+                      <p className="text-[10px] text-muted-foreground">
+                        {isRTL ? 'آخر تحديث:' : 'Last updated:'} {new Date(latest.createdAt).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US')}
+                      </p>
+                    )}
+                  </div>
+                  <Switch
+                    checked={isChecked}
+                    onCheckedChange={(checked) => handleUpdateConsent(type, checked)}
+                    disabled={required}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </SectionCard>
+
       {/* Legal Documents */}
       <SectionCard>
         <SectionTitle>
@@ -125,13 +211,11 @@ export function PrivacyTab() {
           ].map((doc) => (
             <a
               key={doc.type}
-              href={`/api/legal?type=${doc.type}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:bg-primary-container transition-all duration-150 cursor-pointer group"
+              href={`?page=${doc.type}`}
+              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:bg-primary/5 transition-all duration-150 cursor-pointer group"
             >
               <div className="size-9 rounded-lg bg-teal-600/10 flex items-center justify-center">
-                <FileJson className="size-4 text-teal-600 dark:text-teal-400" />
+                <CheckCircle2 className="size-4 text-teal-600 dark:text-teal-400" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-foreground text-sm font-medium">
@@ -156,7 +240,7 @@ export function PrivacyTab() {
           </span>
         </SectionTitle>
         <SectionDescription>
-          {isRTL ? 'قم بتنزيل نسخة من جميع بياناتك الشخصية (متوافق مع GDPR/PDPL)' : 'Download a copy of all your personal data (GDPR/PDPL compliant)'}
+          {isRTL ? 'قم بتنزيل جميع بياناتك بتنسيق JSON (وفقًا للائحة GDPR)' : 'Download all your data in JSON format (GDPR right to portability)'}
         </SectionDescription>
 
         <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border">
@@ -185,91 +269,46 @@ export function PrivacyTab() {
         </p>
       </SectionCard>
 
-      {/* Data Deletion */}
+      {/* Account Deletion — Danger Zone */}
       <SectionCard className="border-[#EF4444]/20">
         <SectionTitle className="text-[#EF4444]">
           <span className="flex items-center gap-2">
-            <AlertTriangle className="size-4" /> {isRTL ? 'حذف الحساب' : 'Delete Account'}
+            <AlertTriangle className="size-4" /> {isRTL ? 'منطقة الخطر' : 'Danger Zone'}
           </span>
         </SectionTitle>
         <SectionDescription>
-          {isRTL ? 'حذف حسابك نهائيًا وجميع بياناتك المرتبطة' : 'Permanently delete your account and all associated data'}
+          {isRTL ? 'حذف حسابك نهائيًا وجميع بياناتك المرتبطة. هذا الإجراء لا يمكن التراجع عنه.' : 'Permanently delete your account and all associated data. This action cannot be undone.'}
         </SectionDescription>
 
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[#EF4444]/5 border border-[#EF4444]/10">
-          <div>
-            <p className="text-foreground text-sm font-medium">{isRTL ? 'حذف حسابي' : 'Delete My Account'}</p>
-            <p className="text-muted-foreground text-xs">
-              {isRTL ? 'هذا الإجراء لا يمكن التراجع عنه' : 'This action cannot be undone'}
-            </p>
-          </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              // Navigate to account tab for deletion
-              toast.info(isRTL ? 'انتقل إلى علامة تبويب الحساب لحذف حسابك' : 'Go to the Account tab to delete your account')
-            }}
-            className="rounded-xl"
-          >
-            <Trash2 className="size-4" />
-            {isRTL ? 'حذف' : 'Delete'}
-          </Button>
-        </div>
-      </SectionCard>
-
-      {/* Consent Management */}
-      <SectionCard>
-        <SectionTitle>
-          <span className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-primary" />
-            {isRTL ? 'إدارة الموافقات' : 'Consent Management'}
-          </span>
-        </SectionTitle>
-        <SectionDescription>
-          {isRTL ? 'عرض وتحديث تفضيلات الموافقة الخاصة بك' : 'View and update your consent preferences'}
-        </SectionDescription>
-
-        {loadingConsents ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="size-5 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {consentTypes.map(({ type, labelEn, labelAr }) => {
-              const latest = latestConsents[type]
-              return (
-                <div key={type} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-                  <div>
-                    <p className="text-foreground text-sm font-medium">{isRTL ? labelAr : labelEn}</p>
-                    {latest && (
-                      <p className="text-muted-foreground text-xs">
-                        {isRTL ? 'آخر تحديث:' : 'Last updated:'} {new Date(latest.createdAt).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US')}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant={latest?.granted ? 'outline' : 'default'}
-                      onClick={() => handleUpdateConsent(type, false)}
-                      className={`text-xs rounded-xl ${!latest?.granted ? 'bg-muted text-muted-foreground' : ''}`}
-                    >
-                      {isRTL ? 'رفض' : 'Reject'}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleUpdateConsent(type, true)}
-                      className={`text-xs rounded-xl ${latest?.granted ? 'bg-teal-600 hover:bg-teal-700 text-white' : 'bg-primary hover:bg-primary/80 text-white'}`}
-                    >
-                      {isRTL ? 'موافقة' : 'Accept'}
-                    </Button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={isDeleting}
+              className="rounded-xl"
+            >
+              <Trash2 className="size-4" />
+              {isDeleting ? (isRTL ? 'جارٍ الحذف...' : 'Deleting...') : (isRTL ? 'حذف حسابي' : 'Delete My Account')}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{isRTL ? 'تأكيد حذف الحساب' : 'Confirm Account Deletion'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {isRTL
+                  ? 'سيتم حذف حسابك نهائيًا مع جميع بياناتك بما في ذلك العائلات والمهام والاشتراكات والموافقات. لا يمكن التراجع عن هذا الإجراء.'
+                  : 'Your account will be permanently deleted along with all your data including families, tasks, subscriptions, and consents. This action cannot be undone.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{isRTL ? 'إلغاء' : 'Cancel'}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteAccount} className="bg-[#EF4444] hover:bg-[#DC2626]">
+                {isRTL ? 'حذف نهائي' : 'Delete Permanently'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SectionCard>
 
       {/* Data Retention Info */}

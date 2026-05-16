@@ -63,18 +63,15 @@ export default function RootLayout({
     <html lang="en" dir="ltr" className="light" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/logo-new.png" />
-        {/* Theme flash prevention — apply class before paint */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('usra-theme');if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light')}else{document.documentElement.classList.add('light');document.documentElement.classList.remove('dark')}}catch(e){document.documentElement.classList.add('light')}})()`,
-          }}
-        />
-        {/* Chunk load error recovery — auto-reload on ChunkLoadError */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var origError=window.onerror;window.onerror=function(msg,src,line,col,err){if(err&&err.name==='ChunkLoadError'){console.warn('[USRA] ChunkLoadError detected, reloading...');window.location.reload();return true}if(origError)return origError.apply(this,arguments);return false};window.addEventListener('unhandledrejection',function(e){if(e.reason&&e.reason.name==='ChunkLoadError'){console.warn('[USRA] ChunkLoadError in promise, reloading...');e.preventDefault();window.location.reload()}})})()`,
-          }}
-        />
+        {/*
+          CSP Compliance: External scripts instead of dangerouslySetInnerHTML.
+          These must run synchronously before React hydration:
+          - theme-init.js: Prevents FOUC by applying theme class before paint
+          - chunk-error-recovery.js: Auto-reloads on ChunkLoadError after deployments
+          When implementing nonce-based CSP, add nonce prop to these <script> tags.
+        */}
+        <script src="/scripts/theme-init.js" />
+        <script src="/scripts/chunk-error-recovery.js" />
       </head>
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexSansArabic.variable} ${jetbrainsMono.variable} antialiased`}

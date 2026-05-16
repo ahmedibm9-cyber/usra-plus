@@ -69,6 +69,14 @@ export async function POST(req: NextRequest) {
         )
       }
 
+      // Check if email is verified before allowing login
+      if (!dbUser.emailVerified) {
+        return NextResponse.json(
+          { error: 'Please verify your email before logging in. Check your inbox for a verification code.', needsVerification: true },
+          { status: 403 }
+        )
+      }
+
       // Create session token
       const token = crypto.randomUUID()
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)

@@ -293,21 +293,24 @@ export function CookieConsent() {
               <p className="text-muted-foreground text-[10px] mt-2">
                 {isRTL ? 'لمزيد من المعلومات، راجع ' : 'For more information, see our '}
                 <a
-                  href="/api/legal?type=cookies"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="?page=cookies"
                   className="text-teal-600 dark:text-teal-400 hover:underline"
                 >
                   {isRTL ? 'سياسة ملفات تعريف الارتباط' : 'Cookie Policy'}
                 </a>
-                {' & '}
+                {', '}
                 <a
-                  href="/api/legal?type=privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="?page=privacy"
                   className="text-teal-600 dark:text-teal-400 hover:underline"
                 >
                   {isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                </a>
+                {' & '}
+                <a
+                  href="?page=terms"
+                  className="text-teal-600 dark:text-teal-400 hover:underline"
+                >
+                  {isRTL ? 'شروط الخدمة' : 'Terms of Service'}
                 </a>
               </p>
             </div>

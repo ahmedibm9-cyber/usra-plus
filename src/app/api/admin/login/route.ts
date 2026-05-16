@@ -8,6 +8,7 @@ import {
   getAdminCookieOptions,
 } from '@/lib/admin-session'
 import { db } from '@/lib/db'
+import { logAuditEvent } from '@/lib/audit-logger'
 
 // ─── Server-Side Admin Authentication ──────────────────────────────────────
 // Single admin credential with role selector.
@@ -26,9 +27,10 @@ const ROLE_NAMES: Record<AllowedRole, string> = {
 
 // Single admin account — one credential, role selected at login
 const ADMIN_EMAIL = 'admin@usraplus.com'
-// Default password for first run — MUST be changed via ADMIN_PASSWORD env var in production
-const DEFAULT_ADMIN_PASSWORD = 'usra2024admin'
-const ADMIN_PASSWORD: string = process.env.ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD
+// Admin password MUST be set via ADMIN_PASSWORD env var.
+// No default password in production — prevents unauthorized access.
+// In development, falls back to 'usra2024admin' for convenience.
+const ADMIN_PASSWORD: string = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV !== 'production' ? 'usra2024admin' : '')
 
 // Bcrypt hash — computed on first request from ADMIN_PASSWORD env var
 let cachedHash: string | null = null
@@ -65,9 +67,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Admin login is disabled — set ADMIN_PASSWORD env var' }, { status: 403 })
     }
 
-    // Warn if using default password (not configured via env var)
-    if (!process.env.ADMIN_PASSWORD) {
-      console.warn('[AdminLogin] Using default ADMIN_PASSWORD — set the ADMIN_PASSWORD env var for production')
+    // Warn if using default dev password (not configured via env var)
+    if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV !== 'production') {
+      console.warn('[AdminLogin] Using default dev password — set ADMIN_PASSWORD env var for production')
     }
 
     const { email, password, role } = await request.json()
@@ -159,6 +161,16 @@ export async function POST(request: NextRequest) {
 
     const cookieOptions = getAdminCookieOptions()
     const cookieName = getAdminCookieName()
+
+    // Audit log successful admin login
+    await logAuditEvent({
+      action: 'admin_login',
+      actorEmail: email,
+      targetType: 'admin',
+      details: { role: sessionRole },
+      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+      userAgent: request.headers.get('user-agent') || undefined,
+    }).catch(() => {})
 
     const response = NextResponse.json({
       success: true,

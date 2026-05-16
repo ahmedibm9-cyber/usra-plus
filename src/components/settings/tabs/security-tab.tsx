@@ -57,9 +57,6 @@ export function SecurityTab() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
 
-  // 2FA state
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-
   // Delete account state
   const [deletingAccount, setDeletingAccount] = useState(false)
 
@@ -198,11 +195,7 @@ export function SecurityTab() {
               Coming Soon
             </Badge>
             <Switch
-              checked={twoFactorEnabled}
-              onCheckedChange={(checked) => {
-                setTwoFactorEnabled(checked)
-                toast.info('2FA setup coming soon!')
-              }}
+              checked={false}
               disabled
               className="data-[state=checked]:bg-primary/50"
             />

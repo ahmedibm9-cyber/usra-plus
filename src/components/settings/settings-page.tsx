@@ -11,17 +11,30 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useI18n } from '@/i18n/use-translation'
 
-import { ProfileTab } from './tabs/profile-tab'
-import { SubscriptionTab } from './tabs/subscription-tab'
-import { FamilyTab } from './tabs/family-tab'
-import { NotificationsTab } from './tabs/notifications-tab'
-import { PrivacyTab } from './tabs/privacy-tab'
-import { SecurityTab } from './tabs/security-tab'
-import { AdvancedTab } from './tabs/advanced-tab'
+// ─── Lazy-loaded Tab Components ──────────────────────────────────────────────
+// Tabs are loaded on demand so the initial bundle only includes the active tab.
+const ProfileTab = dynamic(() => import('./tabs/profile-tab').then(m => ({ default: m.ProfileTab })), { ssr: false, loading: () => <TabSkeleton /> })
+const SubscriptionTab = dynamic(() => import('./tabs/subscription-tab').then(m => ({ default: m.SubscriptionTab })), { ssr: false, loading: () => <TabSkeleton /> })
+const FamilyTab = dynamic(() => import('./tabs/family-tab').then(m => ({ default: m.FamilyTab })), { ssr: false, loading: () => <TabSkeleton /> })
+const NotificationsTab = dynamic(() => import('./tabs/notifications-tab').then(m => ({ default: m.NotificationsTab })), { ssr: false, loading: () => <TabSkeleton /> })
+const PrivacyTab = dynamic(() => import('./tabs/privacy-tab').then(m => ({ default: m.PrivacyTab })), { ssr: false, loading: () => <TabSkeleton /> })
+const SecurityTab = dynamic(() => import('./tabs/security-tab').then(m => ({ default: m.SecurityTab })), { ssr: false, loading: () => <TabSkeleton /> })
+const AdvancedTab = dynamic(() => import('./tabs/advanced-tab').then(m => ({ default: m.AdvancedTab })), { ssr: false, loading: () => <TabSkeleton /> })
+
+function TabSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4 p-4">
+      <div className="h-8 bg-muted rounded-lg w-1/3" />
+      <div className="h-32 bg-muted rounded-xl" />
+      <div className="h-24 bg-muted rounded-xl" />
+    </div>
+  )
+}
 
 // ─── Tab Configuration ───────────────────────────────────────────────────────
 

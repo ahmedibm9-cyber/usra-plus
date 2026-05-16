@@ -30,16 +30,17 @@ interface SignedSession {
 
 /**
  * Get the HMAC signing key from environment.
- * Falls back to a derived key from other secrets if ADMIN_SESSION_SECRET is not set.
+ * Requires explicit ADMIN_SESSION_SECRET or ADMIN_SECRET_KEY.
+ * In production, missing configuration is a fatal error.
  */
 function getSigningKey(): string {
   const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_SECRET_KEY
   if (secret) return secret
 
-  // Fallback for first-run / dev: derive a stable key from other available secrets
+  // Dev-only fallback — never used in production
   if (process.env.NODE_ENV !== 'production') {
-    const fallback = 'usra-admin-session-secret-dev-only-' + (process.env.DATABASE_URL || 'default')
-    console.warn('[AdminSession] WARNING: Using derived fallback signing key. Set ADMIN_SESSION_SECRET for production.')
+    const fallback = 'usra-admin-session-dev-secret-only'
+    console.warn('[AdminSession] WARNING: Using dev-only fallback signing key. Set ADMIN_SESSION_SECRET for production.')
     return fallback
   }
 

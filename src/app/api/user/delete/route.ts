@@ -11,7 +11,8 @@
  *   6. RevenueTransactions (by userId)
  *   7. Refunds (by userId)
  *   8. Sessions (by userId — would cascade, but explicit is clearer)
- *   9. User record (last)
+ *   9. Consents (by userId)
+ *   10. User record (last)
  *
  * Protected by:
  *   - Authentication (getAuthenticatedUserId)
@@ -25,6 +26,7 @@ import { getAuthenticatedUserId } from '@/lib/auth-utils'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { validateCSRF } from '@/lib/csrf'
 import { db } from '@/lib/db'
+import { logAuditEvent } from '@/lib/audit-logger'
 
 // Account deletion is a destructive action — very strict rate limit
 const ACCOUNT_DELETE_RATE_LIMIT = { maxRequests: 1, windowMs: 60 * 60 * 1000, key: 'user:delete' }
@@ -102,10 +104,24 @@ export async function DELETE(request: NextRequest) {
       where: { userId: user.id },
     }).catch(() => {})
 
-    // 9. Finally, delete the user record itself
+    // 9. Consent records — GDPR/PDPL consent history
+    await db.consent.deleteMany({
+      where: { userId: user.id },
+    }).catch(() => {})
+
+    // 10. Finally, delete the user record itself
     await db.user.delete({
       where: { id: user.id },
     })
+
+    // Audit log account deletion
+    await logAuditEvent({
+      action: 'user_delete',
+      targetType: 'user',
+      targetId: user.id,
+      details: { email: user.email },
+      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    }).catch(() => {})
 
     return NextResponse.json({
       success: true,

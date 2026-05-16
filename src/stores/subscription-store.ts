@@ -24,11 +24,11 @@ function getTodayDate(): string {
 // ─── Plan Limits ─────────────────────────────────────────────────────────────
 
 const PLAN_LIMITS: Record<SubscriptionPlan, Record<string, number | null>> = {
-  free: { tasks: 10, families: 1, storage: 100 * 1024 * 1024, members: 5 },
-  pro: { tasks: null, families: 3, storage: 1024 * 1024 * 1024, members: 15 },
-  family_plus: { tasks: null, families: null, storage: 10 * 1024 * 1024 * 1024, members: null },
-  max: { tasks: null, families: 10, storage: 20 * 1024 * 1024 * 1024, members: 25 },
-  ultimate: { tasks: null, families: null, storage: null, members: null },
+  free: { tasks: 50, families: 1, storage: 100 * 1024 * 1024, members: 4, aiCalls: 5, mealPlans: 0 },
+  pro: { tasks: 500, families: 3, storage: 5 * 1024 * 1024 * 1024, members: 8, aiCalls: 100, mealPlans: 4 },
+  family_plus: { tasks: null, families: 5, storage: 20 * 1024 * 1024 * 1024, members: 20, aiCalls: null, mealPlans: null },
+  max: { tasks: null, families: 10, storage: 20 * 1024 * 1024 * 1024, members: 25, aiCalls: null, mealPlans: null },
+  ultimate: { tasks: null, families: null, storage: null, members: null, aiCalls: null, mealPlans: null },
 }
 
 // ─── Effective Plan Resolution ───────────────────────────────────────────────

@@ -32,6 +32,7 @@ model User {
   referrals           Referral[]          @relation("UserReferrals")
   referredReferrals   Referral[]          @relation("UserReferredBy")
   revenueTransactions RevenueTransaction[]
+  consents            Consent[]
   bans                UserBan[]
 }
 
@@ -53,9 +54,9 @@ model SubscriptionPlan {
   slug            String   @unique
   name            String
   description     String
-  monthlyPrice    Float    @default(0)
-  yearlyPrice     Float?   
-  lifetimePrice   Float?   
+  monthlyPrice    Float    @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
+  yearlyPrice     Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
+  lifetimePrice   Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
   currency        String   @default("USD")
   features        String   @default("[]")
   limits          String   @default("{}")
@@ -74,7 +75,7 @@ model Coupon {
   name                  String
   description           String    @default("")
   discountType          String    @default("percentage")
-  discountValue         Float     @default(0)
+  discountValue         Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
   applicablePlans       String    @default("[]")
   maxRedemptions        Int?
   currentRedemptions    Int       @default(0)
@@ -84,11 +85,12 @@ model Coupon {
   isActive              Boolean   @default(true)
   targetAudience        String    @default("all")
   autoApply             Boolean   @default(false)
-  createdBy             String?
+  createdBy             String?   // Keep as String — admin user may not be in User table
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
   redemptions CouponRedemption[]
+  revenueTransactions RevenueTransaction[]
 }
 
 model CouponRedemption {
@@ -133,17 +135,19 @@ model RevenueTransaction {
   userId          String?
   subscriptionId  String?
   type            String    @default("payment")
-  amount          Float     @default(0)
+  amount          Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
   currency        String    @default("USD")
-  originalAmount  Float?    
-  discountAmount  Float     @default(0)
+  originalAmount  Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
+  discountAmount  Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
   couponId        String?
   paymentProvider String?
   status          String    @default("pending")
   description     String?
   createdAt       DateTime  @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon  Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  refunds Refund[]
 
   @@index([userId])
   @@index([type])
@@ -155,7 +159,7 @@ model Refund {
   id            String    @id @default(uuid())
   transactionId String
   userId        String?
-  amount        Float     @default(0)
+  amount        Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
   reason        String    @default("")
   category      String    @default("other")
   status        String    @default("pending")
@@ -164,6 +168,8 @@ model Refund {
   notes         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  transaction RevenueTransaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
   @@index([transactionId])
   @@index([status])
@@ -226,7 +232,7 @@ model ABTest {
 
 model AuditLog {
   id          String   @id @default(uuid())
-  adminEmail  String
+  adminEmail  String   // NOTE: Uses email string instead of userId FK — admin may not be in User table (same pattern as EmailCampaign.createdBy)
   action      String
   targetType  String   @default("system")
   targetId    String?
@@ -356,7 +362,7 @@ model UserSubscription {
   autoRenew            Boolean   @default(true)
   isSandbox             Boolean   @default(false)
   cancellationReason    String?
-  price                 Float?    
+  price                 Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
   currency              String?   @default("USD")
   lastRevenuecatEvent   String?
   lastEventAt           DateTime?
@@ -382,6 +388,8 @@ model Consent {
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([type])

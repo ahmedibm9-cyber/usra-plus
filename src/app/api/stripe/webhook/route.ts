@@ -26,6 +26,10 @@ import {
 // Disable body parsing — we need the raw body for signature verification
 export const runtime = 'nodejs'
 
+// Processed event IDs — prevents duplicate processing on retry
+const processedEvents = new Set<string>()
+const MAX_PROCESSED_EVENTS = 1000
+
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const headersList = await headers()
@@ -52,6 +56,19 @@ export async function POST(request: NextRequest) {
       { error: 'Invalid webhook signature' },
       { status: 400 },
     )
+  }
+
+  // Idempotency: skip already-processed events
+  if (processedEvents.has(event.id)) {
+    console.log(`[Stripe Webhook] Skipping duplicate event: ${event.type} (${event.id})`)
+    return NextResponse.json({ received: true, skipped: true })
+  }
+  processedEvents.add(event.id)
+  // Prevent memory leak — keep only last N events
+  if (processedEvents.size > MAX_PROCESSED_EVENTS) {
+    const iterator = processedEvents.values()
+    iterator.next()
+    processedEvents.delete(iterator.next().value)
   }
 
   // Process the event

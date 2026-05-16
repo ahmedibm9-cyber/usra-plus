@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import crypto from 'crypto'
 
 const DEMO_EMAIL = 'demo@usra.plus'
@@ -88,6 +89,10 @@ async function findSubscription(userId: string): Promise<string | null> {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit
+    const rateLimitResponse = await applyRateLimit(req, RATE_LIMITS.ADMIN_API)
+    if (rateLimitResponse) return rateLimitResponse
+
     // Block in production — demo seed is for development/staging only
     if (process.env.NODE_ENV === 'production') {
       return NextResponse.json({ error: 'Demo seed endpoint is disabled in production' }, { status: 403 })
@@ -436,6 +441,10 @@ export async function POST(req: NextRequest) {
 // ─── GET: Seed via query param ─────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
+  // Rate limit
+  const rateLimitResponse = await applyRateLimit(req, RATE_LIMITS.ADMIN_API)
+  if (rateLimitResponse) return rateLimitResponse
+
   // Block in production
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Demo seed endpoint is disabled in production' }, { status: 403 })

@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
         message: otpEmailSent
           ? 'Account created. A verification code has been sent to your email.'
           : 'Account created. Please verify your email with the code sent.',
-        ...(otpEmailSent ? {} : { devCode: otpCode }),
+        ...(process.env.NODE_ENV !== 'production' && !otpEmailSent ? { devCode: otpCode } : {}),
         emailSent: otpEmailSent,
         expiresIn: 600,
       }, { status: 201 })
@@ -281,7 +281,7 @@ export async function POST(req: NextRequest) {
         message: otpEmailSent
           ? 'Account created. A verification code has been sent to your email.'
           : 'Account created. Please verify your email with the code sent.',
-        ...(otpEmailSent ? {} : { devCode: otpCode }),
+        ...(process.env.NODE_ENV !== 'production' && !otpEmailSent ? { devCode: otpCode } : {}),
         emailSent: otpEmailSent,
         expiresIn: 600,
       }, { status: 201 })
