@@ -29,10 +29,10 @@ const itemVariants: Variants = {
 function statusBadge(status: ReferralStatus) {
   switch (status) {
     case 'pending': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
-    case 'signed_up': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
-    case 'trial_started': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
-    case 'converted': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
-    case 'rewarded': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
+    case 'signed_up': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
+    case 'trial_started': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
+    case 'converted': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
+    case 'rewarded': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
     case 'expired': return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]' }
   }
 }
@@ -134,7 +134,7 @@ function CreateReferralForm({ onSave, onClose }: {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <Plus className="w-4 h-4 text-[#10B981]" />
+          <Plus className="w-4 h-4 text-[var(--accent)]" />
           Create Referral Code
         </h3>
         <button onClick={onClose} className="text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors">Cancel</button>
@@ -147,9 +147,9 @@ function CreateReferralForm({ onSave, onClose }: {
             <div className="flex items-center gap-2">
               <input type="text" value={referralCode} onChange={e => setReferralCode(e.target.value.toUpperCase())}
                 placeholder="REF-ABC123" required
-                className="flex-1 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                className="flex-1 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
               <button type="button" onClick={handleAutoGenerate}
-                className="px-2.5 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all whitespace-nowrap">
+                className="px-2.5 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all whitespace-nowrap">
                 Auto
               </button>
             </div>
@@ -159,20 +159,20 @@ function CreateReferralForm({ onSave, onClose }: {
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Referrer ID</label>
             <input type="text" value={referrerId} onChange={e => setReferrerId(e.target.value)}
               placeholder="admin"
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Referred Email</label>
             <input type="email" value={referredEmail} onChange={e => setReferredEmail(e.target.value)}
               placeholder="Optional"
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Reward Type</label>
             <select value={rewardType} onChange={e => setRewardType(e.target.value as ReferralRewardType)}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
               <option value="trial_extension">Trial Extension</option>
               <option value="discount">Discount</option>
               <option value="plan_upgrade">Plan Upgrade</option>
@@ -184,20 +184,20 @@ function CreateReferralForm({ onSave, onClose }: {
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Reward Value</label>
             <input type="number" value={rewardValue} onChange={e => setRewardValue(e.target.value)}
               min="0" step="0.01"
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Expires At</label>
             <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
           <button type="submit" disabled={isSubmitting}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#0D9488] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent-primary)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
             {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
             Create Referral
           </button>
@@ -364,14 +364,14 @@ export function AdminReferrals() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-[--text-primary] flex items-center gap-2">
-            <Users className="w-5 h-5 text-[#10B981]" />
+            <Users className="w-5 h-5 text-[var(--accent)]" />
             Referral System
           </h2>
           <p className="text-sm text-[--text-muted] mt-1">Manage referral codes, track conversions, and handle rewards</p>
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#0D9488] text-[--text-primary] font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent-primary)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity"
         >
           <Plus className="w-3.5 h-3.5" />
           Create Referral
@@ -381,11 +381,11 @@ export function AdminReferrals() {
       {/* Metrics Overview */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: 'Total Referrals', value: metrics.totalReferrals, icon: Users, color: 'text-[#10B981]' },
-          { label: 'Active', value: metrics.activeReferrals, icon: ArrowRight, color: 'text-[#10B981]' },
-          { label: 'Converted', value: metrics.convertedReferrals, icon: Target, color: 'text-[#10B981]' },
+          { label: 'Total Referrals', value: metrics.totalReferrals, icon: Users, color: 'text-[var(--accent)]' },
+          { label: 'Active', value: metrics.activeReferrals, icon: ArrowRight, color: 'text-[var(--accent)]' },
+          { label: 'Converted', value: metrics.convertedReferrals, icon: Target, color: 'text-[var(--accent)]' },
           { label: 'Conversion Rate', value: `${metrics.conversionRate}%`, icon: TrendingUp, color: 'text-[--status-warning]' },
-          { label: 'Rewards Granted', value: metrics.totalRewardsGranted, icon: Gift, color: 'text-[#10B981]' },
+          { label: 'Rewards Granted', value: metrics.totalRewardsGranted, icon: Gift, color: 'text-[var(--accent)]' },
         ].map(stat => (
           <motion.div key={stat.label} variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             <div className="flex items-center gap-2 mb-2">
@@ -412,7 +412,7 @@ export function AdminReferrals() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-medium transition-all flex-1 justify-center ${
               activeTab === tab.id
-                ? 'bg-[#10B981]/10 text-[#10B981]'
+                ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
                 : 'text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface]'
             }`}
           >
@@ -437,7 +437,7 @@ export function AdminReferrals() {
               {/* Funnel visualization */}
               <motion.div variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-2xl p-6">
                 <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-4 h-4 text-[#10B981]" />
+                  <TrendingUp className="w-4 h-4 text-[var(--accent)]" />
                   Referral Funnel
                 </h3>
                 {metrics.totalReferrals === 0 ? (
@@ -447,7 +447,7 @@ export function AdminReferrals() {
                     <p className="text-xs text-[--text-muted] mt-1">The funnel will populate as users start referring</p>
                     <button
                       onClick={() => setShowCreateForm(true)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all mt-4"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all mt-4"
                     >
                       <Plus className="w-3.5 h-3.5" /> Create First Referral Code
                     </button>
@@ -455,9 +455,9 @@ export function AdminReferrals() {
                 ) : (
                   <div className="flex items-center gap-2">
                     {[
-                      { label: 'Invited', count: metrics.totalReferrals, color: 'bg-[#10B981]' },
-                      { label: 'Signed Up', count: metrics.activeReferrals, color: 'bg-[#10B981]' },
-                      { label: 'Converted', count: metrics.convertedReferrals, color: 'bg-[#10B981]' },
+                      { label: 'Invited', count: metrics.totalReferrals, color: 'bg-[var(--accent)]' },
+                      { label: 'Signed Up', count: metrics.activeReferrals, color: 'bg-[var(--accent)]' },
+                      { label: 'Converted', count: metrics.convertedReferrals, color: 'bg-[var(--accent)]' },
                     ].map((step, i) => (
                       <div key={step.label} className="flex items-center gap-2 flex-1">
                         <div className="flex-1">
@@ -505,7 +505,7 @@ export function AdminReferrals() {
                           <div className="flex items-center gap-1">
                             {ref.status === 'converted' && !ref.rewardClaimed && (
                               <button onClick={() => handleGrantReward(ref.id)}
-                                className="p-1 rounded text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Grant reward">
+                                className="p-1 rounded text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Grant reward">
                                 <Gift className="w-3.5 h-3.5" />
                               </button>
                             )}
@@ -533,7 +533,7 @@ export function AdminReferrals() {
                   <p className="text-xs text-[--text-muted]">Create referral codes for users to share</p>
                   <button
                     onClick={() => setShowCreateForm(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all mt-4"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all mt-4"
                   >
                     <Plus className="w-3.5 h-3.5" /> Create Code
                   </button>
@@ -561,7 +561,7 @@ export function AdminReferrals() {
                           </div>
                           <div>
                             <p className="text-[10px] text-[--text-muted] uppercase">Converted</p>
-                            <p className="text-sm font-semibold text-[#10B981]">{codeMetrics.converted}</p>
+                            <p className="text-sm font-semibold text-[var(--accent)]">{codeMetrics.converted}</p>
                           </div>
                           <div>
                             <p className="text-[10px] text-[--text-muted] uppercase">Rate</p>
@@ -608,18 +608,18 @@ export function AdminReferrals() {
                           </div>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Award className="w-4 h-4 text-[#10B981]" />
+                              <Award className="w-4 h-4 text-[var(--accent)]" />
                               <span className="text-sm text-[--text-secondary]">{rewardTypeLabel(ref.rewardType as ReferralRewardType)}</span>
                               <span className="text-sm font-semibold text-[--text-primary]">{ref.rewardType === 'trial_extension' ? `${ref.rewardValue} days` : ref.rewardType === 'discount' ? `${ref.rewardValue}%` : ref.rewardType === 'credit' ? `$${ref.rewardValue}` : 'Free'}</span>
                             </div>
                             {ref.status === 'converted' && !ref.rewardClaimed && (
                               <button onClick={() => handleGrantReward(ref.id)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
                                 <Gift className="w-3 h-3" /> Grant Reward
                               </button>
                             )}
                             {ref.rewardClaimed && (
-                              <span className="flex items-center gap-1 text-xs text-[#10B981]">
+                              <span className="flex items-center gap-1 text-xs text-[var(--accent)]">
                                 <Check className="w-3.5 h-3.5" /> Claimed
                               </span>
                             )}

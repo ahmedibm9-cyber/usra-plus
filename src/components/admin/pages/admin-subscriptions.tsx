@@ -56,11 +56,11 @@ interface SubscriptionPlan {
 function planIcon(slug: string) {
   switch (slug) {
     case 'free': return { Icon: Users, color: 'text-[--status-neutral]', bg: 'bg-[--bg-surface-2]0/10 border-[--status-neutral-border]', glow: 'rgba(107,114,128,0.15)' }
-    case 'pro': return { Icon: Zap, color: 'text-[#10B981]', bg: 'bg-[#10B981]/10 border-[#10B981]/20', glow: 'rgba(16,185,129,0.2)' }
+    case 'pro': return { Icon: Zap, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent)]/10 border-[var(--accent)]/20', glow: 'color-mix(in srgb, var(--accent) 20%, transparent)' }
     case 'family_plus': return { Icon: Crown, color: 'text-[--status-warning]', bg: 'bg-[--status-warning-bg] border-[--status-warning-border]', glow: 'rgba(245,158,11,0.2)' }
-    case 'max': return { Icon: Sparkles, color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/10 border-[#0D9488]/20', glow: 'rgba(139,92,246,0.2)' }
+    case 'max': return { Icon: Sparkles, color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/20', glow: 'rgba(139,92,246,0.2)' }
     case 'ultimate': return { Icon: ShieldCheck, color: 'text-[--status-danger]', bg: 'bg-[--status-danger-bg] border-[--status-danger-border]', glow: 'rgba(236,72,153,0.2)' }
-    default: return { Icon: Zap, color: 'text-[#10B981]', bg: 'bg-[#10B981]/10 border-[#10B981]/20', glow: 'rgba(16,185,129,0.2)' }
+    default: return { Icon: Zap, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent)]/10 border-[var(--accent)]/20', glow: 'color-mix(in srgb, var(--accent) 20%, transparent)' }
   }
 }
 
@@ -129,7 +129,7 @@ function PlanEditForm({ plan, onSave, onCancel }: {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <Pencil className="w-4 h-4 text-[#10B981]" />
+          <Pencil className="w-4 h-4 text-[var(--accent)]" />
           Edit Plan: {plan.name}
         </h3>
         <button onClick={onCancel} className="text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors">Cancel</button>
@@ -139,37 +139,37 @@ function PlanEditForm({ plan, onSave, onCancel }: {
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Plan Name</label>
           <input type="text" value={name} onChange={e => setName(e.target.value)}
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Description</label>
           <input type="text" value={description} onChange={e => setDescription(e.target.value)}
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Monthly Price ($)</label>
           <input type="number" value={monthlyPrice} onChange={e => setMonthlyPrice(e.target.value)} min="0" step="0.01"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Yearly Price ($)</label>
           <input type="number" value={yearlyPrice} onChange={e => setYearlyPrice(e.target.value)} min="0" step="0.01" placeholder="Optional"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Lifetime Price ($)</label>
           <input type="number" value={lifetimePrice} onChange={e => setLifetimePrice(e.target.value)} min="0" step="0.01" placeholder="Optional"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Trial Days</label>
           <input type="number" value={trialDays} onChange={e => setTrialDays(e.target.value)} min="0"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">CTA Button Text</label>
           <input type="text" value={ctaText} onChange={e => setCtaText(e.target.value)}
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div className="flex items-center gap-3 pt-5">
           <button type="button" onClick={() => setIsPopular(!isPopular)}
@@ -197,9 +197,9 @@ function PlanEditForm({ plan, onSave, onCancel }: {
             <input type="text" value={newFeature} onChange={e => setNewFeature(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAddFeature()}
               placeholder="Add a feature..."
-              className="flex-1 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="flex-1 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
             <button onClick={handleAddFeature}
-              className="px-3 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+              className="px-3 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -209,7 +209,7 @@ function PlanEditForm({ plan, onSave, onCancel }: {
       <div className="flex items-center justify-end gap-2 pt-2">
         <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
         <button onClick={handleSave} disabled={isSaving}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#10B981] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
           {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save Changes
         </button>
@@ -240,7 +240,7 @@ function PlanCard({ plan, onEdit, onToggleActive }: {
   return (
     <motion.div variants={itemVariants}
       className={`bg-[--bg-surface] border rounded-xl p-5 relative overflow-hidden group transition-colors ${
-        plan.isActive ? 'border-[#10B981]/15' : 'border-[--border-subtle] opacity-60'
+        plan.isActive ? 'border-[var(--accent)]/15' : 'border-[--border-subtle] opacity-60'
       }`}>
       {/* Background glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-2/3 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"
@@ -268,7 +268,7 @@ function PlanCard({ plan, onEdit, onToggleActive }: {
           </div>
           <div className="flex items-center gap-1">
             <button onClick={() => onEdit(plan)}
-              className="p-2 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Edit plan">
+              className="p-2 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Edit plan">
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button onClick={handleToggle} disabled={isToggling || plan.slug === 'free'}
@@ -276,7 +276,7 @@ function PlanCard({ plan, onEdit, onToggleActive }: {
                 plan.slug === 'free' ? 'text-[--text-muted] cursor-not-allowed' :
                 plan.isActive
                   ? 'text-[--text-muted] hover:text-[--status-warning] hover:bg-[--status-warning-bg]'
-                  : 'text-[#10B981] hover:bg-[#10B981]/10'
+                  : 'text-[var(--accent)] hover:bg-[var(--accent)]/10'
               }`} title={plan.isActive ? 'Deactivate' : 'Activate'}>
               {isToggling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
                 plan.isActive ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />
@@ -374,7 +374,7 @@ function CreatePlanForm({ onSave, onCancel }: {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <Plus className="w-4 h-4 text-[#10B981]" />
+          <Plus className="w-4 h-4 text-[var(--accent)]" />
           Create New Plan
         </h3>
         <button onClick={onCancel} className="text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors">Cancel</button>
@@ -385,52 +385,52 @@ function CreatePlanForm({ onSave, onCancel }: {
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Plan Slug *</label>
           <input type="text" value={slug} onChange={e => setSlug(e.target.value)}
             placeholder="e.g. premium"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Plan Name *</label>
           <input type="text" value={name} onChange={e => setName(e.target.value)}
             placeholder="e.g. Premium"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div className="sm:col-span-2">
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Description</label>
           <input type="text" value={description} onChange={e => setDescription(e.target.value)}
             placeholder="Describe this plan..."
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Monthly Price ($)</label>
           <input type="number" value={monthlyPrice} onChange={e => setMonthlyPrice(e.target.value)} min="0" step="0.01"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Yearly Price ($)</label>
           <input type="number" value={yearlyPrice} onChange={e => setYearlyPrice(e.target.value)} min="0" step="0.01" placeholder="Optional"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Lifetime Price ($)</label>
           <input type="number" value={lifetimePrice} onChange={e => setLifetimePrice(e.target.value)} min="0" step="0.01" placeholder="Optional"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Trial Days</label>
           <input type="number" value={trialDays} onChange={e => setTrialDays(e.target.value)} min="0"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
         <div>
           <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">CTA Button Text</label>
           <input type="text" value={ctaText} onChange={e => setCtaText(e.target.value)}
             placeholder="e.g. Subscribe Now"
-            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+            className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
         </div>
       </div>
 
       <div className="flex items-center justify-end gap-2 pt-2">
         <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
         <button onClick={handleSave} disabled={isSaving}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#10B981] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
           {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
           Create Plan
         </button>
@@ -570,23 +570,23 @@ export function AdminSubscriptions() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center">
-              <Settings2 className="w-5 h-5 text-[#10B981]" />
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center">
+              <Settings2 className="w-5 h-5 text-[var(--accent)]" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-[--text-primary]">Subscription Plans</h2>
-              <div className="h-[2px] w-full mt-1 rounded-full bg-gradient-to-r from-[#10B981] via-[#22C55E] to-transparent" />
+              <div className="h-[2px] w-full mt-1 rounded-full bg-gradient-to-r from-[var(--accent)] via-[#22C55E] to-transparent" />
             </div>
           </div>
           <p className="text-sm text-[--text-muted] mt-2 ml-[52px]">Manage plans, pricing, and features for your subscription tiers</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-[#10B981] uppercase tracking-widest font-medium bg-[#10B981]/10 border border-[#10B981]/20 rounded-full px-3 py-1">
+          <span className="text-[10px] text-[var(--accent)] uppercase tracking-widest font-medium bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-full px-3 py-1">
             {plans.length} Plans
           </span>
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#10B981] text-[--text-primary] font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity"
           >
             <Plus className="w-3.5 h-3.5" />
             Add Plan
@@ -597,12 +597,12 @@ export function AdminSubscriptions() {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Active Plans', value: plans.filter(p => p.isActive).length, icon: Zap, color: 'text-[#10B981]' },
+          { label: 'Active Plans', value: plans.filter(p => p.isActive).length, icon: Zap, color: 'text-[var(--accent)]' },
           { label: 'Paid Plans', value: plans.filter(p => p.monthlyPrice > 0 || p.lifetimePrice).length, icon: DollarSign, color: 'text-[--status-warning]' },
-          { label: 'With Trial', value: plans.filter(p => p.trialDays > 0).length, icon: Clock, color: 'text-[#10B981]' },
-          { label: 'Total Features', value: plans.reduce((s, p) => s + p.features.length, 0), icon: Star, color: 'text-[#10B981]' },
+          { label: 'With Trial', value: plans.filter(p => p.trialDays > 0).length, icon: Clock, color: 'text-[var(--accent)]' },
+          { label: 'Total Features', value: plans.reduce((s, p) => s + p.features.length, 0), icon: Star, color: 'text-[var(--accent)]' },
         ].map(stat => (
-          <motion.div key={stat.label} variants={itemVariants} className="bg-[--bg-surface] border border-[#10B981]/10 rounded-xl p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+          <motion.div key={stat.label} variants={itemVariants} className="bg-[--bg-surface] border border-[var(--accent)]/10 rounded-xl p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             <div className="flex items-center gap-2 mb-2">
               <stat.icon className={`w-4 h-4 ${stat.color}`} />
               <span className="text-[10px] text-[--text-muted] uppercase tracking-wider">{stat.label}</span>
@@ -644,7 +644,7 @@ export function AdminSubscriptions() {
 
       {/* Pricing Comparison Table */}
       {plans.length > 0 && (
-        <motion.div variants={itemVariants} className="bg-[--bg-surface] border border-[#10B981]/15 rounded-xl overflow-hidden">
+        <motion.div variants={itemVariants} className="bg-[--bg-surface] border border-[var(--accent)]/15 rounded-xl overflow-hidden">
           <div className="p-5 pb-0">
             <h3 className="text-base font-semibold text-[--text-primary] mb-1">Pricing Comparison</h3>
             <p className="text-xs text-[--text-muted]">Side-by-side plan pricing overview</p>
@@ -652,7 +652,7 @@ export function AdminSubscriptions() {
           <div className="overflow-x-auto custom-scrollbar mt-4">
             <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-[#10B981]/10">
+                <tr className="border-b border-[var(--accent)]/10">
                   <th className="text-left text-[11px] font-medium text-[--text-muted] uppercase tracking-wider px-5 py-3">Feature</th>
                   {plans.map(p => (
                     <th key={p.id} className="text-center text-[11px] font-medium text-[--text-muted] uppercase tracking-wider px-5 py-3">
@@ -662,7 +662,7 @@ export function AdminSubscriptions() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-[#10B981]/5">
+                <tr className="border-b border-[var(--accent)]/5">
                   <td className="px-5 py-3 text-sm text-[--text-secondary] font-medium">Monthly Price</td>
                   {plans.map(p => (
                     <td key={p.id} className="px-5 py-3 text-sm text-[--text-primary] text-center font-semibold">
@@ -670,7 +670,7 @@ export function AdminSubscriptions() {
                     </td>
                   ))}
                 </tr>
-                <tr className="border-b border-[#10B981]/5">
+                <tr className="border-b border-[var(--accent)]/5">
                   <td className="px-5 py-3 text-sm text-[--text-secondary] font-medium">Yearly Price</td>
                   {plans.map(p => (
                     <td key={p.id} className="px-5 py-3 text-sm text-[--text-muted] text-center">
@@ -678,7 +678,7 @@ export function AdminSubscriptions() {
                     </td>
                   ))}
                 </tr>
-                <tr className="border-b border-[#10B981]/5">
+                <tr className="border-b border-[var(--accent)]/5">
                   <td className="px-5 py-3 text-sm text-[--text-secondary] font-medium">Trial Days</td>
                   {plans.map(p => (
                     <td key={p.id} className="px-5 py-3 text-sm text-[--text-muted] text-center">
@@ -686,10 +686,10 @@ export function AdminSubscriptions() {
                     </td>
                   ))}
                 </tr>
-                <tr className="border-b border-[#10B981]/5">
+                <tr className="border-b border-[var(--accent)]/5">
                   <td className="px-5 py-3 text-sm text-[--text-secondary] font-medium">Features</td>
                   {plans.map(p => (
-                    <td key={p.id} className="px-5 py-3 text-sm text-[#10B981] text-center font-medium">
+                    <td key={p.id} className="px-5 py-3 text-sm text-[var(--accent)] text-center font-medium">
                       {p.features.length}
                     </td>
                   ))}

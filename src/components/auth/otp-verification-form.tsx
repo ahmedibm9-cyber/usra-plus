@@ -608,8 +608,8 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                       sx={{
                         mt: 1.5,
                         borderRadius: 2,
-                        bgcolor: 'rgba(13,148,136,0.08)',
-                        border: '1px solid rgba(13,148,136,0.25)',
+                        bgcolor: 'color-mix(in srgb, var(--accent-primary) 8%, transparent)',
+                        border: '1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent)',
                         '& .MuiAlert-icon': { color: 'secondary.main' },
                       }}
                     >
@@ -648,7 +648,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                                 textTransform: 'none',
                                 borderColor: 'secondary.main',
                                 color: 'secondary.main',
-                                '&:hover': { borderColor: 'secondary.main', bgcolor: 'rgba(13,148,136,0.05)' },
+                                '&:hover': { borderColor: 'secondary.main', bgcolor: 'color-mix(in srgb, var(--accent-primary) 5%, transparent)' },
                               }}
                             >
                               {isRTL ? 'ملء تلقائي' : 'Auto-fill'}

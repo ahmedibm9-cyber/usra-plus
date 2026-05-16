@@ -107,7 +107,7 @@ function formatTimeAgo(iso: string | null): string {
 
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { bg: string; text: string; dot: string }> = {
-    active: { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', dot: 'bg-[#10B981]' },
+    active: { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', dot: 'bg-[var(--accent)]' },
     suspended: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', dot: 'bg-[--status-danger]' },
     flagged: { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', dot: 'bg-[--status-warning]' },
     banned: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', dot: 'bg-[--status-danger]' },
@@ -127,9 +127,9 @@ function StatusBadge({ status }: { status: string }) {
 function PlanBadge({ plan }: { plan: string }) {
   const config: Record<string, { bg: string; text: string }> = {
     'Free': { bg: 'bg-[--status-neutral-bg]', text: 'text-[--status-neutral]' },
-    'Pro': { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]' },
+    'Pro': { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]' },
     'Family+': { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]' },
-    'Max': { bg: 'bg-[#0D9488]/10', text: 'text-[#0D9488]' },
+    'Max': { bg: 'bg-[var(--accent-primary)]/10', text: 'text-[var(--accent-primary)]' },
     'Ultimate': { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]' },
   }
   const c = config[plan] || config['Free']
@@ -144,13 +144,13 @@ function PlanBadge({ plan }: { plan: string }) {
 
 function VerificationBadge({ verified }: { verified: boolean }) {
   return verified
-    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#10B981]/10 text-[#10B981]"><CheckCircle2 className="w-3 h-3" />Verified</span>
+    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--accent)]/10 text-[var(--accent)]"><CheckCircle2 className="w-3 h-3" />Verified</span>
     : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[--status-danger-bg] text-[--status-danger]"><XCircle className="w-3 h-3" />Unverified</span>
 }
 
 // ─── Radial Progress Ring ─────────────────────────────────────────────────────
 
-function RadialProgressRing({ value, max, size = 56, strokeWidth = 4, color = '#10B981' }: {
+function RadialProgressRing({ value, max, size = 56, strokeWidth = 4, color = 'var(--accent)' }: {
   value: number; max?: number; size?: number; strokeWidth?: number; color?: string
 }) {
   const radius = (size - strokeWidth) / 2
@@ -178,24 +178,24 @@ function StatCard({ icon: Icon, label, value, trend, trendLabel, delay = 0, ring
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.3 }}
-      className="relative bg-gradient-to-br from-[#10B981]/[0.03] to-[#10B981]/[0.02] border border-[#10B981]/[0.12] rounded-xl p-5 hover:border-[#10B981]/[0.25] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group"
+      className="relative bg-gradient-to-br from-[var(--accent)]/[0.03] to-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.12] rounded-xl p-5 hover:border-[var(--accent)]/[0.25] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group"
     >
       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(20,184,166,0.04))' }} />
       <div className="relative z-10 flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <RadialProgressRing value={ringValue} max={ringMax} size={48} strokeWidth={3} color={ringColor || '#10B981'} />
+          <RadialProgressRing value={ringValue} max={ringMax} size={48} strokeWidth={3} color={ringColor || 'var(--accent)'} />
           <div>
             <div className="flex items-center gap-1.5 mb-0.5">
-              <Icon className="w-3.5 h-3.5 text-[#10B981]" />
+              <Icon className="w-3.5 h-3.5 text-[var(--accent)]" />
               <span className="text-[10px] text-[--text-muted] uppercase tracking-wider">{label}</span>
             </div>
-            <p className="text-2xl font-bold text-[#10B981]">{value}</p>
+            <p className="text-2xl font-bold text-[var(--accent)]">{value}</p>
             {trendLabel && <p className="text-[10px] text-[--text-muted] mt-0.5">{trendLabel}</p>}
           </div>
         </div>
         {trend && (
-          <span className={`text-xs font-medium flex items-center gap-0.5 ${trend.startsWith('+') || trend.startsWith('↑') ? 'text-[#10B981]' : 'text-[--status-danger]'}`}>
+          <span className={`text-xs font-medium flex items-center gap-0.5 ${trend.startsWith('+') || trend.startsWith('↑') ? 'text-[var(--accent)]' : 'text-[--status-danger]'}`}>
             <TrendingUp className="w-3 h-3" />{trend}
           </span>
         )}
@@ -254,25 +254,25 @@ function UserCard({ user, onAction, selected, onToggleSelect }: {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
-      className={`bg-gradient-to-br from-[#10B981]/[0.03] to-transparent border rounded-xl p-4 hover:border-[#10B981]/[0.2] transition-all group cursor-pointer relative ${selected ? 'border-[#10B981]/40 bg-[#10B981]/[0.05]' : 'border-[#10B981]/[0.08]'}`}
+      className={`bg-gradient-to-br from-[var(--accent)]/[0.03] to-transparent border rounded-xl p-4 hover:border-[var(--accent)]/[0.2] transition-all group cursor-pointer relative ${selected ? 'border-[var(--accent)]/40 bg-[var(--accent)]/[0.05]' : 'border-[var(--accent)]/[0.08]'}`}
     >
       {/* Selection checkbox */}
       <button
         onClick={(e) => { e.stopPropagation(); onToggleSelect(user.id) }}
-        className="absolute top-3 left-3 z-10 text-[--text-muted] hover:text-[#10B981] transition-colors"
+        className="absolute top-3 left-3 z-10 text-[--text-muted] hover:text-[var(--accent)] transition-colors"
       >
-        {selected ? <CheckSquare className="w-4 h-4 text-[#10B981]" /> : <Square className="w-4 h-4" />}
+        {selected ? <CheckSquare className="w-4 h-4 text-[var(--accent)]" /> : <Square className="w-4 h-4" />}
       </button>
 
       <div className="flex items-start gap-3 pl-5">
         {/* Avatar with activity ring */}
         <div className="relative shrink-0" onClick={() => onAction(user, 'view')}>
-          <div className={`w-11 h-11 rounded-full bg-gradient-to-br from-[#10B981]/20 to-[#10B981]/20 flex items-center justify-center text-sm font-medium text-[#10B981] ring-2 ${isActive ? 'ring-[#10B981]/30' : 'ring-white/[0.06]'}`}>
+          <div className={`w-11 h-11 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-sm font-medium text-[var(--accent)] ring-2 ${isActive ? 'ring-[var(--accent)]/30' : 'ring-white/[0.06]'}`}>
             {user.name.charAt(0)}
           </div>
           {/* Online indicator */}
           {isActive && (
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#10B981] ring-2 ring-[var(--bg-primary)]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-primary)]" />
           )}
         </div>
 
@@ -281,42 +281,42 @@ function UserCard({ user, onAction, selected, onToggleSelect }: {
             <p className="text-sm font-medium text-[--text-primary] truncate">{user.name}</p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-1 rounded-md text-[--text-muted] hover:text-[--text-secondary] hover:bg-[#10B981]/[0.04] transition-all opacity-0 group-hover:opacity-100">
+                <button className="p-1 rounded-md text-[--text-muted] hover:text-[--text-secondary] hover:bg-[var(--accent)]/[0.04] transition-all opacity-0 group-hover:opacity-100">
                   <MoreHorizontal className="w-3.5 h-3.5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[#10B981]/[0.12] text-[--text-secondary] w-52">
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'view')}>
+              <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[var(--accent)]/[0.12] text-[--text-secondary] w-52">
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'view')}>
                   <Eye className="w-3.5 h-3.5 mr-2" />View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'edit_profile')}>
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'edit_profile')}>
                   <Edit3 className="w-3.5 h-3.5 mr-2" />Edit Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'reset_password')}>
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'reset_password')}>
                   <Lock className="w-3.5 h-3.5 mr-2" />Reset Password
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
+                <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
                 <DropdownMenuItem className="text-xs focus:bg-[--status-warning-bg] focus:text-[--status-warning] cursor-pointer" onClick={() => onAction(user, 'ban_workflow')}>
                   <AlertOctagon className="w-3.5 h-3.5 mr-2" />Issue Warning / Ban
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/10 focus:text-[#10B981] cursor-pointer" onClick={() => onAction(user, 'shadow_ban')}>
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/10 focus:text-[var(--accent)] cursor-pointer" onClick={() => onAction(user, 'shadow_ban')}>
                   <EyeOff className="w-3.5 h-3.5 mr-2" />Shadow Ban
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-xs focus:bg-[--status-danger-bg] focus:text-[--status-danger] cursor-pointer" onClick={() => onAction(user, 'permanent_ban')}>
                   <Ban className="w-3.5 h-3.5 mr-2" />Permanent Ban
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/10 focus:text-[#10B981] cursor-pointer" onClick={() => onAction(user, user.isVip ? 'remove_vip' : 'add_vip')}>
+                <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/10 focus:text-[var(--accent)] cursor-pointer" onClick={() => onAction(user, user.isVip ? 'remove_vip' : 'add_vip')}>
                   <Crown className="w-3.5 h-3.5 mr-2" />{user.isVip ? 'Remove VIP' : 'Add VIP Tag'}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/10 focus:text-[#10B981] cursor-pointer" onClick={() => onAction(user, user.betaTester ? 'remove_beta' : 'add_beta')}>
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/10 focus:text-[var(--accent)] cursor-pointer" onClick={() => onAction(user, user.betaTester ? 'remove_beta' : 'add_beta')}>
                   <Zap className="w-3.5 h-3.5 mr-2" />{user.betaTester ? 'Remove Beta' : 'Add Beta Tester'}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'admin_note')}>
+                <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'admin_note')}>
                   <MessageSquare className="w-3.5 h-3.5 mr-2" />Add Admin Note
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'reset_subscription')}>
+                <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => onAction(user, 'reset_subscription')}>
                   <RotateCcw className="w-3.5 h-3.5 mr-2" />Reset Subscription
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -362,12 +362,12 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
       className="flex flex-col items-center justify-center py-20 px-4">
       {/* Telescope illustration */}
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#10B981]/10 to-[#10B981]/10 flex items-center justify-center border border-[#10B981]/15">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent)]/10 flex items-center justify-center border border-[var(--accent)]/15">
           <Telescope className="w-10 h-10 text-[--text-muted]" />
         </div>
         {/* Decorative orbit ring */}
-        <div className="absolute -inset-3 border border-[#10B981]/[0.06] rounded-full" />
-        <div className="absolute -inset-6 border border-[#10B981]/[0.03] rounded-full" />
+        <div className="absolute -inset-3 border border-[var(--accent)]/[0.06] rounded-full" />
+        <div className="absolute -inset-6 border border-[var(--accent)]/[0.03] rounded-full" />
       </div>
       <h3 className="text-lg font-semibold text-[--text-secondary] mb-2">
         {isFiltered ? 'No users match your filters' : 'No users yet'}
@@ -379,7 +379,7 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
         }
       </p>
       {!isFiltered && (
-        <div className="mt-6 flex items-center gap-2 px-4 py-2 rounded-lg bg-[#10B981]/[0.04] border border-[#10B981]/[0.08]">
+        <div className="mt-6 flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)]/[0.04] border border-[var(--accent)]/[0.08]">
           <Shield className="w-4 h-4 text-[--text-muted]" />
           <span className="text-xs text-[--text-muted]">Privacy-safe — only aggregate profile data is shown</span>
         </div>
@@ -552,10 +552,10 @@ export function AdminUsers() {
 
     const total = users.length || 1
     return [
-      { stage: 'New', count: newUsers, color: '#10B981', pct: Math.round((newUsers / total) * 100) },
-      { stage: 'Active', count: activeUsers, color: '#10B981', pct: Math.round((activeUsers / total) * 100) },
-      { stage: 'Power', count: powerUsers, color: '#10B981', pct: Math.round((powerUsers / total) * 100) },
-      { stage: 'Churned', count: churnedUsers, color: '#10B981', pct: Math.round((churnedUsers / total) * 100) },
+      { stage: 'New', count: newUsers, color: 'var(--accent)', pct: Math.round((newUsers / total) * 100) },
+      { stage: 'Active', count: activeUsers, color: 'var(--accent)', pct: Math.round((activeUsers / total) * 100) },
+      { stage: 'Power', count: powerUsers, color: 'var(--accent)', pct: Math.round((powerUsers / total) * 100) },
+      { stage: 'Churned', count: churnedUsers, color: 'var(--accent)', pct: Math.round((churnedUsers / total) * 100) },
     ]
   }, [users])
 
@@ -568,10 +568,10 @@ export function AdminUsers() {
     const ultimate = users.filter(u => u.plan === 'Ultimate').length
     return [
       { plan: 'Free', count: free, color: '#64748B', pct: users.length ? Math.round((free / users.length) * 100) : 0 },
-      { plan: 'Pro', count: pro, color: '#10B981', pct: users.length ? Math.round((pro / users.length) * 100) : 0 },
-      { plan: 'Family+', count: family, color: '#059669', pct: users.length ? Math.round((family / users.length) * 100) : 0 },
-      { plan: 'Max', count: max, color: '#0F766E', pct: users.length ? Math.round((max / users.length) * 100) : 0 },
-      { plan: 'Ultimate', count: ultimate, color: '#0D9488', pct: users.length ? Math.round((ultimate / users.length) * 100) : 0 },
+      { plan: 'Pro', count: pro, color: 'var(--accent)', pct: users.length ? Math.round((pro / users.length) * 100) : 0 },
+      { plan: 'Family+', count: family, color: 'var(--accent)', pct: users.length ? Math.round((family / users.length) * 100) : 0 },
+      { plan: 'Max', count: max, color: 'var(--primary)', pct: users.length ? Math.round((max / users.length) * 100) : 0 },
+      { plan: 'Ultimate', count: ultimate, color: 'var(--accent-primary)', pct: users.length ? Math.round((ultimate / users.length) * 100) : 0 },
     ]
   }, [users])
 
@@ -1063,17 +1063,17 @@ export function AdminUsers() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10B981]/20 to-[#10B981]/20 flex items-center justify-center border border-[#10B981]/20">
-              <Telescope className="w-5 h-5 text-[#10B981]" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center border border-[var(--accent)]/20">
+              <Telescope className="w-5 h-5 text-[var(--accent)]" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-[--text-primary] flex items-center gap-2">
                 People Observatory
-                <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-normal ${dataSource === 'live' ? 'bg-[#10B981]/10 text-[--text-secondary] border-[#10B981]/20' : 'bg-[#10B981]/10 text-[--text-muted] border-[#10B981]/10'}`}>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-normal ${dataSource === 'live' ? 'bg-[var(--accent)]/10 text-[--text-secondary] border-[var(--accent)]/20' : 'bg-[var(--accent)]/10 text-[--text-muted] border-[var(--accent)]/10'}`}>
                   {dataSource === 'live' ? 'Live Data' : 'No Live Data'}
                 </span>
               </h2>
-              <div className="h-[2px] w-32 rounded-full bg-gradient-to-r from-[#10B981]/80 via-[#10B981]/60 to-transparent mt-1" />
+              <div className="h-[2px] w-32 rounded-full bg-gradient-to-r from-[var(--accent)]/80 via-[var(--accent)]/60 to-transparent mt-1" />
             </div>
           </div>
           {/* Refresh button */}
@@ -1082,7 +1082,7 @@ export function AdminUsers() {
             size="sm"
             onClick={() => fetchUsers(true)}
             disabled={isRefreshing}
-            className="text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/[0.04] gap-1.5"
+            className="text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/[0.04] gap-1.5"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="text-xs">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -1093,10 +1093,10 @@ export function AdminUsers() {
 
       {/* ─── Top Stats: 2x2 Grid with Radial Progress ──────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Users} label="Total Users" value={stats.total} delay={0} ringValue={stats.total} ringMax={Math.max(stats.total * 1.5, 10)} ringColor="#10B981" />
-        <StatCard icon={UserPlus} label="New This Month" value={stats.newThisMonth} delay={0.05} ringValue={stats.newThisMonth} ringMax={Math.max(stats.total, 10)} ringColor="#10B981" />
-        <StatCard icon={Activity} label="Active Rate" value={`${stats.activeRate}%`} delay={0.1} ringValue={stats.activeRate} ringMax={100} ringColor="#10B981" />
-        <StatCard icon={Shield} label="Verified" value={`${stats.verifiedRate}%`} delay={0.15} ringValue={stats.verifiedRate} ringMax={100} ringColor="#10B981" />
+        <StatCard icon={Users} label="Total Users" value={stats.total} delay={0} ringValue={stats.total} ringMax={Math.max(stats.total * 1.5, 10)} ringColor="var(--accent)" />
+        <StatCard icon={UserPlus} label="New This Month" value={stats.newThisMonth} delay={0.05} ringValue={stats.newThisMonth} ringMax={Math.max(stats.total, 10)} ringColor="var(--accent)" />
+        <StatCard icon={Activity} label="Active Rate" value={`${stats.activeRate}%`} delay={0.1} ringValue={stats.activeRate} ringMax={100} ringColor="var(--accent)" />
+        <StatCard icon={Shield} label="Verified" value={`${stats.verifiedRate}%`} delay={0.15} ringValue={stats.verifiedRate} ringMax={100} ringColor="var(--accent)" />
       </div>
 
       {/* ─── Main Content: Sidebar + User Explorer ──────────────────── */}
@@ -1104,18 +1104,18 @@ export function AdminUsers() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-1 space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-[#10B981]/[0.02] border border-[#10B981]/[0.08] rounded-xl p-5 animate-pulse">
-                <div className="h-4 bg-[#10B981]/10 rounded w-2/3 mb-3" />
-                <div className="h-2 bg-[#10B981]/5 rounded w-full mb-2" />
-                <div className="h-2 bg-[#10B981]/5 rounded w-4/5" />
+              <div key={i} className="bg-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.08] rounded-xl p-5 animate-pulse">
+                <div className="h-4 bg-[var(--accent)]/10 rounded w-2/3 mb-3" />
+                <div className="h-2 bg-[var(--accent)]/5 rounded w-full mb-2" />
+                <div className="h-2 bg-[var(--accent)]/5 rounded w-4/5" />
               </div>
             ))}
           </div>
-          <div className="lg:col-span-3 bg-[#10B981]/[0.02] border border-[#10B981]/[0.08] rounded-xl p-8 animate-pulse">
-            <div className="h-8 bg-[#10B981]/10 rounded w-1/3 mb-4" />
+          <div className="lg:col-span-3 bg-[var(--accent)]/[0.02] border border-[var(--accent)]/[0.08] rounded-xl p-8 animate-pulse">
+            <div className="h-8 bg-[var(--accent)]/10 rounded w-1/3 mb-4" />
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-32 bg-[#10B981]/5 rounded-xl" />
+                <div key={i} className="h-32 bg-[var(--accent)]/5 rounded-xl" />
               ))}
             </div>
           </div>
@@ -1128,7 +1128,7 @@ export function AdminUsers() {
           <div className="lg:col-span-1 space-y-4">
             {/* Plan Distribution */}
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.3 }}
-              className="bg-gradient-to-b from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08] rounded-xl p-5">
+              className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-[--text-primary] mb-4 flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5 text-[--text-secondary]" />
                 Plan Distribution
@@ -1151,7 +1151,7 @@ export function AdminUsers() {
 
             {/* Country Distribution */}
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.3 }}
-              className="bg-gradient-to-b from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08] rounded-xl p-5">
+              className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-[--text-primary] mb-4 flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-[--text-secondary]" />
                 Countries
@@ -1169,7 +1169,7 @@ export function AdminUsers() {
 
             {/* Language Split */}
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.3 }}
-              className="bg-gradient-to-b from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08] rounded-xl p-5">
+              className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-[--text-primary] mb-4 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 text-[--text-secondary]" />
                 Languages
@@ -1183,7 +1183,7 @@ export function AdminUsers() {
                     </div>
                     <div className="h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${l.pct}%` }} transition={{ delay: 0.35, duration: 0.6 }}
-                        className="h-full rounded-full bg-[#10B981]/40" />
+                        className="h-full rounded-full bg-[var(--accent)]/40" />
                     </div>
                   </div>
                 ))}
@@ -1195,7 +1195,7 @@ export function AdminUsers() {
           <div className="lg:col-span-3 space-y-4">
             {/* Toolbar */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}
-              className="bg-gradient-to-b from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08] rounded-xl p-4">
+              className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-4">
               {/* Row 1: Search + Actions */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 {/* Search */}
@@ -1203,7 +1203,7 @@ export function AdminUsers() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[--text-muted]" />
                   <input type="text" placeholder="Search by name or email..." value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[#10B981]/[0.08] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30 transition-colors" />
+                    className="w-full pl-9 pr-4 py-2 bg-[--bg-primary] border border-[var(--accent)]/[0.08] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30 transition-colors" />
                 </div>
 
                 {/* Action buttons */}
@@ -1214,7 +1214,7 @@ export function AdminUsers() {
                     size="sm"
                     onClick={() => handleExport(false)}
                     disabled={isExporting}
-                    className="h-8 text-xs bg-transparent border-[#10B981]/[0.12] text-[--text-secondary] hover:bg-[#10B981]/[0.06] hover:text-[#10B981] gap-1.5"
+                    className="h-8 text-xs bg-transparent border-[var(--accent)]/[0.12] text-[--text-secondary] hover:bg-[var(--accent)]/[0.06] hover:text-[var(--accent)] gap-1.5"
                   >
                     <Download className={`w-3.5 h-3.5 ${isExporting ? 'animate-pulse' : ''}`} />
                     {isExporting ? 'Exporting...' : 'Export Users'}
@@ -1227,29 +1227,29 @@ export function AdminUsers() {
                         variant="outline"
                         size="sm"
                         disabled={selectedIds.size === 0}
-                        className="h-8 text-xs bg-transparent border-[#10B981]/[0.12] text-[--text-secondary] hover:bg-[#10B981]/[0.06] hover:text-[#10B981] gap-1.5 disabled:opacity-40"
+                        className="h-8 text-xs bg-transparent border-[var(--accent)]/[0.12] text-[--text-secondary] hover:bg-[var(--accent)]/[0.06] hover:text-[var(--accent)] gap-1.5 disabled:opacity-40"
                       >
                         <Ban className="w-3.5 h-3.5" />
                         Bulk Actions
                         {selectedIds.size > 0 && (
-                          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] text-[10px] font-medium">
+                          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[var(--accent)]/20 text-[var(--accent)] text-[10px] font-medium">
                             {selectedIds.size}
                           </span>
                         )}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[#10B981]/[0.12] text-[--text-secondary] w-52">
+                    <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[var(--accent)]/[0.12] text-[--text-secondary] w-52">
                       <DropdownMenuItem className="text-xs focus:bg-[--status-warning-bg] focus:text-[--status-warning] cursor-pointer" onClick={() => requestBulkAction('ban_selected')}>
                         <Ban className="w-3.5 h-3.5 mr-2" />Suspend Selected ({selectedIds.size})
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-xs focus:bg-[--status-danger-bg] focus:text-[--status-danger] cursor-pointer" onClick={() => requestBulkAction('delete_selected')}>
                         <Trash2 className="w-3.5 h-3.5 mr-2" />Delete Selected ({selectedIds.size})
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
-                      <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => handleExport(true)}>
+                      <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
+                      <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => handleExport(true)}>
                         <Download className="w-3.5 h-3.5 mr-2" />Export Selected ({selectedIds.size})
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
+                      <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
                       <DropdownMenuItem className="text-xs focus:bg-[--bg-surface] focus:text-[--text-muted] cursor-pointer" onClick={clearSelection}>
                         <XCircle className="w-3.5 h-3.5 mr-2" />Clear Selection
                       </DropdownMenuItem>
@@ -1263,54 +1263,54 @@ export function AdminUsers() {
                 {/* Filters */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <Select value={planFilter} onValueChange={handlePlanFilterChange}>
-                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[#10B981]/[0.08] text-[--text-secondary] w-[110px]">
+                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[var(--accent)]/[0.08] text-[--text-secondary] w-[110px]">
                       <SelectValue placeholder="Plan" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[--bg-surface] border-[#10B981]/[0.12]">
-                      <SelectItem value="all" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">All Plans</SelectItem>
-                      <SelectItem value="Free" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Free</SelectItem>
-                      <SelectItem value="Pro" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Pro</SelectItem>
-                      <SelectItem value="Family+" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Family+</SelectItem>
-                      <SelectItem value="Max" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Max</SelectItem>
-                      <SelectItem value="Ultimate" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Ultimate</SelectItem>
+                    <SelectContent className="bg-[--bg-surface] border-[var(--accent)]/[0.12]">
+                      <SelectItem value="all" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">All Plans</SelectItem>
+                      <SelectItem value="Free" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Free</SelectItem>
+                      <SelectItem value="Pro" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Pro</SelectItem>
+                      <SelectItem value="Family+" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Family+</SelectItem>
+                      <SelectItem value="Max" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Max</SelectItem>
+                      <SelectItem value="Ultimate" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Ultimate</SelectItem>
                     </SelectContent>
                   </Select>
 
                   <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[#10B981]/[0.08] text-[--text-secondary] w-[120px]">
+                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[var(--accent)]/[0.08] text-[--text-secondary] w-[120px]">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[--bg-surface] border-[#10B981]/[0.12]">
-                      <SelectItem value="all" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">All Status</SelectItem>
-                      <SelectItem value="active" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Active</SelectItem>
-                      <SelectItem value="suspended" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Suspended</SelectItem>
-                      <SelectItem value="flagged" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Flagged</SelectItem>
+                    <SelectContent className="bg-[--bg-surface] border-[var(--accent)]/[0.12]">
+                      <SelectItem value="all" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">All Status</SelectItem>
+                      <SelectItem value="active" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Active</SelectItem>
+                      <SelectItem value="suspended" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Suspended</SelectItem>
+                      <SelectItem value="flagged" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Flagged</SelectItem>
                     </SelectContent>
                   </Select>
 
                   <Select value={verificationFilter} onValueChange={handleVerificationFilterChange}>
-                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[#10B981]/[0.08] text-[--text-secondary] w-[130px]">
+                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[var(--accent)]/[0.08] text-[--text-secondary] w-[130px]">
                       <SelectValue placeholder="Verification" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[--bg-surface] border-[#10B981]/[0.12]">
-                      <SelectItem value="all" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">All Verification</SelectItem>
-                      <SelectItem value="verified" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Verified</SelectItem>
-                      <SelectItem value="unverified" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Unverified</SelectItem>
+                    <SelectContent className="bg-[--bg-surface] border-[var(--accent)]/[0.12]">
+                      <SelectItem value="all" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">All Verification</SelectItem>
+                      <SelectItem value="verified" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Verified</SelectItem>
+                      <SelectItem value="unverified" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Unverified</SelectItem>
                     </SelectContent>
                   </Select>
 
                   <Select value={sortOption} onValueChange={handleSortOptionChange}>
-                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[#10B981]/[0.08] text-[--text-secondary] w-[140px]">
+                    <SelectTrigger className="h-8 text-xs bg-[--bg-primary] border-[var(--accent)]/[0.08] text-[--text-secondary] w-[140px]">
                       <ArrowUpDown className="w-3 h-3 mr-1" />
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[--bg-surface] border-[#10B981]/[0.12]">
-                      <SelectItem value="newest" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Newest First</SelectItem>
-                      <SelectItem value="oldest" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Oldest First</SelectItem>
-                      <SelectItem value="name_az" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Name A → Z</SelectItem>
-                      <SelectItem value="name_za" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Name Z → A</SelectItem>
-                      <SelectItem value="last_active" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Last Active</SelectItem>
-                      <SelectItem value="email_az" className="text-[--text-secondary] text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary]">Email A → Z</SelectItem>
+                    <SelectContent className="bg-[--bg-surface] border-[var(--accent)]/[0.12]">
+                      <SelectItem value="newest" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Newest First</SelectItem>
+                      <SelectItem value="oldest" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Oldest First</SelectItem>
+                      <SelectItem value="name_az" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Name A → Z</SelectItem>
+                      <SelectItem value="name_za" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Name Z → A</SelectItem>
+                      <SelectItem value="last_active" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Last Active</SelectItem>
+                      <SelectItem value="email_az" className="text-[--text-secondary] text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary]">Email A → Z</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1326,13 +1326,13 @@ export function AdminUsers() {
                 </div>
 
                 {/* View toggle */}
-                <div className="flex items-center gap-1 border border-[#10B981]/[0.08] rounded-lg p-0.5">
+                <div className="flex items-center gap-1 border border-[var(--accent)]/[0.08] rounded-lg p-0.5">
                   <button onClick={() => setViewMode('cards')}
-                    className={`p-1.5 rounded-md transition-all ${viewMode === 'cards' ? 'bg-[#10B981]/15 text-[#10B981]' : 'text-[--text-muted] hover:text-[--text-muted]'}`}>
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'cards' ? 'bg-[var(--accent)]/15 text-[var(--accent)]' : 'text-[--text-muted] hover:text-[--text-muted]'}`}>
                     <LayoutGrid className="w-4 h-4" />
                   </button>
                   <button onClick={() => setViewMode('table')}
-                    className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-[#10B981]/15 text-[#10B981]' : 'text-[--text-muted] hover:text-[--text-muted]'}`}>
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-[var(--accent)]/15 text-[var(--accent)]' : 'text-[--text-muted] hover:text-[--text-muted]'}`}>
                     <List className="w-4 h-4" />
                   </button>
                 </div>
@@ -1364,16 +1364,16 @@ export function AdminUsers() {
             ) : (
               /* ─── Table View ──────────────────────────────────────── */
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.3 }}
-                className="bg-gradient-to-b from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08] rounded-xl overflow-hidden">
+                className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl overflow-hidden">
                 <div className="max-h-[500px] overflow-y-auto">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-[#10B981]/[0.06] hover:bg-transparent">
+                      <TableRow className="border-[var(--accent)]/[0.06] hover:bg-transparent">
                         <TableHead className="w-10">
-                          <button onClick={toggleSelectAll} className="text-[--text-muted] hover:text-[#10B981] transition-colors">
+                          <button onClick={toggleSelectAll} className="text-[--text-muted] hover:text-[var(--accent)] transition-colors">
                             {selectedIds.size === paginatedUsers.length && paginatedUsers.length > 0
-                              ? <CheckSquare className="w-4 h-4 text-[#10B981]" />
+                              ? <CheckSquare className="w-4 h-4 text-[var(--accent)]" />
                               : <Square className="w-4 h-4" />
                             }
                           </button>
@@ -1394,18 +1394,18 @@ export function AdminUsers() {
                           <motion.tr key={user.id}
                             initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                             transition={{ delay: idx * 0.02, duration: 0.2 }}
-                            className={`border-b border-[#10B981]/[0.04] hover:bg-[#10B981]/[0.02] transition-colors group ${selectedIds.has(user.id) ? 'bg-[#10B981]/[0.04]' : ''}`}>
+                            className={`border-b border-[var(--accent)]/[0.04] hover:bg-[var(--accent)]/[0.02] transition-colors group ${selectedIds.has(user.id) ? 'bg-[var(--accent)]/[0.04]' : ''}`}>
                             <TableCell className="py-3">
-                              <button onClick={() => toggleSelect(user.id)} className="text-[--text-muted] hover:text-[#10B981] transition-colors">
+                              <button onClick={() => toggleSelect(user.id)} className="text-[--text-muted] hover:text-[var(--accent)] transition-colors">
                                 {selectedIds.has(user.id)
-                                  ? <CheckSquare className="w-4 h-4 text-[#10B981]" />
+                                  ? <CheckSquare className="w-4 h-4 text-[var(--accent)]" />
                                   : <Square className="w-4 h-4" />
                                 }
                               </button>
                             </TableCell>
                             <TableCell className="py-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10B981]/20 to-[#10B981]/20 flex items-center justify-center text-xs font-medium text-[#10B981] shrink-0 ring-2 ring-[#10B981]/20">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-xs font-medium text-[var(--accent)] shrink-0 ring-2 ring-[var(--accent)]/20">
                                   {user.name.charAt(0)}
                                 </div>
                                 <div>
@@ -1419,7 +1419,7 @@ export function AdminUsers() {
                             <TableCell><StatusBadge status={user.status} /></TableCell>
                             <TableCell>
                               {user.emailVerified
-                                ? <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                                ? <CheckCircle2 className="w-4 h-4 text-[var(--accent)]" />
                                 : <XCircle className="w-4 h-4 text-[--status-danger]/60" />
                               }
                             </TableCell>
@@ -1430,23 +1430,23 @@ export function AdminUsers() {
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <button className="p-1.5 rounded-md text-[--text-muted] hover:text-[--text-secondary] hover:bg-[#10B981]/[0.04] transition-all opacity-0 group-hover:opacity-100">
+                                  <button className="p-1.5 rounded-md text-[--text-muted] hover:text-[--text-secondary] hover:bg-[var(--accent)]/[0.04] transition-all opacity-0 group-hover:opacity-100">
                                     <MoreHorizontal className="w-4 h-4" />
                                   </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[#10B981]/[0.12] text-[--text-secondary] w-48">
-                                  <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => handleAction(user, 'view')}>
+                                <DropdownMenuContent align="end" className="bg-[--bg-surface] border-[var(--accent)]/[0.12] text-[--text-secondary] w-48">
+                                  <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => handleAction(user, 'view')}>
                                     <Eye className="w-3.5 h-3.5 mr-2" />View Details
                                   </DropdownMenuItem>
-                                  <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
+                                  <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
                                   <DropdownMenuItem className="text-xs focus:bg-[--status-danger-bg] focus:text-[--status-danger] cursor-pointer" onClick={() => handleAction(user, 'suspend')}>
                                     <Ban className="w-3.5 h-3.5 mr-2" />Suspend Account
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="text-xs focus:bg-[--status-warning-bg] focus:text-[--status-warning] cursor-pointer" onClick={() => handleAction(user, 'flag')}>
                                     <Flag className="w-3.5 h-3.5 mr-2" />Flag Abuse
                                   </DropdownMenuItem>
-                                  <DropdownMenuSeparator className="bg-[#10B981]/[0.06]" />
-                                  <DropdownMenuItem className="text-xs focus:bg-[#10B981]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => handleAction(user, 'reset_subscription')}>
+                                  <DropdownMenuSeparator className="bg-[var(--accent)]/[0.06]" />
+                                  <DropdownMenuItem className="text-xs focus:bg-[var(--accent)]/[0.06] focus:text-[--text-primary] cursor-pointer" onClick={() => handleAction(user, 'reset_subscription')}>
                                     <RotateCcw className="w-3.5 h-3.5 mr-2" />Reset Subscription
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -1459,7 +1459,7 @@ export function AdminUsers() {
                         <TableRow>
                           <TableCell colSpan={9} className="h-32 text-center">
                             <div className="flex flex-col items-center gap-2">
-                              <Users className="w-8 h-8 text-[#10B981]/10" />
+                              <Users className="w-8 h-8 text-[var(--accent)]/10" />
                               <p className="text-sm text-[--text-muted]">No users found</p>
                               <p className="text-xs text-[--text-muted]">Try adjusting your search or filters</p>
                             </div>
@@ -1484,7 +1484,7 @@ export function AdminUsers() {
                 </p>
                 <div className="flex items-center gap-1">
                   <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                    className="p-1.5 rounded-md text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                    className="p-1.5 rounded-md text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -1503,14 +1503,14 @@ export function AdminUsers() {
                         <span key={page} className="flex items-center">
                           {showEllipsis && <span className="text-[--text-muted] text-xs px-1">...</span>}
                           <button onClick={() => setCurrentPage(page)}
-                            className={`w-7 h-7 rounded-md text-xs font-medium transition-all ${page === currentPage ? 'bg-[#10B981]/20 text-[#10B981]' : 'text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/[0.04]'}`}>
+                            className={`w-7 h-7 rounded-md text-xs font-medium transition-all ${page === currentPage ? 'bg-[var(--accent)]/20 text-[var(--accent)]' : 'text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/[0.04]'}`}>
                             {page}
                           </button>
                         </span>
                       )
                     })}
                   <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                    className="p-1.5 rounded-md text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                    className="p-1.5 rounded-md text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/[0.04] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -1523,7 +1523,7 @@ export function AdminUsers() {
       {/* ─── User Lifecycle Stages: Individual Progress Rings ──────── */}
       {users.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.3 }}
-          className="bg-gradient-to-b from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08] rounded-xl p-5">
+          className="bg-gradient-to-b from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08] rounded-xl p-5">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-sm font-semibold text-[--text-primary]">User Lifecycle Stages</h3>
@@ -1551,8 +1551,8 @@ export function AdminUsers() {
 
       {/* ─── Privacy Notice ────────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-        className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-[#10B981]/[0.02] to-transparent border border-[#10B981]/[0.08]">
-        <Shield className="w-4 h-4 text-[#10B981] mt-0.5 shrink-0" />
+        className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-[var(--accent)]/[0.02] to-transparent border border-[var(--accent)]/[0.08]">
+        <Shield className="w-4 h-4 text-[var(--accent)] mt-0.5 shrink-0" />
         <div>
           <p className="text-xs font-medium text-[--text-muted]">Privacy-First Observatory</p>
           <p className="text-[10px] text-[--text-muted] mt-0.5 leading-relaxed">
@@ -1564,7 +1564,7 @@ export function AdminUsers() {
 
       {/* ─── Confirmation Dialog ────────────────────────────────────── */}
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent className="bg-[--bg-surface] border-[#10B981]/[0.12] text-[--text-primary]">
+        <AlertDialogContent className="bg-[--bg-surface] border-[var(--accent)]/[0.12] text-[--text-primary]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-[--status-warning]" />
@@ -1577,12 +1577,12 @@ export function AdminUsers() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-[#10B981]/[0.12] text-[--text-secondary] hover:bg-[#10B981]/[0.04] hover:text-[--text-primary]">
+            <AlertDialogCancel className="bg-transparent border-[var(--accent)]/[0.12] text-[--text-secondary] hover:bg-[var(--accent)]/[0.04] hover:text-[--text-primary]">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAction}
-              className="bg-[#0D9488] text-white hover:bg-[#0F766E]">
+              className="bg-[var(--accent-primary)] text-white hover:bg-[var(--primary)]">
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1591,7 +1591,7 @@ export function AdminUsers() {
 
       {/* ─── Bulk Action Confirmation Dialog ─────────────────────────── */}
       <AlertDialog open={bulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
-        <AlertDialogContent className="bg-[--bg-surface] border-[#10B981]/[0.12] text-[--text-primary]">
+        <AlertDialogContent className="bg-[--bg-surface] border-[var(--accent)]/[0.12] text-[--text-primary]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-[--status-warning]" />
@@ -1603,12 +1603,12 @@ export function AdminUsers() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-[#10B981]/[0.12] text-[--text-secondary] hover:bg-[#10B981]/[0.04] hover:text-[--text-primary]">
+            <AlertDialogCancel className="bg-transparent border-[var(--accent)]/[0.12] text-[--text-secondary] hover:bg-[var(--accent)]/[0.04] hover:text-[--text-primary]">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmBulkAction}
-              className="bg-[#0D9488] text-white hover:bg-[#0F766E]">
+              className="bg-[var(--accent-primary)] text-white hover:bg-[var(--primary)]">
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>

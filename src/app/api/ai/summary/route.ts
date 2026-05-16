@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ZAI from 'z-ai-web-dev-sdk'
 import { requireAuth } from '@/lib/auth-utils'
+import { requirePlanAccess } from '@/lib/plan-limits'
 
 interface FamilyData {
   tasks: {
@@ -103,6 +104,10 @@ export async function POST(request: NextRequest) {
   // Verify authentication
   const auth = await requireAuth(request)
   if (auth.error) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+
+  // ─── Server-side plan check: AI summary requires Pro+ ────────────────
+  const planAccess = await requirePlanAccess(request, 'pro')
+  if (!planAccess.ok) return planAccess.error
 
   try {
     let body: FamilyData

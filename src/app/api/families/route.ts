@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { getUserPlan, checkPlanLimit, getCurrentFamilyCount } from '@/lib/plan-limits'
+import type { PlanResource } from '@/lib/plan-limits'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
@@ -71,6 +73,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Family name is required' },
         { status: 400 }
+      )
+    }
+
+    // ─── Server-side plan limit check ────────────────────────────────────
+    const plan = await getUserPlan(req)
+    const currentFamilyCount = await getCurrentFamilyCount(userId)
+    const { allowed, limit } = checkPlanLimit(plan, 'families', currentFamilyCount)
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: 'Family limit reached for your plan',
+          currentPlan: plan,
+          limit,
+          currentCount: currentFamilyCount,
+          upgradeRequired: true,
+        },
+        { status: 403 },
       )
     }
 
@@ -229,11 +248,16 @@ export async function PUT(req: NextRequest) {
       )
     }
 
+    // ─── Server-side plan limit check (members) ──────────────────────────
+    // We need to check the family owner's plan to enforce the member limit.
+    // We do this after finding the family so we know who the owner is.
+
     // Try Prisma first
     try {
       // Find the family by invite code
       const family = await db.family.findUnique({
         where: { inviteCode: inviteCode.trim().toUpperCase() },
+        include: { members: true },
       })
 
       if (!family) {
@@ -260,7 +284,23 @@ export async function PUT(req: NextRequest) {
         )
       }
 
-      // Add as member
+      // ─── Check member limit for the family owner's plan ────────────────
+      const ownerPlan = await getUserPlan(req)
+      const memberLimit = checkPlanLimit(ownerPlan, 'members' as PlanResource, family.members.length)
+      if (!memberLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: 'Member limit reached for your plan',
+            currentPlan: ownerPlan,
+            limit: memberLimit.limit,
+            currentCount: family.members.length,
+            upgradeRequired: true,
+          },
+          { status: 403 },
+        )
+      }
+
+      // Add as member (Prisma path)
       await db.familyMember.create({
         data: {
           familyId: family.id,
@@ -310,7 +350,28 @@ export async function PUT(req: NextRequest) {
         )
       }
 
-      // Add as member
+      // ─── Check member limit for the family (Supabase path) ─────────────
+      const { count: supabaseMemberCount } = await supabase
+        .from('family_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('family_id', family.id)
+
+      const ownerPlan = await getUserPlan(req)
+      const memberLimit = checkPlanLimit(ownerPlan, 'members' as PlanResource, supabaseMemberCount || 0)
+      if (!memberLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: 'Member limit reached for your plan',
+            currentPlan: ownerPlan,
+            limit: memberLimit.limit,
+            currentCount: supabaseMemberCount || 0,
+            upgradeRequired: true,
+          },
+          { status: 403 },
+        )
+      }
+
+      // Add as member (Supabase path)
       const { error: memberError } = await supabase
         .from('family_members')
         .insert({

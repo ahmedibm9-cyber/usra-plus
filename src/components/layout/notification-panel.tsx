@@ -36,8 +36,7 @@ import {
 import { toast } from 'sonner'
 import { useNotificationStore } from '@/stores/notification-store'
 import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
-import { useAuthStore } from '@/stores/auth-store'
-import { useAppStore } from '@/stores/app-store'
+import { useCurrentUser, useCurrentFamily } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'
 import { playNotificationSound, initAudioContext } from '@/lib/notification-sound'
 import { createClient } from '@/lib/supabase/client'
@@ -55,11 +54,11 @@ const typeIcons: Record<Notification['type'], ElementType> = {
 }
 
 const typeColors: Record<Notification['type'], string> = {
-  task: '#059669',
+  task: 'var(--accent)',
   calendar: '#0D6B58',
   grocery: '#047857',
-  chat: '#065F46',
-  family: '#10B981',
+  chat: 'var(--secondary)',
+  family: 'var(--accent)',
   system: '#79747E',
 }
 
@@ -265,8 +264,8 @@ function NotificationPanelInner() {
   const markAllAsRead = useNotificationStore((s) => s.markAllAsRead)
   const removeNotification = useNotificationStore((s) => s.removeNotification)
 
-  const { user } = useAuthStore()
-  const { currentFamily } = useAppStore()
+  const user = useCurrentUser()
+  const currentFamily = useCurrentFamily()
   const { soundEnabled, setPreference } = useNotificationPreferencesStore()
   const { t, isRTL } = useI18n()
 

@@ -51,9 +51,9 @@ import { toast } from 'sonner'
 const typeConfig: Record<MilestoneType, { emoji: string; color: string; bg: string; border: string; dotColor: string }> = {
   birthday: { emoji: '🎂', color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20', dotColor: 'bg-pink-400' },
   anniversary: { emoji: '💍', color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/20', dotColor: 'bg-teal-400' },
-  graduation: { emoji: '🎓', color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/10', border: 'border-[#0D9488]/20', dotColor: 'bg-[#0D9488]' },
+  graduation: { emoji: '🎓', color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/10', border: 'border-[var(--accent-primary)]/20', dotColor: 'bg-[var(--accent-primary)]' },
   achievement: { emoji: '🏆', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dotColor: 'bg-emerald-400' },
-  custom: { emoji: '⭐', color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/10', border: 'border-[#0D9488]/20', dotColor: 'bg-[#0D9488]' },
+  custom: { emoji: '⭐', color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/10', border: 'border-[var(--accent-primary)]/20', dotColor: 'bg-[var(--accent-primary)]' },
 }
 
 const typeIconMap: Record<MilestoneType, React.ElementType> = {
@@ -80,7 +80,7 @@ function getCountdownBadge(days: number, t: typeof import('@/i18n/en').en.milest
   if (days === 0) return { label: t.today, color: 'bg-green-500/20 text-green-400 border-green-500/30' }
   if (days === 1) return { label: t.tomorrow, color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
   if (days <= 7) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' }
-  if (days <= 30) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20' }
+  if (days <= 30) return { label: t.inDays.replace('{n}', String(days)), color: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20' }
   return { label: t.inDays.replace('{n}', String(days)), color: 'bg-[--bg-surface-2] text-[--text-muted] border-[--border-subtle]' }
 }
 
@@ -370,10 +370,10 @@ export default function MilestonesPage() {
         transition={{ duration: 0.3, delay: 0.05 }}
         className="grid grid-cols-2 sm:grid-cols-4 gap-3"
       >
-        <StatCard icon={PartyPopper} label={mt.totalMilestones} value={stats.total} color="text-[#0D9488]" bg="bg-[#0D9488]/10" />
+        <StatCard icon={PartyPopper} label={mt.totalMilestones} value={stats.total} color="text-[var(--accent-primary)]" bg="bg-[var(--accent-primary)]/10" />
         <StatCard icon={Cake} label={mt.birthdaysCount} value={stats.birthdays} color="text-pink-400" bg="bg-pink-500/10" />
         <StatCard icon={Clock} label={mt.nextUpcoming} value={stats.nextUpcoming} color="text-emerald-400" bg="bg-emerald-500/10" smallValue />
-        <StatCard icon={Calendar} label={mt.thisMonthCount} value={stats.thisMonth} color="text-[#0D9488]" bg="bg-[#0D9488]/10" />
+        <StatCard icon={Calendar} label={mt.thisMonthCount} value={stats.thisMonth} color="text-[var(--accent-primary)]" bg="bg-[var(--accent-primary)]/10" />
       </motion.div>
 
       {/* ─── Month Calendar Strip ───────────────────────────────── */}

@@ -118,7 +118,15 @@ export function validateCSRF(request: NextRequest): NextResponse | null {
     return null
   }
 
-  // No Origin or Referer — allow through (SameSite cookies are primary defense)
-  // This handles direct API calls (curl, Postman) and server-to-server requests
+  // No Origin or Referer — in production, require at least one
+  // In development, allow through for API testing (curl, Postman)
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[CSRF] Blocked request with no Origin or Referer header')
+    return NextResponse.json(
+      { error: 'Request blocked — missing origin validation' },
+      { status: 403 }
+    )
+  }
+
   return null
 }

@@ -930,15 +930,31 @@ function AccountSettingsTab() {
   }
  }, [newPassword, confirmPassword, t])
 
+ const [deletingAccount, setDeletingAccount] = useState(false)
+
  const handleDeleteAccount = useCallback(async () => {
+  setDeletingAccount(true)
   try {
-   const supabase = createClient()
-   // Sign out first, then clear local state
-   await supabase.auth.signOut()
+   // Call GDPR/PDPL-compliant deletion endpoint to purge all DB records
+   const res = await fetch('/api/user/delete', { method: 'DELETE' })
+   if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.error || 'Deletion failed')
+   }
+
+   // After successful DB deletion, sign out and clear local state
+   try {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+   } catch {
+    // Supabase sign-out failure is non-critical — DB records are already deleted
+   }
    useAuthStore.getState().logout()
-   toast.success('Account deletion requested. You have been signed out.')
-  } catch {
-   toast.error(t.common.error)
+   toast.success('Account and all data permanently deleted.')
+  } catch (err) {
+   toast.error(err instanceof Error ? err.message : t.common.error)
+  } finally {
+   setDeletingAccount(false)
   }
  }, [t])
 
@@ -1074,8 +1090,9 @@ function AccountSettingsTab() {
        <AlertDialogCancel className="bg-muted border-border text-foreground">
         {t.common.cancel}
        </AlertDialogCancel>
-       <AlertDialogAction onClick={handleDeleteAccount} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
-        {t.common.delete} Account
+       <AlertDialogAction onClick={handleDeleteAccount} disabled={deletingAccount} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/80">
+        {deletingAccount ? <Loader2 className="size-4 animate-spin" /> : null}
+        {deletingAccount ? 'Deleting...' : `${t.common.delete} Account`}
        </AlertDialogAction>
       </AlertDialogFooter>
      </AlertDialogContent>

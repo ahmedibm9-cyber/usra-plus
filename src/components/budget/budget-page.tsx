@@ -56,9 +56,9 @@ import { useI18n } from '@/i18n/use-translation'
 // ─── Category config ──────────────────────────────────────────────
 const CATEGORIES: { key: ExpenseCategory; icon: React.ElementType; color: string; bg: string }[] = [
   { key: 'food', icon: UtensilsCrossed, color: 'text-orange-400', bg: 'bg-orange-500/15' },
-  { key: 'housing', icon: Home, color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/15' },
-  { key: 'transport', icon: Car, color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/15' },
-  { key: 'education', icon: GraduationCap, color: 'text-[#0D9488]', bg: 'bg-[#0D9488]/15' },
+  { key: 'housing', icon: Home, color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/15' },
+  { key: 'transport', icon: Car, color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/15' },
+  { key: 'education', icon: GraduationCap, color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/15' },
   { key: 'health', icon: HeartPulse, color: 'text-red-400', bg: 'bg-red-500/15' },
   { key: 'entertainment', icon: Gamepad2, color: 'text-pink-400', bg: 'bg-pink-500/15' },
   { key: 'shopping', icon: ShoppingBag, color: 'text-emerald-400', bg: 'bg-emerald-500/15' },
@@ -79,7 +79,7 @@ function ProgressRing({ percent, size = 120, strokeWidth = 10 }: { percent: numb
 
   const getColor = (p: number) => {
     if (p >= 90) return '#EF4444'
-    if (p >= 70) return '#059669'
+    if (p >= 70) return 'var(--accent)'
     return 'var(--accent-primary)'
   }
 
@@ -372,7 +372,7 @@ export default function BudgetPage() {
       >
         <div>
           <h1 className="text-2xl font-bold font-display text-[--text-primary] flex items-center gap-2">
-            <Wallet className="size-6 text-[#0D9488]" />
+            <Wallet className="size-6 text-[var(--accent-primary)]" />
             {t.budget.title}
           </h1>
           {/* Month selector */}
@@ -416,7 +416,7 @@ export default function BudgetPage() {
                 setShowAddExpense(true)
               }
             }}
-            className="bg-[#0D9488] hover:bg-[#0F766E] text-white btn-press"
+            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white btn-press"
           >
             <Plus className="size-3.5 mr-1.5" />
             {budgetMonth ? t.budget.addExpense : t.budget.setBudget}
@@ -438,7 +438,7 @@ export default function BudgetPage() {
           <h3 className="text-lg font-semibold font-display text-[--text-primary] mb-2">{t.budget.noBudget}</h3>
           <Button
             onClick={openSetBudget}
-            className="bg-[#0D9488] hover:bg-[#0F766E] text-white btn-press mt-2"
+            className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white btn-press mt-2"
           >
             <Coins className="size-4 mr-2" />
             {t.budget.setBudget}
@@ -469,7 +469,7 @@ export default function BudgetPage() {
               {/* Summary Stats */}
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
                 <div className="rounded-2xl bg-[--bg-surface-2] p-4 text-center card-hover">
-                  <Coins className="size-5 text-[#0D9488] mx-auto mb-2" />
+                  <Coins className="size-5 text-[var(--accent-primary)] mx-auto mb-2" />
                   <p className="text-xs text-[--text-muted] mb-1">{t.budget.totalBudget}</p>
                   <p className="text-lg font-bold font-metric text-[--text-primary]">
                     {budgetMonth.totalBudget.toLocaleString()}
@@ -499,7 +499,7 @@ export default function BudgetPage() {
                   {remaining < 0 && <p className="text-[10px] text-red-400 mt-0.5">{t.budget.overBudget}</p>}
                 </div>
                 <div className="rounded-2xl bg-[--bg-surface-2] p-4 text-center card-hover">
-                  <Receipt className="size-5 text-[#0D9488] mx-auto mb-2" />
+                  <Receipt className="size-5 text-[var(--accent-primary)] mx-auto mb-2" />
                   <p className="text-xs text-[--text-muted] mb-1">{t.budget.transactions}</p>
                   <p className="text-lg font-bold font-metric text-[--text-primary]">{expenses.length}</p>
                 </div>
@@ -621,7 +621,7 @@ export default function BudgetPage() {
                 <Button
                   onClick={() => setShowAddExpense(true)}
                   size="sm"
-                  className="mt-3 bg-[#0D9488] hover:bg-[#0F766E] text-white btn-press"
+                  className="mt-3 bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white btn-press"
                 >
                   <Plus className="size-3.5 mr-1.5" />
                   {t.budget.addExpense}
@@ -667,7 +667,7 @@ export default function BudgetPage() {
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <Avatar className="size-4">
-                              <AvatarFallback className="text-[8px] bg-[#0D9488]/20 text-[#0D9488]">
+                              <AvatarFallback className="text-[8px] bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]">
                                 {initials}
                               </AvatarFallback>
                               <AvatarImage src={undefined} />
@@ -760,12 +760,12 @@ export default function BudgetPage() {
                       className={`
                         flex flex-col items-center gap-1 p-2.5 rounded-xl text-xs transition-all btn-press
                         ${isSelected
-                          ? `border-2 border-[#0D9488]/50 bg-[#0D9488]/10 text-[--text-primary]`
+                          ? `border-2 border-[var(--accent-primary)]/50 bg-[var(--accent-primary)]/10 text-[--text-primary]`
                           : 'border border-[--border-subtle] bg-[--bg-surface-2] text-[--text-muted] hover:border-[--border-medium]'
                         }
                       `}
                     >
-                      <Icon className={`size-4 ${isSelected ? 'text-[#0D9488]' : cat.color}`} />
+                      <Icon className={`size-4 ${isSelected ? 'text-[var(--accent-primary)]' : cat.color}`} />
                       <span className="truncate">{t.budget[cat.key as keyof typeof t.budget]}</span>
                     </button>
                   )
@@ -825,7 +825,7 @@ export default function BudgetPage() {
             <Button
               onClick={handleAddExpense}
               disabled={!expenseForm.title.trim() || !expenseForm.amount}
-              className="bg-[#0D9488] hover:bg-[#0F766E] text-white"
+              className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white"
             >
               {t.budget.save}
             </Button>
@@ -909,7 +909,7 @@ export default function BudgetPage() {
             <Button
               onClick={handleSetBudget}
               disabled={!budgetForm.totalBudget || parseFloat(budgetForm.totalBudget) <= 0}
-              className="bg-[#0D9488] hover:bg-[#0F766E] text-white"
+              className="bg-[var(--accent-primary)] hover:bg-[var(--primary)] text-white"
             >
               {t.budget.save}
             </Button>

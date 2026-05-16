@@ -192,10 +192,10 @@ const itemVariants: Variants = {
 function RevenueTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[--bg-primary]/95 border border-[#0D9488]/20 rounded-xl px-4 py-3 shadow-2xl backdrop-blur-sm">
+    <div className="bg-[--bg-primary]/95 border border-[var(--accent-primary)]/20 rounded-xl px-4 py-3 shadow-2xl backdrop-blur-sm">
       <p className="text-xs text-[--text-muted] mb-1">{label}</p>
       <p className="text-lg font-bold text-[--text-primary]">${payload[0].value.toLocaleString()}</p>
-      <p className="text-xs text-[#0D9488]">MRR</p>
+      <p className="text-xs text-[var(--accent-primary)]">MRR</p>
     </div>
   )
 }
@@ -203,10 +203,10 @@ function RevenueTooltip({ active, payload, label }: { active?: boolean; payload?
 function UserGrowthTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[--bg-primary]/95 border border-[#0D9488]/20 rounded-xl px-4 py-3 shadow-2xl backdrop-blur-sm">
+    <div className="bg-[--bg-primary]/95 border border-[var(--accent-primary)]/20 rounded-xl px-4 py-3 shadow-2xl backdrop-blur-sm">
       <p className="text-xs text-[--text-muted] mb-1">{label}</p>
       <p className="text-lg font-bold text-[--text-primary]">{payload[0].value.toLocaleString()}</p>
-      <p className="text-xs text-[#0D9488]">Registrations</p>
+      <p className="text-xs text-[var(--accent-primary)]">Registrations</p>
     </div>
   )
 }
@@ -266,7 +266,7 @@ function BentoKPIBlock({
           {hasData && (
             <div
               className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                isPositive ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[--status-danger-bg] text-[--status-danger]'
+                isPositive ? 'bg-[var(--accent)]/10 text-[var(--accent)]' : 'bg-[--status-danger-bg] text-[--status-danger]'
               }`}
             >
               {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
@@ -356,7 +356,7 @@ function TerminalActivityFeed({ items, source }: {
 
   const getTerminalColor = (type: string) => {
     if (type === 'user_registered') return '#22C55E'
-    if (type === 'subscription_upgraded') return '#10B981'
+    if (type === 'subscription_upgraded') return 'var(--accent)'
     if (type === 'security_alert') return '#F87171'
     return '#9CA3AF'
   }
@@ -377,21 +377,21 @@ function TerminalActivityFeed({ items, source }: {
   return (
     <motion.div
       variants={itemVariants}
-      className="rounded-2xl overflow-hidden border border-[#10B981]/10"
+      className="rounded-2xl overflow-hidden border border-[var(--accent)]/10"
     >
-      <div className="bg-[--bg-surface] border-b border-[#10B981]/10 px-4 py-2.5 flex items-center justify-between">
+      <div className="bg-[--bg-surface] border-b border-[var(--accent)]/10 px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-[--status-danger]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[--status-warning]/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#34D399]/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[var(--secondary)]/80" />
           </div>
           <span className="text-[10px] font-metric text-[--text-muted] ml-2">usra-admin@live ~ activity.log</span>
         </div>
         <div className="flex items-center gap-1.5">
           {hasData && source === 'live' ? (
             <>
-              <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
               <span className="text-[10px] font-metric text-[--text-secondary]">LIVE</span>
             </>
           ) : (
@@ -426,14 +426,14 @@ function TerminalActivityFeed({ items, source }: {
             })}
             <div className="flex items-center gap-2 py-1.5">
               <span className="text-[--text-muted] select-none">$</span>
-              <span className="inline-block w-2 h-4 bg-[#10B981]/70 animate-pulse" />
+              <span className="inline-block w-2 h-4 bg-[var(--accent)]/70 animate-pulse" />
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center py-8">
-            <Activity className="w-6 h-6 text-[#10B981]/10 mb-2" />
+            <Activity className="w-6 h-6 text-[var(--accent)]/10 mb-2" />
             <p className="text-xs text-[--text-muted] font-metric">No activity yet</p>
-            <p className="text-[10px] text-[#10B981]/10 font-metric mt-1">Events will stream here in real-time</p>
+            <p className="text-[10px] text-[var(--accent)]/10 font-metric mt-1">Events will stream here in real-time</p>
           </div>
         )}
       </div>
@@ -625,7 +625,7 @@ export function AdminOverview() {
           <div
             className="absolute top-0 right-0 w-[600px] h-[400px] opacity-100 animate-float-blob-1"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(13, 148, 136,0.15) 0%, rgba(13, 148, 136,0.05) 40%, transparent 70%)',
+              background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent-primary) 15%, transparent) 0%, color-mix(in srgb, var(--accent-primary) 5%, transparent) 40%, transparent 70%)',
             }}
           />
           <div
@@ -637,7 +637,7 @@ export function AdminOverview() {
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[300px] opacity-100 animate-float-blob-3"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(13, 148, 136,0.06) 0%, transparent 60%)',
+              background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent-primary) 6%, transparent) 0%, transparent 60%)',
             }}
           />
           <div className="absolute inset-0 opacity-[0.015]" style={{
@@ -650,8 +650,8 @@ export function AdminOverview() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative">
-                  <div className={`w-3 h-3 rounded-full ${source === 'live' ? 'bg-[#10B981]' : 'bg-[--bg-surface]'}`} />
-                  {source === 'live' && <div className="absolute inset-0 w-3 h-3 rounded-full bg-[#10B981] animate-ping opacity-40" />}
+                  <div className={`w-3 h-3 rounded-full ${source === 'live' ? 'bg-[var(--accent)]' : 'bg-[--bg-surface]'}`} />
+                  {source === 'live' && <div className="absolute inset-0 w-3 h-3 rounded-full bg-[var(--accent)] animate-ping opacity-40" />}
                 </div>
                 <span className={`text-sm font-medium tracking-wide ${isEmpty ? 'text-[--text-muted]' : 'text-[--text-secondary]'}`}>
                   {isEmpty ? 'Awaiting user data' : 'All systems operational'}
@@ -659,7 +659,7 @@ export function AdminOverview() {
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[--text-primary] tracking-tight leading-tight">
                 Platform
-                <span className="bg-gradient-to-r from-[#0D9488] via-[#0D9488] to-[#0D9488] bg-clip-text text-transparent"> Command Center</span>
+                <span className="bg-gradient-to-r from-[var(--accent-primary)] via-[var(--accent-primary)] to-[var(--accent-primary)] bg-clip-text text-transparent"> Command Center</span>
               </h1>
               <p className="text-base text-[--text-muted] mt-3 max-w-xl">
                 Real-time monitoring of platform metrics, system health, and operational insights across all regions.
@@ -669,14 +669,14 @@ export function AdminOverview() {
             {/* Quick status badges */}
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[--bg-surface] border border-[--border-subtle] backdrop-blur-sm">
-                <Server className="w-3.5 h-3.5 text-[#10B981]" />
+                <Server className="w-3.5 h-3.5 text-[var(--accent)]" />
                 <span className="text-xs text-[--text-muted]">Server</span>
-                <span className="text-xs font-bold text-[#10B981]">OK</span>
+                <span className="text-xs font-bold text-[var(--accent)]">OK</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[--bg-surface] border border-[--border-subtle] backdrop-blur-sm">
-                <Database className="w-3.5 h-3.5 text-[#10B981]" />
+                <Database className="w-3.5 h-3.5 text-[var(--accent)]" />
                 <span className="text-xs text-[--text-muted]">{dbLabel}</span>
-                <span className="text-xs font-bold text-[#10B981]">Connected</span>
+                <span className="text-xs font-bold text-[var(--accent)]">Connected</span>
               </div>
             </div>
           </div>
@@ -690,15 +690,15 @@ export function AdminOverview() {
           ═══════════════════════════════════════════════════════════════════ */}
       <motion.div variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Zap className="w-4 h-4 text-[#10B981]" />
+          <Zap className="w-4 h-4 text-[var(--accent)]" />
           <h3 className="text-sm font-semibold text-[--text-primary]">Quick Actions</h3>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
           {[
-            { label: 'Create Announcement', icon: Megaphone, page: 'settings' as const, color: '#10B981' },
-            { label: 'Ban User', icon: ShieldAlert, page: 'users' as const, color: '#0D9488' },
+            { label: 'Create Announcement', icon: Megaphone, page: 'settings' as const, color: 'var(--accent)' },
+            { label: 'Ban User', icon: ShieldAlert, page: 'users' as const, color: 'var(--accent-primary)' },
             { label: 'Run Health Check', icon: Heart, page: 'bugs' as const, color: '#22C55E' },
-            { label: 'Export Data', icon: Download, page: 'users' as const, color: '#059669' },
+            { label: 'Export Data', icon: Download, page: 'users' as const, color: 'var(--accent)' },
             { label: 'Clear Cache', icon: RefreshCw, page: 'settings' as const, color: '#8B5CF6' },
           ].map(action => (
             <button
@@ -729,8 +729,8 @@ export function AdminOverview() {
           trend={usersTrend}
           trendLabel="vs last month"
           icon={Users}
-          gradientFrom="#0D9488"
-          gradientTo="#10B981"
+          gradientFrom="var(--accent-primary)"
+          gradientTo="var(--accent)"
           sparkData={sparkUsers}
           delay={0}
         />
@@ -740,8 +740,8 @@ export function AdminOverview() {
           trend={mauTrend}
           trendLabel="vs last month"
           icon={Activity}
-          gradientFrom="#0F766E"
-          gradientTo="#0D9488"
+          gradientFrom="var(--primary)"
+          gradientTo="var(--accent-primary)"
           sparkData={sparkMau}
           delay={50}
         />
@@ -751,7 +751,7 @@ export function AdminOverview() {
           trend={familiesTrend}
           trendLabel="vs last month"
           icon={Home}
-          gradientFrom="#10B981"
+          gradientFrom="var(--accent)"
           gradientTo="#22C55E"
           sparkData={sparkFamilies}
           delay={100}
@@ -763,8 +763,8 @@ export function AdminOverview() {
           trend={mrrTrend}
           trendLabel="vs last month"
           icon={DollarSign}
-          gradientFrom="#059669"
-          gradientTo="#34D399"
+          gradientFrom="var(--accent)"
+          gradientTo="var(--secondary)"
           sparkData={sparkMrr}
           delay={150}
         />
@@ -776,12 +776,12 @@ export function AdminOverview() {
       {revenueData.length > 0 ? (
         <motion.div
           variants={itemVariants}
-          className="bg-[--bg-primary] border border-[#0D9488]/10 rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden"
+          className="bg-[--bg-primary] border border-[var(--accent-primary)]/10 rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden"
         >
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] pointer-events-none opacity-30"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(13, 148, 136,0.08) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent-primary) 8%, transparent) 0%, transparent 70%)',
             }}
           />
 
@@ -789,47 +789,47 @@ export function AdminOverview() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-[--text-primary] flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-[#0D9488]" />
+                  <Radio className="w-4 h-4 text-[var(--accent-primary)]" />
                   Monthly Recurring Revenue
                 </h3>
                 <p className="text-sm text-[--text-muted] mt-0.5">Last 12 months performance</p>
               </div>
               {mrr > 0 && (
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D9488]/10 border border-[#0D9488]/20">
-                    <TrendingUp className="w-3.5 h-3.5 text-[#0D9488]" />
-                    <span className="text-sm font-semibold text-[#0D9488]">${(mrr * 12).toLocaleString()} ARR</span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20">
+                    <TrendingUp className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
+                    <span className="text-sm font-semibold text-[var(--accent-primary)]">${(mrr * 12).toLocaleString()} ARR</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="h-[300px]" style={{ filter: 'drop-shadow(0 0 12px rgba(13, 148, 136,0.15))' }}>
+            <div className="h-[300px]" style={{ filter: 'drop-shadow(0 0 12px color-mix(in srgb, var(--accent-primary) 15%, transparent))' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={revenueData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="mrrGradientGlow" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#0D9488" stopOpacity={0.35} />
-                      <stop offset="50%" stopColor="#0D9488" stopOpacity={0.1} />
-                      <stop offset="80%" stopColor="#0D9488" stopOpacity={0.02} />
+                      <stop offset="0%" stopColor="var(--accent-primary)" stopOpacity={0.35} />
+                      <stop offset="50%" stopColor="var(--accent-primary)" stopOpacity={0.1} />
+                      <stop offset="80%" stopColor="var(--accent-primary)" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} dy={8} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} dx={-4} />
-                  <Tooltip content={<RevenueTooltip />} cursor={{ stroke: 'rgba(13, 148, 136,0.2)', strokeWidth: 1 }} />
+                  <Tooltip content={<RevenueTooltip />} cursor={{ stroke: 'color-mix(in srgb, var(--accent-primary) 20%, transparent)', strokeWidth: 1 }} />
                   <Area
                     type="monotone"
                     dataKey="mrr"
-                    stroke="#0D9488"
+                    stroke="var(--accent-primary)"
                     strokeWidth={2.5}
                     fill="url(#mrrGradientGlow)"
                     dot={false}
                     activeDot={{
-                      r: 6, fill: '#0D9488', stroke: 'var(--bg-primary)', strokeWidth: 3,
-                      style: { filter: 'drop-shadow(0 0 8px rgba(13, 148, 136,0.5))' }
+                      r: 6, fill: 'var(--accent-primary)', stroke: 'var(--bg-primary)', strokeWidth: 3,
+                      style: { filter: 'drop-shadow(0 0 8px color-mix(in srgb, var(--accent-primary) 50%, transparent))' }
                     }}
-                    style={{ filter: 'drop-shadow(0 0 6px rgba(13, 148, 136,0.4))' }}
+                    style={{ filter: 'drop-shadow(0 0 6px color-mix(in srgb, var(--accent-primary) 40%, transparent))' }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -853,7 +853,7 @@ export function AdminOverview() {
         {userGrowthData.length > 0 ? (
           <motion.div
             variants={itemVariants}
-            className="bg-[--bg-primary] border border-[#0D9488]/10 rounded-2xl p-6 backdrop-blur-sm"
+            className="bg-[--bg-primary] border border-[var(--accent-primary)]/10 rounded-2xl p-6 backdrop-blur-sm"
           >
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -861,9 +861,9 @@ export function AdminOverview() {
                 <p className="text-sm text-[--text-muted] mt-0.5">Registrations per month</p>
               </div>
               {totalUsers > 0 && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#10B981]/10">
-                  <TrendingUp className="w-3 h-3 text-[#10B981]" />
-                  <span className="text-xs font-medium text-[#10B981]">+{Math.round((userGrowthData[userGrowthData.length - 1]?.registrations ?? 0) / Math.max(1, userGrowthData[0]?.registrations ?? 1) * 100 - 100)}%</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent)]/10">
+                  <TrendingUp className="w-3 h-3 text-[var(--accent)]" />
+                  <span className="text-xs font-medium text-[var(--accent)]">+{Math.round((userGrowthData[userGrowthData.length - 1]?.registrations ?? 0) / Math.max(1, userGrowthData[0]?.registrations ?? 1) * 100 - 100)}%</span>
                 </div>
               )}
             </div>
@@ -875,7 +875,7 @@ export function AdminOverview() {
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} dy={6} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} dx={-4} />
                   <Tooltip content={<UserGrowthTooltip />} cursor={{ fill: 'rgba(139,92,246,0.05)' }} />
-                  <Bar dataKey="registrations" fill="#0F766E" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                  <Bar dataKey="registrations" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={36} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -891,7 +891,7 @@ export function AdminOverview() {
         {/* Right: Custom SVG Donut Chart for Plan Distribution */}
         <motion.div
           variants={itemVariants}
-          className="bg-[--bg-primary] border border-[#0D9488]/10 rounded-2xl p-6 backdrop-blur-sm"
+          className="bg-[--bg-primary] border border-[var(--accent-primary)]/10 rounded-2xl p-6 backdrop-blur-sm"
         >
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-[--text-primary]">Plan Distribution</h3>
@@ -980,9 +980,9 @@ export function AdminOverview() {
                       className="h-full rounded-full"
                       style={{
                         background: region.percentage > 30
-                          ? 'linear-gradient(90deg, #0D9488, #0F766E)'
+                          ? 'linear-gradient(90deg, var(--accent-primary), var(--primary))'
                           : region.percentage > 10
-                          ? 'linear-gradient(90deg, #0F766E, #0D9488)'
+                          ? 'linear-gradient(90deg, var(--primary), var(--accent-primary))'
                           : '#6B7280'
                       }}
                     />
@@ -1012,10 +1012,10 @@ export function AdminOverview() {
           <div className="space-y-5">
             {/* Real data from database via overview API */}
             {[
-              { label: 'DB Connected', value: overviewData?.platformHealth?.dbConnected ? 'Yes' : 'No', color: overviewData?.platformHealth?.dbConnected ? '#10B981' : '#EF4444', icon: Database, barPercent: overviewData?.platformHealth?.dbConnected ? 100 : 0 },
-              { label: 'Total Users', value: String(overviewData?.platformHealth?.totalUsers ?? 0), color: '#0D9488', icon: Users, barPercent: Math.min(((overviewData?.platformHealth?.totalUsers ?? 0) / Math.max(overviewData?.platformHealth?.totalUsers ?? 1, 10)) * 100, 100) },
-              { label: 'Verified Users', value: String(overviewData?.platformHealth?.verifiedUsers ?? 0), color: '#059669', icon: CheckCircle2, barPercent: totalUsers > 0 ? Math.round(((overviewData?.platformHealth?.verifiedUsers ?? 0) / totalUsers) * 100) : 0 },
-              { label: 'Active Sessions', value: String(overviewData?.platformHealth?.totalSessions ?? 0), color: '#0F766E', icon: Activity, barPercent: Math.min(((overviewData?.platformHealth?.totalSessions ?? 0) / Math.max(overviewData?.platformHealth?.totalUsers ?? 1, 10)) * 100, 100) },
+              { label: 'DB Connected', value: overviewData?.platformHealth?.dbConnected ? 'Yes' : 'No', color: overviewData?.platformHealth?.dbConnected ? 'var(--accent)' : '#EF4444', icon: Database, barPercent: overviewData?.platformHealth?.dbConnected ? 100 : 0 },
+              { label: 'Total Users', value: String(overviewData?.platformHealth?.totalUsers ?? 0), color: 'var(--accent-primary)', icon: Users, barPercent: Math.min(((overviewData?.platformHealth?.totalUsers ?? 0) / Math.max(overviewData?.platformHealth?.totalUsers ?? 1, 10)) * 100, 100) },
+              { label: 'Verified Users', value: String(overviewData?.platformHealth?.verifiedUsers ?? 0), color: 'var(--accent)', icon: CheckCircle2, barPercent: totalUsers > 0 ? Math.round(((overviewData?.platformHealth?.verifiedUsers ?? 0) / totalUsers) * 100) : 0 },
+              { label: 'Active Sessions', value: String(overviewData?.platformHealth?.totalSessions ?? 0), color: 'var(--primary)', icon: Activity, barPercent: Math.min(((overviewData?.platformHealth?.totalSessions ?? 0) / Math.max(overviewData?.platformHealth?.totalUsers ?? 1, 10)) * 100, 100) },
             ].map((metric) => {
               const IconComp = metric.icon
               return (
@@ -1069,11 +1069,11 @@ export function AdminOverview() {
             <motion.div
               key={metric.label}
               variants={itemVariants}
-              className="bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-4 backdrop-blur-sm hover:border-[#0D9488]/20 transition-all duration-300 group"
+              className="bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-4 backdrop-blur-sm hover:border-[var(--accent-primary)]/20 transition-all duration-300 group"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center group-hover:bg-[#0D9488]/20 transition-colors">
-                  <metric.icon className="w-4 h-4 text-[#0D9488]" />
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent-primary)]/10 flex items-center justify-center group-hover:bg-[var(--accent-primary)]/20 transition-colors">
+                  <metric.icon className="w-4 h-4 text-[var(--accent-primary)]" />
                 </div>
                 <p className="text-xs text-[--text-muted] font-medium">{metric.label}</p>
               </div>

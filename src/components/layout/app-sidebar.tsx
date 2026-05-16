@@ -39,7 +39,7 @@ import {
 } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { useSubscriptionStore } from '@/stores/subscription-store'
+import { useCurrentPage, useCurrentFamily, useSidebarCollapsed, useCurrentUser, useCurrentPlan } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'
 import { MuiLayoutProvider } from './mui-layout-provider'
 import type { AppPage } from '@/types'
@@ -65,7 +65,7 @@ const navItems: NavItem[] = [
 ]
 
 function PlanBadgeMUI() {
-  const { plan } = useSubscriptionStore()
+  const plan = useCurrentPlan()
 
   const config: Record<string, { label: string; color: string; bgcolor: string }> = {
     free: { label: 'Free', color: 'text.disabled', bgcolor: 'action.hover' },
@@ -193,8 +193,13 @@ function NavItemButton({
 }
 
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
-  const { currentPage, setCurrentPage, currentFamily, families, setCurrentFamily } = useAppStore()
-  const { user, logout } = useAuthStore()
+  const currentPage = useCurrentPage()
+  const setCurrentPage = useAppStore((state) => state.setCurrentPage)
+  const currentFamily = useCurrentFamily()
+  const families = useAppStore((state) => state.families)
+  const setCurrentFamily = useAppStore((state) => state.setCurrentFamily)
+  const user = useCurrentUser()
+  const logout = useAuthStore((state) => state.logout)
   const { t, isRTL } = useI18n()
   const [familyMenuAnchor, setFamilyMenuAnchor] = useState<HTMLElement | null>(null)
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
@@ -506,7 +511,10 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 }
 
 function AppSidebarInner() {
-  const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar } = useAppStore()
+  const sidebarCollapsed = useSidebarCollapsed()
+  const sidebarOpen = useAppStore((state) => state.sidebarOpen)
+  const setSidebarOpen = useAppStore((state) => state.setSidebarOpen)
+  const toggleSidebar = useAppStore((state) => state.toggleSidebar)
   const { t, isRTL } = useI18n()
 
   const drawerWidth = sidebarCollapsed ? 72 : 256

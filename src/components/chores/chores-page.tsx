@@ -68,12 +68,12 @@ const CHORE_ICONS = [
 
 // ─── Person colors for avatars ─────────────────────────────────────
 const PERSON_COLORS = [
-  'bg-[#0D9488]',
-  'bg-[#10B981]',
+  'bg-[var(--accent-primary)]',
+  'bg-[var(--accent)]',
   'bg-[#22C55E]',
   'bg-emerald-500',
   'bg-teal-500',
-  'bg-[#0D9488]',
+  'bg-[var(--accent-primary)]',
 ]
 
 function getPersonColor(index: number) {
@@ -89,9 +89,9 @@ const DIFFICULTY_STYLES = {
 
 // ─── Frequency badge colors ────────────────────────────────────────
 const FREQUENCY_STYLES = {
-  daily: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20',
-  weekly: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20',
-  biweekly: 'bg-[#0D9488]/15 text-[#0D9488] border-[#0D9488]/20',
+  daily: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20',
+  weekly: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20',
+  biweekly: 'bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/20',
   monthly: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
 }
 
@@ -1013,7 +1013,7 @@ export default function ChoresPage() {
         </div>
         <div className="stat-card-wrapper glass-card rounded-xl border border-[--border-subtle] bg-[--bg-surface] p-4">
           <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="size-4 text-[#0D9488]" />
+            <BarChart3 className="size-4 text-[var(--accent-primary)]" />
             <span className="text-[10px] text-[--text-muted] font-medium uppercase tracking-wide">{t.chores.completionRate}</span>
           </div>
           <span className="text-2xl font-bold text-[--text-primary]">{completionRate}%</span>

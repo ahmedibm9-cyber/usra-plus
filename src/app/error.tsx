@@ -54,7 +54,7 @@ export default function Error({ error, reset }: ErrorProps) {
           width: '64px',
           height: '64px',
           borderRadius: '16px',
-          background: 'linear-gradient(135deg, #0D9488, #0F766E)',
+          background: 'linear-gradient(135deg, var(--accent-primary, #0D9488), var(--primary, #0F766E))',
           marginBottom: '24px',
         }}>
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -91,7 +91,7 @@ export default function Error({ error, reset }: ErrorProps) {
           An unexpected error occurred while loading this page. This is usually temporary.
         </p>
 
-        {error?.message && (
+        {error?.digest && (
           <p style={{
             fontSize: '12px',
             color: 'var(--text-muted, #8B93A1)',
@@ -102,7 +102,7 @@ export default function Error({ error, reset }: ErrorProps) {
             border: '1px solid var(--border-subtle, rgba(255,255,255,0.08))',
             wordBreak: 'break-word',
           }}>
-            {error.message}
+            Error ID: {error.digest}
           </p>
         )}
 
@@ -116,7 +116,7 @@ export default function Error({ error, reset }: ErrorProps) {
               gap: '8px',
               padding: '10px 24px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #0D9488, #0F766E)',
+              background: 'linear-gradient(135deg, var(--accent-primary, #0D9488), var(--primary, #0F766E))',
               color: '#FFFFFF',
               fontSize: '14px',
               fontWeight: 600,

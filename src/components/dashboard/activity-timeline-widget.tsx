@@ -36,7 +36,7 @@ import { useI18n } from '@/i18n/use-translation'
 const tealTheme = createTheme({
   palette: {
     primary: { main: '#0D6B58' },
-    secondary: { main: '#059669' },
+    secondary: { main: 'var(--accent)' },
   },
   shape: { borderRadius: 16 },
 })
@@ -70,13 +70,13 @@ const TIMELINE_TYPE_CONFIG: Record<ActivityType, {
   },
   grocery_added: {
     icon: ShoppingCart,
-    dotColor: '#059669',
-    bgColor: alpha('#059669', 0.12),
+    dotColor: 'var(--accent)',
+    bgColor: alpha('var(--accent)', 0.12),
   },
   grocery_checked: {
     icon: ShoppingCart,
-    dotColor: '#059669',
-    bgColor: alpha('#059669', 0.12),
+    dotColor: 'var(--accent)',
+    bgColor: alpha('var(--accent)', 0.12),
   },
   message_sent: {
     icon: Chat,
@@ -85,8 +85,8 @@ const TIMELINE_TYPE_CONFIG: Record<ActivityType, {
   },
   member_joined: {
     icon: PersonAdd,
-    dotColor: '#059669',
-    bgColor: alpha('#059669', 0.12),
+    dotColor: 'var(--accent)',
+    bgColor: alpha('var(--accent)', 0.12),
   },
 }
 

@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner'
 import type { EmailCampaign, UserSegment, ABTest, EmailCampaignStatus } from '@/types/admin'
 import { safeJsonResponse } from '@/lib/safe-fetch'
+import DOMPurify from 'dompurify'
 
 // ─── Animation Variants ──────────────────────────────────────────────
 
@@ -60,9 +61,9 @@ function LoadingSkeleton() {
 function campaignStatusBadge(status: EmailCampaignStatus) {
   switch (status) {
     case 'draft': return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', label: 'Draft' }
-    case 'scheduled': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Scheduled' }
-    case 'sending': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Sending' }
-    case 'sent': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Sent' }
+    case 'scheduled': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Scheduled' }
+    case 'sending': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Sending' }
+    case 'sent': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Sent' }
     case 'paused': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', label: 'Paused' }
     case 'cancelled': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]', label: 'Cancelled' }
   }
@@ -71,9 +72,9 @@ function campaignStatusBadge(status: EmailCampaignStatus) {
 function abTestStatusBadge(status: string) {
   switch (status) {
     case 'draft': return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', label: 'Draft' }
-    case 'running': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Running' }
+    case 'running': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Running' }
     case 'paused': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', label: 'Paused' }
-    case 'completed': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Completed' }
+    case 'completed': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Completed' }
     case 'cancelled': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]', label: 'Cancelled' }
     default: return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', label: status }
   }
@@ -81,7 +82,7 @@ function abTestStatusBadge(status: string) {
 
 function segmentBadge(isAuto: boolean) {
   return isAuto
-    ? { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Auto-Update' }
+    ? { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Auto-Update' }
     : { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', label: 'Static' }
 }
 
@@ -204,7 +205,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (v: stri
   }, [value])
 
   const btnBase = 'p-1.5 rounded-lg transition-all text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface]'
-  const btnActive = 'text-[#10B981] bg-[#10B981]/10'
+  const btnActive = 'text-[var(--accent)] bg-[var(--accent)]/10'
 
   return (
     <div className="border border-[--border-subtle] rounded-lg overflow-hidden">
@@ -232,7 +233,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (v: stri
         onInput={handleInput}
         className="min-h-[120px] max-h-[240px] overflow-y-auto px-3 py-2 text-sm text-[--text-secondary] bg-[--bg-primary] focus:outline-none custom-scrollbar"
         suppressContentEditableWarning
-        dangerouslySetInnerHTML={{ __html: value || '<p><br></p>' }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value || '<p><br></p>') }}
       />
     </div>
   )
@@ -262,10 +263,10 @@ function PreviewModal({ html, subject, onClose }: { html: string; subject: strin
           <h3 className="text-sm font-semibold text-[--text-primary]">Email Preview</h3>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 bg-[--bg-primary] border border-[--border-subtle] rounded-lg p-0.5">
-              <button onClick={() => setViewMode('desktop')} className={`p-1.5 rounded-md transition-all ${viewMode === 'desktop' ? 'bg-[#10B981]/10 text-[#10B981]' : 'text-[--text-muted]'}`}>
+              <button onClick={() => setViewMode('desktop')} className={`p-1.5 rounded-md transition-all ${viewMode === 'desktop' ? 'bg-[var(--accent)]/10 text-[var(--accent)]' : 'text-[--text-muted]'}`}>
                 <Monitor className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => setViewMode('mobile')} className={`p-1.5 rounded-md transition-all ${viewMode === 'mobile' ? 'bg-[#10B981]/10 text-[#10B981]' : 'text-[--text-muted]'}`}>
+              <button onClick={() => setViewMode('mobile')} className={`p-1.5 rounded-md transition-all ${viewMode === 'mobile' ? 'bg-[var(--accent)]/10 text-[var(--accent)]' : 'text-[--text-muted]'}`}>
                 <Smartphone className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -279,7 +280,7 @@ function PreviewModal({ html, subject, onClose }: { html: string; subject: strin
             <div className="px-4 py-2 border-b border-[--border-subtle] bg-[--bg-surface-2]">
               <p className="text-xs text-[--text-muted]">Subject: {subject}</p>
             </div>
-            <div className="p-4 min-h-[200px]" dangerouslySetInnerHTML={{ __html: html || '<p style="color:#999">No content yet</p>' }} />
+            <div className="p-4 min-h-[200px]" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html || '<p style="color:#999">No content yet</p>') }} />
           </div>
         </div>
       </motion.div>
@@ -343,19 +344,19 @@ function VisualRuleBuilder({ conditions, setConditions }: {
             className="flex items-center gap-2"
           >
             {idx > 0 && (
-              <span className="text-[10px] text-[#10B981] font-metric uppercase px-1">AND</span>
+              <span className="text-[10px] text-[var(--accent)] font-metric uppercase px-1">AND</span>
             )}
             <select value={cond.field} onChange={e => updateCondition(cond.id, 'field', e.target.value)}
-              className="flex-1 px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+              className="flex-1 px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
               {RULE_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
             <select value={cond.operator} onChange={e => updateCondition(cond.id, 'operator', e.target.value)}
-              className="px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+              className="px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
               {RULE_OPERATORS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             {fieldConfig?.type === 'select' ? (
               <select value={cond.value} onChange={e => updateCondition(cond.id, 'value', e.target.value)}
-                className="flex-1 px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+                className="flex-1 px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
                 <option value="">Select...</option>
                 {fieldConfig.options?.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -365,7 +366,7 @@ function VisualRuleBuilder({ conditions, setConditions }: {
                 value={cond.value}
                 onChange={e => updateCondition(cond.id, 'value', e.target.value)}
                 placeholder="Value"
-                className="flex-1 px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30"
+                className="flex-1 px-2 py-1.5 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-xs text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30"
               />
             )}
             <button type="button" onClick={() => removeCondition(cond.id)} className="p-1 rounded text-[--text-muted] hover:text-[--status-danger] transition-colors">
@@ -375,7 +376,7 @@ function VisualRuleBuilder({ conditions, setConditions }: {
         )
       })}
       <button type="button" onClick={addCondition}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#10B981] hover:bg-[#10B981]/10 border border-dashed border-[#10B981]/30 transition-all">
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[var(--accent)] hover:bg-[var(--accent)]/10 border border-dashed border-[var(--accent)]/30 transition-all">
         <Plus className="w-3 h-3" /> Add Condition
       </button>
     </div>
@@ -388,17 +389,17 @@ function TrafficSplitVisualizer({ value, onChange }: { value: number; onChange: 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-[#10B981]">Variant A: {100 - value}%</span>
-        <span className="text-[#0D9488]">Variant B: {value}%</span>
+        <span className="text-[var(--accent)]">Variant A: {100 - value}%</span>
+        <span className="text-[var(--accent-primary)]">Variant B: {value}%</span>
       </div>
       <div className="relative h-3 bg-[--bg-surface] rounded-full overflow-hidden border border-[--border-subtle]">
         <motion.div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#10B981] to-[#10B981]/70"
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--accent)] to-[var(--accent)]/70"
           animate={{ width: `${100 - value}%` }}
           transition={{ duration: 0.3 }}
         />
         <motion.div
-          className="absolute inset-y-0 right-0 bg-gradient-to-l from-[#0D9488] to-[#0D9488]/70"
+          className="absolute inset-y-0 right-0 bg-gradient-to-l from-[var(--accent-primary)] to-[var(--accent-primary)]/70"
           animate={{ width: `${value}%` }}
           transition={{ duration: 0.3 }}
         />
@@ -417,7 +418,7 @@ function TrafficSplitVisualizer({ value, onChange }: { value: number; onChange: 
 
 // ─── Stat Card Component ─────────────────────────────────────────────
 
-function StatCard({ icon, label, value, subtext, color = '#10B981' }: {
+function StatCard({ icon, label, value, subtext, color = 'var(--accent)' }: {
   icon: React.ReactNode; label: string; value: string | number; subtext?: string; color?: string
 }) {
   return (
@@ -612,8 +613,8 @@ function EmailCampaignsTab() {
     const actions: { label: string; icon: React.ReactNode; status: EmailCampaignStatus; color: string }[] = []
     switch (c.status) {
       case 'draft':
-        actions.push({ label: 'Schedule', icon: <Clock className="w-3 h-3" />, status: 'scheduled', color: 'text-[#10B981] hover:bg-[#10B981]/10' })
-        actions.push({ label: 'Send Now', icon: <Send className="w-3 h-3" />, status: 'sending', color: 'text-[#10B981] hover:bg-[#10B981]/10' })
+        actions.push({ label: 'Schedule', icon: <Clock className="w-3 h-3" />, status: 'scheduled', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10' })
+        actions.push({ label: 'Send Now', icon: <Send className="w-3 h-3" />, status: 'sending', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10' })
         break
       case 'scheduled':
         actions.push({ label: 'Pause', icon: <Pause className="w-3 h-3" />, status: 'paused', color: 'text-[--status-warning] hover:bg-[--status-warning-bg]' })
@@ -623,7 +624,7 @@ function EmailCampaignsTab() {
         actions.push({ label: 'Pause', icon: <Pause className="w-3 h-3" />, status: 'paused', color: 'text-[--status-warning] hover:bg-[--status-warning-bg]' })
         break
       case 'paused':
-        actions.push({ label: 'Resume', icon: <Play className="w-3 h-3" />, status: 'sending', color: 'text-[#10B981] hover:bg-[#10B981]/10' })
+        actions.push({ label: 'Resume', icon: <Play className="w-3 h-3" />, status: 'sending', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10' })
         actions.push({ label: 'Cancel', icon: <Square className="w-3 h-3" />, status: 'cancelled', color: 'text-[--status-danger] hover:bg-[--status-danger-bg]' })
         break
       case 'sent':
@@ -637,17 +638,17 @@ function EmailCampaignsTab() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4">
       {/* Analytics Dashboard */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard icon={<Mail className="w-4 h-4" />} label="Total Campaigns" value={stats.total} color="#10B981" />
-        <StatCard icon={<Send className="w-4 h-4" />} label="Total Sent" value={stats.totalSent.toLocaleString()} color="#0D9488" />
-        <StatCard icon={<Eye className="w-4 h-4" />} label="Avg Open Rate" value={`${stats.avgOpenRate}%`} color="#10B981" />
-        <StatCard icon={<MousePointer className="w-4 h-4" />} label="Avg Click Rate" value={`${stats.avgClickRate}%`} color="#0D9488" />
+        <StatCard icon={<Mail className="w-4 h-4" />} label="Total Campaigns" value={stats.total} color="var(--accent)" />
+        <StatCard icon={<Send className="w-4 h-4" />} label="Total Sent" value={stats.totalSent.toLocaleString()} color="var(--accent-primary)" />
+        <StatCard icon={<Eye className="w-4 h-4" />} label="Avg Open Rate" value={`${stats.avgOpenRate}%`} color="var(--accent)" />
+        <StatCard icon={<MousePointer className="w-4 h-4" />} label="Avg Click Rate" value={`${stats.avgClickRate}%`} color="var(--accent-primary)" />
       </div>
 
       {/* Active Campaigns Alert */}
       {stats.activeCampaigns > 0 && (
-        <motion.div variants={itemVariants} className="flex items-center gap-2 px-3 py-2 bg-[#10B981]/5 border border-[#10B981]/15 rounded-lg">
-          <Radio className="w-3.5 h-3.5 text-[#10B981] animate-pulse" />
-          <span className="text-xs text-[#10B981]">{stats.activeCampaigns} active campaign{stats.activeCampaigns > 1 ? 's' : ''} running</span>
+        <motion.div variants={itemVariants} className="flex items-center gap-2 px-3 py-2 bg-[var(--accent)]/5 border border-[var(--accent)]/15 rounded-lg">
+          <Radio className="w-3.5 h-3.5 text-[var(--accent)] animate-pulse" />
+          <span className="text-xs text-[var(--accent)]">{stats.activeCampaigns} active campaign{stats.activeCampaigns > 1 ? 's' : ''} running</span>
         </motion.div>
       )}
 
@@ -655,16 +656,16 @@ function EmailCampaignsTab() {
       {scheduledCampaigns.length > 0 && (
         <motion.div variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-4">
           <h4 className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-[#10B981]" />
+            <Calendar className="w-3.5 h-3.5 text-[var(--accent)]" />
             Scheduled Timeline
           </h4>
           <div className="relative pl-6">
-            <div className="absolute left-2 top-0 bottom-0 w-px bg-[#10B981]/20" />
+            <div className="absolute left-2 top-0 bottom-0 w-px bg-[var(--accent)]/20" />
             {scheduledCampaigns.map((c, idx) => (
               <div key={c.id} className="relative pb-3 last:pb-0">
-                <div className="absolute -left-[18px] top-1 w-3 h-3 rounded-full bg-[#10B981] border-2 border-[--bg-primary]" />
+                <div className="absolute -left-[18px] top-1 w-3 h-3 rounded-full bg-[var(--accent)] border-2 border-[--bg-primary]" />
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-[#10B981] font-metric">{new Date(c.scheduledAt!).toLocaleString()}</span>
+                  <span className="text-[10px] text-[var(--accent)] font-metric">{new Date(c.scheduledAt!).toLocaleString()}</span>
                   <span className="text-xs text-[--text-primary]">{c.name}</span>
                   <span className="text-[10px] text-[--text-muted]">→ {c.targetSegment}</span>
                 </div>
@@ -677,10 +678,10 @@ function EmailCampaignsTab() {
       {/* Header Row */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <Mail className="w-4 h-4 text-[#10B981]" />
+          <Mail className="w-4 h-4 text-[var(--accent)]" />
           Email Campaigns
           {campaigns.length > 0 && (
-            <span className="px-2 py-0.5 rounded text-[10px] bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">{campaigns.length}</span>
+            <span className="px-2 py-0.5 rounded text-[10px] bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">{campaigns.length}</span>
           )}
         </h3>
         <div className="flex items-center gap-2">
@@ -697,10 +698,10 @@ function EmailCampaignsTab() {
             <option value="paused">Paused</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <button onClick={fetchCampaigns} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Refresh">
+          <button onClick={fetchCampaigns} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Refresh">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
             <Plus className="w-3 h-3" /> Create Campaign
           </button>
         </div>
@@ -714,7 +715,7 @@ function EmailCampaignsTab() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.2 }}
-            className="bg-[--bg-primary] border border-[#10B981]/10 rounded-xl p-4 space-y-3"
+            className="bg-[--bg-primary] border border-[var(--accent)]/10 rounded-xl p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">
@@ -727,17 +728,17 @@ function EmailCampaignsTab() {
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Campaign Name *</label>
                   <input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Summer 2025 Launch" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Subject Line *</label>
                   <input type="text" value={formSubject} onChange={e => setFormSubject(e.target.value)} placeholder="Welcome to USRA PLUS!" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Target Segment</label>
                   <select value={formTargetSegment} onChange={e => setFormTargetSegment(e.target.value)}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
                     <option value="all">All Users</option>
                     <option value="new">New Users (7 days)</option>
                     <option value="active">Active Users</option>
@@ -749,7 +750,7 @@ function EmailCampaignsTab() {
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Template</label>
                   <select value={selectedTemplate} onChange={e => handleTemplateSelect(e.target.value)}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
                     <option value="">Custom (no template)</option>
                     {MOCK_TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
@@ -757,7 +758,7 @@ function EmailCampaignsTab() {
                 <div className="sm:col-span-2">
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Schedule</label>
                   <input type="datetime-local" value={formScheduledAt} onChange={e => setFormScheduledAt(e.target.value)}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
               </div>
               <div>
@@ -767,18 +768,18 @@ function EmailCampaignsTab() {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={() => setShowPreview(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 border border-[--border-subtle] transition-all">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 border border-[--border-subtle] transition-all">
                     <Eye className="w-3 h-3" /> Preview
                   </button>
                   <button type="button" onClick={handleSendTest}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 border border-[--border-subtle] transition-all">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 border border-[--border-subtle] transition-all">
                     <Send className="w-3 h-3" /> Send Test
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={() => { setShowCreateForm(false); resetForm() }} className="px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
                   <button type="submit" disabled={submitting}
-                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#0D9488] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent-primary)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
                     {submitting ? <Loader2 className="w-3 h-3 animate-spin" /> : editingCampaign ? <Save className="w-3 h-3" /> : <Mail className="w-3 h-3" />}
                     {editingCampaign ? 'Update Campaign' : 'Save as Draft'}
                   </button>
@@ -800,12 +801,12 @@ function EmailCampaignsTab() {
       {/* Empty State */}
       {!loading && campaigns.length === 0 && (
         <motion.div variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-2xl p-8 flex flex-col items-center justify-center min-h-[300px]">
-          <div className="w-16 h-16 rounded-2xl bg-[#10B981]/5 border border-[#10B981]/10 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/5 border border-[var(--accent)]/10 flex items-center justify-center mb-4">
             <Mail className="w-8 h-8 text-[--text-muted]" />
           </div>
           <p className="text-sm font-medium text-[--text-primary] mb-1">No email campaigns yet</p>
           <p className="text-xs text-[--text-muted] mb-4 text-center max-w-[280px]">Create your first email campaign to engage users and drive conversions</p>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
             <Plus className="w-3 h-3" /> Create First Campaign
           </button>
         </motion.div>
@@ -834,10 +835,10 @@ function EmailCampaignsTab() {
                         {a.icon}
                       </button>
                     ))}
-                    <button onClick={() => handleDuplicate(campaign)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Duplicate">
+                    <button onClick={() => handleDuplicate(campaign)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Duplicate">
                       <Copy className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => openEdit(campaign)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Edit">
+                    <button onClick={() => openEdit(campaign)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Edit">
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={() => setConfirmAction({ type: 'delete', id: campaign.id, campaign })} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--status-danger] hover:bg-[--status-danger-bg] transition-all" title="Delete">
@@ -858,11 +859,11 @@ function EmailCampaignsTab() {
                   </div>
                   <div>
                     <p className="text-[10px] text-[--text-muted] uppercase">Opened</p>
-                    <p className="text-sm font-semibold text-[#10B981] font-metric">{campaign.openedCount} <span className="text-[10px] text-[--text-muted]">({openRate}%)</span></p>
+                    <p className="text-sm font-semibold text-[var(--accent)] font-metric">{campaign.openedCount} <span className="text-[10px] text-[--text-muted]">({openRate}%)</span></p>
                   </div>
                   <div>
                     <p className="text-[10px] text-[--text-muted] uppercase">Clicked</p>
-                    <p className="text-sm font-semibold text-[#10B981] font-metric">{campaign.clickedCount} <span className="text-[10px] text-[--text-muted]">({clickRate}%)</span></p>
+                    <p className="text-sm font-semibold text-[var(--accent)] font-metric">{campaign.clickedCount} <span className="text-[10px] text-[--text-muted]">({clickRate}%)</span></p>
                   </div>
                   <div>
                     <p className="text-[10px] text-[--text-muted] uppercase">Bounced</p>
@@ -1089,24 +1090,24 @@ function UserSegmentsTab() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4">
       {/* Segment Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatCard icon={<Users className="w-4 h-4" />} label="Total Segments" value={segments.length} color="#10B981" />
-        <StatCard icon={<UserCheck className="w-4 h-4" />} label="Total Users" value={segmentStats.totalUsers.toLocaleString()} color="#0D9488" />
-        <StatCard icon={<PieChart className="w-4 h-4" />} label="Avg Size" value={segmentStats.avgSize.toLocaleString()} subtext={`${segmentStats.autoCount} auto-update`} color="#10B981" />
+        <StatCard icon={<Users className="w-4 h-4" />} label="Total Segments" value={segments.length} color="var(--accent)" />
+        <StatCard icon={<UserCheck className="w-4 h-4" />} label="Total Users" value={segmentStats.totalUsers.toLocaleString()} color="var(--accent-primary)" />
+        <StatCard icon={<PieChart className="w-4 h-4" />} label="Avg Size" value={segmentStats.avgSize.toLocaleString()} subtext={`${segmentStats.autoCount} auto-update`} color="var(--accent)" />
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#10B981]" />
+          <Users className="w-4 h-4 text-[var(--accent)]" />
           User Segments
           {segments.length > 0 && (
-            <span className="px-2 py-0.5 rounded text-[10px] bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">{segments.length}</span>
+            <span className="px-2 py-0.5 rounded text-[10px] bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">{segments.length}</span>
           )}
         </h3>
         <div className="flex items-center gap-2">
-          <button onClick={fetchSegments} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Refresh">
+          <button onClick={fetchSegments} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Refresh">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
             <Plus className="w-3 h-3" /> Create Segment
           </button>
         </div>
@@ -1120,7 +1121,7 @@ function UserSegmentsTab() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.2 }}
-            className="bg-[--bg-primary] border border-[#10B981]/10 rounded-xl p-4 space-y-3"
+            className="bg-[--bg-primary] border border-[var(--accent)]/10 rounded-xl p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">
@@ -1133,12 +1134,12 @@ function UserSegmentsTab() {
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Segment Name *</label>
                   <input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Churned Pro Users" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Description</label>
                   <input type="text" value={formDescription} onChange={e => setFormDescription(e.target.value)} placeholder="Pro users who haven't logged in 30+ days"
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
               </div>
 
@@ -1147,7 +1148,7 @@ function UserSegmentsTab() {
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider">Rules</label>
                   <button type="button" onClick={() => setUseVisualBuilder(!useVisualBuilder)}
-                    className="text-[10px] text-[#10B981] hover:text-[#34D399] transition-colors">
+                    className="text-[10px] text-[var(--accent)] hover:text-[var(--secondary)] transition-colors">
                     {useVisualBuilder ? 'Switch to JSON' : 'Switch to Visual Builder'}
                   </button>
                 </div>
@@ -1157,7 +1158,7 @@ function UserSegmentsTab() {
                   <textarea value={formRuleJson} onChange={e => setFormRuleJson(e.target.value)}
                     placeholder='{"and": [{"field": "plan", "op": "eq", "value": "pro"}, {"field": "last_login_days", "op": "gt", "value": 30}]}'
                     rows={4}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-[11px] text-[--text-secondary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30 resize-none" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-[11px] text-[--text-secondary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30 resize-none" />
                 )}
               </div>
 
@@ -1166,24 +1167,24 @@ function UserSegmentsTab() {
                 <motion.div
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 px-3 py-2 bg-[#10B981]/5 border border-[#10B981]/15 rounded-lg"
+                  className="flex items-center gap-2 px-3 py-2 bg-[var(--accent)]/5 border border-[var(--accent)]/15 rounded-lg"
                 >
-                  <Users className="w-3.5 h-3.5 text-[#10B981]" />
-                  <span className="text-xs text-[#10B981]">Estimated users matching rules:</span>
+                  <Users className="w-3.5 h-3.5 text-[var(--accent)]" />
+                  <span className="text-xs text-[var(--accent)]">Estimated users matching rules:</span>
                   <span className="text-xs font-bold text-[--text-primary] font-metric">{estimatedUserCount.toLocaleString()}</span>
                 </motion.div>
               )}
 
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => setFormAutoUpdate(!formAutoUpdate)} className="flex items-center gap-2">
-                  {formAutoUpdate ? <Power className="w-4 h-4 text-[#10B981]" /> : <PowerOff className="w-4 h-4 text-[--text-muted]" />}
+                  {formAutoUpdate ? <Power className="w-4 h-4 text-[var(--accent)]" /> : <PowerOff className="w-4 h-4 text-[--text-muted]" />}
                   <span className="text-xs text-[--text-muted]">Auto-update segment membership</span>
                 </button>
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button type="button" onClick={() => { setShowCreateForm(false); resetForm() }} className="px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
                 <button type="submit" disabled={submitting}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#0D9488] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent-primary)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
                   {submitting ? <Loader2 className="w-3 h-3 animate-spin" /> : editingSegment ? <Save className="w-3 h-3" /> : <Users className="w-3 h-3" />}
                   {editingSegment ? 'Update Segment' : 'Create Segment'}
                 </button>
@@ -1199,12 +1200,12 @@ function UserSegmentsTab() {
       {/* Empty State */}
       {!loading && segments.length === 0 && (
         <motion.div variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-2xl p-8 flex flex-col items-center justify-center min-h-[300px]">
-          <div className="w-16 h-16 rounded-2xl bg-[#10B981]/5 border border-[#10B981]/10 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/5 border border-[var(--accent)]/10 flex items-center justify-center mb-4">
             <Users className="w-8 h-8 text-[--text-muted]" />
           </div>
           <p className="text-sm font-medium text-[--text-primary] mb-1">No user segments</p>
           <p className="text-xs text-[--text-muted] mb-4 text-center max-w-[280px]">Create segments to target specific user groups with campaigns</p>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
             <Plus className="w-3 h-3" /> Create First Segment
           </button>
         </motion.div>
@@ -1227,13 +1228,13 @@ function UserSegmentsTab() {
                     <span className={`px-1.5 py-0.5 rounded text-[9px] ${sb.bg} ${sb.text} border ${sb.border}`}>{sb.label}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => setShowMergePicker(segment.id)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Merge with...">
+                    <button onClick={() => setShowMergePicker(segment.id)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Merge with...">
                       <GitMerge className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => openEdit(segment)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Edit">
+                    <button onClick={() => openEdit(segment)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Edit">
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleRecalculate(segment)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Recalculate">
+                    <button onClick={() => handleRecalculate(segment)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Recalculate">
                       <RefreshCw className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={() => setConfirmAction({ type: 'delete', id: segment.id })} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--status-danger] hover:bg-[--status-danger-bg] transition-all" title="Delete">
@@ -1249,11 +1250,11 @@ function UserSegmentsTab() {
                   </div>
                   <div>
                     <p className="text-[10px] text-[--text-muted] uppercase">Growth</p>
-                    <p className={`text-sm font-semibold font-metric ${isPositiveGrowth ? 'text-[#0D9488]' : 'text-[--status-danger]'}`}>{growthRate}</p>
+                    <p className={`text-sm font-semibold font-metric ${isPositiveGrowth ? 'text-[var(--accent-primary)]' : 'text-[--status-danger]'}`}>{growthRate}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-[--text-muted] uppercase">Engagement</p>
-                    <p className="text-sm font-semibold text-[#10B981] font-metric">{engagementRate}</p>
+                    <p className="text-sm font-semibold text-[var(--accent)] font-metric">{engagementRate}</p>
                   </div>
                 </div>
                 {segment.lastUpdatedAt && (
@@ -1273,7 +1274,7 @@ function UserSegmentsTab() {
                       <div className="flex flex-wrap gap-2">
                         {segments.filter(s => s.id !== segment.id).map(s => (
                           <button key={s.id} onClick={() => setConfirmAction({ type: 'merge', id: segment.id, id2: s.id })}
-                            className="px-2 py-1 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-secondary] hover:border-[#10B981]/30 hover:text-[#10B981] transition-all">
+                            className="px-2 py-1 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-secondary] hover:border-[var(--accent)]/30 hover:text-[var(--accent)] transition-all">
                             {s.name}
                           </button>
                         ))}
@@ -1418,16 +1419,16 @@ function ABTestsTab() {
     const actions: { label: string; icon: React.ReactNode; action: 'start' | 'pause' | 'complete' | 'cancel'; color: string; winner?: string }[] = []
     switch (test.status) {
       case 'draft':
-        actions.push({ label: 'Start', icon: <Play className="w-3 h-3" />, action: 'start', color: 'text-[#10B981] hover:bg-[#10B981]/10' })
+        actions.push({ label: 'Start', icon: <Play className="w-3 h-3" />, action: 'start', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10' })
         actions.push({ label: 'Delete', icon: <Trash2 className="w-3 h-3" />, action: 'cancel', color: 'text-[--status-danger] hover:bg-[--status-danger-bg]' })
         break
       case 'running':
         actions.push({ label: 'Pause', icon: <Pause className="w-3 h-3" />, action: 'pause', color: 'text-[--status-warning] hover:bg-[--status-warning-bg]' })
-        actions.push({ label: 'Complete (A Wins)', icon: <CheckCircle2 className="w-3 h-3" />, action: 'complete', color: 'text-[#10B981] hover:bg-[#10B981]/10', winner: 'A' })
-        actions.push({ label: 'Complete (B Wins)', icon: <CheckCircle2 className="w-3 h-3" />, action: 'complete', color: 'text-[#10B981] hover:bg-[#10B981]/10', winner: 'B' })
+        actions.push({ label: 'Complete (A Wins)', icon: <CheckCircle2 className="w-3 h-3" />, action: 'complete', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10', winner: 'A' })
+        actions.push({ label: 'Complete (B Wins)', icon: <CheckCircle2 className="w-3 h-3" />, action: 'complete', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10', winner: 'B' })
         break
       case 'paused':
-        actions.push({ label: 'Resume', icon: <Play className="w-3 h-3" />, action: 'start', color: 'text-[#10B981] hover:bg-[#10B981]/10' })
+        actions.push({ label: 'Resume', icon: <Play className="w-3 h-3" />, action: 'start', color: 'text-[var(--accent)] hover:bg-[var(--accent)]/10' })
         actions.push({ label: 'Cancel', icon: <Square className="w-3 h-3" />, action: 'cancel', color: 'text-[--status-danger] hover:bg-[--status-danger-bg]' })
         break
       case 'completed':
@@ -1451,17 +1452,17 @@ function ABTestsTab() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4">
       {/* Test Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatCard icon={<Activity className="w-4 h-4" />} label="Active Tests" value={testStats.activeTests} color="#10B981" />
-        <StatCard icon={<CheckCircle2 className="w-4 h-4" />} label="Completed" value={testStats.completedTests} color="#0D9488" />
-        <StatCard icon={<Trophy className="w-4 h-4" />} label="Winners Found" value={testStats.testsWithWinner} color="#10B981" subtext={testStats.testsWithWinner > 0 ? `${((testStats.testsWithWinner / Math.max(testStats.completedTests, 1)) * 100).toFixed(0)}% completion rate` : undefined} />
+        <StatCard icon={<Activity className="w-4 h-4" />} label="Active Tests" value={testStats.activeTests} color="var(--accent)" />
+        <StatCard icon={<CheckCircle2 className="w-4 h-4" />} label="Completed" value={testStats.completedTests} color="var(--accent-primary)" />
+        <StatCard icon={<Trophy className="w-4 h-4" />} label="Winners Found" value={testStats.testsWithWinner} color="var(--accent)" subtext={testStats.testsWithWinner > 0 ? `${((testStats.testsWithWinner / Math.max(testStats.completedTests, 1)) * 100).toFixed(0)}% completion rate` : undefined} />
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <FlaskConical className="w-4 h-4 text-[#10B981]" />
+          <FlaskConical className="w-4 h-4 text-[var(--accent)]" />
           A/B Tests
           {tests.length > 0 && (
-            <span className="px-2 py-0.5 rounded text-[10px] bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">{tests.length}</span>
+            <span className="px-2 py-0.5 rounded text-[10px] bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">{tests.length}</span>
           )}
         </h3>
         <div className="flex items-center gap-2">
@@ -1474,10 +1475,10 @@ function ABTestsTab() {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <button onClick={fetchTests} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Refresh">
+          <button onClick={fetchTests} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Refresh">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
             <Plus className="w-3 h-3" /> Create Test
           </button>
         </div>
@@ -1491,7 +1492,7 @@ function ABTestsTab() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.2 }}
-            className="bg-[--bg-primary] border border-[#10B981]/10 rounded-xl p-4 space-y-3"
+            className="bg-[--bg-primary] border border-[var(--accent)]/10 rounded-xl p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">New A/B Test</h4>
@@ -1502,27 +1503,27 @@ function ABTestsTab() {
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Test Name *</label>
                   <input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Pricing Page Variant" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Feature Key *</label>
                   <input type="text" value={formFeatureKey} onChange={e => setFormFeatureKey(e.target.value)} placeholder="pricing_page_v2" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Variant A (Control) *</label>
                   <input type="text" value={formVariantA} onChange={e => setFormVariantA(e.target.value)} placeholder="Current pricing page" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Variant B *</label>
                   <input type="text" value={formVariantB} onChange={e => setFormVariantB(e.target.value)} placeholder="New pricing with annual toggle" required
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Target Segment</label>
                   <select value={formTargetSegment} onChange={e => setFormTargetSegment(e.target.value)}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
                     <option value="all">All Users</option>
                     <option value="new">New Users</option>
                     <option value="trial">Trial Users</option>
@@ -1541,7 +1542,7 @@ function ABTestsTab() {
               <div className="flex items-center justify-end gap-2">
                 <button type="button" onClick={() => { setShowCreateForm(false); resetForm() }} className="px-3 py-1.5 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
                 <button type="submit" disabled={submitting}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#10B981] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
                   {submitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <FlaskConical className="w-3 h-3" />}
                   Create Test
                 </button>
@@ -1557,12 +1558,12 @@ function ABTestsTab() {
       {/* Empty State */}
       {!loading && tests.length === 0 && (
         <motion.div variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-2xl p-8 flex flex-col items-center justify-center min-h-[300px]">
-          <div className="w-16 h-16 rounded-2xl bg-[#10B981]/5 border border-[#10B981]/10 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/5 border border-[var(--accent)]/10 flex items-center justify-center mb-4">
             <FlaskConical className="w-8 h-8 text-[--text-muted]" />
           </div>
           <p className="text-sm font-medium text-[--text-primary] mb-1">No A/B tests yet</p>
           <p className="text-xs text-[--text-muted] mb-4 text-center max-w-[280px]">Create experiments to test feature variants and optimize conversions</p>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
             <Plus className="w-3 h-3" /> Create First Test
           </button>
         </motion.div>
@@ -1596,7 +1597,7 @@ function ABTestsTab() {
                       </button>
                     ))}
                     <button onClick={() => setShowVariantComparison(isExpanded ? null : test.id)}
-                      className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Compare Variants">
+                      className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Compare Variants">
                       <Eye className="w-3.5 h-3.5" />
                     </button>
                     {(test.status === 'completed' || test.status === 'cancelled' || test.status === 'draft') && (
@@ -1609,7 +1610,7 @@ function ABTestsTab() {
 
                 {test.winner && (
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 flex items-center gap-1">
                       <Sparkles className="w-3 h-3" /> Winner: Variant {test.winner}
                     </span>
                   </div>
@@ -1623,27 +1624,27 @@ function ABTestsTab() {
                     className="mb-3 p-3 bg-[--bg-surface] border border-[--border-subtle] rounded-lg"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <ShieldCheck className={`w-4 h-4 ${results.isSignificant ? 'text-[#0D9488]' : 'text-[--status-warning]'}`} />
+                      <ShieldCheck className={`w-4 h-4 ${results.isSignificant ? 'text-[var(--accent-primary)]' : 'text-[--status-warning]'}`} />
                       <span className="text-xs font-medium text-[--text-primary]">Results Dashboard</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div>
                         <p className="text-[10px] text-[--text-muted] uppercase">Winner</p>
-                        <p className="text-sm font-semibold text-[#10B981] font-metric">Variant {test.winner || 'A'}</p>
+                        <p className="text-sm font-semibold text-[var(--accent)] font-metric">Variant {test.winner || 'A'}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-[--text-muted] uppercase">Confidence</p>
-                        <p className={`text-sm font-semibold font-metric ${results.isSignificant ? 'text-[#0D9488]' : 'text-[--status-warning]'}`}>{results.confidence}%</p>
+                        <p className={`text-sm font-semibold font-metric ${results.isSignificant ? 'text-[var(--accent-primary)]' : 'text-[--status-warning]'}`}>{results.confidence}%</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-[--text-muted] uppercase">Improvement</p>
-                        <p className="text-sm font-semibold text-[#0D9488] font-metric">+{results.improvement}%</p>
+                        <p className="text-sm font-semibold text-[var(--accent-primary)] font-metric">+{results.improvement}%</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-[--text-muted] uppercase">Significance</p>
                         <div className="flex items-center gap-1">
-                          <div className={`w-2 h-2 rounded-full ${results.isSignificant ? 'bg-[#0D9488]' : 'bg-[--status-warning]'}`} />
-                          <span className={`text-xs font-metric ${results.isSignificant ? 'text-[#0D9488]' : 'text-[--status-warning]'}`}>
+                          <div className={`w-2 h-2 rounded-full ${results.isSignificant ? 'bg-[var(--accent-primary)]' : 'bg-[--status-warning]'}`} />
+                          <span className={`text-xs font-metric ${results.isSignificant ? 'text-[var(--accent-primary)]' : 'text-[--status-warning]'}`}>
                             {results.isSignificant ? 'Significant' : 'Not yet'}
                           </span>
                         </div>
@@ -1651,8 +1652,8 @@ function ABTestsTab() {
                     </div>
                     {results.isSignificant && (
                       <div className="mt-2 pt-2 border-t border-[--border-subtle] flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-[#10B981]" />
-                        <span className="text-[10px] text-[#10B981]">Recommendation: Deploy Variant {test.winner || 'A'} to all users</span>
+                        <Zap className="w-3 h-3 text-[var(--accent)]" />
+                        <span className="text-[10px] text-[var(--accent)]">Recommendation: Deploy Variant {test.winner || 'A'} to all users</span>
                       </div>
                     )}
                   </motion.div>
@@ -1668,10 +1669,10 @@ function ABTestsTab() {
                       className="mb-3 overflow-hidden"
                     >
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-[--bg-surface] border-2 border-[#10B981]/30 rounded-lg p-3">
+                        <div className="bg-[--bg-surface] border-2 border-[var(--accent)]/30 rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-5 h-5 rounded bg-[#10B981]/10 flex items-center justify-center">
-                              <span className="text-[10px] font-bold text-[#10B981]">A</span>
+                            <div className="w-5 h-5 rounded bg-[var(--accent)]/10 flex items-center justify-center">
+                              <span className="text-[10px] font-bold text-[var(--accent)]">A</span>
                             </div>
                             <span className="text-[10px] text-[--text-muted] uppercase">Control</span>
                           </div>
@@ -1680,10 +1681,10 @@ function ABTestsTab() {
                             <p className="text-xs text-[--text-muted] mt-2 font-metric">Conversion: {results.conversionA}%</p>
                           )}
                         </div>
-                        <div className="bg-[--bg-surface] border-2 border-[#0D9488]/30 rounded-lg p-3">
+                        <div className="bg-[--bg-surface] border-2 border-[var(--accent-primary)]/30 rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-5 h-5 rounded bg-[#0D9488]/10 flex items-center justify-center">
-                              <span className="text-[10px] font-bold text-[#0D9488]">B</span>
+                            <div className="w-5 h-5 rounded bg-[var(--accent-primary)]/10 flex items-center justify-center">
+                              <span className="text-[10px] font-bold text-[var(--accent-primary)]">B</span>
                             </div>
                             <span className="text-[10px] text-[--text-muted] uppercase">Variant</span>
                           </div>
@@ -1764,7 +1765,7 @@ export function AdminCampaigns() {
       {/* Header */}
       <motion.div variants={itemVariants}>
         <h2 className="text-xl font-bold text-[--text-primary] flex items-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Megaphone className="w-5 h-5 text-[#10B981]" />
+          <Megaphone className="w-5 h-5 text-[var(--accent)]" />
           Campaign &amp; Segments
         </h2>
         <p className="text-sm text-[--text-muted] mt-1">Email campaigns, user segments, and A/B testing</p>
@@ -1773,21 +1774,21 @@ export function AdminCampaigns() {
       {/* Top Stats Bar */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="flex items-center gap-2 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg">
-          <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
           <div>
             <p className="text-[9px] text-[--text-muted] uppercase tracking-wider">Active Campaigns</p>
             <p className="text-sm font-bold text-[--text-primary] font-metric">—</p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg">
-          <div className="w-2 h-2 rounded-full bg-[#0D9488]" />
+          <div className="w-2 h-2 rounded-full bg-[var(--accent-primary)]" />
           <div>
             <p className="text-[9px] text-[--text-muted] uppercase tracking-wider">Active Tests</p>
             <p className="text-sm font-bold text-[--text-primary] font-metric">—</p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg">
-          <Users className="w-3.5 h-3.5 text-[#10B981]" />
+          <Users className="w-3.5 h-3.5 text-[var(--accent)]" />
           <div>
             <p className="text-[9px] text-[--text-muted] uppercase tracking-wider">Total Segments</p>
             <p className="text-sm font-bold text-[--text-primary] font-metric">—</p>
@@ -1810,7 +1811,7 @@ export function AdminCampaigns() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-medium transition-all flex-1 justify-center ${
               activeTab === tab.id
-                ? 'bg-[#10B981]/10 text-[#10B981]'
+                ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
                 : 'text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface]'
             }`}
           >

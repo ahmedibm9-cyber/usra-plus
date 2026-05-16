@@ -136,13 +136,14 @@ export async function POST(req: NextRequest) {
         updatedAt: dbUser.updatedAt.toISOString(),
       }
 
-      // Always return devCode — the Prisma/SQLite path has no email provider,
-      // so the user has no other way to receive the verification code.
+      // Return verification code only in non-production environments
+      // In production, the code should be delivered via email
+      const isDev = process.env.NODE_ENV !== 'production'
       return NextResponse.json({
         user,
         needsVerification: true,
         message: 'Account created. Please verify your email with the code sent.',
-        devCode: otpCode,
+        ...(isDev ? { devCode: otpCode } : {}),
         expiresIn: 600,
       }, { status: 201 })
 
@@ -228,14 +229,14 @@ export async function POST(req: NextRequest) {
         updatedAt: authUser.updated_at || authUser.created_at,
       }
 
-      // Always return devCode — the Supabase admin.createUser() path does not
-      // send a confirmation email (email_confirm: false), so the user has no
-      // other way to receive the verification code.
+      // Return verification code only in non-production environments
+      // In production, the code should be delivered via email
+      const isDev = process.env.NODE_ENV !== 'production'
       return NextResponse.json({
         user,
         needsVerification: true,
         message: 'Account created. Please verify your email with the code sent.',
-        devCode: otpCode,
+        ...(isDev ? { devCode: otpCode } : {}),
         expiresIn: 600,
       }, { status: 201 })
     }

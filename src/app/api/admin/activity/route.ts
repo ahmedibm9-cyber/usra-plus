@@ -4,8 +4,10 @@ import { verifyAdminAuth } from '@/lib/admin-auth'
 
 export async function GET(request: Request) {
   // Auth check — activity logs contain admin emails and IPs
-  const authResult = await verifyAdminAuth(request)
-  if (authResult) return authResult
+  const authResult = verifyAdminAuth(request)
+  if (!authResult.authenticated) {
+    return NextResponse.json({ error: authResult.reason || 'Unauthorized' }, { status: 401 })
+  }
   try {
     const { searchParams } = new URL(request.url)
 

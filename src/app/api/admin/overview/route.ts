@@ -162,13 +162,38 @@ export async function GET(request: Request) {
       }
     }
 
-    // ─── Revenue Time Series (simulated from subscription data) ──────────
-    const revenueTimeSeries = monthNames.map(month => {
-      // Distribute MRR evenly across months for visualization
-      const monthIdx = monthNames.indexOf(month)
-      const scaleFactor = 0.3 + (monthIdx / 12) * 0.7 // Growth curve
-      return { month, mrr: Math.round(mrr * scaleFactor * 100) / 100 }
-    })
+    // ─── Revenue Time Series (REAL data from RevenueTransaction) ──────────
+    // Query actual revenue per month from RevenueTransaction table.
+    // If there are no transactions, show $0 — never fabricate data.
+    const revenueByMonth: Record<string, number> = {}
+    for (const month of monthNames) {
+      revenueByMonth[month] = 0
+    }
+
+    const revenueTransactions = await db.revenueTransaction.findMany({
+      where: {
+        status: 'completed',
+        type: 'payment',
+        createdAt: {
+          gte: new Date(now.getFullYear(), now.getMonth() - 11, 1),
+        },
+      },
+      select: { amount: true, createdAt: true },
+    }).catch(() => [])
+
+    if (Array.isArray(revenueTransactions)) {
+      for (const tx of revenueTransactions) {
+        const key = tx.createdAt.toLocaleDateString('en-US', { month: 'short' })
+        if (key in revenueByMonth) {
+          revenueByMonth[key] += tx.amount || 0
+        }
+      }
+    }
+
+    const revenueTimeSeries = monthNames.map(month => ({
+      month,
+      mrr: Math.round((revenueByMonth[month] || 0) * 100) / 100,
+    }))
 
     const hasAnyData = totalUsers > 0 || totalSessions > 0
 

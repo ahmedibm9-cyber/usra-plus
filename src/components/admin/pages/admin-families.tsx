@@ -89,12 +89,12 @@ function PlanBadge({ plan }: { plan: string }) {
 
 function ActivityScoreBar({ score }: { score: number }) {
   const gradientClass = score >= 80
-    ? 'from-[#0D9488] to-[#0F766E]'
+    ? 'from-[var(--accent-primary)] to-[var(--primary)]'
     : score >= 60
-      ? 'from-[#0D9488] to-[#10B981]'
-      : 'from-[#10B981] to-[#34D399]'
+      ? 'from-[var(--accent-primary)] to-[var(--accent)]'
+      : 'from-[var(--accent)] to-[var(--secondary)]'
 
-  const textColor = score >= 80 ? 'text-[#0D9488]' : score >= 60 ? 'text-[#0D9488]' : 'text-[#10B981]'
+  const textColor = score >= 80 ? 'text-[var(--accent-primary)]' : score >= 60 ? 'text-[var(--accent-primary)]' : 'text-[var(--accent)]'
 
   return (
     <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ function HeatmapCell({ value }: { value: number }) {
 
 function FamilyConstellationCard({ family }: { family: FamilyRecord }) {
   const memberNodes = Math.min(family.members, 6)
-  const planColor = family.plan === 'Family+' ? '#059669' : family.plan === 'Pro' ? '#0D9488' : '#64748B'
+  const planColor = family.plan === 'Family+' ? 'var(--accent)' : family.plan === 'Pro' ? 'var(--accent-primary)' : '#64748B'
 
   return (
     <motion.div
@@ -339,8 +339,8 @@ export function AdminFamilies() {
     const family = families.filter(f => f.plan === 'Family+').length
     return [
       { plan: 'Free', count: free, color: '#64748B', pct: families.length ? Math.round((free / families.length) * 100) : 0 },
-      { plan: 'Pro', count: pro, color: '#0D9488', pct: families.length ? Math.round((pro / families.length) * 100) : 0 },
-      { plan: 'Family+', count: family, color: '#059669', pct: families.length ? Math.round((family / families.length) * 100) : 0 },
+      { plan: 'Pro', count: pro, color: 'var(--accent-primary)', pct: families.length ? Math.round((pro / families.length) * 100) : 0 },
+      { plan: 'Family+', count: family, color: 'var(--accent)', pct: families.length ? Math.round((family / families.length) * 100) : 0 },
     ]
   }, [families])
 
@@ -350,8 +350,8 @@ export function AdminFamilies() {
     const medium = families.filter(f => f.activityScore >= 50 && f.activityScore < 80).length
     const low = families.filter(f => f.activityScore < 50).length
     return [
-      { tier: 'High', count: high, color: '#0D9488', icon: Flame },
-      { tier: 'Medium', count: medium, color: '#10B981', icon: Zap },
+      { tier: 'High', count: high, color: 'var(--accent-primary)', icon: Flame },
+      { tier: 'Medium', count: medium, color: 'var(--accent)', icon: Zap },
       { tier: 'Low', count: low, color: '#D946EF', icon: CircleDot },
     ]
   }, [families])

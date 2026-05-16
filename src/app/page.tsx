@@ -7,6 +7,7 @@ import { localGetMe, localUserToProfile } from '@/lib/local-auth'
 import { seedDemoData } from '@/lib/seed-demo-data'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAppStore } from '@/stores/app-store'
+import { useCurrentPage, useCurrentFamily, useShowOnboarding, useDemoDataReady, useSidebarCollapsed, useIsAuthenticated, useAuthLoading, useCurrentUser } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'
 import { useAdminAuthStore } from '@/stores/admin-auth-store'
 import { initErrorCapture } from '@/lib/error-capture'
@@ -175,7 +176,7 @@ class RenderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
 const AUTH_FEATURES = ['Tasks', 'Calendar', 'Meals', 'Budget', 'Chat'] as const
 
 function AuthScreen() {
-  const { authView } = useAuthStore()
+  const authView = useAuthStore((state) => state.authView)
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', position: 'relative', overflow: 'hidden' }}>
@@ -186,7 +187,7 @@ function AuthScreen() {
           width: { lg: '45%', xl: '50%' },
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #0D6B58, #065F46, #1C1B1F)',
+          background: 'linear-gradient(135deg, var(--primary), var(--secondary), #1C1B1F)',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
@@ -361,8 +362,14 @@ const SWIPE_MIN_VELOCITY = 0.3
 
 // ─── Main App Layout — MUI ────────────────────────────────────────
 function MainApp() {
-  const { currentPage, currentFamily, showOnboarding, setCurrentPage, demoDataReady, sidebarCollapsed } = useAppStore()
-  const { user, setUser } = useAuthStore()
+  const currentPage = useCurrentPage()
+  const currentFamily = useCurrentFamily()
+  const showOnboarding = useShowOnboarding()
+  const setCurrentPage = useAppStore((state) => state.setCurrentPage)
+  const demoDataReady = useDemoDataReady()
+  const sidebarCollapsed = useSidebarCollapsed()
+  const user = useCurrentUser()
+  const setUser = useAuthStore((state) => state.setUser)
   const { isRTL } = useI18n()
   const supabase = useMemo(() => safeCreateClient(), [])
 
@@ -667,7 +674,11 @@ function MainApp() {
 
 // ─── Root Page Component ──────────────────────────────────────────
 export default function RootPage() {
-  const { isAuthenticated, isLoading, setIsLoading, setIsAuthenticated, setUser } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
+  const isLoading = useAuthLoading()
+  const setIsLoading = useAuthStore((state) => state.setIsLoading)
+  const setIsAuthenticated = useAuthStore((state) => state.setIsAuthenticated)
+  const setUser = useAuthStore((state) => state.setUser)
   const { language } = useI18n()
   const { isAdminAuthenticated, isSessionValid, showAdminLogin } = useAdminAuthStore()
   const supabase = useMemo(() => safeCreateClient(), [])

@@ -293,7 +293,7 @@ export function TermsModal() {
                 bgcolor: hasScrolledToBottom ? 'primary.main' : undefined,
                 backgroundImage: hasScrolledToBottom
                   ? undefined
-                  : 'linear-gradient(90deg, #0D6B58, #059669)',
+                  : 'linear-gradient(90deg, var(--primary), var(--accent))',
               },
             }}
           />

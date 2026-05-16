@@ -29,9 +29,9 @@ const itemVariants: Variants = {
 
 function discountTypeBadge(type: CouponDiscountType) {
   switch (type) {
-    case 'percentage': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: '% Off' }
-    case 'fixed_amount': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Fixed' }
-    case 'free_trial_extension': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Trial+' }
+    case 'percentage': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: '% Off' }
+    case 'fixed_amount': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Fixed' }
+    case 'free_trial_extension': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Trial+' }
     case 'plan_upgrade': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', label: 'Upgrade' }
   }
 }
@@ -39,10 +39,10 @@ function discountTypeBadge(type: CouponDiscountType) {
 function audienceBadge(audience: CouponAudience) {
   switch (audience) {
     case 'all': return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', label: 'All Users' }
-    case 'new_users': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'New Users' }
-    case 'existing_users': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Existing' }
+    case 'new_users': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'New Users' }
+    case 'existing_users': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Existing' }
     case 'churned_users': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', label: 'Churned' }
-    case 'trial_users': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', label: 'Trial' }
+    case 'trial_users': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', label: 'Trial' }
     case 'vip': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]', label: 'VIP' }
   }
 }
@@ -175,7 +175,7 @@ function CreateCouponForm({ onSave, onClose }: {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[--text-secondary] uppercase tracking-wider flex items-center gap-2">
-          <Plus className="w-4 h-4 text-[#10B981]" />
+          <Plus className="w-4 h-4 text-[var(--accent)]" />
           Create New Coupon
         </h3>
         <button onClick={onClose} className="text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors">Cancel</button>
@@ -188,9 +188,9 @@ function CreateCouponForm({ onSave, onClose }: {
             <div className="flex items-center gap-2">
               <input type="text" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
                 placeholder="USRA2024PRO" required
-                className="flex-1 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                className="flex-1 px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] font-metric placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
               <button type="button" onClick={handleAutoGenerate}
-                className="px-2.5 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all whitespace-nowrap">
+                className="px-2.5 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all whitespace-nowrap">
                 Auto
               </button>
             </div>
@@ -200,20 +200,20 @@ function CreateCouponForm({ onSave, onClose }: {
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Name *</label>
             <input type="text" value={name} onChange={e => setName(e.target.value)}
               placeholder="Summer Sale 50% Off" required
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div className="sm:col-span-2">
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Description</label>
             <textarea value={description} onChange={e => setDescription(e.target.value)}
               placeholder="Describe this coupon promotion..." rows={2}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30 resize-none" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30 resize-none" />
           </div>
 
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Discount Type</label>
             <select value={discountType} onChange={e => setDiscountType(e.target.value as CouponDiscountType)}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
               <option value="percentage">Percentage (%)</option>
               <option value="fixed_amount">Fixed Amount ($)</option>
               <option value="free_trial_extension">Trial Extension (days)</option>
@@ -226,7 +226,7 @@ function CreateCouponForm({ onSave, onClose }: {
             <input type="number" value={discountValue} onChange={e => setDiscountValue(e.target.value)}
               placeholder={discountType === 'percentage' ? '25' : discountType === 'fixed_amount' ? '9.99' : '7'}
               required min="0"
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div className="sm:col-span-2">
@@ -236,7 +236,7 @@ function CreateCouponForm({ onSave, onClose }: {
                 <button key={plan} type="button" onClick={() => togglePlan(plan)}
                   className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
                     applicablePlans.includes(plan)
-                      ? 'bg-[#10B981]/10 border-[#10B981]/20 text-[#10B981]'
+                      ? 'bg-[var(--accent)]/10 border-[var(--accent)]/20 text-[var(--accent)]'
                       : 'bg-[--bg-surface] border-[--border-subtle] text-[--text-muted] hover:text-[--text-muted]'
                   }`}>
                   {plan.replace(/_/g, ' ')}
@@ -249,30 +249,30 @@ function CreateCouponForm({ onSave, onClose }: {
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Max Redemptions</label>
             <input type="number" value={maxRedemptions} onChange={e => setMaxRedemptions(e.target.value)}
               placeholder="Unlimited" min="0"
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Per-User Limit</label>
             <input type="number" value={perUserLimit} onChange={e => setPerUserLimit(e.target.value)}
               placeholder="1" min="1"
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Valid From</label>
             <input type="date" value={validFrom} onChange={e => setValidFrom(e.target.value)}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Valid Until</label>
             <input type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30" />
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30" />
           </div>
 
           <div>
             <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Target Audience</label>
             <select value={targetAudience} onChange={e => setTargetAudience(e.target.value as CouponAudience)}
-              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+              className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
               {audiences.map(a => (
                 <option key={a} value={a}>{a.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
               ))}
@@ -281,7 +281,7 @@ function CreateCouponForm({ onSave, onClose }: {
 
           <div className="flex items-center gap-3">
             <button type="button" onClick={() => setAutoApply(!autoApply)} className="flex items-center gap-2">
-              {autoApply ? <ToggleRight className="w-8 h-8 text-[#10B981]" /> : <ToggleLeft className="w-8 h-8 text-[--text-muted]" />}
+              {autoApply ? <ToggleRight className="w-8 h-8 text-[var(--accent)]" /> : <ToggleLeft className="w-8 h-8 text-[--text-muted]" />}
               <span className="text-xs text-[--text-muted]">Auto-apply at checkout</span>
             </button>
           </div>
@@ -290,7 +290,7 @@ function CreateCouponForm({ onSave, onClose }: {
         <div className="flex items-center justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-xs text-[--text-muted] hover:text-[--text-secondary] bg-[--bg-surface] border border-[--border-subtle] transition-all">Cancel</button>
           <button type="submit" disabled={isSubmitting}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#10B981] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
             {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Tag className="w-3.5 h-3.5" />}
             Create Coupon
           </button>
@@ -372,12 +372,12 @@ function CouponCard({ coupon, onToggle, onDelete }: {
             <span className="px-2 py-0.5 rounded text-[10px] bg-[--bg-surface] text-[--text-muted] border border-[--border-subtle]">Inactive</span>
           )}
           {isFullyRedeemed && (
-            <span className="px-2 py-0.5 rounded text-[10px] bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Fully Redeemed</span>
+            <span className="px-2 py-0.5 rounded text-[10px] bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">Fully Redeemed</span>
           )}
         </div>
         <div className="flex items-center gap-1">
           <button onClick={handleCopy} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface] transition-all" title="Copy code">
-            {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-[var(--accent)]" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
           <button onClick={handleToggle} disabled={isToggling}
             className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--status-warning] hover:bg-[--status-warning-bg] transition-all"
@@ -406,7 +406,7 @@ function CouponCard({ coupon, onToggle, onDelete }: {
 
       {/* Discount Value */}
       <div className="flex items-center gap-2">
-        <Gift className="w-4 h-4 text-[#10B981]" />
+        <Gift className="w-4 h-4 text-[var(--accent)]" />
         <span className="text-lg font-bold text-[--text-primary]">{formatDiscountValue(coupon.discountType, coupon.discountValue)}</span>
         {coupon.applicablePlans.length > 0 && (
           <span className="text-xs text-[--text-muted]">for {coupon.applicablePlans.join(', ').replace(/_/g, ' ')}</span>
@@ -422,7 +422,7 @@ function CouponCard({ coupon, onToggle, onDelete }: {
         <div>
           <p className="text-[10px] text-[--text-muted] uppercase">Usage</p>
           <div className="h-1.5 bg-[--bg-surface] rounded-full overflow-hidden mt-2">
-            <div className="h-full rounded-full bg-[#10B981]/60" style={{ width: `${Math.min(redemptionPercent, 100)}%` }} />
+            <div className="h-full rounded-full bg-[var(--accent)]/60" style={{ width: `${Math.min(redemptionPercent, 100)}%` }} />
           </div>
         </div>
         <div>
@@ -573,14 +573,14 @@ export function AdminCoupons() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-[--text-primary] flex items-center gap-2">
-            <Ticket className="w-5 h-5 text-[#10B981]" />
+            <Ticket className="w-5 h-5 text-[var(--accent)]" />
             Coupon Engine
           </h2>
           <p className="text-sm text-[--text-muted] mt-1">Create, manage, and track promotional coupons</p>
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[#10B981] to-[#10B981] text-[--text-primary] font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-[--text-primary] font-medium hover:opacity-90 transition-opacity"
         >
           <Plus className="w-3.5 h-3.5" />
           Create Coupon
@@ -590,8 +590,8 @@ export function AdminCoupons() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Active Coupons', value: activeCoupons.length, icon: Tag, color: 'text-[#10B981]' },
-          { label: 'Total Redemptions', value: totalRedemptions, icon: Users, color: 'text-[#10B981]' },
+          { label: 'Active Coupons', value: activeCoupons.length, icon: Tag, color: 'text-[var(--accent)]' },
+          { label: 'Total Redemptions', value: totalRedemptions, icon: Users, color: 'text-[var(--accent)]' },
           { label: 'Total Coupons', value: coupons.length, icon: Ticket, color: 'text-[--status-warning]' },
           { label: 'Expired', value: coupons.filter(c => isExpired(c)).length, icon: AlertTriangle, color: 'text-[--status-danger]' },
         ].map(stat => (
@@ -611,7 +611,7 @@ export function AdminCoupons() {
           <button key={f} onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               filter === f
-                ? 'bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981]'
+                ? 'bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)]'
                 : 'bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-muted]'
             }`}>
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -637,7 +637,7 @@ export function AdminCoupons() {
           {filter === 'all' && (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all"
             >
               <Plus className="w-3.5 h-3.5" /> Create First Coupon
             </button>

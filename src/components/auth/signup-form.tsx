@@ -70,7 +70,7 @@ interface FormErrors {
 const getPasswordStrength = (pwd: string): { level: number; percent: number; color: string; label: string } => {
   if (!pwd) return { level: 0, percent: 0, color: '', label: '' }
   if (pwd.length < 6) return { level: 1, percent: 25, color: '#9A3412', label: 'Weak' } // warm brown
-  if (pwd.length < 8) return { level: 2, percent: 50, color: '#0D9488', label: 'Fair' } // teal
+  if (pwd.length < 8) return { level: 2, percent: 50, color: 'var(--accent-primary)', label: 'Fair' } // teal
   if (pwd.length < 12) return { level: 3, percent: 75, color: '#0D6B58', label: 'Good' } // teal
   return { level: 4, percent: 100, color: '#0D6B58', label: 'Strong' } // teal
 }

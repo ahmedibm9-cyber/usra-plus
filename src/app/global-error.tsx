@@ -40,7 +40,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             width: '64px',
             height: '64px',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #0D9488, #0F766E)',
+            background: 'linear-gradient(135deg, var(--accent-primary, #0D9488), var(--primary, #0F766E))',
             marginBottom: '24px',
           }}>
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -86,7 +86,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               gap: '8px',
               padding: '12px 28px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #0D9488, #0F766E)',
+              background: 'linear-gradient(135deg, var(--accent-primary, #0D9488), var(--primary, #0F766E))',
               color: '#FFFFFF',
               fontSize: '14px',
               fontWeight: 600,

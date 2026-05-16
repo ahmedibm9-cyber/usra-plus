@@ -45,7 +45,7 @@ function priorityColor(priority: string) {
     case 'urgent': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]' }
     case 'high': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
     case 'medium': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
-    case 'low': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
+    case 'low': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
     default: return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]' }
   }
 }
@@ -55,7 +55,7 @@ function severityColor(severity: FraudSeverity) {
     case 'critical': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]' }
     case 'high': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
     case 'medium': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
-    case 'low': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
+    case 'low': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
   }
 }
 
@@ -63,7 +63,7 @@ function banTypeColor(banType: BanType) {
   switch (banType) {
     case 'warning': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
     case 'temporary_suspension': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
-    case 'shadow_ban': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
+    case 'shadow_ban': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
     case 'permanent_ban': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]' }
   }
 }
@@ -71,8 +71,8 @@ function banTypeColor(banType: BanType) {
 function reportStatusColor(status: AbuseReportStatus) {
   switch (status) {
     case 'pending': return { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', border: 'border-[--status-warning-border]' }
-    case 'reviewing': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
-    case 'actioned': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
+    case 'reviewing': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
+    case 'actioned': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
     case 'dismissed': return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]' }
     case 'escalated': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]' }
   }
@@ -83,12 +83,12 @@ function riskLevelColor(level: RiskLevel) {
     case 'critical': return 'text-[--status-danger]'
     case 'high': return 'text-[--status-warning]'
     case 'medium': return 'text-[--status-warning]'
-    case 'low': return 'text-[#10B981]'
+    case 'low': return 'text-[var(--accent)]'
   }
 }
 
 function riskScoreGradient(score: number): string {
-  if (score < 25) return 'from-[#10B981] to-[#10B981]'
+  if (score < 25) return 'from-[var(--accent)] to-[var(--accent)]'
   if (score < 50) return 'from-emerald-500 to-emerald-400'
   if (score < 75) return 'from-orange-500 to-orange-400'
   return 'from-red-500 to-red-400'
@@ -108,7 +108,7 @@ function RiskScoreBar({ score }: { score: number }) {
         />
       </div>
       <span className={`text-xs font-metric font-medium min-w-[28px] text-right ${
-        score < 25 ? 'text-[#10B981]' : score < 50 ? 'text-[--status-warning]' : score < 75 ? 'text-[--status-warning]' : 'text-[--status-danger]'
+        score < 25 ? 'text-[var(--accent)]' : score < 50 ? 'text-[--status-warning]' : score < 75 ? 'text-[--status-warning]' : 'text-[--status-danger]'
       }`}>
         {score}
       </span>
@@ -191,7 +191,7 @@ function ModerationQueueTab({ items, onRefresh }: { items: ModerationItem[]; onR
       <div className="flex flex-wrap items-center gap-2">
         <Filter className="w-4 h-4 text-[--text-muted]" />
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30">
+          className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[var(--accent)]/30">
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="in_progress">In Progress</option>
@@ -199,7 +199,7 @@ function ModerationQueueTab({ items, onRefresh }: { items: ModerationItem[]; onR
           <option value="escalated">Escalated</option>
         </select>
         <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}
-          className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30">
+          className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[var(--accent)]/30">
           <option value="all">All Priority</option>
           <option value="urgent">Urgent</option>
           <option value="high">High</option>
@@ -207,7 +207,7 @@ function ModerationQueueTab({ items, onRefresh }: { items: ModerationItem[]; onR
           <option value="low">Low</option>
         </select>
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
-          className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[#10B981]/30">
+          className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1.5 focus:outline-none focus:border-[var(--accent)]/30">
           <option value="all">All Types</option>
           <option value="ban_review">Ban Review</option>
           <option value="abuse_report">Abuse Report</option>
@@ -237,18 +237,18 @@ function ModerationQueueTab({ items, onRefresh }: { items: ModerationItem[]; onR
                   <span className="text-xs text-[--text-secondary] truncate">{item.notes || item.itemType.replace(/_/g, ' ')}</span>
                   <span className={`px-2 py-0.5 rounded text-[10px] ${pc.bg} ${pc.text} border ${pc.border} capitalize text-center`}>{item.priority}</span>
                   <span className="text-xs text-[--text-muted] capitalize">{item.itemType.replace(/_/g, ' ')}</span>
-                  <span className={`text-xs capitalize ${item.status === 'pending' ? 'text-[--status-warning]' : item.status === 'escalated' ? 'text-[--status-danger]' : item.status === 'resolved' ? 'text-[#10B981]' : 'text-[#10B981]'}`}>{item.status.replace(/_/g, ' ')}</span>
+                  <span className={`text-xs capitalize ${item.status === 'pending' ? 'text-[--status-warning]' : item.status === 'escalated' ? 'text-[--status-danger]' : item.status === 'resolved' ? 'text-[var(--accent)]' : 'text-[var(--accent)]'}`}>{item.status.replace(/_/g, ' ')}</span>
                   <span className="text-xs text-[--text-muted]">{item.assignedTo || 'Unassigned'}</span>
                   <span className="text-[10px] text-[--text-muted]">{timeAgo(item.createdAt)}</span>
                   <div className="flex items-center gap-1">
                     {item.status === 'pending' && (
                       <button onClick={() => handleItemAction(item.id, 'assign')} disabled={actionLoading === item.id}
-                        className="p-1 rounded text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all disabled:opacity-50" title="Assign">
+                        className="p-1 rounded text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all disabled:opacity-50" title="Assign">
                         <Eye className="w-3 h-3" />
                       </button>
                     )}
                     <button onClick={() => handleItemAction(item.id, 'resolve')} disabled={actionLoading === item.id}
-                      className="p-1 rounded text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all disabled:opacity-50" title="Resolve">
+                      className="p-1 rounded text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all disabled:opacity-50" title="Resolve">
                       <CheckCircle2 className="w-3 h-3" />
                     </button>
                     <button onClick={() => handleItemAction(item.id, 'escalate')} disabled={actionLoading === item.id}
@@ -315,10 +315,10 @@ function FraudAlertsTab({ alerts, onRefresh }: { alerts: FraudAlert[]; onRefresh
                           <div><span className="text-[--text-muted]">Description:</span> {alert.description}</div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <button onClick={() => handleAction('investigating', alert.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+                          <button onClick={() => handleAction('investigating', alert.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
                             <Eye className="w-3 h-3" /> Investigate
                           </button>
-                          <button onClick={() => handleAction('resolved', alert.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+                          <button onClick={() => handleAction('resolved', alert.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
                             <CheckCircle2 className="w-3 h-3" /> Resolve
                           </button>
                           <button onClick={() => handleAction('false_positive', alert.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-secondary] transition-all">
@@ -414,12 +414,12 @@ function BanManagementTab({ bans, onRefresh }: { bans: UserBan[]; onRefresh: () 
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">User ID *</label>
                   <input type="text" value={newBanUserId} onChange={e => setNewBanUserId(e.target.value)}
-                    placeholder="Enter user ID..." className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    placeholder="Enter user ID..." className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Ban Type</label>
                   <select value={newBanType} onChange={e => setNewBanType(e.target.value as BanType)}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[#10B981]/30">
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] focus:outline-none focus:border-[var(--accent)]/30">
                     <option value="warning">Warning</option>
                     <option value="temporary_suspension">Temporary Suspension</option>
                     <option value="shadow_ban">Shadow Ban</option>
@@ -429,13 +429,13 @@ function BanManagementTab({ bans, onRefresh }: { bans: UserBan[]; onRefresh: () 
                 <div>
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Duration (hours, for temp)</label>
                   <input type="number" value={newBanExpiry} onChange={e => setNewBanExpiry(e.target.value)}
-                    placeholder="e.g. 24" className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30" />
+                    placeholder="e.g. 24" className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-[10px] text-[--text-muted] uppercase tracking-wider mb-1 block">Reason *</label>
                   <textarea value={newBanReason} onChange={e => setNewBanReason(e.target.value)}
                     placeholder="Describe the reason for this ban..." rows={2}
-                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[#10B981]/30 resize-none" />
+                    className="w-full px-3 py-2 bg-[--bg-primary] border border-[--border-subtle] rounded-lg text-sm text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:border-[var(--accent)]/30 resize-none" />
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -477,7 +477,7 @@ function BanManagementTab({ bans, onRefresh }: { bans: UserBan[]; onRefresh: () 
                     </button>
                   )}
                   <span className="text-[10px] text-[--text-muted]">{timeAgo(ban.issuedAt)}</span>
-                  <button onClick={() => handleRevokeBan(ban.id)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all" title="Revoke ban">
+                  <button onClick={() => handleRevokeBan(ban.id)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all" title="Revoke ban">
                     <XCircle className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -540,7 +540,7 @@ function AbuseReportsTab({ reports, onRefresh }: { reports: AbuseReport[]; onRef
                           {report.evidenceUrls.length > 0 && <div><span className="text-[--text-muted]">Evidence:</span> {report.evidenceUrls.length} file(s)</div>}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <button onClick={() => handleAction('reviewing', report.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+                          <button onClick={() => handleAction('reviewing', report.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
                             <Eye className="w-3 h-3" /> Review
                           </button>
                           <button onClick={() => handleAction('dismissed', report.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-secondary] transition-all">
@@ -616,7 +616,7 @@ function AppealQueueTab({ bans, onRefresh }: { bans: UserBan[]; onRefresh: () =>
                     </div>
                     <div className="flex items-center gap-2 mt-3">
                       <button onClick={() => handleAppealAction(ban.id, 'revoke')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/20 transition-all">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
                         <ThumbsUp className="w-3 h-3" /> Accept Appeal
                       </button>
                       <button onClick={() => handleAppealAction(ban.id, 'uphold')}
@@ -639,7 +639,7 @@ function AppealQueueTab({ bans, onRefresh }: { bans: UserBan[]; onRefresh: () =>
 
 function TrustScoresTab({ scores }: { scores: UserTrustScore[] }) {
   const distribution = [
-    { level: 'low' as RiskLevel, count: scores.filter(s => s.riskLevel === 'low').length, color: 'bg-[#10B981]' },
+    { level: 'low' as RiskLevel, count: scores.filter(s => s.riskLevel === 'low').length, color: 'bg-[var(--accent)]' },
     { level: 'medium' as RiskLevel, count: scores.filter(s => s.riskLevel === 'medium').length, color: 'bg-[--status-warning]' },
     { level: 'high' as RiskLevel, count: scores.filter(s => s.riskLevel === 'high').length, color: 'bg-[--status-warning]' },
     { level: 'critical' as RiskLevel, count: scores.filter(s => s.riskLevel === 'critical').length, color: 'bg-[--status-danger]' },
@@ -690,7 +690,7 @@ function TrustScoresTab({ scores }: { scores: UserTrustScore[] }) {
                       <span className={`text-[10px] capitalize ${riskLevelColor(score.riskLevel)}`}>{score.riskLevel} risk</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      <div><span className="text-[--text-muted]">Trust: </span><span className="text-[#10B981]">{score.trustScore}</span></div>
+                      <div><span className="text-[--text-muted]">Trust: </span><span className="text-[var(--accent)]">{score.trustScore}</span></div>
                       <div><span className="text-[--text-muted]">Fraud: </span><span className="text-[--status-danger]">{score.fraudScore}</span></div>
                     </div>
                   </div>
@@ -836,7 +836,7 @@ export function AdminModeration() {
               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[--status-warning-bg] text-[--status-warning] border border-[--status-warning-border] font-normal">No Data</span>
             )}
             {dataSource === 'live' && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#10B981]/10 text-[--text-muted] border border-[#10B981]/10 font-normal">Live</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--accent)]/10 text-[--text-muted] border border-[var(--accent)]/10 font-normal">Live</span>
             )}
           </h2>
           <p className="text-sm text-[--text-muted] mt-1">Moderation, fraud detection, and user safety management</p>
@@ -845,8 +845,8 @@ export function AdminModeration() {
           <button onClick={fetchData} disabled={isLoading} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--bg-surface-2] transition-all disabled:opacity-50">
             <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
           </button>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10B981]/10 border border-[#10B981]/20 text-xs text-[#10B981]">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" /> System Active
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-xs text-[var(--accent)]">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" /> System Active
           </div>
         </div>
       </motion.div>
@@ -857,7 +857,7 @@ export function AdminModeration() {
           { label: 'Pending Items', value: moderationItems.filter(i => i.status === 'pending').length, icon: Clock, color: 'text-[--status-warning]' },
           { label: 'Fraud Alerts', value: fraudAlerts.filter(a => a.status === 'open').length, icon: AlertOctagon, color: 'text-[--status-danger]' },
           { label: 'Active Bans', value: bans.filter(b => b.status === 'active').length, icon: Ban, color: 'text-[--status-warning]' },
-          { label: 'Open Reports', value: reports.filter(r => r.status === 'pending').length, icon: Flag, color: 'text-[#10B981]' },
+          { label: 'Open Reports', value: reports.filter(r => r.status === 'pending').length, icon: Flag, color: 'text-[var(--accent)]' },
         ].map(stat => (
           <motion.div key={stat.label} variants={itemVariants} className="bg-[--bg-primary] border border-[--border-subtle] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">

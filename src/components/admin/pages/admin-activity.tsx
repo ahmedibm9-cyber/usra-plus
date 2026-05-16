@@ -57,8 +57,8 @@ function getEventTypeIcon(type: string) {
 
 function getEventTypeColor(type: string) {
   switch (type) {
-    case 'signup': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
-    case 'session': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20', dot: 'bg-[#10B981]' }
+    case 'signup': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', dot: 'bg-[var(--accent)]' }
+    case 'session': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20', dot: 'bg-[var(--accent)]' }
     case 'security': return { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', border: 'border-[--status-danger-border]', dot: 'bg-[--status-danger]' }
     default: return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]', dot: 'bg-[--bg-surface-2]' }
   }
@@ -75,7 +75,7 @@ function getEventTypeLabel(type: string) {
 
 // ─── Live Pulse Dot ──────────────────────────────────────────────────────────
 
-function LivePulseDot({ color = 'bg-[#10B981]' }: { color?: string }) {
+function LivePulseDot({ color = 'bg-[var(--accent)]' }: { color?: string }) {
   return (
     <span className="relative flex h-2.5 w-2.5">
       <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${color} opacity-40`} />
@@ -121,11 +121,11 @@ function EmptyActivityState({ onRetry, dbLabel, dbSource }: { onRetry: () => voi
       className="flex flex-col items-center justify-center py-16 px-6"
     >
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#10B981]/10 to-[#10B981]/10 flex items-center justify-center border border-[#10B981]/15">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent)]/10 flex items-center justify-center border border-[var(--accent)]/15">
           <Eye className="w-10 h-10 text-[--text-muted]" />
         </div>
-        <div className="absolute -inset-3 border border-[#10B981]/[0.06] rounded-full" />
-        <div className="absolute -inset-6 border border-[#10B981]/[0.03] rounded-full" />
+        <div className="absolute -inset-3 border border-[var(--accent)]/[0.06] rounded-full" />
+        <div className="absolute -inset-6 border border-[var(--accent)]/[0.03] rounded-full" />
       </div>
       <h3 className="text-lg font-semibold text-[--text-secondary] mb-2">No Activity Yet</h3>
       <p className="text-sm text-[--text-muted] text-center max-w-md mb-2">
@@ -134,13 +134,13 @@ function EmptyActivityState({ onRetry, dbLabel, dbSource }: { onRetry: () => voi
       <p className="text-xs text-[--text-muted] text-center max-w-sm mb-6">
         Activity events like user signups, sessions, and security events will appear here in real-time as users interact with the platform.
       </p>
-      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#10B981]/[0.04] border border-[#10B981]/[0.08] mb-4">
+      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)]/[0.04] border border-[var(--accent)]/[0.08] mb-4">
         <Database className="w-4 h-4 text-[--text-muted]" />
         <span className="text-xs text-[--text-muted]">Connected to {dbSource} — data is real, just empty</span>
       </div>
       <button
         onClick={onRetry}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm hover:bg-[#10B981]/20 transition-colors"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-sm hover:bg-[var(--accent)]/20 transition-colors"
       >
         <RefreshCw className="w-3.5 h-3.5" />
         Refresh
@@ -298,21 +298,21 @@ export function AdminActivity() {
       {/* ── Header ── */}
       <motion.div variants={itemVariants} className="relative overflow-hidden rounded-2xl">
         <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-[400px] h-[300px] opacity-100" style={{ background: 'radial-gradient(ellipse at center, rgba(16,185,129,0.12) 0%, transparent 60%)' }} />
+          <div className="absolute top-0 right-0 w-[400px] h-[300px] opacity-100" style={{ background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 60%)' }} />
           <div className="absolute bottom-0 left-0 w-[300px] h-[200px] opacity-100" style={{ background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.08) 0%, transparent 60%)' }} />
         </div>
         <div className="relative z-10 px-6 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <LivePulseDot color={isEmpty ? 'bg-[--bg-surface]' : 'bg-[#10B981]'} />
+                <LivePulseDot color={isEmpty ? 'bg-[--bg-surface]' : 'bg-[var(--accent)]'} />
                 <span className={`text-sm font-medium ${isEmpty ? 'text-[--text-muted]' : 'text-[--text-secondary]'}`}>
                   {isEmpty ? 'Monitoring active — No events yet' : 'Real-time monitoring active'}
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-[--text-primary]">
                 Activity
-                <span className="bg-gradient-to-r from-[#10B981] to-[#10B981] bg-clip-text text-transparent"> Monitor</span>
+                <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] bg-clip-text text-transparent"> Monitor</span>
               </h1>
               <p className="text-sm text-[--text-muted] mt-1">
                 {isEmpty
@@ -321,7 +321,7 @@ export function AdminActivity() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">
                 <Database className="w-3 h-3" />
                 {dbLabel}
               </div>
@@ -344,10 +344,10 @@ export function AdminActivity() {
         <>
           {/* ── Stats Cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatsCard title="Total Users" value={totalUsers || '—'} icon={Users} color="#10B981" />
-            <StatsCard title="Total Sessions" value={totalSessions || '—'} icon={Activity} color="#10B981" />
-            <StatsCard title="Active Sessions" value={activeSessions || '—'} icon={Radio} color="#0F766E" />
-            <StatsCard title="Events Today" value={eventsToday || '—'} icon={TrendingUp} color="#059669" />
+            <StatsCard title="Total Users" value={totalUsers || '—'} icon={Users} color="var(--accent)" />
+            <StatsCard title="Total Sessions" value={totalSessions || '—'} icon={Activity} color="var(--accent)" />
+            <StatsCard title="Active Sessions" value={activeSessions || '—'} icon={Radio} color="var(--primary)" />
+            <StatsCard title="Events Today" value={eventsToday || '—'} icon={TrendingUp} color="var(--accent)" />
           </div>
 
           {/* ── Live Activity Feed ── */}
@@ -355,17 +355,17 @@ export function AdminActivity() {
             <div className="px-4 py-3 border-b border-[--border-subtle] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-semibold text-[--text-primary] flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-[#10B981]" />
+                  <Activity className="w-4 h-4 text-[var(--accent)]" />
                   Activity Feed
                 </h3>
-                {events.length > 0 && <LivePulseDot color="bg-[#10B981]" />}
+                {events.length > 0 && <LivePulseDot color="bg-[var(--accent)]" />}
               </div>
               {eventTypes.length > 0 && (
                 <div className="relative">
                   <select
                     value={filterType}
                     onChange={e => setFilterType(e.target.value)}
-                    className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1 pr-6 focus:outline-none focus:border-[#10B981]/30 appearance-none"
+                    className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg text-xs text-[--text-muted] px-2 py-1 pr-6 focus:outline-none focus:border-[var(--accent)]/30 appearance-none"
                   >
                     <option value="all">All Types</option>
                     {eventTypes.map(t => (

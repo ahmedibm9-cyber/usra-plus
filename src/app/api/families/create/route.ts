@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { getUserPlan, checkPlanLimit, getCurrentFamilyCount } from '@/lib/plan-limits'
 
 // POST /api/families/create
 // Creates a family and adds the user as owner using the service role key.
@@ -53,6 +54,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid or expired authentication token' },
         { status: 401 }
+      )
+    }
+
+    // ─── Server-side plan limit check ────────────────────────────────────
+    const plan = await getUserPlan(request)
+    const currentFamilyCount = await getCurrentFamilyCount(userId)
+    const { allowed, limit } = checkPlanLimit(plan, 'families', currentFamilyCount)
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: 'Family limit reached for your plan',
+          currentPlan: plan,
+          limit,
+          currentCount: currentFamilyCount,
+          upgradeRequired: true,
+        },
+        { status: 403 },
       )
     }
 

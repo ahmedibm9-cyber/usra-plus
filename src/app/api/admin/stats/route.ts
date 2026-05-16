@@ -5,8 +5,10 @@ import { verifyAdminAuth } from '@/lib/admin-auth'
 
 export async function GET(request: Request) {
   // Auth check — stats contain sensitive platform data
-  const authResult = await verifyAdminAuth(request)
-  if (authResult) return authResult
+  const authResult = verifyAdminAuth(request)
+  if (!authResult.authenticated) {
+    return NextResponse.json({ error: authResult.reason || 'Unauthorized' }, { status: 401 })
+  }
   try {
     const now = new Date()
     const todayStart = startOfDay(now)

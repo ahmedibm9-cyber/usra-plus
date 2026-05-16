@@ -52,6 +52,7 @@ import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTaskStore } from '@/stores/task-store'
 import { useGroceryStore } from '@/stores/grocery-store'
+import { useCurrentFamily, useCurrentUser, useIsDarkMode } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'
 import type {
   Task,
@@ -79,9 +80,9 @@ function getDashboardTheme(mode: 'light' | 'dark') {
         contrastText: mode === 'dark' ? '#00382A' : '#FFFFFF',
       },
       secondary: {
-        main: mode === 'dark' ? '#34D399' : '#065F46',
-        light: mode === 'dark' ? '#6EE7B7' : '#34D399',
-        dark: mode === 'dark' ? '#065F46' : '#064E3B',
+        main: mode === 'dark' ? 'var(--secondary)' : 'var(--secondary)',
+        light: mode === 'dark' ? '#6EE7B7' : 'var(--secondary)',
+        dark: mode === 'dark' ? 'var(--secondary)' : '#064E3B',
         contrastText: mode === 'dark' ? '#064E3B' : '#FFFFFF',
       },
       background: {
@@ -530,9 +531,12 @@ const WEEKLY_ACTIVITY_DATA = [
 
 export default function DashboardPage() {
   const { t, isRTL } = useI18n()
-  const { user } = useAuthStore()
-  const { currentFamily, setCurrentPage, setShowOnboarding, familyMembers, setFamilyMembers } =
-    useAppStore()
+  const user = useCurrentUser()
+  const currentFamily = useCurrentFamily()
+  const setCurrentPage = useAppStore((state) => state.setCurrentPage)
+  const setShowOnboarding = useAppStore((state) => state.setShowOnboarding)
+  const familyMembers = useAppStore((state) => state.familyMembers)
+  const setFamilyMembers = useAppStore((state) => state.setFamilyMembers)
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [events, setEvents] = useState<CalendarEvent[]>([])
@@ -777,8 +781,8 @@ export default function DashboardPage() {
 
   // ─── No Family Onboarding ───────────────────────────────────
 
-  const { theme: appTheme } = useAppStore()
-  const dashboardTheme = useMemo(() => getDashboardTheme(appTheme === 'dark' ? 'dark' : 'light'), [appTheme])
+  const isDark = useIsDarkMode()
+  const dashboardTheme = useMemo(() => getDashboardTheme(isDark ? 'dark' : 'light'), [isDark])
 
   if (!currentFamily) {
     return (

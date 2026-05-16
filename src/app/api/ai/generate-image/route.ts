@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ZAI from 'z-ai-web-dev-sdk'
 import { requireAuth } from '@/lib/auth-utils'
+import { requirePlanAccess } from '@/lib/plan-limits'
 
 type ImageStyle = 'avatar' | 'icon' | 'cover'
 type ImageSize = '256x256' | '512x512'
@@ -47,6 +48,10 @@ export async function POST(request: NextRequest) {
   // Verify authentication
   const auth = await requireAuth(request)
   if (auth.error) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+
+  // ─── Server-side plan check: Image generation requires Pro+ ──────────
+  const imgPlanAccess = await requirePlanAccess(request, 'pro')
+  if (!imgPlanAccess.ok) return imgPlanAccess.error
 
   try {
     let body: GenerateImageRequest

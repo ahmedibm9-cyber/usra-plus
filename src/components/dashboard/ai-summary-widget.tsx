@@ -26,7 +26,7 @@ import { isToday, parseISO, format } from 'date-fns'
 const tealTheme = createTheme({
   palette: {
     primary: { main: '#0D6B58' },
-    secondary: { main: '#059669' },
+    secondary: { main: 'var(--accent)' },
   },
   shape: { borderRadius: 16 },
 })
@@ -314,7 +314,7 @@ export function AISummaryWidget({
           <Box sx={{
             position: 'absolute', inset: 0, borderRadius: 4,
             border: '1px solid transparent',
-            background: `linear-gradient(to right, ${alpha('#0D6B58', 0.2)}, ${alpha('#059669', 0.2)}) border-box`,
+            background: `linear-gradient(to right, ${alpha('#0D6B58', 0.2)}, ${alpha('var(--accent)', 0.2)}) border-box`,
             WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
             WebkitMaskComposite: 'xor',
             maskComposite: 'exclude',
@@ -328,7 +328,7 @@ export function AISummaryWidget({
                 <Box sx={{
                   width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: 1.5,
-                  background: `linear-gradient(135deg, ${alpha('#0D6B58', 0.15)}, ${alpha('#059669', 0.15)})`,
+                  background: `linear-gradient(135deg, ${alpha('#0D6B58', 0.15)}, ${alpha('var(--accent)', 0.15)})`,
                 }}>
                   <AutoAwesome sx={{ fontSize: 16, color: 'secondary.main', animation: 'pulse 2s infinite' }} />
                 </Box>
@@ -344,7 +344,7 @@ export function AISummaryWidget({
                     height: 18,
                     fontSize: 10,
                     fontWeight: 700,
-                    background: 'linear-gradient(to right, #0D6B58, #059669)',
+                    background: 'linear-gradient(to right, var(--primary), var(--accent))',
                     color: '#FFFFFF',
                     '& .MuiChip-label': { px: 1 },
                   }}

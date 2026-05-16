@@ -25,6 +25,7 @@ import {
   ShoppingCart,
 } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
+import { useCurrentPage } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'
 import { MuiLayoutProvider } from './mui-layout-provider'
 import type { AppPage } from '@/types'
@@ -59,7 +60,8 @@ const moreNavItems: MoreNavItem[] = [
 ]
 
 function BottomNavInner() {
-  const { currentPage, setCurrentPage } = useAppStore()
+  const currentPage = useCurrentPage()
+  const setCurrentPage = useAppStore((state) => state.setCurrentPage)
   const { t, isRTL } = useI18n()
   const [moreDrawerOpen, setMoreDrawerOpen] = useState(false)
 

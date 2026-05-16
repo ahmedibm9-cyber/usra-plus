@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useCurrentPage, useIsDarkMode, useCurrentUser } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'
 import { MuiLayoutProvider } from './mui-layout-provider'
 import { NotificationPanel } from './notification-panel'
@@ -48,8 +49,13 @@ const pageTitles: Record<AppPage, keyof import('@/i18n/en').TranslationKeys['nav
 }
 
 function AppHeaderInner() {
-  const { currentPage, setSidebarOpen, setCommandPaletteOpen, theme, setTheme } = useAppStore()
-  const { user, logout } = useAuthStore()
+  const currentPage = useCurrentPage()
+  const setSidebarOpen = useAppStore((state) => state.setSidebarOpen)
+  const setCommandPaletteOpen = useAppStore((state) => state.setCommandPaletteOpen)
+  const isDark = useIsDarkMode()
+  const setTheme = useAppStore((state) => state.setTheme)
+  const user = useCurrentUser()
+  const logout = useAuthStore((state) => state.logout)
   const { t, language, setLanguage, isRTL } = useI18n()
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
 
@@ -81,9 +87,9 @@ function AppHeaderInner() {
   }, [language, setLanguage])
 
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    const newTheme = isDark ? 'light' : 'dark'
     setTheme(newTheme)
-  }, [theme, setTheme])
+  }, [isDark, setTheme])
 
   const kbdSymbol = isMac ? '⌘' : 'Ctrl'
 
@@ -234,17 +240,17 @@ function AppHeaderInner() {
         </Tooltip>
 
         {/* Theme Toggle */}
-        <Tooltip title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+        <Tooltip title={isDark ? 'Light mode' : 'Dark mode'}>
           <IconButton
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             sx={{
               color: 'text.secondary',
               '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
               borderRadius: 2,
             }}
           >
-            {theme === 'dark' ? <LightMode sx={{ fontSize: 18 }} /> : <DarkMode sx={{ fontSize: 18 }} />}
+            {isDark ? <LightMode sx={{ fontSize: 18 }} /> : <DarkMode sx={{ fontSize: 18 }} />}
           </IconButton>
         </Tooltip>
 

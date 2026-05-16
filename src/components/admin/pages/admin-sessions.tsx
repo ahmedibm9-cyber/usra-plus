@@ -85,9 +85,9 @@ function getDeviceIcon(deviceType: string) {
 
 function getDeviceColor(deviceType: string) {
   switch (deviceType) {
-    case 'mobile': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
-    case 'desktop': return { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' }
-    case 'tablet': return { bg: 'bg-[#0D9488]/10', text: 'text-[#0D9488]', border: 'border-[#0D9488]/20' }
+    case 'mobile': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
+    case 'desktop': return { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/20' }
+    case 'tablet': return { bg: 'bg-[var(--accent-primary)]/10', text: 'text-[var(--accent-primary)]', border: 'border-[var(--accent-primary)]/20' }
     default: return { bg: 'bg-[--bg-surface]', text: 'text-[--text-muted]', border: 'border-[--border-subtle]' }
   }
 }
@@ -197,18 +197,18 @@ export function AdminSessions() {
       <motion.div variants={itemVariants} className="relative overflow-hidden rounded-2xl">
         <div className="absolute inset-0">
           <div className="absolute top-0 right-0 w-[400px] h-[300px]" style={{ background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.12) 0%, transparent 60%)' }} />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[200px]" style={{ background: 'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 60%)' }} />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[200px]" style={{ background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 60%)' }} />
         </div>
         <div className="relative z-10 px-6 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-[--text-primary]">
-                Session <span className="bg-gradient-to-r from-[#10B981] to-[#10B981] bg-clip-text text-transparent">Tracker</span>
+                Session <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] bg-clip-text text-transparent">Tracker</span>
               </h1>
               <p className="text-sm text-[--text-muted] mt-1">Real session data from the database · {stats?.totalSessions || 0} total</p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">
                 <Wifi className="w-3 h-3" /> Live Data
               </div>
               <button onClick={fetchData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[--bg-surface] border border-[--border-subtle] text-[--text-muted] hover:text-[--text-secondary] transition-all">
@@ -221,10 +221,10 @@ export function AdminSessions() {
 
       {/* ── Stats Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatsCard title="Active Sessions" value={stats?.totalActive ?? '—'} icon={Users} color="#10B981" />
-        <StatsCard title="Desktop / Mobile" value={stats ? `${stats.desktopCount} / ${stats.mobileCount}` : '—'} icon={Smartphone} color="#10B981" />
-        <StatsCard title="Avg Duration" value={stats ? formatDuration(stats.avgDurationMs) : '—'} icon={Timer} color="#0F766E" />
-        <StatsCard title="Last Hour" value={stats?.sessionsLastHour ?? '—'} icon={Clock} color="#059669" sub="sessions" />
+        <StatsCard title="Active Sessions" value={stats?.totalActive ?? '—'} icon={Users} color="var(--accent)" />
+        <StatsCard title="Desktop / Mobile" value={stats ? `${stats.desktopCount} / ${stats.mobileCount}` : '—'} icon={Smartphone} color="var(--accent)" />
+        <StatsCard title="Avg Duration" value={stats ? formatDuration(stats.avgDurationMs) : '—'} icon={Timer} color="var(--primary)" />
+        <StatsCard title="Last Hour" value={stats?.sessionsLastHour ?? '—'} icon={Clock} color="var(--accent)" sub="sessions" />
       </div>
 
       {/* ── Sessions Table + Sidebar ── */}
@@ -232,7 +232,7 @@ export function AdminSessions() {
         <motion.div variants={itemVariants} className="lg:col-span-2 bg-[--bg-surface] border border-[--border-subtle] rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-[--border-subtle]">
             <h3 className="text-sm font-semibold text-[--text-primary] flex items-center gap-2">
-              <Wifi className="w-4 h-4 text-[#10B981]" /> All Sessions
+              <Wifi className="w-4 h-4 text-[var(--accent)]" /> All Sessions
               <span className="text-xs text-[--text-muted] font-normal">({sessions.length})</span>
             </h3>
           </div>
@@ -256,7 +256,7 @@ export function AdminSessions() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-xs text-[--text-secondary] truncate font-medium">{session.userName}</p>
-                        {session.isActive && !isRevoked && <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />}
+                        {session.isActive && !isRevoked && <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0" />}
                         {isRevoked && <span className="px-1.5 py-0.5 rounded text-[8px] bg-[--status-danger-bg] text-[--status-danger] border border-[--status-danger-border]">Revoked</span>}
                       </div>
                       <p className="text-[10px] text-[--text-muted] truncate">{session.userEmail}</p>
@@ -285,7 +285,7 @@ export function AdminSessions() {
         <div className="space-y-4">
           <motion.div variants={itemVariants} className="bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-4">
             <h3 className="text-sm font-semibold text-[--text-primary] flex items-center gap-2 mb-4">
-              <BarChart3 className="w-4 h-4 text-[#10B981]" /> Device Breakdown
+              <BarChart3 className="w-4 h-4 text-[var(--accent)]" /> Device Breakdown
             </h3>
             {deviceBreakdown.length > 0 ? (
               <div className="space-y-4">
@@ -302,7 +302,7 @@ export function AdminSessions() {
                       </div>
                     </div>
                     <div className="h-3 bg-[--bg-surface] rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${item.percentage}%` }} transition={{ duration: 0.8, delay: 0.2 }} className="h-full rounded-full bg-[#10B981]/60" />
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${item.percentage}%` }} transition={{ duration: 0.8, delay: 0.2 }} className="h-full rounded-full bg-[var(--accent)]/60" />
                     </div>
                   </div>
                 ))}
@@ -317,7 +317,7 @@ export function AdminSessions() {
 
           <motion.div variants={itemVariants} className="bg-[--bg-surface] border border-[--border-subtle] rounded-xl p-4">
             <h3 className="text-sm font-semibold text-[--text-primary] flex items-center gap-2 mb-4">
-              <Globe className="w-4 h-4 text-[#10B981]" /> Session Info
+              <Globe className="w-4 h-4 text-[var(--accent)]" /> Session Info
             </h3>
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between">
@@ -326,7 +326,7 @@ export function AdminSessions() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[--text-muted]">Active Now</span>
-                <span className="text-[#10B981] font-metric">{stats?.totalActive || 0}</span>
+                <span className="text-[var(--accent)] font-metric">{stats?.totalActive || 0}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[--text-muted]">Last Hour</span>
@@ -334,7 +334,7 @@ export function AdminSessions() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[--text-muted]">Avg Duration</span>
-                <span className="text-[#10B981] font-metric">{stats ? formatDuration(stats.avgDurationMs) : '—'}</span>
+                <span className="text-[var(--accent)] font-metric">{stats ? formatDuration(stats.avgDurationMs) : '—'}</span>
               </div>
             </div>
           </motion.div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { verifyAdminAuth } from '@/lib/admin-auth'
+import crypto from 'crypto'
 
 // ─── In-Memory Fallback Storage ───────────────────────────────────────
 
@@ -170,6 +171,11 @@ async function checkApiRoutes(): Promise<{ status: string; responseTime: number;
 // ─── POST: Receive Error Reports ─────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  // Auth check — only authenticated admins can submit error reports
+  const authResult = verifyAdminAuth(request)
+  if (!authResult.authenticated) {
+    return NextResponse.json({ error: authResult.reason || 'Unauthorized' }, { status: 401 })
+  }
   try {
     const body = await request.json()
     const { type, severity, message, stack, source, lineNumber, columnNumber, url, userAgent } = body
@@ -178,15 +184,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
+    // Input length limits — prevent abuse
+    const MAX_MESSAGE = 2000
+    const MAX_STACK = 5000
+    const MAX_URL = 2000
+    if (message.length > MAX_MESSAGE || (stack && stack.length > MAX_STACK) || (url && url.length > MAX_URL)) {
+      return NextResponse.json({ error: 'Input too long' }, { status: 400 })
+    }
+
+    // Sanitize HTML from message to prevent stored XSS
+    const stripHtml = (s: string) => s.replace(/<[^>]*>/g, '')
+
     const errorEntry: StoredError = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
       timestamp: new Date().toISOString(),
-      type: type || 'unknown',
-      severity: severity || 'error',
+      type: type ? String(type).slice(0, 50) : 'unknown',
+      severity: severity ? String(severity).slice(0, 20) : 'error',
       status: 'active',
-      message,
-      stack,
-      source,
+      message: stripHtml(String(message).slice(0, MAX_MESSAGE)),
+      stack: stack ? stripHtml(String(stack).slice(0, MAX_STACK)) : undefined,
+      source: source ? String(source).slice(0, 200) : undefined,
       lineNumber,
       columnNumber,
       url,
@@ -238,8 +255,10 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   // Auth check — error logs contain stack traces and user info
-  const authResult = await verifyAdminAuth(request)
-  if (authResult) return authResult
+  const authResult = verifyAdminAuth(request)
+  if (!authResult.authenticated) {
+    return NextResponse.json({ error: authResult.reason || 'Unauthorized' }, { status: 401 })
+  }
   try {
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action')

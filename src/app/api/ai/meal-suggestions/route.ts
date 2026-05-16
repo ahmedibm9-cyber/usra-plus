@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ZAI from 'z-ai-web-dev-sdk'
 import { requireAuth } from '@/lib/auth-utils'
+import { requirePlanAccess } from '@/lib/plan-limits'
 
 interface MealSuggestion {
   title: string
@@ -122,6 +123,10 @@ export async function POST(request: NextRequest) {
   // Verify authentication
   const auth = await requireAuth(request)
   if (auth.error) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+
+  // ─── Server-side plan check: Meal suggestions require Pro+ ────────────
+  const mealPlanAccess = await requirePlanAccess(request, 'pro')
+  if (!mealPlanAccess.ok) return mealPlanAccess.error
 
   try {
     let body: { groceryItems: string[]; mealType: string; preferences?: string; language?: string }

@@ -123,7 +123,7 @@ function getProviderIcon(provider: string) {
 
 // ─── Radial Progress Ring ───────────────────────────────────────────────────
 
-function RadialProgressRing({ value, size = 80, strokeWidth = 5, color = '#10B981', label }: {
+function RadialProgressRing({ value, size = 80, strokeWidth = 5, color = 'var(--accent)', label }: {
   value: number; size?: number; strokeWidth?: number; color?: string; label?: string
 }) {
   const radius = (size - strokeWidth) / 2
@@ -153,7 +153,7 @@ function RadialProgressRing({ value, size = 80, strokeWidth = 5, color = '#10B98
 function SectionHeader({ icon: Icon, title }: { icon: React.ComponentType<{ className?: string }>; title: string }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      <Icon className="w-4 h-4 text-[#10B981]/70" />
+      <Icon className="w-4 h-4 text-[var(--accent)]/70" />
       <h3 className="text-sm font-semibold text-[--text-primary]">{title}</h3>
       <div className="flex-1 h-px bg-[--bg-surface]" />
     </div>
@@ -175,16 +175,16 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
 
 function ConfirmedBadge({ confirmed }: { confirmed: boolean }) {
   return confirmed
-    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#10B981]/10 text-[#10B981]"><CheckCircle2 className="w-3 h-3" />Confirmed</span>
+    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--accent)]/10 text-[var(--accent)]"><CheckCircle2 className="w-3 h-3" />Confirmed</span>
     : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[--status-danger-bg] text-[--status-danger]"><XCircle className="w-3 h-3" />Unconfirmed</span>
 }
 
 function PlanBadge({ plan }: { plan: string }) {
   const config: Record<string, { bg: string; text: string }> = {
     'Free': { bg: 'bg-[--status-neutral-bg]', text: 'text-[--status-neutral]' },
-    'Pro': { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]' },
+    'Pro': { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]' },
     'Family+': { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]' },
-    'Max': { bg: 'bg-[#0D9488]/10', text: 'text-[#0D9488]' },
+    'Max': { bg: 'bg-[var(--accent-primary)]/10', text: 'text-[var(--accent-primary)]' },
     'Ultimate': { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]' },
   }
   const c = config[plan] || config['Free']
@@ -193,7 +193,7 @@ function PlanBadge({ plan }: { plan: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { bg: string; text: string; dot: string }> = {
-    active: { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', dot: 'bg-[#10B981]' },
+    active: { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', dot: 'bg-[var(--accent)]' },
     suspended: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', dot: 'bg-[--status-danger]' },
     flagged: { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]', dot: 'bg-[--status-warning]' },
     banned: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]', dot: 'bg-[--status-danger]' },
@@ -210,7 +210,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function RiskBadge({ level }: { level: string }) {
   const config: Record<string, { bg: string; text: string }> = {
-    low: { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]' },
+    low: { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]' },
     medium: { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]' },
     high: { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]' },
     critical: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]' },
@@ -224,7 +224,7 @@ function BanStatusBadge({ status }: { status: string }) {
     active: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]' },
     appealed: { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]' },
     upheld: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]' },
-    revoked: { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]' },
+    revoked: { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]' },
     expired: { bg: 'bg-[--status-neutral-bg]', text: 'text-[--status-neutral]' },
   }
   const c = config[status] || config.active
@@ -233,11 +233,11 @@ function BanStatusBadge({ status }: { status: string }) {
 
 function NoteCategoryBadge({ category }: { category: string }) {
   const config: Record<string, { bg: string; text: string }> = {
-    general: { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]' },
+    general: { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]' },
     warning: { bg: 'bg-[--status-warning-bg]', text: 'text-[--status-warning]' },
-    action: { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]' },
+    action: { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]' },
     fraud: { bg: 'bg-[--status-danger-bg]', text: 'text-[--status-danger]' },
-    compliance: { bg: 'bg-[#0D9488]/10', text: 'text-[#0D9488]' },
+    compliance: { bg: 'bg-[var(--accent-primary)]/10', text: 'text-[var(--accent-primary)]' },
   }
   const c = config[category] || config.general
   return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${c.bg} ${c.text}`}>{category}</span>
@@ -421,14 +421,14 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
         <SectionHeader icon={Lock} title="Password" />
         <div className="space-y-0">
           <InfoRow label="Encryption">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#10B981]/10 text-[10px] text-[#10B981]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--accent)]/10 text-[10px] text-[var(--accent)]">
               <ShieldCheck className="w-3 h-3" />
               {auth?.password_info?.encryption_type || 'bcrypt (Supabase Auth)'}
             </span>
           </InfoRow>
           <InfoRow label="Has Password">
             {auth?.password_info?.has_password
-              ? <span className="text-[#10B981] text-[10px]">Yes</span>
+              ? <span className="text-[var(--accent)] text-[10px]">Yes</span>
               : <span className="text-[--text-muted] text-[10px]">No (OAuth only)</span>
             }
           </InfoRow>
@@ -437,7 +437,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
           </InfoRow>
           <InfoRow label="MFA Enabled">
             {auth?.password_info?.mfa_enabled
-              ? <span className="inline-flex items-center gap-1 text-[#10B981] text-[10px]"><CheckCircle2 className="w-3 h-3" />Enabled</span>
+              ? <span className="inline-flex items-center gap-1 text-[var(--accent)] text-[10px]"><CheckCircle2 className="w-3 h-3" />Enabled</span>
               : <span className="inline-flex items-center gap-1 text-[--text-muted] text-[10px]"><XCircle className="w-3 h-3" />Disabled</span>
             }
           </InfoRow>
@@ -521,7 +521,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
             {user?.avatar_url || (profile?.avatar_url as string) ? (
               <img src={(user?.avatar_url || profile?.avatar_url) as string} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10B981]/20 to-[#10B981]/20 flex items-center justify-center text-xs font-medium text-[#10B981]">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-xs font-medium text-[var(--accent)]">
                 {(user?.name || '?').charAt(0)}
               </div>
             )}
@@ -566,7 +566,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
           <div className="flex items-center justify-between">
             <span className="text-xs text-[--text-muted]">Beta Tester</span>
             {user?.betaTester || (profile?.beta_tester as boolean)
-              ? <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#10B981]/10 text-[#10B981]"><Zap className="w-3 h-3" />Beta</span>
+              ? <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--accent)]/10 text-[var(--accent)]"><Zap className="w-3 h-3" />Beta</span>
               : <span className="text-[10px] text-[--text-muted]">Not a beta tester</span>
             }
           </div>
@@ -617,7 +617,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
               <div key={i} className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-[--text-secondary]">{(f.family_name as string) || (f.families as Record<string, unknown>)?.name as string || 'Family'}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#10B981]/10 text-[#10B981]">{(f.role as string) || 'member'}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)]">{(f.role as string) || 'member'}</span>
                 </div>
                 {f.nickname ? <span className="text-[10px] text-[--text-muted] mt-1 block">Nickname: {f.nickname as string}</span> : null}
               </div>
@@ -636,7 +636,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
             {detail.devices.map((d, i) => (
               <div key={i} className="flex items-center justify-between bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-2.5">
                 <div className="flex items-center gap-2">
-                  <Fingerprint className="w-3.5 h-3.5 text-[#10B981]/40" />
+                  <Fingerprint className="w-3.5 h-3.5 text-[var(--accent)]/40" />
                   <span className="text-[10px] text-[--text-muted] font-metric">{((d.fingerprint as string) || d.id as string || 'unknown').substring(0, 16)}...</span>
                 </div>
                 <span className="text-[10px] text-[--text-muted]">{formatTimeAgo(d.last_seen as string)}</span>
@@ -706,11 +706,11 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
       <div>
         <SectionHeader icon={Zap} title="Quick Actions" />
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" className="h-7 text-[10px] bg-transparent border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/10 hover:text-[#10B981]"
+          <Button size="sm" variant="outline" className="h-7 text-[10px] bg-transparent border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)]"
             onClick={() => toast.info('Upgrade plan action — requires billing integration')}>
             <Crown className="w-3 h-3 mr-1" />Upgrade Plan
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[10px] bg-transparent border-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/10 hover:text-[#10B981]"
+          <Button size="sm" variant="outline" className="h-7 text-[10px] bg-transparent border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)]"
             onClick={() => toast.info('Extend trial action — requires billing integration')}>
             <Clock className="w-3 h-3 mr-1" />Extend Trial
           </Button>
@@ -737,11 +737,11 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
           <SectionHeader icon={ShieldAlert} title="Risk Assessment" />
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-center gap-1">
-              <RadialProgressRing value={trustScore} size={88} strokeWidth={6} color={trustScore >= 80 ? '#10B981' : trustScore >= 50 ? '#059669' : '#EF4444'} label="Trust" />
+              <RadialProgressRing value={trustScore} size={88} strokeWidth={6} color={trustScore >= 80 ? 'var(--accent)' : trustScore >= 50 ? 'var(--accent)' : '#EF4444'} label="Trust" />
               <span className="text-[10px] text-[--text-muted]">Trust Score</span>
             </div>
             <div className="flex flex-col items-center gap-1">
-              <RadialProgressRing value={fraudScore} size={88} strokeWidth={6} color={fraudScore <= 20 ? '#10B981' : fraudScore <= 50 ? '#059669' : '#EF4444'} label="Fraud" />
+              <RadialProgressRing value={fraudScore} size={88} strokeWidth={6} color={fraudScore <= 20 ? 'var(--accent)' : fraudScore <= 50 ? 'var(--accent)' : '#EF4444'} label="Fraud" />
               <span className="text-[10px] text-[--text-muted]">Fraud Score</span>
             </div>
             <div className="flex flex-col items-center gap-1">
@@ -760,7 +760,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
                 <div key={key} className="flex items-center gap-3">
                   <span className="text-[10px] text-[--text-muted] min-w-[100px]">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                   <div className="flex-1 h-1.5 bg-[--bg-surface] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(val, 100)}%`, backgroundColor: val >= 70 ? '#10B981' : val >= 40 ? '#059669' : '#EF4444' }} />
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(val, 100)}%`, backgroundColor: val >= 70 ? 'var(--accent)' : val >= 40 ? 'var(--accent)' : '#EF4444' }} />
                   </div>
                   <span className="text-[10px] text-[--text-muted] w-8 text-right">{Math.round(val)}</span>
                 </div>
@@ -806,7 +806,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
             {detail.notes.map((n, i) => (
               <div key={i} className="relative pl-6 pb-4 border-l border-[--border-subtle] last:border-l-0">
                 {/* Timeline dot */}
-                <div className="absolute left-0 top-0 w-2 h-2 -translate-x-[5px] rounded-full bg-[#10B981]/40" />
+                <div className="absolute left-0 top-0 w-2 h-2 -translate-x-[5px] rounded-full bg-[var(--accent)]/40" />
                 <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
@@ -828,13 +828,13 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
       {/* Add Note Form */}
       <div className="bg-[--bg-surface] border border-[--border-subtle] rounded-lg p-4">
         <h4 className="text-xs font-medium text-[--text-secondary] mb-3 flex items-center gap-1.5">
-          <Plus className="w-3.5 h-3.5 text-[#10B981]/60" />Add Note
+          <Plus className="w-3.5 h-3.5 text-[var(--accent)]/60" />Add Note
         </h4>
         <Textarea
           value={noteText}
           onChange={(e) => setNoteText(e.target.value)}
           placeholder="Enter admin note..."
-          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-xs placeholder-[--text-muted] min-h-[80px] resize-none focus:border-[#10B981]/30"
+          className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] text-xs placeholder-[--text-muted] min-h-[80px] resize-none focus:border-[var(--accent)]/30"
         />
         <div className="flex items-center justify-between mt-3">
           <Select value={noteCategory} onValueChange={setNoteCategory}>
@@ -853,7 +853,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
             size="sm"
             disabled={!noteText.trim() || noteSubmitting}
             onClick={handleAddNote}
-            className="h-7 text-[10px] bg-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/30 border-0"
+            className="h-7 text-[10px] bg-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/30 border-0"
           >
             <Send className="w-3 h-3 mr-1" />
             {noteSubmitting ? 'Saving...' : 'Add Note'}
@@ -884,11 +884,11 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
             <div className="flex items-center gap-4">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#10B981]/20 to-[#10B981]/20 flex items-center justify-center text-lg font-medium text-[#10B981] ring-2 ring-[#10B981]/20">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20 flex items-center justify-center text-lg font-medium text-[var(--accent)] ring-2 ring-[var(--accent)]/20">
                   {user?.name?.charAt(0) || '?'}
                 </div>
                 {user?.status === 'active' && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#10B981] ring-2 ring-[var(--bg-primary)]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-primary)]" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -902,7 +902,7 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
                   <PlanBadge plan={normalizePlan(user?.plan || 'free')} />
                   <StatusBadge status={user?.status || 'active'} />
                   {isDemo && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#10B981]/10 text-[#10B981]/50 border border-[#10B981]/10">Demo</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)]/50 border border-[var(--accent)]/10">Demo</span>
                   )}
                 </div>
               </div>
@@ -942,22 +942,22 @@ export function UserDetailDrawer({ userId, user, open, onClose }: UserDetailDraw
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           <div className="px-6 pt-3">
             <TabsList className="bg-[--bg-surface] border border-[--border-subtle] h-9 p-1 w-full">
-              <TabsTrigger value="account" className="text-[10px] data-[state=active]:bg-[#10B981]/10 data-[state=active]:text-[#10B981] flex-1 h-7">
+              <TabsTrigger value="account" className="text-[10px] data-[state=active]:bg-[var(--accent)]/10 data-[state=active]:text-[var(--accent)] flex-1 h-7">
                 <Shield className="w-3 h-3 mr-1" />Account
               </TabsTrigger>
-              <TabsTrigger value="profile" className="text-[10px] data-[state=active]:bg-[#10B981]/10 data-[state=active]:text-[#10B981] flex-1 h-7">
+              <TabsTrigger value="profile" className="text-[10px] data-[state=active]:bg-[var(--accent)]/10 data-[state=active]:text-[var(--accent)] flex-1 h-7">
                 <User className="w-3 h-3 mr-1" />Profile
               </TabsTrigger>
-              <TabsTrigger value="activity" className="text-[10px] data-[state=active]:bg-[#10B981]/10 data-[state=active]:text-[#10B981] flex-1 h-7">
+              <TabsTrigger value="activity" className="text-[10px] data-[state=active]:bg-[var(--accent)]/10 data-[state=active]:text-[var(--accent)] flex-1 h-7">
                 <Activity className="w-3 h-3 mr-1" />Activity
               </TabsTrigger>
-              <TabsTrigger value="subscription" className="text-[10px] data-[state=active]:bg-[#10B981]/10 data-[state=active]:text-[#10B981] flex-1 h-7">
+              <TabsTrigger value="subscription" className="text-[10px] data-[state=active]:bg-[var(--accent)]/10 data-[state=active]:text-[var(--accent)] flex-1 h-7">
                 <CreditCard className="w-3 h-3 mr-1" />Plan
               </TabsTrigger>
-              <TabsTrigger value="security" className="text-[10px] data-[state=active]:bg-[#10B981]/10 data-[state=active]:text-[#10B981] flex-1 h-7">
+              <TabsTrigger value="security" className="text-[10px] data-[state=active]:bg-[var(--accent)]/10 data-[state=active]:text-[var(--accent)] flex-1 h-7">
                 <ShieldAlert className="w-3 h-3 mr-1" />Security
               </TabsTrigger>
-              <TabsTrigger value="notes" className="text-[10px] data-[state=active]:bg-[#10B981]/10 data-[state=active]:text-[#10B981] flex-1 h-7">
+              <TabsTrigger value="notes" className="text-[10px] data-[state=active]:bg-[var(--accent)]/10 data-[state=active]:text-[var(--accent)] flex-1 h-7">
                 <MessageSquare className="w-3 h-3 mr-1" />Notes
               </TabsTrigger>
             </TabsList>

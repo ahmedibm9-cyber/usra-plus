@@ -168,13 +168,13 @@ function CategoryIconRender({ category, className }: { category: string | null; 
 function getCategoryColor(category: string | null) {
   const colors: Record<string, string> = {
     fruits: 'bg-green-500/20 text-green-400 border-green-500/30',
-    dairy: 'bg-[#0D9488]/20 text-[#0D9488] border-[#0D9488]/30',
+    dairy: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-[var(--accent-primary)]/30',
     meat: 'bg-red-500/20 text-red-400 border-red-500/30',
     bakery: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    beverages: 'bg-[#0D9488]/20 text-[#0D9488] border-[#0D9488]/30',
+    beverages: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-[var(--accent-primary)]/30',
     snacks: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    frozen: 'bg-[#0D9488]/20 text-[#0D9488] border-[#0D9488]/30',
-    household: 'bg-[#0D9488]/20 text-[#0D9488] border-[#0D9488]/30',
+    frozen: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-[var(--accent-primary)]/30',
+    household: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-[var(--accent-primary)]/30',
     other: 'bg-gray-500/20 text-[--text-muted] border-gray-500/30',
   }
   return colors[category ?? 'other'] ?? colors.other
@@ -346,7 +346,7 @@ function SortableGroceryItem({
     >
       {/* Drop indicator line */}
       {isOver && (
-        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-[#0D9488] rounded-full z-10" />
+        <div className="absolute -top-[1px] left-4 right-4 h-0.5 bg-[var(--accent-primary)] rounded-full z-10" />
       )}
       <GroceryItemCard
         item={item}
@@ -454,7 +454,7 @@ function RecipeCard({
         variant="ghost"
         size="sm"
         onClick={() => setExpanded(!expanded)}
-        className="text-xs text-[--accent-primary] hover:text-[#10B981] p-0 h-auto"
+        className="text-xs text-[--accent-primary] hover:text-[var(--accent)] p-0 h-auto"
       >
         {expanded ? '−' : '+'} {t.grocery.viewRecipe}
       </Button>
@@ -1092,7 +1092,7 @@ export function GroceryPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.grocery.search}
             className={cn(
-              'bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#0D9488]/20 focus-visible:border-[#0D9488]/50 focus-visible:ring-offset-0',
+              'bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[var(--accent-primary)]/20 focus-visible:border-[var(--accent-primary)]/50 focus-visible:ring-offset-0',
               isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'
             )}
           />
@@ -1313,7 +1313,7 @@ export function GroceryPage() {
                   size="sm"
                   onClick={() => fetchRecipes()}
                   disabled={recipesLoading}
-                  className="text-xs text-[--accent-primary] hover:text-[#10B981] gap-1.5"
+                  className="text-xs text-[--accent-primary] hover:text-[var(--accent)] gap-1.5"
                 >
                   <RefreshCw className={cn('w-3.5 h-3.5', recipesLoading && 'animate-spin')} />
                   {t.grocery.refreshSuggestions}
@@ -1410,7 +1410,7 @@ export function GroceryPage() {
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 placeholder="e.g. Organic Bananas"
-                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[#0D9488]/20 focus-visible:border-[#0D9488]/50 focus-visible:ring-offset-0"
+                className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] placeholder:text-[--text-muted] rounded-xl h-10 focus-visible:ring-[var(--accent-primary)]/20 focus-visible:border-[var(--accent-primary)]/50 focus-visible:ring-offset-0"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && newItemName.trim()) handleAddItem()
                 }}
@@ -1424,7 +1424,7 @@ export function GroceryPage() {
                   min={1}
                   value={newItemQuantity}
                   onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] rounded-xl h-10 focus-visible:ring-[#0D9488]/20 focus-visible:border-[#0D9488]/50 focus-visible:ring-offset-0"
+                  className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] rounded-xl h-10 focus-visible:ring-[var(--accent-primary)]/20 focus-visible:border-[var(--accent-primary)]/50 focus-visible:ring-offset-0"
                 />
               </div>
               <div className="space-y-2 flex-1">
@@ -1441,7 +1441,7 @@ export function GroceryPage() {
                   setNewItemCategory(v)
                   setAutoDetectedCategory(null)
                 }}>
-                  <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] rounded-xl h-10 focus:ring-[#0D9488]/20 focus:border-[#0D9488]/50">
+                  <SelectTrigger className="bg-[--bg-primary] border-[--border-subtle] text-[--text-primary] rounded-xl h-10 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)]/50">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[--bg-surface] border-[--border-subtle] text-[--text-primary] rounded-xl">
