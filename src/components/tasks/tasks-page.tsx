@@ -43,24 +43,7 @@ import {
   Fab,
   InputAdornment,
 } from '@mui/material'
-import {
-  Add,
-  Search,
-  SwapVert,
-  CalendarToday,
-  CheckCircle,
-  RadioButtonUnchecked,
-  AccessTime,
-  Edit,
-  Delete,
-  ChatBubbleOutline,
-  Send,
-  PlaylistAddCheck,
-  GridView,
-  ViewList,
-  Warning,
-  Person,
-} from '@mui/icons-material'
+import { Add, Search, SwapVert, CalendarToday, CheckCircle, RadioButtonUnchecked, AccessTime, Edit, Delete, ChatBubbleOutline, Send, PlaylistAddCheck, GridView, ViewList, Warning, Person } from '@mui/icons-material'
 
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { chipColor: 'error' | 'primary' | 'secondary' | 'success'; label: string }> = {
@@ -196,7 +179,7 @@ function TaskCardComponent({
 
         {/* Content */}
         <Stack sx={{ flex: 1, minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" spacing={0.5} flexWrap="wrap" useFlexGap>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} flexWrap="wrap" useFlexGap>
             <Typography
               variant="body2"
               fontWeight={500}
@@ -211,12 +194,12 @@ function TaskCardComponent({
           </Stack>
 
           {task.description && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ mt: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {task.description}
             </Typography>
           )}
 
-          <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
             <Chip
               icon={task.status === 'in_progress' ? <AccessTime sx={{ fontSize: 12 }} /> : task.status === 'done' ? <CheckCircle sx={{ fontSize: 12 }} /> : <RadioButtonUnchecked sx={{ fontSize: 12 }} />}
               label={statusCfg.label}
@@ -227,7 +210,7 @@ function TaskCardComponent({
             />
 
             {task.due_date && (
-              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: isOverdue ? 'error.main' : 'text.secondary' }}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ color: isOverdue ? 'error.main' : 'text.secondary' }}>
                 <CalendarToday sx={{ fontSize: 12 }} />
                 <Typography variant="caption">{dueDateLabel}</Typography>
                 {isOverdue && <Warning sx={{ fontSize: 12, color: 'error.main' }} />}
@@ -235,11 +218,11 @@ function TaskCardComponent({
             )}
 
             {task.assignee && (
-              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 'auto !important' }}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ ml: 'auto !important' }}>
                 <Avatar sx={{ width: 20, height: 20, fontSize: 9, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
                   {assigneeInitials}
                 </Avatar>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {task.assignee.first_name || task.assignee.email?.split('@')[0]}
                 </Typography>
               </Stack>
@@ -248,11 +231,11 @@ function TaskCardComponent({
         </Stack>
 
         {/* Action buttons */}
-        <Stack direction="row" spacing={0} sx={{ flexShrink: 0 }}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={0} sx={{ flexShrink: 0 }}>
           <IconButton size="small" onClick={() => onEdit(task)} aria-label="Edit task">
             <Edit sx={{ fontSize: 16 }} />
           </IconButton>
-          <IconButton size="small" onClick={() => onDelete(task.id)} aria-label="Delete task" color="error">
+          <IconButton size="small" onClick={() => onDelete(task.id)} aria-label="Delete task" sx={{ color: 'error.main' }}>
             <Delete sx={{ fontSize: 16 }} />
           </IconButton>
         </Stack>
@@ -337,7 +320,7 @@ function TaskModal({
             fullWidth
           />
 
-          <Stack direction="row" spacing={2}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>{t.tasks.priority}</InputLabel>
               <Select
@@ -347,7 +330,7 @@ function TaskModal({
               >
                 {(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => (
                   <MenuItem key={p} value={p}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                       <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: `${PRIORITY_CONFIG[p].chipColor}.main` }} />
                       {PRIORITY_CONFIG[p].label}
                     </Stack>
@@ -370,7 +353,7 @@ function TaskModal({
             </FormControl>
           </Stack>
 
-          <Stack direction="row" spacing={2}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>{t.tasks.assignTo}</InputLabel>
               <Select
@@ -379,7 +362,7 @@ function TaskModal({
                 onChange={(e) => setForm((f) => ({ ...f, assigned_to: e.target.value === '__none__' ? '' : e.target.value }))}
               >
                 <MenuItem value="__none__">
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                     <Person sx={{ fontSize: 14 }} />
                     <Typography variant="body2">Unassigned</Typography>
                   </Stack>
@@ -389,7 +372,7 @@ function TaskModal({
                   const initials = ((member.profiles?.first_name?.[0] || '') + (member.profiles?.last_name?.[0] || '')).toUpperCase() || '?'
                   return (
                     <MenuItem key={member.user_id} value={member.user_id}>
-                      <Stack direction="row" alignItems="center" spacing={1}>
+                      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                         <Avatar sx={{ width: 20, height: 20, fontSize: 8, bgcolor: 'primary.main', color: 'primary.contrastText' }}>{initials}</Avatar>
                         <Typography variant="body2">{name}</Typography>
                       </Stack>
@@ -434,7 +417,7 @@ function DateSectionHeader({ group, count }: { group: DateGroup; count: number }
   const config = DATE_GROUP_CONFIG[group]
   const color = config.color as string
   return (
-    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mt: 3, mb: 1.5, '&:first-of-type': { mt: 0 } }}>
+    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }} sx={{ mt: 3, mb: 1.5, '&:first-of-type': { mt: 0 } }}>
       <Typography variant="caption" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: 1, color: config.color }}>
         {config.label}
       </Typography>
@@ -588,18 +571,18 @@ export default function TasksPage() {
     <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
       <Stack spacing={3}>
         {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30`, display: 'flex' }}>
               <PlaylistAddCheck sx={{ color: 'primary.main' }} />
             </Box>
             <Box>
               <Typography variant="h5" fontWeight={700}>{t.tasks.title}</Typography>
-              <Typography variant="body2" color="text.secondary">{activeTasks} active, {completedTasks} completed</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>{activeTasks} active, {completedTasks} completed</Typography>
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack sx={{ flexDirection: 'row' }} spacing={1} alignItems="center">
             <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, borderRadius: 2 }}>
               <IconButton size="small" onClick={() => setViewMode('list')} color={viewMode === 'list' ? 'primary' : 'default'} sx={{ borderRadius: 1.5 }}>
                 <ViewList sx={{ fontSize: 16 }} />
@@ -615,7 +598,7 @@ export default function TasksPage() {
         </Stack>
 
         {/* Stats */}
-        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+        <Stack sx={{ flexDirection: 'row' }} spacing={2} flexWrap="wrap" useFlexGap>
           {[
             { label: 'Total', value: totalTasks, color: theme.palette.primary.main },
             { label: 'Active', value: activeTasks, color: theme.palette.secondary.main },
@@ -627,21 +610,21 @@ export default function TasksPage() {
               </Box>
               <Box>
                 <Typography variant="body2" fontWeight={700}>{stat.value}</Typography>
-                <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{stat.label}</Typography>
               </Box>
             </Paper>
           ))}
           <Paper variant="outlined" sx={{ flex: '1 1 140px', p: 2 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-              <Typography variant="caption" color="text.secondary">Progress</Typography>
-              <Typography variant="caption" fontWeight={600} color="primary">{completionRate}%</Typography>
+            <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Progress</Typography>
+              <Typography variant="caption" fontWeight={600} sx={{ color: 'primary.main' }}>{completionRate}%</Typography>
             </Stack>
             <LinearProgress variant="determinate" value={completionRate} sx={{ height: 8, borderRadius: 4 }} />
           </Paper>
         </Stack>
 
         {/* Search + Filter */}
-        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack sx={{ flexDirection: 'row' }} spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
           <TextField
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -697,7 +680,7 @@ export default function TasksPage() {
             {filteredTasks.length === 0 && (
               <Stack alignItems="center" sx={{ py: 8 }}>
                 <PlaylistAddCheck sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-                <Typography variant="body2" color="text.secondary">No tasks found</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>No tasks found</Typography>
                 <Button variant="outlined" startIcon={<Add sx={{ fontSize: 16}} />} onClick={handleAddNew} sx={{ mt: 2 }}>
                   {t.tasks.addTask}
                 </Button>
@@ -708,15 +691,15 @@ export default function TasksPage() {
 
         {/* Kanban View */}
         {viewMode === 'kanban' && (
-          <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
             {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((status) => {
               const statusTasks = filteredTasks.filter((t) => t.status === status)
               const cfg = STATUS_CONFIG[status]
               return (
                 <Paper key={status} variant="outlined" sx={{ minWidth: 280, maxWidth: 360, flex: '0 0 300px', p: 2, borderRadius: 2 }}>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 2 }}>
                     <Chip label={cfg.label} size="small" color={cfg.chipColor} />
-                    <Typography variant="caption" color="text.secondary">{statusTasks.length}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{statusTasks.length}</Typography>
                   </Stack>
                   <Stack spacing={1} sx={{ maxHeight: 500, overflowY: 'auto' }}>
                     {statusTasks.map((task) => (
@@ -729,7 +712,7 @@ export default function TasksPage() {
                       />
                     ))}
                     {statusTasks.length === 0 && (
-                      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ py: 4 }}>No tasks</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }} textAlign="center" sx={{ py: 4 }}>No tasks</Typography>
                     )}
                   </Stack>
                 </Paper>
@@ -750,7 +733,7 @@ export default function TasksPage() {
 
       {/* FAB for mobile */}
       {isMobile && (
-        <Fab color="primary" onClick={handleAddNew} sx={{ position: 'fixed', bottom: 80, right: 16 }}>
+        <Fab sx={{ color: 'primary.main' }} onClick={handleAddNew} sx={{ position: 'fixed', bottom: 80, right: 16 }}>
           <Add />
         </Fab>
       )}

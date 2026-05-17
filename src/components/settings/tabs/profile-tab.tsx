@@ -154,7 +154,7 @@ export function ProfileTab() {
     <Stack spacing={3}>
       {/* Profile Card */}
       <SectionCard>
-        <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 3 }}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 2 }} sx={{ mb: 3 }}>
           <Avatar
             src={user?.avatar_url ?? ''}
             sx={{ width: 64, height: 64, border: 2, borderColor: 'primary.light', ring: 4, boxShadow: 2 }}
@@ -167,13 +167,13 @@ export function ProfileTab() {
                 ? `${user.first_name} ${user.last_name}`
                 : user?.email ?? 'User'}
             </Typography>
-            <Typography variant="body2" color="text.secondary">{user?.email}</Typography>
-            <Stack direction="row" alignItems="center" gap={1} sx={{ mt: 0.5 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{user?.email}</Typography>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mt: 0.5 }}>
               <Chip
                 label={t.settings.owner}
                 size="small"
                 variant="outlined"
-                color="primary"
+                sx={{ color: 'primary.main' }}
                 sx={{ fontSize: 10 }}
               />
             </Stack>
@@ -182,7 +182,7 @@ export function ProfileTab() {
             <Button
               variant="text"
               size="small"
-              color="primary"
+              sx={{ color: 'primary.main' }}
               startIcon={<Pencil size={16} />}
               onClick={() => setIsEditing(true)}
             >
@@ -198,7 +198,7 @@ export function ProfileTab() {
               <Typography variant="caption" color="text.primary" sx={{ mb: 1, display: 'block' }}>
                 {t.avatarGen.changePhoto}
               </Typography>
-              <Stack direction="row" alignItems="center" gap={2}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                 <Avatar
                   src={user?.avatar_url ?? ''}
                   sx={{ width: 56, height: 56 }}
@@ -218,7 +218,7 @@ export function ProfileTab() {
                     <Button
                       variant="text"
                       size="small"
-                      color="error"
+                      sx={{ color: 'error.main' }}
                       onClick={handleRemovePhoto}
                       sx={{ fontSize: 12, minHeight: 28 }}
                     >
@@ -276,7 +276,7 @@ export function ProfileTab() {
             {/* Phone with country code */}
             <Box>
               <Typography variant="caption" sx={{ mb: 1, display: 'block' }}>{t.auth.phone}</Typography>
-              <Stack direction="row" gap={1}>
+              <Stack sx={{ flexDirection: 'row', gap: 1 }}>
                 <TextField
                   select
                   value={countryCode}
@@ -303,7 +303,7 @@ export function ProfileTab() {
             <Divider />
 
             {/* Save / Cancel */}
-            <Stack direction="row" gap={1}>
+            <Stack sx={{ flexDirection: 'row', gap: 1 }}>
               <Button
                 variant="contained"
                 size="small"
@@ -328,20 +328,20 @@ export function ProfileTab() {
           <Stack spacing={1.5}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography variant="caption" color="text.secondary">{t.auth.firstName}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.auth.firstName}</Typography>
                 <Typography variant="body2">{user?.first_name || 'Not set'}</Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography variant="caption" color="text.secondary">{t.auth.lastName}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.auth.lastName}</Typography>
                 <Typography variant="body2">{user?.last_name || 'Not set'}</Typography>
               </Grid>
             </Grid>
             <Box>
-              <Typography variant="caption" color="text.secondary">{t.auth.email}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.auth.email}</Typography>
               <Typography variant="body2">{user?.email || 'Not set'}</Typography>
             </Box>
             <Box>
-              <Typography variant="caption" color="text.secondary">{t.auth.phone}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.auth.phone}</Typography>
               <Typography variant="body2">{user?.phone || 'Not set'}</Typography>
             </Box>
           </Stack>
@@ -351,8 +351,8 @@ export function ProfileTab() {
       {/* Language */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Globe size={16} color="primary" /> {t.settings.language}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Globe size={16} sx={{ color: 'primary.main' }} /> {t.settings.language}
           </Stack>
         </SectionTitle>
         <SectionDescription>Choose your preferred language</SectionDescription>
@@ -386,14 +386,14 @@ export function ProfileTab() {
       {/* Theme */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
             {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
             {t.settings.theme}
           </Stack>
         </SectionTitle>
         <SectionDescription>{isRTL ? 'خصّص تجربتك البصرية' : 'Customize your visual experience'}</SectionDescription>
 
-        <Stack direction="row" gap={1.5}>
+        <Stack sx={{ flexDirection: 'row', gap: 1.5 }}>
           <Button
             fullWidth
             variant={theme === 'dark' ? 'contained' : 'outlined'}
@@ -446,16 +446,16 @@ export function ProfileTab() {
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>{family.name}</Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap>{family.description || 'No description'}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>{family.description || 'No description'}</Typography>
                 </Box>
-                <ChevronRight size={16} color="text.secondary" />
+                <ChevronRight size={16} sx={{ color: 'text.secondary' }} />
               </Stack>
             ))}
           </Stack>
         ) : (
           <Stack alignItems="center" sx={{ py: 3 }}>
-            <Users size={32} color="text.secondary" />
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No family memberships yet</Typography>
+            <Users size={32} sx={{ color: 'text.secondary' }} />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ mt: 1 }}>No family memberships yet</Typography>
           </Stack>
         )}
       </SectionCard>

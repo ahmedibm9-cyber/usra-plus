@@ -1,12 +1,13 @@
 // USRA PLUS — Prisma Schema
-// Conditional provider: SQLite for dev, PostgreSQL for production
+// Production-ready: PostgreSQL only (Supabase)
+// Development: Use Supabase local or set DATABASE_URL to PostgreSQL
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -54,9 +55,9 @@ model SubscriptionPlan {
   slug            String   @unique
   name            String
   description     String
-  monthlyPrice    Float    @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
-  yearlyPrice     Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
-  lifetimePrice   Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
+  monthlyPrice    Decimal  @default(0) @db.Decimal(10,2)
+  yearlyPrice     Decimal? @db.Decimal(10,2)
+  lifetimePrice   Decimal? @db.Decimal(10,2)
   currency        String   @default("USD")
   features        String   @default("[]")
   limits          String   @default("{}")
@@ -75,7 +76,7 @@ model Coupon {
   name                  String
   description           String    @default("")
   discountType          String    @default("percentage")
-  discountValue         Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
+  discountValue         Decimal   @default(0) @db.Decimal(10,2)
   applicablePlans       String    @default("[]")
   maxRedemptions        Int?
   currentRedemptions    Int       @default(0)
@@ -85,7 +86,7 @@ model Coupon {
   isActive              Boolean   @default(true)
   targetAudience        String    @default("all")
   autoApply             Boolean   @default(false)
-  createdBy             String?   // Keep as String — admin user may not be in User table
+  createdBy             String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -97,7 +98,7 @@ model CouponRedemption {
   id              String   @id @default(uuid())
   couponId        String
   userId          String
-  discountApplied Float    @default(0)
+  discountApplied Decimal  @default(0) @db.Decimal(10,2)
   redeemedAt      DateTime @default(now())
 
   coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
@@ -115,7 +116,7 @@ model Referral {
   referredUserId  String?
   status          String    @default("pending")
   rewardType      String    @default("trial_extension")
-  rewardValue     Float     @default(0)
+  rewardValue     Decimal   @default(0) @db.Decimal(10,2)
   rewardClaimed   Boolean   @default(false)
   rewardClaimedAt DateTime?
   expiresAt       DateTime?
@@ -135,10 +136,10 @@ model RevenueTransaction {
   userId          String?
   subscriptionId  String?
   type            String    @default("payment")
-  amount          Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
+  amount          Decimal   @default(0) @db.Decimal(10,2)
   currency        String    @default("USD")
-  originalAmount  Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
-  discountAmount  Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
+  originalAmount  Decimal?  @db.Decimal(10,2)
+  discountAmount  Decimal   @default(0) @db.Decimal(10,2)
   couponId        String?
   paymentProvider String?
   status          String    @default("pending")
@@ -159,7 +160,7 @@ model Refund {
   id            String    @id @default(uuid())
   transactionId String
   userId        String?
-  amount        Float     @default(0) // TODO: Migrate to Decimal @db.Decimal(10,2) when switching to PostgreSQL
+  amount        Decimal   @default(0) @db.Decimal(10,2)
   reason        String    @default("")
   category      String    @default("other")
   status        String    @default("pending")
@@ -232,7 +233,7 @@ model ABTest {
 
 model AuditLog {
   id          String   @id @default(uuid())
-  adminEmail  String   // NOTE: Uses email string instead of userId FK — admin may not be in User table (same pattern as EmailCampaign.createdBy)
+  adminEmail  String
   action      String
   targetType  String   @default("system")
   targetId    String?
@@ -315,7 +316,7 @@ model FeatureFlag {
   rolloutPercentage Int      @default(100)
   targetPlan        String?
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime  @updatedAt
 
   @@index([key])
   @@index([enabled])
@@ -345,27 +346,14 @@ model DatabaseBackup {
 model UserSubscription {
   id                    String    @id @default(uuid())
   userId                String
-  revenuecatId          String?   @unique
-  stripeCustomerId      String?   @unique
-  stripeSubscriptionId  String?   @unique
-  stripePriceId         String?
   plan                  String    @default("free")
   status                String    @default("active")
-  productIdentifier     String?
-  store                 String?
-  periodType            String?
   currentPeriodStart    DateTime?
   currentPeriodEnd      DateTime?
-  expirationDate        DateTime?
   trialStart            DateTime?
   trialEnd              DateTime?
   autoRenew            Boolean   @default(true)
-  isSandbox             Boolean   @default(false)
   cancellationReason    String?
-  price                 Float?     // TODO: Migrate to Decimal? @db.Decimal(10,2) when switching to PostgreSQL
-  currency              String?   @default("USD")
-  lastRevenuecatEvent   String?
-  lastEventAt           DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -374,15 +362,12 @@ model UserSubscription {
   @@index([userId])
   @@index([status])
   @@index([plan])
-  @@index([revenuecatId])
-  @@index([stripeCustomerId])
-  @@index([stripeSubscriptionId])
 }
 
 model Consent {
   id        String   @id @default(uuid())
   userId    String
-  type      String   // "terms", "privacy", "marketing", "cookies"
+  type      String
   granted   Boolean
   version   String?
   ipAddress String?
@@ -441,8 +426,6 @@ model FamilyMember {
   @@index([userId])
 }
 
-// ─── System Health Monitoring (from incoming) ──────────────────────
-
 model SystemHealth {
   id            String   @id @default(uuid())
   service       String
@@ -455,8 +438,6 @@ model SystemHealth {
 
   @@index([service])
 }
-
-// ─── Bug Reports (from incoming) ────────────────────────────────────
 
 model BugReport {
   id          String   @id @default(uuid())
@@ -473,15 +454,13 @@ model BugReport {
   @@index([severity])
 }
 
-// ─── Platform Stats (from incoming) ─────────────────────────────────
-
 model PlatformStats {
   id              String   @id @default(uuid())
   totalUsers      Int      @default(0)
   activeUsers     Int      @default(0)
   totalDevices    Int      @default(0)
   totalAlerts     Int      @default(0)
-  revenue         Float    @default(0)
+  revenue         Decimal  @default(0) @db.Decimal(10,2)
   timestamp       DateTime @default(now())
 }
 
@@ -492,11 +471,11 @@ model SubscriptionOtp {
   planSlug     String
   startDate    DateTime
   endDate      DateTime
-  generatedBy  String    // admin user id
-  status       String    @default("pending") // pending, used, expired, revoked
+  generatedBy  String
+  status       String    @default("pending")
   usedAt       DateTime?
   createdAt    DateTime  @default(now())
-  expiresAt    DateTime  // OTP code expiry (e.g. 7 days after generation)
+  expiresAt    DateTime
 
   @@index([code])
   @@index([userId])
@@ -506,7 +485,7 @@ model SubscriptionOtp {
 model AdminOtpAction {
   id           String   @id @default(uuid())
   adminId      String
-  action       String   // generated, revoked
+  action       String
   otpId        String
   targetUserId String
   details      String   @default("{}")

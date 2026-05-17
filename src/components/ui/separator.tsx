@@ -1,28 +1,17 @@
-"use client"
+import React from 'react'
+import MuiSeparator from '@mui/material/Divider'
 
-import * as React from "react"
-import * as SeparatorPrimitive from "@radix-ui/react-separator"
-
-import { cn } from "@/lib/utils"
-
-function Separator({
+export function Separator({
   className,
-  orientation = "horizontal",
-  decorative = true,
-  ...props
-}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
+  orientation = 'horizontal',
+}: {
+  className?: string
+  orientation?: 'horizontal' | 'vertical'
+}) {
   return (
-    <SeparatorPrimitive.Root
-      data-slot="separator"
-      decorative={decorative}
+    <MuiSeparator
       orientation={orientation}
-      className={cn(
-        "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
-        className
-      )}
-      {...props}
+      className={className}
     />
   )
 }
-
-export { Separator }

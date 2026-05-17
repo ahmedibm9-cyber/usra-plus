@@ -460,8 +460,8 @@ export function AdminCoupons() {
     try {
       const res = await fetch('/api/admin/coupons', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await safeJsonResponse(res)
-        setCoupons(json.data || [])
+        const json = await safeJsonResponse(res) as Record<string, unknown>
+        setCoupons((json as any).data || [])
       }
     } catch {
       // ignore
@@ -481,8 +481,8 @@ export function AdminCoupons() {
         body: JSON.stringify(data),
       })
       if (!res.ok) {
-        const err = await safeJsonResponse(res)
-        toast.error(err.error || 'Failed to create coupon')
+        const err = await safeJsonResponse(res) as Record<string, unknown>
+        toast.error((err.error as string) || 'Failed to create coupon')
         return
       }
       toast.success(`Coupon "${data.code}" created successfully`)
@@ -502,8 +502,8 @@ export function AdminCoupons() {
         body: JSON.stringify({ couponId, isActive }),
       })
       if (!res.ok) {
-        const err = await safeJsonResponse(res)
-        toast.error(err.error || 'Failed to toggle coupon')
+        const err = await safeJsonResponse(res) as Record<string, unknown>
+        toast.error((err.error as string) || 'Failed to toggle coupon')
         return
       }
       toast.success(`Coupon ${isActive ? 'activated' : 'deactivated'}`)
@@ -520,8 +520,8 @@ export function AdminCoupons() {
         credentials: 'same-origin',
       })
       if (!res.ok) {
-        const err = await safeJsonResponse(res)
-        toast.error(err.error || 'Failed to delete coupon')
+        const err = await safeJsonResponse(res) as Record<string, unknown>
+        toast.error((err.error as string) || 'Failed to delete coupon')
         return
       }
       toast.success('Coupon deleted')

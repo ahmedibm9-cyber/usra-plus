@@ -8,6 +8,7 @@ import {
   Heart, UserCheck, UsersRound, CircleDot, Download
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { safeJsonResponse } from '@/lib/safe-json-response'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -297,8 +298,9 @@ export function AdminFamilies() {
         }
         if (!cancelled && res.ok) {
           const json = await safeJsonResponse<FamiliesApiResponse>(res)
+          if (!json) return
           setDataSource(json.source)
-          const mapped: FamilyRecord[] = json.data.map(f => ({
+          const mapped: FamilyRecord[] = json.data.map((f: ApiFamily) => ({
             id: f.id,
             name: f.name,
             members: f.member_count,
@@ -456,8 +458,9 @@ export function AdminFamilies() {
                 try {
                   const res = await fetch('/api/admin/export?type=families&format=csv', { credentials: 'same-origin' })
                   if (res.ok) {
-                    const json = await safeJsonResponse(res)
-                    const blob = new Blob([json.data], { type: 'text/csv' })
+                    const json = await safeJsonResponse<Record<string, unknown>>(res)
+                    if (!json) return
+                    const blob = new Blob([json.data as string], { type: 'text/csv' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
@@ -479,7 +482,8 @@ export function AdminFamilies() {
                 try {
                   const res = await fetch('/api/admin/export?type=families&format=json', { credentials: 'same-origin' })
                   if (res.ok) {
-                    const json = await safeJsonResponse(res)
+                    const json = await safeJsonResponse<Record<string, unknown>>(res)
+                    if (!json) return
                     const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')

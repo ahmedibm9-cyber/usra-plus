@@ -2,25 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Add,
-  Cake as CakeIcon,
-  CardGiftcard,
-  School,
-  EmojiEvents,
-  Star,
-  Search,
-  CalendarMonth,
-  Schedule,
-  Groups,
-  TrendingUp,
-  Celebration,
-  Favorite,
-  ExpandMore,
-  Edit,
-  Delete,
-  Close,
-} from '@mui/icons-material'
+import { Add, Cake as CakeIcon, CardGiftcard, School, EmojiEvents, Star, Search, CalendarMonth, Schedule, Groups, TrendingUp, Celebration, Favorite, ExpandMore, Edit, Delete, Close } from '@mui/icons-material'
 import {
   Container,
   Stack,
@@ -116,7 +98,7 @@ function StatCard({ icon: Icon, label, value, color, smallValue }: { icon: React
       </Box>
       <Box sx={{ minWidth: 0 }}>
         <Typography variant={smallValue ? 'body2' : 'h5'} fontWeight={700} noWrap>{value}</Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: 10 }} noWrap>{label}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: 10 }} noWrap>{label}</Typography>
       </Box>
     </Paper>
   )
@@ -219,12 +201,12 @@ export default function MilestonesPage() {
     <Container maxWidth="lg" sx={{ py: 3 }} dir={dir}>
       <Stack spacing={3}>
         {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
             <CakeIcon sx={{ color: 'error.main' }} />
             <Box>
               <Typography variant="h5" fontWeight={700}>{mt.title}</Typography>
-              <Typography variant="body2" color="text.secondary">{isRTL ? 'تتبع التواريخ المهمة لعائلتك' : "Track your family's important dates"}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>{isRTL ? 'تتبع التواريخ المهمة لعائلتك' : "Track your family's important dates"}</Typography>
             </Box>
           </Stack>
           <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd}>{mt.addMilestone}</Button>
@@ -232,24 +214,24 @@ export default function MilestonesPage() {
 
         {/* Statistics */}
         <Grid container spacing={1.5}>
-          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={Celebration} label={mt.totalMilestones} value={stats.total} color="primary" /></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={CakeIcon} label={mt.birthdaysCount} value={stats.birthdays} color="error" /></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={Schedule} label={mt.nextUpcoming} value={stats.nextUpcoming} color="success" smallValue /></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={CalendarMonth} label={mt.thisMonthCount} value={stats.thisMonth} color="primary" /></Grid>
+          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={Celebration} label={mt.totalMilestones} value={stats.total} sx={{ color: 'primary.main' }} /></Grid>
+          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={CakeIcon} label={mt.birthdaysCount} value={stats.birthdays} sx={{ color: 'error.main' }} /></Grid>
+          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={Schedule} label={mt.nextUpcoming} value={stats.nextUpcoming} sx={{ color: 'success.main' }} smallValue /></Grid>
+          <Grid size={{ xs: 6, sm: 3 }}><StatCard icon={CalendarMonth} label={mt.thisMonthCount} value={stats.thisMonth} sx={{ color: 'primary.main' }} /></Grid>
         </Grid>
 
         {/* Month Calendar Strip */}
         <Paper variant="outlined" sx={{ p: 2, borderRadius: 4 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
             <CalendarMonth sx={{ fontSize: 14 }} />
             <Typography variant="caption" fontWeight={500}>{new Date().toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' })}</Typography>
           </Stack>
-          <Stack direction="row" spacing={0.5} sx={{ overflowX: 'auto', pb: 1 }}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={0.5} sx={{ overflowX: 'auto', pb: 1 }}>
             {monthStripData.map((day) => (
               <Stack key={day.day} alignItems="center" sx={{ minWidth: 36, py: 1, px: 0.5, borderRadius: 2, bgcolor: day.day === todayDate ? 'primary.main' + '15' : day.hasMilestone ? 'action.hover' : 'transparent', ring: day.day === todayDate ? 1 : 0 }}>
                 <Typography variant="caption" fontWeight={500} sx={{ fontSize: 10, color: day.day === todayDate ? 'primary.main' : 'text.disabled' }}>{day.day}</Typography>
                 {day.hasMilestone && (
-                  <Stack direction="row" spacing={0.25} sx={{ mt: 0.5 }}>
+                  <Stack sx={{ flexDirection: 'row' }} spacing={0.25} sx={{ mt: 0.5 }}>
                     {day.milestoneTypes.slice(0, 3).map((type, i) => (
                       <Box key={i} sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: `${typeConfig[type].color}.main` }} />
                     ))}
@@ -262,7 +244,7 @@ export default function MilestonesPage() {
 
         {/* Filter Tabs & Search */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-          <Stack direction="row" spacing={0.75} sx={{ overflowX: 'auto', pb: 0.5 }}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={0.75} sx={{ overflowX: 'auto', pb: 0.5 }}>
             {filterTypes.map((filter) => {
               const isActive = activeFilter === filter.key
               const emoji = filter.key === 'all' ? '📋' : typeConfig[filter.key as MilestoneType].emoji
@@ -277,7 +259,7 @@ export default function MilestonesPage() {
         {/* Upcoming Section */}
         {upcomingMilestones.length > 0 && activeFilter === 'all' && !searchQuery.trim() && (
           <Box>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
               <Schedule sx={{ fontSize: 14 }} />
               <Typography variant="subtitle2">{mt.upcoming}</Typography>
             </Stack>
@@ -288,19 +270,19 @@ export default function MilestonesPage() {
                 return (
                   <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={milestone.id}>
                     <Paper variant="outlined" onClick={() => handleOpenEdit(milestone)} sx={{ p: 2, borderRadius: 4, cursor: 'pointer', borderColor: `${config.color}.main`, opacity: 0.8, '&:hover': { opacity: 1, borderColor: `${config.color}.main` } }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
-                        <Stack direction="row" alignItems="center" spacing={1.5}>
+                      <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="flex-start" spacing={1}>
+                        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                           <Box sx={{ width: 40, height: 40, borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: `${config.color}.main`, opacity: 0.15, fontSize: 18 }}>{config.emoji}</Box>
                           <Box>
                             <Typography variant="body2" fontWeight={600} noWrap>{milestone.title}</Typography>
-                            {milestone.personName && <Typography variant="caption" color="text.secondary">{milestone.personName}</Typography>}
+                            {milestone.personName && <Typography variant="caption" sx={{ color: 'text.secondary' }}>{milestone.personName}</Typography>}
                           </Box>
                         </Stack>
                         <Chip label={countdown.label} size="small" color={countdown.color} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
                       </Stack>
-                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1.5 }}>
+                      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mt: 1.5 }}>
                         <CalendarMonth sx={{ fontSize: 12, color: 'text.disabled' }} />
-                        <Typography variant="caption" color="text.secondary">{formatDate(milestone.date, isRTL)}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{formatDate(milestone.date, isRTL)}</Typography>
                         {milestone.type === 'birthday' && <Typography variant="caption" color="error.main">· {mt.turning.replace('{age}', String(calculateAge(milestone.date)))}</Typography>}
                         {milestone.type === 'anniversary' && <Typography variant="caption" color="primary.main">· {mt.anniversaryYearOther.replace('{n}', String(calculateAnniversaryYears(milestone.date)))}</Typography>}
                       </Stack>
@@ -314,7 +296,7 @@ export default function MilestonesPage() {
 
         {/* Timeline View */}
         <Box>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
             <TrendingUp sx={{ fontSize: 14 }} />
             <Typography variant="subtitle2">{mt.timeline}</Typography>
           </Stack>
@@ -327,7 +309,7 @@ export default function MilestonesPage() {
                 </Box>
                 <Box>
                   <Typography variant="h6" fontWeight={600}>{mt.noMilestones}</Typography>
-                  <Typography variant="body2" color="text.secondary">{mt.noMilestonesDesc}</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>{mt.noMilestonesDesc}</Typography>
                 </Box>
                 <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd}>{mt.addMilestone}</Button>
               </Stack>
@@ -342,39 +324,39 @@ export default function MilestonesPage() {
                     const countdown = getCountdownChip(milestone.daysUntil, mt)
                     return (
                       <motion.div key={milestone.id} initial={{ opacity: 0, x: isRTL ? 12 : -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: isRTL ? 12 : -12 }} transition={{ duration: 0.25, delay: index * 0.03 }}>
-                        <Stack direction="row" spacing={2} sx={{ pl: 1, position: 'relative' }}>
+                        <Stack sx={{ flexDirection: 'row' }} spacing={2} sx={{ pl: 1, position: 'relative' }}>
                           <Box sx={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 10, bgcolor: 'background.paper', border: 2, borderColor: 'background.paper', boxShadow: `0 0 0 2px ${theme.palette[config.color].main}30` }}>
                             <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: `${config.color}.main` }} />
                           </Box>
                           <Paper variant="outlined" onClick={() => handleOpenEdit(milestone)} sx={{ flex: 1, p: 2, borderRadius: 4, cursor: 'pointer', borderColor: `${config.color}.main`, opacity: 0.8, '&:hover': { opacity: 1 } }}>
-                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1.5}>
-                              <Stack direction="row" spacing={1.5}>
+                            <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="flex-start" spacing={1.5}>
+                              <Stack sx={{ flexDirection: 'row' }} spacing={1.5}>
                                 <Box sx={{ width: 40, height: 40, borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: `${config.color}.main`, opacity: 0.15, fontSize: 18, flexShrink: 0 }}>{config.emoji}</Box>
                                 <Box sx={{ minWidth: 0 }}>
                                   <Typography variant="body2" fontWeight={600} noWrap>{milestone.title}</Typography>
                                   {milestone.personName && (
-                                    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mt: 0.5 }}>
+                                    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.75 }} sx={{ mt: 0.5 }}>
                                       <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Groups sx={{ fontSize: 12, color: 'text.disabled' }} />
                                       </Box>
-                                      <Typography variant="caption" color="text.secondary">{milestone.personName}</Typography>
+                                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{milestone.personName}</Typography>
                                     </Stack>
                                   )}
-                                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
+                                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mt: 1 }}>
                                     <CalendarMonth sx={{ fontSize: 12, color: 'text.disabled' }} />
-                                    <Typography variant="caption" color="text.secondary">{formatDate(milestone.date, isRTL)}</Typography>
-                                    {milestone.isRecurring && <Typography variant="caption" color="text.disabled">🔄</Typography>}
+                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{formatDate(milestone.date, isRTL)}</Typography>
+                                    {milestone.isRecurring && <Typography variant="caption" sx={{ color: 'text.disabled' }}>🔄</Typography>}
                                   </Stack>
-                                  {milestone.description && <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{milestone.description}</Typography>}
+                                  {milestone.description && <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ mt: 0.75, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{milestone.description}</Typography>}
                                 </Box>
                               </Stack>
                               <Stack alignItems="flex-end" spacing={1} sx={{ flexShrink: 0 }}>
                                 <Chip label={countdown.label} size="small" color={countdown.color} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
                                 {milestone.type === 'birthday' && <Typography variant="caption" color="error.main" sx={{ fontSize: 10, fontWeight: 500 }}>{mt.turning.replace('{age}', String(calculateAge(milestone.date)))}</Typography>}
                                 {milestone.type === 'anniversary' && <Typography variant="caption" color="primary.main" sx={{ fontSize: 10, fontWeight: 500 }}>{mt.anniversaryYearOther.replace('{n}', String(calculateAnniversaryYears(milestone.date)))}</Typography>}
-                                <Stack direction="row" spacing={0.5}>
+                                <Stack sx={{ flexDirection: 'row' }} spacing={0.5}>
                                   <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleOpenEdit(milestone) }} aria-label={mt.editMilestone}><Edit sx={{ fontSize: 12 }} /></IconButton>
-                                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(milestone.id) }} aria-label={mt.deleteMilestone} color="error"><Delete sx={{ fontSize: 12 }} /></IconButton>
+                                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(milestone.id) }} aria-label={mt.deleteMilestone} sx={{ color: 'error.main' }}><Delete sx={{ fontSize: 12 }} /></IconButton>
                                 </Stack>
                               </Stack>
                             </Stack>
@@ -423,7 +405,7 @@ export default function MilestonesPage() {
         <DialogContent><Typography variant="body2">{mt.confirmDelete}</Typography></DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirmId(null)} color="inherit">{t.common.cancel}</Button>
-          <Button onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)} color="error" variant="contained">{t.common.delete}</Button>
+          <Button onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)} sx={{ color: 'error.main' }} variant="contained">{t.common.delete}</Button>
         </DialogActions>
       </Dialog>
     </Container>

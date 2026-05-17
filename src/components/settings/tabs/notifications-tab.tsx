@@ -144,7 +144,7 @@ export function NotificationsTab() {
                     <Icon size={20} />
                   </Box>
                   <Typography variant="body2" sx={{ fontWeight: 500, textAlign: 'center' }}>{channel.title}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>{channel.desc}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textAlign: 'center' }}>{channel.desc}</Typography>
                   <Switch
                     checked={channel.enabled}
                     onChange={(e) => setPreference(channel.key as 'pushEnabled' | 'emailEnabled' | 'inAppEnabled', e.target.checked)}
@@ -168,12 +168,12 @@ export function NotificationsTab() {
             return (
               <Box key={group.id}>
                 {/* Group Header */}
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                  <Stack direction="row" alignItems="center" gap={1}>
-                    <Icon size={16} color="primary" />
+                <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+                    <Icon size={16} sx={{ color: 'primary.main' }} />
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{group.label}</Typography>
                   </Stack>
-                  <Stack direction="row" gap={0.5}>
+                  <Stack sx={{ flexDirection: 'row', gap: 0.5 }}>
                     <Button
                       size="small"
                       variant={allEnabled ? 'contained' : 'text'}
@@ -185,7 +185,7 @@ export function NotificationsTab() {
                     <Button
                       size="small"
                       variant={!allEnabled ? 'outlined' : 'text'}
-                      color="error"
+                      sx={{ color: 'error.main' }}
                       onClick={() => setCategoryGroup(group.id, false)}
                       sx={{ fontSize: 11, minWidth: 0, px: 1.5, py: 0.25, textTransform: 'none' }}
                     >
@@ -238,7 +238,7 @@ export function NotificationsTab() {
           >
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.quietHours}</Typography>
-              <Typography variant="caption" color="text.secondary">{t.notifications.quietHoursDesc}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.notifications.quietHoursDesc}</Typography>
             </Box>
             <Switch
               checked={quietHoursEnabled}
@@ -249,7 +249,7 @@ export function NotificationsTab() {
 
           {/* Quiet Hours Time Pickers */}
           {quietHoursEnabled && (
-            <Stack direction="row" gap={2} sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider', pl: 1 }}>
+            <Stack sx={{ flexDirection: 'row', gap: 2 }} sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider', pl: 1 }}>
               <TextField
                 label={t.notifications.startTime}
                 type="time"
@@ -297,8 +297,8 @@ export function NotificationsTab() {
             justifyContent="space-between"
             sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider' }}
           >
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Volume2 size={16} color="text.secondary" />
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+              <Volume2 size={16} sx={{ color: 'text.secondary' }} />
               <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.sound}</Typography>
             </Stack>
             <Switch
@@ -315,8 +315,8 @@ export function NotificationsTab() {
             justifyContent="space-between"
             sx={{ py: 1.5 }}
           >
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Vibrate size={16} color="text.secondary" />
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+              <Vibrate size={16} sx={{ color: 'text.secondary' }} />
               <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.notifications.vibration}</Typography>
             </Stack>
             <Switch

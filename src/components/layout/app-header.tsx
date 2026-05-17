@@ -19,16 +19,7 @@ import {
   alpha,
   useTheme,
 } from '@mui/material'
-import {
-  Menu as MenuIcon,
-  Search,
-  Logout,
-  Settings,
-  Person,
-  ChevronRight,
-  LightMode,
-  DarkMode,
-} from '@mui/icons-material'
+import { Menu as MenuIcon, Search, Logout, Settings, Person, ChevronRight, LightMode, DarkMode } from '@mui/icons-material'
 import { keyframes } from '@mui/system'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'

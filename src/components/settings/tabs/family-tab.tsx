@@ -153,9 +153,9 @@ export function FamilyTab() {
     return (
       <SectionCard>
         <Stack alignItems="center" sx={{ py: 6 }}>
-          <Users size={48} color="text.secondary" />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t.settings.family}</Typography>
-          <Typography variant="caption" color="text.secondary">No family selected</Typography>
+          <Users size={48} sx={{ color: 'text.secondary' }} />
+          <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ mt: 1 }}>{t.settings.family}</Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>No family selected</Typography>
         </Stack>
       </SectionCard>
     )
@@ -171,13 +171,13 @@ export function FamilyTab() {
     <Stack spacing={3}>
       {/* Family Info */}
       <SectionCard>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Box>
             <SectionTitle>{t.settings.family}</SectionTitle>
             <SectionDescription>Manage your family details and members</SectionDescription>
           </Box>
           {isOwnerOrAdmin && !isEditing && (
-            <IconButton color="primary" onClick={() => setIsEditing(true)} size="small">
+            <IconButton sx={{ color: 'primary.main' }} onClick={() => setIsEditing(true)} size="small">
               <Pencil size={16} />
             </IconButton>
           )}
@@ -200,7 +200,7 @@ export function FamilyTab() {
               fullWidth
               size="small"
             />
-            <Stack direction="row" gap={1}>
+            <Stack sx={{ flexDirection: 'row', gap: 1 }}>
               <Button
                 variant="contained"
                 size="small"
@@ -224,11 +224,11 @@ export function FamilyTab() {
         ) : (
           <Stack spacing={1.5}>
             <Box>
-              <Typography variant="caption" color="text.secondary">{t.settings.familyName}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.settings.familyName}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>{currentFamily.name}</Typography>
             </Box>
             <Box>
-              <Typography variant="caption" color="text.secondary">Description</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Description</Typography>
               <Typography variant="body2">{currentFamily.description || 'No description'}</Typography>
             </Box>
           </Stack>
@@ -238,8 +238,8 @@ export function FamilyTab() {
 
         {/* Invite Code */}
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>{t.settings.inviteCode}</Typography>
-          <Stack direction="row" gap={1} alignItems="center">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ mb: 1, display: 'block' }}>{t.settings.inviteCode}</Typography>
+          <Stack sx={{ flexDirection: 'row', gap: 1 }} alignItems="center">
             <Paper elevation={0} variant="outlined" sx={{ flex: 1, px: 2, py: 1, fontFamily: 'monospace', fontSize: 14, bgcolor: 'action.hover', borderRadius: 2 }}>
               {currentFamily.invite_code}
             </Paper>
@@ -286,7 +286,7 @@ export function FamilyTab() {
                     ? `${member.profiles.first_name} ${member.profiles.last_name ?? ''}`
                     : member.nickname ?? 'Unknown'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>
                   {member.profiles?.email ?? ''}
                 </Typography>
               </Box>
@@ -320,7 +320,7 @@ export function FamilyTab() {
               {isOwnerOrAdmin && member.user_id !== user?.id && (
                 <IconButton
                   size="small"
-                  color="error"
+                  sx={{ color: 'error.main' }}
                   onClick={() => setRemoveDialogOpen(member.id)}
                 >
                   <Trash2 size={14} />
@@ -340,7 +340,7 @@ export function FamilyTab() {
         <DialogActions>
           <Button onClick={() => setRemoveDialogOpen(null)}>{t.common.cancel}</Button>
           <Button
-            color="error"
+            sx={{ color: 'error.main' }}
             variant="contained"
             onClick={() => {
               if (removeDialogOpen) handleRemoveMember(removeDialogOpen)
@@ -354,9 +354,9 @@ export function FamilyTab() {
 
       {/* Danger Zone */}
       <SectionCard sx={{ borderColor: 'error.light' }}>
-        <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 0.5 }}>
-          <AlertTriangle size={16} color="error" />
-          <Typography variant="subtitle1" color="error" sx={{ fontWeight: 600 }}>Danger Zone</Typography>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 0.5 }}>
+          <AlertTriangle size={16} sx={{ color: 'error.main' }} />
+          <Typography variant="subtitle1" sx={{ color: 'error.main' }} sx={{ fontWeight: 600 }}>Danger Zone</Typography>
         </Stack>
         <SectionDescription>Irreversible and destructive actions</SectionDescription>
 
@@ -364,15 +364,15 @@ export function FamilyTab() {
           {/* Leave Family */}
           {!isOwner && (
             <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3, borderColor: 'error.light', bgcolor: 'error.light', }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>Leave Family</Typography>
-                  <Typography variant="caption" color="text.secondary">You will lose access to all family data</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>You will lose access to all family data</Typography>
                 </Box>
                 <Button
                   variant="outlined"
                   size="small"
-                  color="error"
+                  sx={{ color: 'error.main' }}
                   startIcon={<LogOut size={16} />}
                   onClick={() => setLeaveDialogOpen(true)}
                 >
@@ -385,15 +385,15 @@ export function FamilyTab() {
           {/* Delete Family - owner only */}
           {isOwner && (
             <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3, borderColor: 'error.light', bgcolor: 'error.light' }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>{t.common.delete} Family</Typography>
-                  <Typography variant="caption" color="text.secondary">Permanently delete this family and all its data</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>Permanently delete this family and all its data</Typography>
                 </Box>
                 <Button
                   variant="contained"
                   size="small"
-                  color="error"
+                  sx={{ color: 'error.main' }}
                   startIcon={<Trash2 size={16} />}
                   onClick={() => setDeleteDialogOpen(true)}
                 >
@@ -416,7 +416,7 @@ export function FamilyTab() {
         <DialogActions>
           <Button onClick={() => setLeaveDialogOpen(false)}>{t.common.cancel}</Button>
           <Button
-            color="error"
+            sx={{ color: 'error.main' }}
             variant="contained"
             onClick={() => { handleLeaveFamily(); setLeaveDialogOpen(false) }}
           >
@@ -436,7 +436,7 @@ export function FamilyTab() {
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>{t.common.cancel}</Button>
           <Button
-            color="error"
+            sx={{ color: 'error.main' }}
             variant="contained"
             onClick={() => { handleDeleteFamily(); setDeleteDialogOpen(false) }}
           >

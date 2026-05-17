@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomInt } from 'crypto'
 import { db } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -13,7 +14,7 @@ function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let code = ''
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(crypto.randomInt(chars.length))
+    code += chars.charAt(randomInt(chars.length))
   }
   return code
 }

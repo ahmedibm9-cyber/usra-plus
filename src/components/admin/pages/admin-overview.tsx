@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { useOverviewData, useAnalyticsData } from '@/hooks/use-admin-data'
 import { useAdminStore } from '@/stores/admin-store'
-import { Skeleton as MuiSkeleton, Tooltip as MuiTooltip } from '@mui/material'
+import { Skeleton as MuiSkeleton, Tooltip as MuiTooltip, Box } from '@mui/material'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { DataSource } from '@/hooks/use-admin-data'
 import { safeJsonResponse } from '@/lib/safe-fetch'

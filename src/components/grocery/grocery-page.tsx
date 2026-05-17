@@ -1,35 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import {
-  Plus,
-  Search,
-  Trash2,
-  ShoppingBag,
-  Check,
-  Apple,
-  Milk,
-  Fish,
-  Croissant,
-  CupSoda,
-  Cookie,
-  Snowflake,
-  Home,
-  Package,
-  X,
-  Sparkles,
-  GripVertical,
-  ArrowUpDown,
-  ChefHat,
-  Clock,
-  Users,
-  RefreshCw,
-  Download,
-  Copy,
-  Share2,
-  FileText,
-  Trash,
-} from '@mui/icons-material'
+import { Search, Check, Home, X, Download } from '@mui/icons-material'
+import { Plus, Trash2, ShoppingBag, Apple, Milk, Fish, Croissant, CupSoda, Cookie, Snowflake, Package, Sparkles, GripVertical, ArrowUpDown, ChefHat, Clock, Users, RefreshCw, Copy, Share2, FileText, Trash } from 'lucide-react'
 import {
   Container,
   Stack,
@@ -264,19 +237,19 @@ export function GroceryPage() {
     <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
       <Stack spacing={3}>
         {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30` }}>
               <ShoppingBag sx={{ color: 'primary.main' }} />
             </Box>
             <Box>
               <Typography variant="h5" fontWeight={700}>{t.grocery.title}</Typography>
-              <Typography variant="body2" color="text.secondary">{progress.checked}/{progress.total} items checked</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>{progress.checked}/{progress.total} items checked</Typography>
             </Box>
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack sx={{ flexDirection: 'row' }} spacing={1} alignItems="center">
             <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel><Stack direction="row" alignItems="center" spacing={0.5}><ArrowUpDown sx={{ fontSize: 12 }} /><Typography variant="caption">Sort</Typography></Stack></InputLabel>
+              <InputLabel><Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}><ArrowUpDown sx={{ fontSize: 12 }} /><Typography variant="caption">Sort</Typography></Stack></InputLabel>
               <Select value={sortBy} label="Sort" onChange={(e) => setSortBy(e.target.value as typeof sortBy)}>
                 <MenuItem value="created_at">Created Date</MenuItem>
                 <MenuItem value="name">Name</MenuItem>
@@ -292,9 +265,9 @@ export function GroceryPage() {
 
         {/* Progress bar */}
         <Paper variant="outlined" sx={{ p: 2 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+          <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
             <Typography variant="body2" fontWeight={500}>{t.grocery.progress}</Typography>
-            <Typography variant="body2" fontWeight={600} color="primary">{progress.percentage}%</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ color: 'primary.main' }}>{progress.percentage}%</Typography>
           </Stack>
           <LinearProgress variant="determinate" value={progress.percentage} sx={{ height: 10, borderRadius: 5 }} />
         </Paper>
@@ -302,11 +275,11 @@ export function GroceryPage() {
         {/* Recent Items */}
         {recentItems.length > 0 && (
           <Stack spacing={1}>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
               <Sparkles sx={{ fontSize: 14, color: 'secondary.main' }} />
-              <Typography variant="caption" fontWeight={500} color="text.secondary">Quick Add</Typography>
+              <Typography variant="caption" fontWeight={500} sx={{ color: 'text.secondary' }}>Quick Add</Typography>
             </Stack>
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+            <Stack sx={{ flexDirection: 'row' }} spacing={0.5} flexWrap="wrap" useFlexGap>
               {recentItems.map((recent) => (
                 <Chip key={recent.name} label={recent.name} size="small" variant="outlined" onClick={() => { setNewItemName(recent.name); setNewItemCategory(recent.category); setShowAddItem(true) }} sx={{ cursor: 'pointer' }} />
               ))}
@@ -326,7 +299,7 @@ export function GroceryPage() {
         />
 
         {/* Category Tabs */}
-        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+        <Stack sx={{ flexDirection: 'row' }} spacing={0.5} flexWrap="wrap" useFlexGap>
           {CATEGORIES.map((cat) => {
             const count = cat.key === 'all' ? items.length : getCategoryCount(cat.key)
             const isActive = filterCategory === cat.key
@@ -362,11 +335,11 @@ export function GroceryPage() {
               <Checkbox checked={item.checked} onChange={() => handleToggleChecked(item)} size="small" />
               <Stack sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="body2" fontWeight={500} noWrap>{item.name}</Typography>
-                {item.adder && <Typography variant="caption" color="text.secondary">Added by {item.adder.first_name ?? 'Someone'}</Typography>}
+                {item.adder && <Typography variant="caption" sx={{ color: 'text.secondary' }}>Added by {item.adder.first_name ?? 'Someone'}</Typography>}
               </Stack>
-              <Typography variant="caption" color="text.secondary">x{item.quantity}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>x{item.quantity}</Typography>
               <Chip label={item.category ? t.grocery.categories[item.category as keyof typeof t.grocery.categories] ?? item.category : 'Other'} size="small" color={getCategoryChipColor(item.category)} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
-              <IconButton size="small" color="error" onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
+              <IconButton size="small" sx={{ color: 'error.main' }} onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
                 <Trash2 sx={{ fontSize: 14 }} />
               </IconButton>
             </Paper>
@@ -375,9 +348,9 @@ export function GroceryPage() {
           {checkedItems.length > 0 && (
             <>
               <Divider sx={{ my: 1 }} />
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="caption" color="text.secondary">Checked ({checkedItems.length})</Typography>
-                <Button size="small" color="error" variant="text" onClick={() => setShowClearConfirm(true)}>
+              <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center">
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Checked ({checkedItems.length})</Typography>
+                <Button size="small" sx={{ color: 'error.main' }} variant="text" onClick={() => setShowClearConfirm(true)}>
                   {t.grocery.clearChecked}
                 </Button>
               </Stack>
@@ -385,8 +358,8 @@ export function GroceryPage() {
                 <Paper key={item.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, borderRadius: 2, opacity: 0.6 }}>
                   <Checkbox checked={item.checked} onChange={() => handleToggleChecked(item)} size="small" />
                   <Typography variant="body2" sx={{ flex: 1, textDecoration: 'line-through', color: 'text.disabled' }} noWrap>{item.name}</Typography>
-                  <Typography variant="caption" color="text.disabled">x{item.quantity}</Typography>
-                  <IconButton size="small" color="error" onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
+                  <Typography variant="caption" sx={{ color: 'text.disabled' }}>x{item.quantity}</Typography>
+                  <IconButton size="small" sx={{ color: 'error.main' }} onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
                     <Trash2 sx={{ fontSize: 14 }} />
                   </IconButton>
                 </Paper>
@@ -397,7 +370,7 @@ export function GroceryPage() {
           {filteredItems.length === 0 && (
             <Stack alignItems="center" sx={{ py: 6 }}>
               <ShoppingBag sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-              <Typography variant="body2" color="text.secondary">No items found</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>No items found</Typography>
             </Stack>
           )}
         </Stack>
@@ -409,7 +382,7 @@ export function GroceryPage() {
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField label="Item name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="e.g. Milk" size="small" fullWidth autoFocus />
-            <Stack direction="row" spacing={2}>
+            <Stack sx={{ flexDirection: 'row' }} spacing={2}>
               <TextField label="Quantity" type="number" value={newItemQuantity} onChange={(e) => setNewItemQuantity(parseInt(e.target.value) || 1)} size="small" fullWidth inputProps={{ min: 1 }} />
               <FormControl size="small" fullWidth>
                 <InputLabel>Category</InputLabel>
@@ -420,7 +393,7 @@ export function GroceryPage() {
                 </Select>
               </FormControl>
             </Stack>
-            {autoDetectedCategory && <Typography variant="caption" color="primary">Auto-detected: {autoDetectedCategory}</Typography>}
+            {autoDetectedCategory && <Typography variant="caption" sx={{ color: 'primary.main' }}>Auto-detected: {autoDetectedCategory}</Typography>}
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -435,7 +408,7 @@ export function GroceryPage() {
         <DialogContent><Typography variant="body2">This will remove all checked items from the list.</Typography></DialogContent>
         <DialogActions>
           <Button onClick={() => setShowClearConfirm(false)} color="inherit">Cancel</Button>
-          <Button onClick={confirmClearChecked} color="error" variant="contained">Clear</Button>
+          <Button onClick={confirmClearChecked} sx={{ color: 'error.main' }} variant="contained">Clear</Button>
         </DialogActions>
       </Dialog>
     </Container>

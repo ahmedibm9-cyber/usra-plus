@@ -15,14 +15,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import {
-  Shield,
-  Description,
-  Balance,
-  ExpandMore,
-  CheckCircle,
-  Error as ErrorOutline,
-} from '@mui/icons-material'
+import { Shield, Description, Balance, ExpandMore, CheckCircle, Error as ErrorOutline } from '@mui/icons-material'
 import { useI18n } from '@/i18n/use-translation'
 import { useAuthStore } from '@/stores/auth-store'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -212,7 +205,7 @@ export function TermsModal() {
           background: 'linear-gradient(90deg, rgba(13,107,88,0.08), rgba(217,119,6,0.04), rgba(13,107,88,0.08))',
         }}
       >
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={1.5} sx={{ alignItems: 'flex-start' }}>
           <Box
             sx={{
               width: 48,
@@ -240,7 +233,7 @@ export function TermsModal() {
         </Stack>
 
         {/* Trust badges */}
-        <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={1.5} sx={{ mt: 2 }}>
           <Stack
             direction="row"
             spacing={0.75}
@@ -403,7 +396,7 @@ export function TermsModal() {
         <Box sx={{ py: 1 }} dir={isRTL ? 'rtl' : 'ltr'}>
           {termsContent.sections.map((section, index) => (
             <Box key={index} sx={{ mb: 2.5 }}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.75 }}>
+              <Stack sx={{ flexDirection: 'row' }} spacing={1} sx={{ alignItems: 'center', mb: 0.75 }}>
                 <Box
                   sx={{
                     width: 20,
@@ -475,7 +468,7 @@ export function TermsModal() {
           gap: 1.5,
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={1} sx={{ alignItems: 'center' }}>
           {hasScrolledToBottom ? (
             <CheckCircle sx={{ fontSize: 16, color: 'primary.main' }} />
           ) : (
@@ -490,7 +483,7 @@ export function TermsModal() {
             }
           </Typography>
         </Stack>
-        <Stack direction="row" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={1.5}>
           <Button
             onClick={handleDecline}
             sx={{

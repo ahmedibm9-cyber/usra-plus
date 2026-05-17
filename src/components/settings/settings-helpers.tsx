@@ -48,7 +48,7 @@ export function SectionDescription({ children }: { children: React.ReactNode }) 
   return (
     <Typography
       variant="body2"
-      color="text.secondary"
+      sx={{ color: 'text.secondary' }}
       sx={{ mb: 2 }}
     >
       {children}
@@ -66,11 +66,7 @@ export function SettingRow({
   children: React.ReactNode
 }) {
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      gap={2}
+    <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}
       sx={{
         py: 1.5,
         borderBottom: 1,
@@ -86,7 +82,7 @@ export function SettingRow({
           {label}
         </Typography>
         {description && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ mt: 0.25 }}>
             {description}
           </Typography>
         )}

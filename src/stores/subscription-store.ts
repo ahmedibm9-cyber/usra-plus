@@ -35,22 +35,9 @@ const PLAN_LIMITS: Record<SubscriptionPlan, Record<string, number | null>> = {
 
 /**
  * Resolve the effective plan tier, using the `plan` field as the source of truth.
- * `isRevenueCatPro` is only a supplementary flag — if RevenueCat says the user
- * has a pro entitlement but the server-side plan is free, we upgrade to 'pro'
- * (the lowest paid tier). We do NOT bypass all plan limits anymore.
  */
 function resolveEffectivePlan(state: SubscriptionState): SubscriptionPlan {
-  // The server-fetched `plan` field is the source of truth
-  const serverPlan = state.plan
-
-  // If server already says non-free, trust it completely
-  if (serverPlan !== 'free') return serverPlan
-
-  // If RevenueCat reports pro but server says free, the user at least has 'pro'
-  // (the lowest paid tier). We do NOT assume ultimate/max.
-  if (state.isRevenueCatPro) return 'pro'
-
-  return 'free'
+  return state.plan
 }
 
 // ─── Store Interface ─────────────────────────────────────────────────────────
@@ -61,31 +48,16 @@ interface SubscriptionState {
   trialEnd: string | null
   isLoading: boolean
   lastFetched: number | null
-  // RevenueCat integration
-  isRevenueCatPro: boolean
-  revenuecatEntitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>
-  // Stripe checkout/portal state
-  checkoutUrl: string | null
-  portalUrl: string | null
-  isCheckoutLoading: boolean
-  isPortalLoading: boolean
   // Setters
   setPlan: (plan: SubscriptionPlan) => void
   fetchPlanFromServer: (userId: string) => Promise<void>
-  // RevenueCat integration
-  setRevenueCatPro: (isPro: boolean) => void
-  setRevenueCatEntitlements: (entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>) => void
-  syncWithRevenueCat: (isPro: boolean, entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>, plan?: SubscriptionPlan) => void
-  // Stripe integration
-  initiateCheckout: (planId: string) => Promise<void>
-  openBillingPortal: () => Promise<void>
-  // Tier checks — use resolveEffectivePlan instead of raw isRevenueCatPro bypass
+  // Tier checks — use resolveEffectivePlan
   isPro: () => boolean
   isPremium: () => boolean
   isFamilyPlus: () => boolean
   isTrialActive: () => boolean
   trialTimeRemaining: () => number | null
-  // Feature limit checks — use effective plan, not bypass
+  // Feature limit checks — use effective plan
   canCreateTask: (currentTaskCount: number) => boolean
   canCreateFamily: (currentFamilyCount: number) => boolean
   canUploadFile: (currentStorageBytes: number) => boolean
@@ -108,8 +80,6 @@ const PERSIST_TTL = 5 * 60 * 1000
 
 // Subscription plan is fetched from the server via /api/subscription/plan.
 // Client-side checks are for UX ONLY — real enforcement is in Supabase RLS policies.
-// RevenueCat entitlements are supplementary — the `plan` field (from server data)
-// is always the source of truth for tier resolution.
 export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
     (set, get) => ({
@@ -118,12 +88,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       trialEnd: null,
       isLoading: false,
       lastFetched: null,
-      isRevenueCatPro: false,
-      revenuecatEntitlements: {},
-      checkoutUrl: null,
-      portalUrl: null,
-      isCheckoutLoading: false,
-      isPortalLoading: false,
 
       setPlan: (plan) => set({ plan }),
 
@@ -154,104 +118,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           console.warn('[SubscriptionStore] Failed to fetch plan from server')
         } finally {
           set({ isLoading: false })
-        }
-      },
-
-      // RevenueCat integration methods
-      setRevenueCatPro: (isPro) => set({ isRevenueCatPro: isPro }),
-
-      setRevenueCatEntitlements: (entitlements) => set({ revenuecatEntitlements: entitlements }),
-
-      syncWithRevenueCat: (isPro, entitlements, plan) => {
-        const updates: Partial<SubscriptionState> = {
-          isRevenueCatPro: isPro,
-          revenuecatEntitlements: entitlements,
-        }
-        // If RevenueCat provides a specific plan (mapped from product identifier), use it
-        if (isPro && plan) {
-          updates.plan = plan
-        } else if (isPro) {
-          // If RevenueCat says user is pro but no specific plan is given,
-          // only upgrade to 'pro' (the lowest paid tier), NOT to ultimate/max.
-          // This prevents the old bug where isRevenueCatPro bypassed all limits.
-          const currentPlan = get().plan
-          if (currentPlan === 'free') {
-            updates.plan = 'pro'
-          }
-          // If the user already has a higher plan from server data, keep it
-        }
-        // If RevenueCat says user is not pro, and the current plan is pro-level,
-        // the RevenueCat data is the source of truth for revocation
-        if (!isPro && ['pro', 'family_plus', 'max', 'ultimate'].includes(get().plan)) {
-          updates.plan = 'free'
-        }
-        set(updates)
-      },
-
-      // ─── Stripe Integration ──────────────────────────────────────────────
-
-      initiateCheckout: async (planId: string) => {
-        set({ isCheckoutLoading: true, checkoutUrl: null })
-        try {
-          const response = await fetch('/api/stripe/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ planId }),
-          })
-
-          const data = await safeJsonResponse<{ url?: string; error?: string }>(response)
-
-          if (response.ok && data?.url) {
-            set({ checkoutUrl: data.url })
-            // Redirect to Stripe Checkout
-            window.location.href = data.url
-          } else {
-            const errorMsg = data?.error || 'Failed to create checkout session'
-            console.error('[SubscriptionStore] Checkout error:', errorMsg)
-            // If Stripe is not configured, show a user-friendly message
-            if (response.status === 503) {
-              const { toast } = await import('sonner')
-              toast.error('Payment processing is not available yet. Please try again later.')
-            } else {
-              const { toast } = await import('sonner')
-              toast.error(errorMsg)
-            }
-          }
-        } catch (err) {
-          console.error('[SubscriptionStore] Checkout error:', err)
-          const { toast } = await import('sonner')
-          toast.error('Failed to initiate checkout. Please try again.')
-        } finally {
-          set({ isCheckoutLoading: false })
-        }
-      },
-
-      openBillingPortal: async () => {
-        set({ isPortalLoading: true, portalUrl: null })
-        try {
-          const response = await fetch('/api/stripe/portal', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-          })
-
-          const data = await safeJsonResponse<{ url?: string; error?: string }>(response)
-
-          if (response.ok && data?.url) {
-            set({ portalUrl: data.url })
-            // Redirect to Stripe Billing Portal
-            window.location.href = data.url
-          } else {
-            const errorMsg = data?.error || 'Failed to create portal session'
-            console.error('[SubscriptionStore] Portal error:', errorMsg)
-            const { toast } = await import('sonner')
-            toast.error(errorMsg)
-          }
-        } catch (err) {
-          console.error('[SubscriptionStore] Portal error:', err)
-          const { toast } = await import('sonner')
-          toast.error('Failed to open billing portal. Please try again.')
-        } finally {
-          set({ isPortalLoading: false })
         }
       },
 
@@ -366,7 +232,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         isTrial: state.isTrial,
         trialEnd: state.trialEnd,
         lastFetched: state.lastFetched,
-        isRevenueCatPro: state.isRevenueCatPro,
       }),
       // On hydration, check if cache is expired and trigger refetch
       onRehydrateStorage: () => {

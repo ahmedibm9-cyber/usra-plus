@@ -14,20 +14,7 @@ import {
   alpha,
   useTheme,
 } from '@mui/material'
-import {
-  Dashboard,
-  CheckBox,
-  CalendarMonth,
-  Chat,
-  MoreHoriz,
-  AccountBalanceWallet,
-  Restaurant,
-  Cake,
-  Brush,
-  FolderOpen,
-  Settings,
-  ShoppingCart,
-} from '@mui/icons-material'
+import { Dashboard, CheckBox, CalendarMonth, Chat, MoreHoriz, AccountBalanceWallet, Restaurant, Cake, Brush, FolderOpen, Settings, ShoppingCart } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useCurrentPage } from '@/stores/selectors'
 import { useI18n } from '@/i18n/use-translation'

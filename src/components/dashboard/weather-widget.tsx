@@ -2,16 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  WbSunny,
-  Cloud,
-  WaterDrop,
-  Air,
-  LocationOn,
-  ExpandMore,
-  CloudQueue,
-  Grain,
-} from '@mui/icons-material'
+import { WbSunny, Cloud, WaterDrop, Air, LocationOn, ExpandMore, CloudQueue, Grain } from '@mui/icons-material'
 import {
   Card,
   CardContent,

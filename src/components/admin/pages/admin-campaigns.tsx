@@ -98,8 +98,8 @@ function timeAgo(dateStr: string): string {
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', ...opts?.headers } })
-  const data = await safeJsonResponse(res)
-  if (!res.ok) throw new Error(data.error || data.details || 'Request failed')
+  const data = await safeJsonResponse(res) as Record<string, unknown>
+  if (!res.ok) throw new Error((data.error as string) || (data.details as string) || 'Request failed')
   return data
 }
 
@@ -169,7 +169,7 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = []
 async function fetchTemplates(): Promise<EmailTemplate[]> {
   try {
     const data = await apiFetch('/api/admin/campaigns?pageSize=100')
-    const campaigns = data.data || []
+    const campaigns = (data as any).data || []
     // Convert campaigns to template format
     return campaigns.map((c: EmailCampaign) => ({
       id: c.id,
@@ -476,7 +476,7 @@ function EmailCampaignsTab() {
     try {
       const statusParam = statusFilter !== 'all' ? `&status=${statusFilter}` : ''
       const data = await apiFetch(`/api/admin/campaigns?pageSize=100${statusParam}`)
-      setCampaigns(data.data || [])
+      setCampaigns((data as any).data || [])
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to load campaigns')
     } finally {
@@ -949,7 +949,7 @@ function UserSegmentsTab() {
     setLoading(true)
     try {
       const data = await apiFetch('/api/admin/segments?pageSize=100')
-      setSegments(data.data || [])
+      setSegments((data as any).data || [])
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to load segments')
     } finally {
@@ -1097,7 +1097,7 @@ function UserSegmentsTab() {
   const handleRecalculate = async (segment: UserSegment) => {
     try {
       const usersData = await apiFetch('/api/admin/users?pageSize=1')
-      const totalUsers = usersData.total || 0
+      const totalUsers = (usersData as any).total || 0
       const estimated = Math.floor(totalUsers * (0.1 + Math.random() * 0.4))
       await apiFetch('/api/admin/segments', {
         method: 'PATCH',
@@ -1356,7 +1356,7 @@ function ABTestsTab() {
     try {
       const statusParam = statusFilter !== 'all' ? `&status=${statusFilter}` : ''
       const data = await apiFetch(`/api/admin/abtests?pageSize=100${statusParam}`)
-      setTests(data.data || [])
+      setTests((data as any).data || [])
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to load A/B tests')
     } finally {

@@ -1065,7 +1065,7 @@ function PerformanceMonitorTab({ bugApiMetrics }: { bugApiMetrics: PerformanceMe
     try {
       const res = await fetch('/api/admin/performance', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await safeJsonResponse(res)
+        const json = await safeJsonResponse(res) as PerformanceAPIData | null
         setPerfData(json)
       }
     } catch {
@@ -1329,17 +1329,17 @@ function AutoHealTab() {
       })
 
       if (!res.ok) {
-        const err = await safeJsonResponse(res)
+        const err = await safeJsonResponse(res) as Record<string, unknown>
         setResults(prev => [{
           action: actionId,
           affected_rows: 0,
           success: false,
-          message: err.error || 'Failed to execute action',
+          message: (err.error as string) || 'Failed to execute action',
           duration_ms: 0,
         }, ...prev])
       } else {
-        const data = await safeJsonResponse(res)
-        const result = data.results ? data.results[0] : data
+        const data = await safeJsonResponse(res) as Record<string, unknown>
+        const result = (data as any).results ? (data as any).results[0] : data
         setResults(prev => [result, ...prev])
       }
       setLastRun(new Date().toISOString())
@@ -1367,9 +1367,9 @@ function AutoHealTab() {
       })
 
       if (res.ok) {
-        const data = await safeJsonResponse(res)
-        if (data.results) {
-          setResults(prev => [...data.results, ...prev])
+        const data = await safeJsonResponse(res) as Record<string, unknown>
+        if ((data as any).results) {
+          setResults(prev => [...(data as any).results, ...prev])
         }
       }
       setLastRun(new Date().toISOString())
@@ -1587,17 +1587,17 @@ function ApiHealthTab() {
         credentials: 'same-origin',
       })
       if (!res.ok) {
-        const errData = await safeJsonResponse(res).catch(() => ({}))
-        throw new Error(errData.error || `HTTP ${res.status}`)
+        const errData = await safeJsonResponse(res).catch(() => ({})) as Record<string, unknown>
+        throw new Error((errData.error as string) || `HTTP ${res.status}`)
       }
-      const json = await safeJsonResponse(res)
-      if (json.data) {
-        setRoutes(json.data.routes || [])
-        setSummary(json.data.summary || null)
-        setTestedAt(json.data.testedAt || new Date().toISOString())
+      const json = await safeJsonResponse(res) as Record<string, unknown>
+      if ((json as any).data) {
+        setRoutes((json as any).data.routes || [])
+        setSummary((json as any).data.summary || null)
+        setTestedAt((json as any).data.testedAt || new Date().toISOString())
 
         // Log any down/degraded routes as client-side failures
-        const downRoutes = (json.data.routes || []).filter(
+        const downRoutes = ((json as any).data.routes || []).filter(
           (r: APIRouteHealth) => r.status === 'down' || r.status === 'degraded'
         )
         for (const route of downRoutes) {
@@ -1639,9 +1639,9 @@ function ApiHealthTab() {
           credentials: 'same-origin',
         })
         if (listRes.ok) {
-          const listJson = await safeJsonResponse(listRes)
-          if (listJson.data) {
-            setRoutes(listJson.data.routes || [])
+          const listJson = await safeJsonResponse(listRes) as Record<string, unknown>
+          if ((listJson as any).data) {
+            setRoutes((listJson as any).data.routes || [])
           }
         }
       } catch {
@@ -2082,7 +2082,7 @@ export function AdminBugs() {
         return
       }
       if (!res.ok) throw new Error('Failed to fetch bug detection data')
-      const json = await safeJsonResponse(res)
+      const json = await safeJsonResponse(res) as BugsAPIData | null
       if (!mountedRef.current) return
       setApiData(json)
     } catch (err) {
@@ -2112,8 +2112,8 @@ export function AdminBugs() {
       body: JSON.stringify(bug),
     })
     if (!res.ok) {
-      const err = await safeJsonResponse(res)
-      throw new Error(err.error || 'Failed to submit bug report')
+      const err = await safeJsonResponse(res) as Record<string, unknown>
+      throw new Error((err.error as string) || 'Failed to submit bug report')
     }
     await fetchData()
   }

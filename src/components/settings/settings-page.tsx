@@ -84,7 +84,7 @@ export default function SettingsPage() {
         <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
           {t.settings.title}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ mb: 3 }}>
           Manage your account, family, and preferences
         </Typography>
 

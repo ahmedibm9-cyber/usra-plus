@@ -1,18 +1,10 @@
-import * as React from "react"
+import React from 'react'
+import MuiTextareaAutosize from '@mui/material/TextareaAutosize'
+import TextField from '@mui/material/TextField'
 
-import { cn } from "@/lib/utils"
-
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
-  return (
-    <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-[--border-medium] bg-[--bg-surface-2] placeholder:text-[--text-muted] focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex field-sizing-content min-h-16 w-full rounded-md border px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      )}
-      {...props}
-    />
-  )
+export function Textarea({
+  className,
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <TextField multiline minRows={3} fullWidth {...props} />
 }
-
-export { Textarea }

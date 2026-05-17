@@ -22,15 +22,7 @@ import {
   Divider,
   Link,
 } from '@mui/material'
-import {
-  Mail,
-  Lock,
-  Visibility,
-  VisibilityOff,
-  Shield,
-  Fingerprint,
-  ArrowBack,
-} from '@mui/icons-material'
+import { Mail, Lock, Visibility, VisibilityOff, Shield, Fingerprint, ArrowBack } from '@mui/icons-material'
 import { LanguageSelector } from './language-selector'
 import { ThemeToggle } from './theme-toggle'
 import { TermsModal } from './terms-modal'
@@ -268,7 +260,7 @@ export function LoginForm() {
             <CardContent sx={{ p: 3 }}>
               {/* Top bar: Theme toggle + Language selector */}
               <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0 }}>
-                <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                <Stack sx={{ flexDirection: 'row' }} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                   <ThemeToggle />
                   <LanguageSelector />
                 </Stack>
@@ -389,7 +381,7 @@ export function LoginForm() {
 
                 {/* Password / Access Key */}
                 <motion.div {...fadeUp} transition={{ duration: 0.3, delay: 0.15 }}>
-                  <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                  <Stack sx={{ flexDirection: 'row' }} sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {showAdminLogin ? 'Access Key' : t.auth.password}
                     </Typography>

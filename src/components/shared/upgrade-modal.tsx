@@ -22,9 +22,12 @@ import {
  BarChart3,
  MessageSquare,
  Loader2,
+ KeyRound,
 } from 'lucide-react'
 import { useI18n } from '@/i18n/use-translation'
 import { useSubscriptionStore } from '@/stores/subscription-store'
+import { useAuthStore } from '@/stores/auth-store'
+import { toast } from 'sonner'
 import type { SubscriptionPlan } from '@/types'
 
 interface UpgradeModalProps {
@@ -48,8 +51,12 @@ const PLAN_FEATURES = [
 
 export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit }: UpgradeModalProps) {
  const { t, isRTL } = useI18n()
- const { plan, initiateCheckout, isCheckoutLoading } = useSubscriptionStore()
+ const { plan, setPlan, fetchPlanFromServer } = useSubscriptionStore()
+ const { user } = useAuthStore()
  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+ const [showOtpInput, setShowOtpInput] = useState(false)
+ const [otpCode, setOtpCode] = useState('')
+ const [isActivating, setIsActivating] = useState(false)
 
  const featureLabels: Record<string, { en: string; ar: string }> = {
   tasks: { en: 'Tasks', ar: 'المهام' },
@@ -60,18 +67,48 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
  const featureLabel = featureLabels[feature]?.[isRTL ? 'ar' : 'en'] || feature
 
- const handleUpgrade = async (targetPlan: SubscriptionPlan) => {
+ const handleUpgrade = (targetPlan: SubscriptionPlan) => {
   setSelectedPlan(targetPlan)
-  try {
-   await initiateCheckout(targetPlan)
-   // After initiateCheckout, the browser will redirect to Stripe Checkout.
-   // No need to close the modal here — the redirect will navigate away.
-   // If the redirect fails (e.g. Stripe not configured), the store will show a toast.
-  } catch {
-   // Error is handled in the store
-  } finally {
-   setSelectedPlan(null)
+  setShowOtpInput(true)
+ }
+
+ const handleActivateOtp = async () => {
+  if (!otpCode.trim()) {
+   toast.error('Please enter an OTP code')
+   return
   }
+  setIsActivating(true)
+  try {
+   const res = await fetch('/api/subscription/activate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ otpCode: otpCode.trim() }),
+   })
+   const data = await res.json()
+   if (res.ok && data.success) {
+    if (data.subscription?.plan) {
+     setPlan(data.subscription.plan as SubscriptionPlan)
+     if (user?.id) {
+      setTimeout(() => fetchPlanFromServer(user.id), 1000)
+     }
+    }
+    toast.success('Subscription activated successfully!')
+    onOpenChange(false)
+   } else {
+    toast.error(data.error || 'Failed to activate subscription')
+   }
+  } catch {
+   toast.error('Network error. Please try again.')
+  } finally {
+   setIsActivating(false)
+  }
+ }
+
+ const handleCancelOtp = () => {
+  setShowOtpInput(false)
+  setSelectedPlan(null)
+  setOtpCode('')
  }
 
  return (
@@ -137,14 +174,14 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
        >
         <div className="grid grid-cols-3 gap-2.5">
          {/* Free Plan */}
-         <div className="relative bg-background border border-border rounded-xl p-3.5 flex flex-col">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-           {t.settings.free}
-          </p>
-          <p className="text-lg font-bold text-foreground">$0</p>
-          <p className="text-[10px] text-muted-foreground mb-3">
-           {isRTL ? 'مجانًا للأبد' : 'forever'}
-          </p>
+          <div className="relative bg-background border border-border rounded-xl p-3.5 flex flex-col">
+           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+            {t.settings.free}
+           </p>
+           <p className="text-lg font-bold text-foreground">{isRTL ? 'مجاني' : 'Free'}</p>
+           <p className="text-[10px] text-muted-foreground mb-3">
+            {isRTL ? 'الخطة الأساسية' : 'Basic plan'}
+           </p>
 
           <div className="flex-1 space-y-1.5">
            {PLAN_FEATURES.map((feat) => {
@@ -196,9 +233,9 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
             {t.settings.pro}
            </p>
-           <p className="text-lg font-bold text-foreground">$4.99</p>
+           <p className="text-lg font-bold text-foreground">{isRTL ? 'مدفوع' : 'Pro'}</p>
            <p className="text-[10px] text-muted-foreground mb-3">
-            {isRTL ? '/شهريًا' : '/month'}
+            {isRTL ? 'تفعيل برمز OTP' : 'Activate via OTP'}
            </p>
 
            <div className="space-y-1.5">
@@ -220,17 +257,12 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            <Button
             onClick={() => handleUpgrade('pro')}
             className="w-full mt-3 h-8 text-xs bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
-            disabled={plan === 'pro' || isCheckoutLoading}
+            disabled={plan === 'pro'}
            >
-            {isCheckoutLoading && selectedPlan === 'pro' ? (
-             <>
-              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-              {isRTL ? 'جارٍ التحويل...' : 'Redirecting...'}
-             </>
-            ) : plan === 'pro' ? (
+            {plan === 'pro' ? (
              isRTL ? 'الخطة الحالية' : 'Current Plan'
             ) : (
-             isRTL ? 'الترقية إلى Pro' : 'Upgrade to Pro'
+             isRTL ? 'تفعيل Pro' : 'Activate Pro'
             )}
            </Button>
           </div>
@@ -241,10 +273,10 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
           <p className="text-xs font-semibold text-emerald-400/80 uppercase tracking-wider mb-1">
            {t.settings.familyPlus}
           </p>
-          <p className="text-lg font-bold text-foreground">$9.99</p>
-          <p className="text-[10px] text-muted-foreground mb-3">
-           {isRTL ? '/شهريًا' : '/month'}
-          </p>
+           <p className="text-lg font-bold text-foreground">{isRTL ? 'عائلة+' : 'Family+'}</p>
+           <p className="text-[10px] text-muted-foreground mb-3">
+            {isRTL ? 'تفعيل برمز OTP' : 'Activate via OTP'}
+           </p>
 
           <div className="flex-1 space-y-1.5">
            {PLAN_FEATURES.map((feat) => {
@@ -266,70 +298,120 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            })}
           </div>
 
-          <Button
-           onClick={() => handleUpgrade('family_plus')}
-           variant="outline"
-           className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-           disabled={plan === 'family_plus' || isCheckoutLoading}
-          >
-           {isCheckoutLoading && selectedPlan === 'family_plus' ? (
-            <>
-             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-             {isRTL ? 'جارٍ التحويل...' : 'Redirecting...'}
-            </>
-           ) : plan === 'family_plus' ? (
-            isRTL ? 'الخطة الحالية' : 'Current Plan'
-           ) : (
-            isRTL ? 'الترقية إلى Family+' : 'Upgrade to Family+'
-           )}
-          </Button>
+           <Button
+            onClick={() => handleUpgrade('family_plus')}
+            variant="outline"
+            className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+            disabled={plan === 'family_plus'}
+           >
+            {plan === 'family_plus' ? (
+             isRTL ? 'الخطة الحالية' : 'Current Plan'
+            ) : (
+             isRTL ? 'تفعيل Family+' : 'Activate Family+'
+            )}
+           </Button>
          </div>
         </div>
        </motion.div>
 
-       {/* Feature highlights row */}
-       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="px-6 pb-3"
-       >
-        <div className="grid grid-cols-3 gap-2">
-         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
-          <Infinity className="size-4 text-primary shrink-0" />
-          <span className="text-[10px] text-muted-foreground">
-           {isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}
-          </span>
-         </div>
-         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
-          <Zap className="size-4 text-primary shrink-0" />
-          <span className="text-[10px] text-muted-foreground">
-           {isRTL ? 'مزامنة فورية' : 'Real-time Sync'}
-          </span>
-         </div>
-         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
-          <HardDrive className="size-4 text-emerald-400 shrink-0" />
-          <span className="text-[10px] text-muted-foreground">
-           {isRTL ? 'مساحة أكبر' : 'More Storage'}
-          </span>
-         </div>
-        </div>
-       </motion.div>
-
-       {/* Dismiss button */}
-       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-        className="px-6 pb-5 text-center"
-       >
-        <button
-         onClick={() => onOpenChange(false)}
-         className="text-xs text-muted-foreground hover:text-muted-foreground transition-colors"
+        {/* Feature highlights row */}
+        <motion.div
+         initial={{ opacity: 0, y: 10 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.3, delay: 0.2 }}
+         className="px-6 pb-3"
         >
-         {isRTL ? 'ربما لاحقًا' : 'Maybe Later'}
-        </button>
-       </motion.div>
+         <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
+           <Infinity className="size-4 text-primary shrink-0" />
+           <span className="text-[10px] text-muted-foreground">
+            {isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}
+           </span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
+           <Zap className="size-4 text-primary shrink-0" />
+           <span className="text-[10px] text-muted-foreground">
+            {isRTL ? 'مزامنة فورية' : 'Real-time Sync'}
+           </span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border">
+           <HardDrive className="size-4 text-emerald-400 shrink-0" />
+           <span className="text-[10px] text-muted-foreground">
+            {isRTL ? 'مساحة أكبر' : 'More Storage'}
+           </span>
+          </div>
+         </div>
+        </motion.div>
+
+        {/* OTP Activation Section */}
+        {showOtpInput && selectedPlan && (
+         <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="px-6 pb-4"
+         >
+          <div className="rounded-xl border border-border bg-muted/50 p-4">
+           <div className="flex items-center gap-2 mb-3">
+            <KeyRound className="size-4 text-primary" />
+            <span className="text-sm font-medium">
+             {isRTL
+              ? `أدخل رمز OTP لتفعيل باقة ${selectedPlan === 'pro' ? 'Pro' : 'Family+'}`
+              : `Enter OTP to activate ${selectedPlan === 'pro' ? 'Pro' : 'Family+'} plan`}
+            </span>
+           </div>
+           <div className="flex gap-2">
+            <input
+             type="text"
+             value={otpCode}
+             onChange={(e) => {
+              setOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))
+             }}
+             placeholder="000000"
+             className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-lg font-mono text-center tracking-[0.5em]"
+             maxLength={6}
+             disabled={isActivating}
+            />
+            <Button
+             onClick={handleActivateOtp}
+             disabled={isActivating || otpCode.length !== 6}
+             size="sm"
+            >
+             {isActivating ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+             ) : isRTL ? (
+              'تفعيل'
+             ) : (
+              'Activate'
+             )}
+            </Button>
+           </div>
+           <button
+            onClick={handleCancelOtp}
+            className="mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+           >
+            {isRTL ? 'إلغاء' : 'Cancel'}
+           </button>
+          </div>
+         </motion.div>
+        )}
+
+        {/* Dismiss button — hidden while OTP input is shown */}
+        {!showOtpInput && (
+         <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="px-6 pb-5 text-center"
+         >
+          <button
+           onClick={() => onOpenChange(false)}
+           className="text-xs text-muted-foreground hover:text-muted-foreground transition-colors"
+          >
+           {isRTL ? 'ربما لاحقًا' : 'Maybe Later'}
+          </button>
+         </motion.div>
+        )}
       </div>
      )}
     </AnimatePresence>

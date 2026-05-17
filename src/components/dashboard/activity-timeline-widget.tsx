@@ -2,17 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  CheckCircle,
-  AddCircle,
-  CalendarMonth,
-  ShoppingCart,
-  Chat,
-  PersonAdd,
-  Timeline,
-  ExpandLess,
-  ExpandMore,
-} from '@mui/icons-material'
+import { CheckCircle, AddCircle, CalendarMonth, ShoppingCart, Chat, PersonAdd, Timeline, ExpandLess, ExpandMore } from '@mui/icons-material'
 import {
   Card,
   CardContent,

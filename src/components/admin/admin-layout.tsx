@@ -82,7 +82,7 @@ function ThemedIcon({ color, children }: { color: string; children: React.ReactN
 
 function AdminPageLoader() {
   return (
-    <Stack alignItems="center" justifyContent="center" sx={{ py: 10 }}>
+    <Stack sx={{ alignItems: 'center', justifyContent: 'center', py: 10 }}>
       <CircularProgress size={24} />
     </Stack>
   )
@@ -153,7 +153,7 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
   return (
     <>
       <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)} aria-label="Notifications">
-        <Badge badgeContent={total} color="error" max={99}>
+        <Badge badgeContent={total} sx={{ color: 'error.main' }} max={99}>
           <Bell size={16} />
         </Badge>
       </IconButton>
@@ -167,10 +167,10 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
       >
         <Paper sx={{ width: 320, maxHeight: 400, overflowY: 'auto' }}>
           {/* Header */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
             <Typography variant="subtitle2">Notifications</Typography>
             {total > 0 && (
-              <Chip label={`${total} items need attention`} size="small" color="error" variant="outlined" />
+              <Chip label={`${total} items need attention`} size="small" sx={{ color: 'error.main' }} variant="outlined" />
             )}
           </Stack>
 
@@ -181,8 +181,8 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <ThemedIcon color="error.main"><Bug size={14} /></ThemedIcon>
                 </ListItemIcon>
-                <ListItemText primary="Critical Bugs" primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }} />
-                <Chip label={data.counts.criticalBugs} size="small" color="error" />
+                <ListItemText primary="Critical Bugs" />
+                <Chip label={data.counts.criticalBugs} size="small" sx={{ color: 'error.main' }} />
               </ListItemButton>
               {data.latest.bugs.slice(0, 3).map(bug => (
                 <Stack key={bug.id} sx={{ px: 2, py: 0.5, pl: 5 }}>
@@ -200,8 +200,10 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <ThemedIcon color="warning.main"><ShieldAlert size={14} /></ThemedIcon>
                 </ListItemIcon>
-                <ListItemText primary="Pending Moderation" primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }} />
-                <Chip label={data.counts.pendingModeration} size="small" color="warning" />
+                <ListItemText
+                  primary={<Typography variant="body2" sx={{ fontWeight: 500 }}>Pending Moderation</Typography>}
+                />
+                <Chip label={data.counts.pendingModeration} size="small" sx={{ color: 'warning.main' }} />
               </ListItemButton>
               {data.latest.moderation.slice(0, 3).map(item => (
                 <Stack key={item.id} sx={{ px: 2, py: 0.5, pl: 5 }}>
@@ -219,8 +221,10 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <ThemedIcon color="primary.main"><LifeBuoy size={14} /></ThemedIcon>
                 </ListItemIcon>
-                <ListItemText primary="Open Tickets" primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }} />
-                <Chip label={data.counts.openTickets} size="small" color="primary" />
+                <ListItemText
+                  primary={<Typography variant="body2" sx={{ fontWeight: 500 }}>Open Tickets</Typography>}
+                />
+                <Chip label={data.counts.openTickets} size="small" sx={{ color: 'primary.main' }} />
               </ListItemButton>
               {data.latest.tickets.slice(0, 3).map(ticket => (
                 <Stack key={ticket.id} sx={{ px: 2, py: 0.5, pl: 5 }}>
@@ -233,7 +237,7 @@ function NotificationBellDropdown({ onNavigate }: { onNavigate: (page: AdminPage
 
           {/* No notifications */}
           {(!data || data.counts.total === 0) && (
-            <Stack alignItems="center" sx={{ py: 4 }}>
+            <Stack sx={{ py: 4, alignItems: 'center' }}>
               <ThemedIcon color="success.main"><CheckCircle2 size={32} /></ThemedIcon>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>All clear!</Typography>
               <Typography variant="caption" sx={{ color: 'text.disabled' }}>No items need your attention right now</Typography>
@@ -318,17 +322,19 @@ function AdminSearchPalette({ onNavigate }: { onNavigate: (page: AdminPage) => v
         onChange={(e) => { setQuery(e.target.value); setAnchorEl(e.currentTarget) }}
         onFocus={(e) => setAnchorEl(e.currentTarget)}
         sx={{ width: 224, '& .MuiInputBase-input': { fontSize: 12, py: 0.75 } }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start" sx={{ mr: 0.5 }}>
-              <Search size={14} />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end" sx={{ ml: 0.5 }}>
-              <Typography variant="caption" sx={{ fontSize: 9, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 0.5, px: 0.5, py: 0.25, color: 'text.disabled' }}>⌘K</Typography>
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start" sx={{ mr: 0.5 }}>
+                <Search size={14} />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end" sx={{ ml: 0.5 }}>
+                <Typography variant="caption" sx={{ fontSize: 9, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 0.5, px: 0.5, py: 0.25, color: 'text.disabled' }}>⌘K</Typography>
+              </InputAdornment>
+            ),
+          },
         }}
       />
       <Popover
@@ -349,18 +355,16 @@ function AdminSearchPalette({ onNavigate }: { onNavigate: (page: AdminPage) => v
                 <ListItemButton key={item.id} onClick={() => handleSelect(item.page)} sx={{ py: 1 }}>
                   <ListItemIcon sx={{ minWidth: 28 }}><Search size={12} /></ListItemIcon>
                   <ListItemText
-                    primary={item.label}
-                    secondary={item.description}
-                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
+                    primary={<Typography variant="body2" sx={{ fontWeight: 500 }}>{item.label}</Typography>}
+                    secondary={<Typography variant="caption">{item.description}</Typography>}
                   />
                 </ListItemButton>
               ))}
             </Box>
           ))}
           {query.trim().length > 0 && filteredResults.length === 0 && (
-            <Stack alignItems="center" sx={{ py: 3 }}>
-              <ThemedIcon color="text.disabled"><Search size={20} /></ThemedIcon>
+            <Stack sx={{ py: 3, alignItems: 'center' }}>
+              <ThemedIcon sx={{ color: 'text.disabled' }}><Search size={20} /></ThemedIcon>
               <Typography variant="caption" sx={{ color: 'text.disabled', mt: 1 }}>No results for &quot;{query}&quot;</Typography>
             </Stack>
           )}
@@ -385,8 +389,8 @@ function SystemHealthWidget({ collapsed }: { collapsed: boolean }) {
       try {
         const dbRes = await fetch('/api/admin/db-info', { credentials: 'same-origin' })
         if (dbRes.ok) {
-          const dbData = await safeJsonResponse(dbRes)
-          setHealth(prev => ({ ...prev, dbStatus: 'healthy', dbLabel: dbData.displayBadge || 'SQLite' }))
+          const dbData = await safeJsonResponse(dbRes) as Record<string, unknown>
+          setHealth(prev => ({ ...prev, dbStatus: 'healthy', dbLabel: (dbData.displayBadge as string) || 'SQLite' }))
         }
       } catch {
         setHealth(prev => ({ ...prev, dbStatus: 'error', dbLabel: 'Error' }))
@@ -409,37 +413,37 @@ function SystemHealthWidget({ collapsed }: { collapsed: boolean }) {
 
   if (collapsed) {
     return (
-      <Stack alignItems="center" sx={{ py: 0.5 }}>
+      <Stack sx={{ py: 0.5, alignItems: 'center' }}>
         <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: statusColor, boxShadow: `0 0 6px ${statusColor}` }} />
       </Stack>
     )
   }
 
   return (
-    <Stack spacing={0.5} sx={{ px: 1.5, py: 1 }}>
+    <Stack sx={{ px: 1.5, py: 1, gap: 0.5 }}>
       <Typography variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontSize: 9, fontWeight: 500, mb: 0.5, color: 'text.disabled' }}>
         System Health
       </Typography>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Stack direction="row" alignItems="center" gap={0.75}>
-          <ThemedIcon color="text.disabled"><Database size={12} /></ThemedIcon>
+      <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Stack sx={{ flexDirection: 'row', gap: 0.75 }}>
+          <ThemedIcon sx={{ color: 'text.disabled' }}><Database size={12} /></ThemedIcon>
           <Typography variant="caption" sx={{ fontSize: 10, color: 'text.disabled' }}>DB</Typography>
         </Stack>
-        <Stack direction="row" alignItems="center" gap={0.75}>
+        <Stack sx={{ flexDirection: 'row', gap: 0.75 }}>
           <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: statusColor }} />
           <Typography variant="caption" sx={{ fontSize: 10, color: statusColor }}>{health.dbLabel}</Typography>
         </Stack>
       </Stack>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Stack direction="row" alignItems="center" gap={0.75}>
-          <ThemedIcon color="text.disabled"><Clock size={12} /></ThemedIcon>
+      <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Stack sx={{ flexDirection: 'row', gap: 0.75 }}>
+          <ThemedIcon sx={{ color: 'text.disabled' }}><Clock size={12} /></ThemedIcon>
           <Typography variant="caption" sx={{ fontSize: 10, color: 'text.disabled' }}>Uptime</Typography>
         </Stack>
         <Typography variant="caption" sx={{ fontSize: 10, color: 'text.secondary' }}>{health.uptime}</Typography>
       </Stack>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Stack direction="row" alignItems="center" gap={0.75}>
-          <ThemedIcon color="text.disabled"><Wifi size={12} /></ThemedIcon>
+      <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Stack sx={{ flexDirection: 'row', gap: 0.75 }}>
+          <ThemedIcon sx={{ color: 'text.disabled' }}><Wifi size={12} /></ThemedIcon>
           <Typography variant="caption" sx={{ fontSize: 10, color: 'text.disabled' }}>Active</Typography>
         </Stack>
         <Typography variant="caption" sx={{ fontSize: 10, color: 'text.secondary' }}>{health.activeConnections}</Typography>
@@ -542,7 +546,7 @@ export function AdminLayout() {
       >
         {/* Sidebar Header — Logo + Branding */}
         <Toolbar sx={{ minHeight: 64, px: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Stack direction="row" alignItems="center" gap={1.5} sx={{ overflow: 'hidden' }}>
+          <Stack sx={{ flexDirection: 'row', gap: 1.5, overflow: 'hidden' }}>
             <Box sx={{ width: 32, height: 32, borderRadius: 2, bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: primaryGlow }}>
               <Shield size={16} />
             </Box>
@@ -567,7 +571,7 @@ export function AdminLayout() {
             return (
               <Box key={group} sx={{ mb: 2 }}>
                 {!sidebarCollapsed && (
-                  <Stack direction="row" alignItems="center" gap={1} sx={{ px: 2, mb: 1 }}>
+                  <Stack sx={{ flexDirection: 'row', gap: 1, px: 2, mb: 1 }}>
                     <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: groupColor }} />
                     <Typography variant="caption" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1, fontSize: 10, color: groupColor }}>
                       {group}
@@ -575,7 +579,7 @@ export function AdminLayout() {
                   </Stack>
                 )}
                 {sidebarCollapsed && (
-                  <Stack alignItems="center" sx={{ mb: 1 }}>
+                  <Stack sx={{ mb: 1, alignItems: 'center' }}>
                     <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: groupColor }} />
                   </Stack>
                 )}
@@ -606,8 +610,7 @@ export function AdminLayout() {
                           </ListItemIcon>
                           {!sidebarCollapsed && (
                             <ListItemText
-                              primary={item.label}
-                              primaryTypographyProps={{ variant: 'body2', fontWeight: isActive ? 600 : 400 }}
+                              primary={<Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400 }}>{item.label}</Typography>}
                             />
                           )}
                           {!sidebarCollapsed && isActive && (
@@ -648,7 +651,7 @@ export function AdminLayout() {
         {/* ─── Admin Header / Control Bar using MUI AppBar ─── */}
         <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
           <Toolbar sx={{ minHeight: 56, gap: 2 }}>
-            <Stack direction="row" alignItems="center" gap={2} sx={{ flex: 1 }}>
+            <Stack sx={{ flexDirection: 'row', gap: 2, flex: 1 }}>
               {/* Page Title */}
               <Typography variant="subtitle1" sx={{ fontWeight: 600, fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>
                 {currentNav?.label || 'Dashboard'}
@@ -674,7 +677,7 @@ export function AdminLayout() {
               />
             </Stack>
 
-            <Stack direction="row" alignItems="center" gap={1}>
+            <Stack sx={{ flexDirection: 'row', gap: 1 }}>
               {/* Search */}
               <AdminSearchPalette onNavigate={handleNavClick} />
 
@@ -707,7 +710,7 @@ export function AdminLayout() {
 
               {/* Logout */}
               <Tooltip title="Sign out">
-                <IconButton size="small" color="error" onClick={logoutAdmin} aria-label="Sign out">
+                <IconButton size="small" sx={{ color: 'error.main' }} onClick={logoutAdmin} aria-label="Sign out">
                   <LogOut size={16} />
                 </IconButton>
               </Tooltip>

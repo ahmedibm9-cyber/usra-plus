@@ -3,29 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, isToday, isYesterday } from 'date-fns'
-import {
-  Send,
-  Search,
-  Chat as ChatIcon,
-  Close,
-  EmojiEmotions,
-  AttachFile,
-  KeyboardArrowDown,
-  Check,
-  DoneAll,
-  Mic,
-  PlayArrow,
-  Pause,
-  Add,
-  Image as ImageIcon,
-  Description as FileText,
-  InsertDriveFile as FileIcon,
-  Download,
-  Upload,
-  Cancel,
-  Wifi,
-  WifiOff,
-} from '@mui/icons-material'
+import { Send, Search, Chat as ChatIcon, Close, EmojiEmotions, AttachFile, KeyboardArrowDown, Check, DoneAll, Mic, PlayArrow, Pause, Add, Image as ImageIcon, Description as FileText, InsertDriveFile as FileIcon, Download, Upload, Cancel, Wifi, WifiOff } from '@mui/icons-material'
 import {
   Stack,
   Box,
@@ -247,7 +225,7 @@ function VoiceMessageBubble({
           })}
         </Stack>
 
-        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, minWidth: 32, textAlign: 'center' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ flexShrink: 0, minWidth: 32, textAlign: 'center' }}>
           {formatDuration(duration)}
         </Typography>
       </Stack>
@@ -277,7 +255,7 @@ function RecordingWaveform() {
   }, [])
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.125} sx={{ height: 32 }}>
+    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.125 }} sx={{ height: 32 }}>
       {bars.map((h, i) => (
         <Box
           key={i}
@@ -755,11 +733,11 @@ export function ChatPage() {
       const { Icon, sxColor, sxBg } = getFileIconAndColor(msg.file_name)
       return (
         <Box sx={{ borderRadius: 4, display: 'inline-block', borderBottomRightRadius: isOwn ? 1 : undefined, borderBottomLeftRadius: isOwn ? undefined : 1 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 4, p: 1.5, minWidth: 200 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }} sx={{ bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 4, p: 1.5, minWidth: 200 }}>
             <Box sx={{ p: 1, borderRadius: 2, flexShrink: 0, ...sxBg }}><Icon sx={{ fontSize: 20, ...sxColor }} /></Box>
             <Stack sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="body2" fontWeight={500} noWrap>{msg.file_name}</Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>{msg.file_size ? formatFileSize(msg.file_size) : ''}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ fontSize: 10 }}>{msg.file_size ? formatFileSize(msg.file_size) : ''}</Typography>
             </Stack>
             {msg.file_url && (
               <IconButton size="small" component="a" href={msg.file_url} download={msg.file_name} onClick={(e) => e.stopPropagation()} aria-label={t.chat.download}>
@@ -829,13 +807,13 @@ export function ChatPage() {
 
       {/* Header */}
       <Box sx={{ flexShrink: 0, px: isMobile ? 2 : 3, pt: 3, pb: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center">
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, borderRadius: 3, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30` }}>
               <ChatIcon sx={{ color: 'primary.main' }} />
             </Box>
             <Box>
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                 <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={700}>{t.chat.title}</Typography>
                 {/* Connection Status */}
                 <Chip
@@ -855,7 +833,7 @@ export function ChatPage() {
                   }}
                 />
               </Stack>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 {familyMembers.length} {isRTL ? 'أعضاء' : 'members'} · {onlineCount} {t.chat.membersOnline}
               </Typography>
             </Box>
@@ -867,8 +845,8 @@ export function ChatPage() {
 
         {/* Online Members Bar */}
         {onlineMembers.length > 0 && (
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1.5 }}>
-            <Stack direction="row" sx={{ '& > :not(:first-of-type)': { ml: -0.5 } }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mt: 1.5 }}>
+            <Stack sx={{ flexDirection: 'row' }} sx={{ '& > :not(:first-of-type)': { ml: -0.5 } }}>
               {onlineMembers.slice(0, 5).map((member) => (
                 <Box key={member.user_id} sx={{ position: 'relative' }}>
                   <Avatar sx={{ width: 28, height: 28, border: 2, borderColor: 'background.paper' }} src={member.profiles?.avatar_url ?? undefined}>
@@ -879,11 +857,11 @@ export function ChatPage() {
               ))}
               {onlineMembers.length > 5 && (
                 <Avatar sx={{ width: 28, height: 28, bgcolor: 'background.paper', border: 2, borderColor: 'background.paper' }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={500}>+{onlineMembers.length - 5}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }} fontWeight={500}>+{onlineMembers.length - 5}</Typography>
                 </Avatar>
               )}
             </Stack>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {onlineCount} {t.chat.membersOnline}
             </Typography>
           </Stack>
@@ -982,7 +960,7 @@ export function ChatPage() {
                         <Stack sx={{ maxWidth: isMobile ? '75%' : '65%', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
                           {/* Sender name */}
                           {!isOwn && !isConsecutive && (
-                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 0.5, ml: 0.5 }}>
+                            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ mb: 0.5, ml: 0.5 }}>
                               <Typography variant="caption" fontWeight={500} color="secondary.main">
                                 {getSenderName(msg.sender_id)}
                               </Typography>
@@ -1036,14 +1014,14 @@ export function ChatPage() {
 
                           {/* Reaction pills */}
                           {msg.reactions && msg.reactions.length > 0 && (
-                            <Stack direction="row" spacing={0.5} sx={{ mt: 0.5, flexWrap: 'wrap', ...(isOwn ? { justifyContent: 'flex-end', mr: 0.5 } : { justifyContent: 'flex-start', ml: 0.5 }) }}>
+                            <Stack sx={{ flexDirection: 'row' }} spacing={0.5} sx={{ mt: 0.5, flexWrap: 'wrap', ...(isOwn ? { justifyContent: 'flex-end', mr: 0.5 } : { justifyContent: 'flex-start', ml: 0.5 }) }}>
                               {msg.reactions.map((reaction) => {
                                 const isActive = userId ? reaction.users.includes(userId) : false
                                 return (
                                   <Chip
                                     key={reaction.emoji}
                                     size="small"
-                                    label={<Stack direction="row" spacing={0.25} alignItems="center"><span style={{ fontSize: 14 }}>{reaction.emoji}</span><Typography variant="caption" color={isActive ? 'secondary.main' : 'text.secondary'}>{reaction.users.length}</Typography></Stack>}
+                                    label={<Stack sx={{ flexDirection: 'row' }} spacing={0.25} alignItems="center"><span style={{ fontSize: 14 }}>{reaction.emoji}</span><Typography variant="caption" color={isActive ? 'secondary.main' : 'text.secondary'}>{reaction.users.length}</Typography></Stack>}
                                     variant={isActive ? 'filled' : 'outlined'}
                                     color={isActive ? 'primary' : 'default'}
                                     onClick={() => handleReaction(msg.id, reaction.emoji)}
@@ -1056,8 +1034,8 @@ export function ChatPage() {
 
                           {/* Timestamp + Read Receipts */}
                           {!isConsecutive && (
-                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.5, ...(isOwn ? { justifyContent: 'flex-end', mr: 0.5 } : { justifyContent: 'flex-start', ml: 0.5 }) }}>
-                              <Typography variant="caption" sx={{ fontSize: 10 }} color="text.secondary">
+                            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ mt: 0.5, ...(isOwn ? { justifyContent: 'flex-end', mr: 0.5 } : { justifyContent: 'flex-start', ml: 0.5 }) }}>
+                              <Typography variant="caption" sx={{ fontSize: 10 }} sx={{ color: 'text.secondary' }}>
                                 {formatMessageTime(msg.created_at)}
                               </Typography>
                               {isOwn && readStatus && (
@@ -1068,7 +1046,7 @@ export function ChatPage() {
                             </Stack>
                           )}
                           {isConsecutive && isOwn && readStatus && (
-                            <Stack direction="row" justifyContent="flex-end" sx={{ mr: 0.5, mt: -0.25 }}>
+                            <Stack sx={{ flexDirection: 'row' }} justifyContent="flex-end" sx={{ mr: 0.5, mt: -0.25 }}>
                               <Box sx={{ color: readStatus === 'read' ? 'primary.main' : 'text.secondary', display: 'flex' }}>
                                 {readStatus === 'sent' ? <Check sx={{ fontSize: 10 }} /> : <DoneAll sx={{ fontSize: 10 }} />}
                               </Box>
@@ -1083,7 +1061,7 @@ export function ChatPage() {
 
               {/* Typing indicator */}
               {typingUsers.length > 0 && (
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1.5, px: 0.5 }} aria-live="polite">
+                <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mt: 1.5, px: 0.5 }} aria-live="polite">
                   <Box sx={{ flexShrink: 0, width: 32, position: 'relative' }}>
                     <Avatar sx={{ width: 32, height: 32, border: 1, borderColor: 'divider' }}>
                       {typingUsers[0].userName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
@@ -1091,12 +1069,12 @@ export function ChatPage() {
                     <Box sx={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main', border: 2, borderColor: 'background.paper' }} />
                   </Box>
                   <Paper variant="outlined" sx={{ px: 2, py: 1, borderRadius: 4, borderBottomLeftRadius: 1, display: 'flex', alignItems: 'center', gap: 1, boxShadow: 1 }}>
-                    <Stack direction="row" spacing={0.5}>
+                    <Stack sx={{ flexDirection: 'row' }} spacing={0.5}>
                       <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite' }} />
                       <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite 0.2s' }} />
                       <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite 0.4s' }} />
                     </Stack>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                       {typingUsers[0].userName} {t.chat.isTyping}
                     </Typography>
                   </Paper>
@@ -1132,18 +1110,18 @@ export function ChatPage() {
                   {isImage && pending.preview ? (
                     <Box component="img" src={pending.preview} alt={pending.file.name} sx={{ maxHeight: 128, borderRadius: 2, objectFit: 'cover', border: 1, borderColor: 'divider' }} />
                   ) : (
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ p: 1 }}>
+                    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ p: 1 }}>
                       {(() => {
                         const { Icon, sxColor, sxBg } = getFileIconAndColor(pending.file.name)
                         return <Box sx={{ p: 1, borderRadius: 2, ...sxBg }}><Icon sx={{ fontSize: 20, ...sxColor }} /></Box>
                       })()}
                       <Stack sx={{ minWidth: 0 }}>
                         <Typography variant="caption" fontWeight={500} noWrap sx={{ maxWidth: 150 }}>{pending.file.name}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>{formatFileSize(pending.file.size)}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ fontSize: 10 }}>{formatFileSize(pending.file.size)}</Typography>
                       </Stack>
                     </Stack>
                   )}
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, minWidth: 0 }}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ flex: 1, minWidth: 0 }}>
                     <TextField
                       value={pending.caption}
                       onChange={(e) => setPendingFiles((prev) => prev.map((p, i) => i === index ? { ...p, caption: e.target.value } : p))}
@@ -1159,7 +1137,7 @@ export function ChatPage() {
                 </Stack>
               )
             })}
-            <Stack direction="row" justifyContent="flex-end" spacing={1}>
+            <Stack sx={{ flexDirection: 'row' }} justifyContent="flex-end" spacing={1}>
               <Button size="small" color="inherit" onClick={cancelPendingFiles}>{t.common.cancel}</Button>
               <Button size="small" variant="contained" startIcon={<Send sx={{ fontSize: 12 }} />} onClick={handleSendFiles}>
                 {pendingFiles.some((p) => p.file.type.startsWith('image/')) ? t.chat.sendImage : t.chat.sendFile}
@@ -1173,15 +1151,15 @@ export function ChatPage() {
       <Box sx={{ flexShrink: 0, px: isMobile ? 2 : 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
         {isRecording ? (
           <Paper variant="outlined" sx={{ px: 2, py: 1.5, borderColor: `${theme.palette.primary.main}30` }}>
-            <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
               <IconButton onClick={handleCancelRecording} aria-label={t.chat.cancelRecording} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.main' + '15' } }}>
                 <Close />
               </IconButton>
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ flexShrink: 0 }}>
                 <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'error.main', animation: 'pulse 1.5s infinite' }} />
                 <Typography variant="body2" fontWeight={500}>{t.chat.recording}</Typography>
               </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                 {formatDuration(recordingTime)}
               </Typography>
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
@@ -1193,7 +1171,7 @@ export function ChatPage() {
             </Stack>
           </Paper>
         ) : (
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 4, px: 2, py: 1, '&:focus-within': { borderColor: `${theme.palette.primary.main}50` } }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 4, px: 2, py: 1, '&:focus-within': { borderColor: `${theme.palette.primary.main}50` } }}>
             <IconButton size="small" onClick={() => fileInputRef.current?.click()} aria-label={t.chat.attachFile} sx={{ color: 'text.secondary' }}>
               <AttachFile sx={{ fontSize: 16 }} />
             </IconButton>

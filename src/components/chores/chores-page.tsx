@@ -1,24 +1,8 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import {
-  Plus,
-  LayoutGrid,
-  List,
-  Pause,
-  Play,
-  CheckCircle2,
-  ArrowRight,
-  Trash2,
-  Pencil,
-  Sparkles,
-  Clock,
-  Trophy,
-  Users,
-  BarChart3,
-  CalendarDays,
-  MoreVert,
-} from '@mui/icons-material'
+import { List, Pause, ArrowRight, MoreVert } from '@mui/icons-material'
+import { Plus, LayoutGrid, Play, CheckCircle2, Trash2, Pencil, Sparkles, Clock, Trophy, Users, BarChart3, CalendarDays } from 'lucide-react'
 import {
   Container,
   Stack,
@@ -245,8 +229,8 @@ function AddChoreForm({
         <Stack spacing={2.5}>
           {/* Icon Selector */}
           <Stack spacing={1}>
-            <Typography variant="body2" color="text.secondary">{t.chores.selectIcon}</Typography>
-            <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.chores.selectIcon}</Typography>
+            <Stack sx={{ flexDirection: 'row' }} flexWrap="wrap" spacing={1} useFlexGap>
               {CHORE_ICONS.map((ic) => (
                 <IconButton
                   key={ic.emoji + ic.label}
@@ -269,7 +253,7 @@ function AddChoreForm({
 
           {/* Title */}
           <Stack spacing={1}>
-            <Typography variant="body2" color="text.secondary">{t.chores.choreTitle}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.chores.choreTitle}</Typography>
             <TextField
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -281,7 +265,7 @@ function AddChoreForm({
 
           {/* Description */}
           <Stack spacing={1}>
-            <Typography variant="body2" color="text.secondary">{t.chores.description}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.chores.description}</Typography>
             <TextField
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -292,7 +276,7 @@ function AddChoreForm({
           </Stack>
 
           {/* Frequency + Difficulty Row */}
-          <Stack direction="row" spacing={2}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>{t.chores.frequency}</InputLabel>
               <Select value={frequency} label={t.chores.frequency} onChange={(e) => setFrequency(e.target.value as Chore['frequency'])}>
@@ -314,7 +298,7 @@ function AddChoreForm({
 
           {/* Estimated Minutes */}
           <Stack spacing={1}>
-            <Typography variant="body2" color="text.secondary">{t.chores.estimatedMinutes}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.chores.estimatedMinutes}</Typography>
             <TextField
               type="number"
               value={estimatedMinutes}
@@ -327,8 +311,8 @@ function AddChoreForm({
 
           {/* Assignees */}
           <Stack spacing={1}>
-            <Typography variant="body2" color="text.secondary">{t.chores.selectAssignees}</Typography>
-            <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.chores.selectAssignees}</Typography>
+            <Stack sx={{ flexDirection: 'row' }} flexWrap="wrap" spacing={1} useFlexGap>
               {members.map((member) => {
                 const userId = member.user_id
                 const name = member.nickname || member.profiles?.first_name || userId.slice(0, 8)
@@ -394,8 +378,8 @@ function ChoreCard({
     <Card sx={{ opacity: chore.isPaused ? 0.6 : 1 }}>
       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
         {/* Top row: icon, title, menu */}
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flex: 1 }}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="flex-start">
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ minWidth: 0, flex: 1 }}>
             <Typography sx={{ fontSize: 18, flexShrink: 0 }}>{chore.icon}</Typography>
             <Typography variant="body2" fontWeight={600} noWrap>{chore.title}</Typography>
           </Stack>
@@ -419,43 +403,43 @@ function ChoreCard({
         </Stack>
 
         {/* Current assignee + rotation indicator */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
+        <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ minWidth: 0 }}>
             <PersonAvatar personId={currentAssignee} members={members} />
-            <Typography variant="body2" color="text.secondary" noWrap>{memberName}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>{memberName}</Typography>
           </Stack>
           {chore.rotationOrder.length > 1 && nextMemberName && (
-            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexShrink: 0 }}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ flexShrink: 0 }}>
               <ArrowRight sx={{ fontSize: 12, transform: isRTL ? 'rotate(180deg)' : 'none' }} />
-              <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 60 }}>{nextMemberName}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap sx={{ maxWidth: 60 }}>{nextMemberName}</Typography>
             </Stack>
           )}
         </Stack>
 
         {/* Badges row */}
-        <Stack direction="row" alignItems="center" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
           <Chip label={t.chores[chore.difficulty]} size="small" color={DIFFICULTY_COLOR[chore.difficulty]} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
           <Chip label={t.chores[chore.frequency]} size="small" color={FREQUENCY_COLOR[chore.frequency]} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 'auto !important' }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ ml: 'auto !important' }}>
             <Clock sx={{ fontSize: 12 }} color="action" />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {chore.estimatedMinutes}{t.chores.minutes}
             </Typography>
           </Stack>
         </Stack>
 
         {/* Progress ring + Done button */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
             <ProgressRing percent={completionPercent} size={30} strokeWidth={3} />
-            <Typography variant="caption" color="text.secondary">{completionPercent}%</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{completionPercent}%</Typography>
           </Stack>
           {!chore.isPaused && (
             <Button
               size="small"
               onClick={() => onDone(chore)}
               variant="outlined"
-              color="success"
+              sx={{ color: 'success.main' }}
               startIcon={<CheckCircle2 sx={{ fontSize: 14 }} />}
               sx={{ fontSize: 12, px: 1.5, py: 0.25, minHeight: 28 }}
             >
@@ -503,15 +487,15 @@ function ChoreListRow({
   return (
     <Paper variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 2, py: 1.5, borderRadius: 2, opacity: chore.isPaused ? 0.6 : 1 }}>
       {/* Icon + Title */}
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flex: 1 }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ minWidth: 0, flex: 1 }}>
         <Typography sx={{ fontSize: 18, flexShrink: 0 }}>{chore.icon}</Typography>
         <Typography variant="body2" fontWeight={500} noWrap>{chore.title}</Typography>
       </Stack>
 
       {/* Assigned To */}
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexShrink: 0 }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ flexShrink: 0 }}>
         <PersonAvatar personId={currentAssignee} members={members} />
-        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'inline' } }}>{memberName}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ display: { xs: 'none', sm: 'inline' } }}>{memberName}</Typography>
       </Stack>
 
       {/* Frequency */}
@@ -521,7 +505,7 @@ function ChoreListRow({
       <Chip label={t.chores[chore.difficulty]} size="small" color={DIFFICULTY_COLOR[chore.difficulty]} variant="outlined" sx={{ display: { xs: 'none', md: 'inline-flex' }, fontSize: 10, height: 20 }} />
 
       {/* Last Done */}
-      <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', lg: 'inline' }, flexShrink: 0 }}>{lastDone}</Typography>
+      <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ display: { xs: 'none', lg: 'inline' }, flexShrink: 0 }}>{lastDone}</Typography>
 
       {/* Status */}
       <Chip
@@ -533,10 +517,10 @@ function ChoreListRow({
       />
 
       {/* Actions */}
-      <Stack direction="row" alignItems="center" spacing={0} sx={{ flexShrink: 0 }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0 }} sx={{ flexShrink: 0 }}>
         {!chore.isPaused && (
           <Tooltip title={t.chores.done}>
-            <IconButton size="small" color="success" onClick={() => onDone(chore)}>
+            <IconButton size="small" sx={{ color: 'success.main' }} onClick={() => onDone(chore)}>
               <CheckCircle2 sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
@@ -580,15 +564,15 @@ function RotationScheduleGrid({ chores, members }: { chores: Chore[]; members: {
 
   return (
     <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
         <CalendarDays sx={{ fontSize: 16, color: theme.palette.primary.main }} />
         <Typography variant="subtitle2">{t.chores.rotationSchedule}</Typography>
       </Stack>
       <Box sx={{ minWidth: 500 }}>
         {/* Header row */}
-        <Stack direction="row" spacing={0} sx={{ mb: 1 }}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={0} sx={{ mb: 1 }}>
           <Box sx={{ flex: '0 0 100px', px: 0.5 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}></Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }} fontWeight={500}></Typography>
           </Box>
           {days.map((day, i) => (
             <Box key={i} sx={{ flex: 1, textAlign: 'center', px: 0.5, py: 0.5, borderRadius: 1, bgcolor: weekDates[i].toDateString() === today.toDateString() ? `${theme.palette.primary.main}15` : 'transparent' }}>
@@ -608,13 +592,13 @@ function RotationScheduleGrid({ chores, members }: { chores: Chore[]; members: {
           }
           return (
             <Stack key={chore.id} direction="row" spacing={0} sx={{ mb: 0.25 }}>
-              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flex: '0 0 100px', px: 0.5, py: 0.5 }}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }} sx={{ flex: '0 0 100px', px: 0.5, py: 0.5 }}>
                 <Typography sx={{ fontSize: 12 }}>{chore.icon}</Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>{chore.title}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>{chore.title}</Typography>
               </Stack>
               {Array.from({ length: 7 }, (_, i) => (
                 <Box key={i} sx={{ flex: 1, textAlign: 'center', py: 0.5, borderRadius: 1, bgcolor: weekDates[i].toDateString() === today.toDateString() ? theme.palette.action.hover : 'transparent' }}>
-                  <Typography variant="caption" color="text.secondary">{assigneeForDay(i)}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{assigneeForDay(i)}</Typography>
                 </Box>
               ))}
             </Stack>
@@ -643,10 +627,10 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
         <Trophy sx={{ fontSize: 16, color: theme.palette.success.main }} />
         <Typography variant="subtitle2">{t.chores.leaderboard}</Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{t.chores.thisWeek}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ ml: 0.5 }}>{t.chores.thisWeek}</Typography>
       </Stack>
       <Stack spacing={1.5}>
         {displayData.map((entry, idx) => {
@@ -656,15 +640,15 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
 
           return (
             <Box key={entry.personId}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
+                <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body2" fontWeight={700} color={idx === 0 ? 'success.main' : 'text.secondary'}>
                     #{idx + 1}
                   </Typography>
                   <PersonAvatar personId={entry.personId} members={members} size="medium" />
-                  <Typography variant="body2" color="text.secondary">{name}</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>{name}</Typography>
                 </Stack>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {entry.count} {t.chores.completions}
                 </Typography>
               </Stack>
@@ -673,7 +657,7 @@ function LeaderboardSection({ members }: { members: { id: string; user_id: strin
           )
         })}
         {displayData.length === 0 && (
-          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }} textAlign="center" sx={{ py: 2 }}>
             {t.chores.noChores}
           </Typography>
         )}
@@ -820,7 +804,7 @@ export default function ChoresPage() {
               <Sparkles sx={{ fontSize: 40, color: theme.palette.primary.main }} />
             </Box>
             <Typography variant="h6" fontWeight={600}>{t.chores.noChores}</Typography>
-            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ maxWidth: 400 }}>{t.chores.noChoresDesc}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} textAlign="center" sx={{ maxWidth: 400 }}>{t.chores.noChoresDesc}</Typography>
             <Button variant="contained" startIcon={<Plus />} onClick={handleAddNew} sx={{ mt: 1 }}>
               {t.chores.addChore}
             </Button>
@@ -834,15 +818,15 @@ export default function ChoresPage() {
     <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
       <Stack spacing={3}>
         {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
           <Box>
             <Typography variant="h5" fontWeight={700}>{t.chores.title}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ mt: 0.5 }}>
               {totalChores} {t.chores.totalChores.toLowerCase()}
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack sx={{ flexDirection: 'row' }} spacing={1} alignItems="center">
             {/* Filter tabs */}
             <Paper variant="outlined" sx={{ display: 'flex', p: 0.25, gap: 0.25, borderRadius: 2 }}>
               {(['all', 'active', 'paused', 'completed'] as const).map((f) => (
@@ -875,7 +859,7 @@ export default function ChoresPage() {
         </Stack>
 
         {/* Stats */}
-        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+        <Stack sx={{ flexDirection: 'row' }} spacing={2} flexWrap="wrap" useFlexGap>
           {[
             { label: t.chores.totalChores, value: totalChores, icon: <BarChart3 sx={{ fontSize: 20 }} />, color: theme.palette.primary.main },
             { label: t.chores.completedToday, value: completedToday, icon: <CheckCircle2 sx={{ fontSize: 20 }} />, color: theme.palette.success.main },
@@ -888,7 +872,7 @@ export default function ChoresPage() {
               </Box>
               <Box>
                 <Typography variant="body2" fontWeight={700}>{stat.value}</Typography>
-                <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{stat.label}</Typography>
               </Box>
             </Paper>
           ))}
@@ -902,10 +886,10 @@ export default function ChoresPage() {
               if (!group || group.length === 0) return null
               return (
                 <Box key={freq}>
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 1 }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }} sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 1 }}>
                     {t.chores[freq]}
                   </Typography>
-                  <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                  <Stack sx={{ flexDirection: 'row' }} spacing={2} flexWrap="wrap" useFlexGap>
                     {group.map((chore) => (
                       <Box key={chore.id} sx={{ flex: '1 1 280px', maxWidth: 360 }}>
                         <ChoreCard
@@ -940,7 +924,7 @@ export default function ChoresPage() {
               />
             ))}
             {filteredChores.length === 0 && (
-              <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }} textAlign="center" sx={{ py: 4 }}>
                 {t.chores.noChores}
               </Typography>
             )}

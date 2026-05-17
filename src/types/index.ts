@@ -136,7 +136,6 @@ export interface Subscription {
   id: string;
   user_id: string;
   plan: SubscriptionPlan;
-  revenuecat_id: string | null;
   status: 'active' | 'cancelled' | 'expired';
   current_period_start: string;
   current_period_end: string | null;

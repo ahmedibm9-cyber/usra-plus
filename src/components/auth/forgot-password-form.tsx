@@ -17,11 +17,7 @@ import {
   InputAdornment,
   Divider,
 } from '@mui/material'
-import {
-  Mail,
-  ArrowBack,
-  CheckCircle,
-} from '@mui/icons-material'
+import { Mail, ArrowBack, CheckCircle } from '@mui/icons-material'
 import { ThemeToggle } from './theme-toggle'
 import { toast } from 'sonner'
 import { useAppStore } from '@/stores/app-store'

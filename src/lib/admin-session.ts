@@ -155,84 +155,8 @@ export function getAdminCookieOptions() {
 }
 
 /**
- * Valid admin roles that can be assigned.
+ * Parse a specific cookie value from a cookie header string.
  */
-const VALID_ROLES = ['super_admin', 'support_admin', 'analytics_admin', 'billing_admin']
-
-/**
- * Known admin email addresses.
- */
-const ADMIN_EMAILS = ['admin@usraplus.com']
-
-/**
- * Verify admin auth from a request using the new signed session system.
- * This replaces the old verifyAdminAuth for new sessions.
- */
-export function verifySignedAdminAuth(request: Request): {
-  authenticated: boolean
-  admin?: { email: string; role: string }
-  reason?: string
-} {
-  // Method 1: Bearer token with ADMIN_SECRET_KEY
-  const secretKey = process.env.ADMIN_SECRET_KEY
-  const authHeader = request.headers.get('authorization')
-  if (authHeader) {
-    const match = authHeader.match(/^Bearer\s+(.+)$/i)
-    if (match && secretKey) {
-      // Use timing-safe comparison to prevent timing attacks
-      const tokenBuf = Buffer.from(match[1])
-      const keyBuf = Buffer.from(secretKey)
-      if (tokenBuf.length === keyBuf.length && timingSafeEqual(tokenBuf, keyBuf)) {
-        return {
-          authenticated: true,
-          admin: { email: 'api-key', role: 'super_admin' },
-        }
-      }
-    }
-  }
-
-  // Method 2: Signed session cookie
-  const cookieHeader = request.headers.get('cookie') || ''
-  const sessionCookie = parseCookie(cookieHeader, COOKIE_NAME)
-
-  if (sessionCookie) {
-    const payload = verifyAdminSessionToken(decodeURIComponent(sessionCookie))
-
-    if (!payload) {
-      return {
-        authenticated: false,
-        reason: 'Invalid or expired session',
-      }
-    }
-
-    // Validate the admin account is still authorized
-    if (!ADMIN_EMAILS.includes(payload.email)) {
-      return {
-        authenticated: false,
-        reason: 'Unknown admin account',
-      }
-    }
-
-    // Validate role is one of the allowed roles
-    if (!VALID_ROLES.includes(payload.role)) {
-      return {
-        authenticated: false,
-        reason: 'Invalid role in session',
-      }
-    }
-
-    return {
-      authenticated: true,
-      admin: { email: payload.email, role: payload.role },
-    }
-  }
-
-  return {
-    authenticated: false,
-    reason: 'No valid authentication credentials',
-  }
-}
-
 function parseCookie(cookieHeader: string, name: string): string | null {
   const prefix = `${name}=`
   const cookies = cookieHeader.split(';')

@@ -13,6 +13,7 @@ import {
   UserCircle, Tag, Filter, Download
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { safeJsonResponse } from '@/lib/safe-fetch'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar,

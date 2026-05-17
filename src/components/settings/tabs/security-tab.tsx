@@ -142,14 +142,14 @@ export function SecurityTab() {
       {/* Email Change */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Mail size={16} color="primary" /> Change Email
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Mail size={16} sx={{ color: 'primary.main' }} /> Change Email
           </Stack>
         </SectionTitle>
         <SectionDescription>Update your email address</SectionDescription>
 
         <Stack spacing={2}>
-          <Stack direction="row" gap={1}>
+          <Stack sx={{ flexDirection: 'row', gap: 1 }}>
             <TextField
               type="email"
               label={t.auth.email}
@@ -175,29 +175,29 @@ export function SecurityTab() {
       {/* Two-Factor Authentication */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <ShieldCheck size={16} color="primary" /> Two-Factor Authentication
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <ShieldCheck size={16} sx={{ color: 'primary.main' }} /> Two-Factor Authentication
           </Stack>
         </SectionTitle>
         <SectionDescription>Add an extra layer of security to your account</SectionDescription>
 
         <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Stack direction="row" alignItems="center" gap={1.5}>
+          <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Lock size={16} />
               </Box>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>Two-Factor Authentication</Typography>
-                <Typography variant="caption" color="text.secondary">Add an extra layer of security to your account</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Add an extra layer of security to your account</Typography>
               </Box>
             </Stack>
-            <Stack direction="row" alignItems="center" gap={1}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
               <Chip
                 label={isRTL ? 'المصادقة الثانية وإدارة الجلسات' : '2FA & Session Management'}
                 size="small"
                 variant="outlined"
-                color="success"
+                sx={{ color: 'success.main' }}
               />
               <Switch checked={false} disabled size="small" />
             </Stack>
@@ -208,8 +208,8 @@ export function SecurityTab() {
       {/* Active Sessions */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Smartphone size={16} color="primary" /> Active Sessions
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Smartphone size={16} sx={{ color: 'primary.main' }} /> Active Sessions
           </Stack>
         </SectionTitle>
         <SectionDescription>Devices currently signed in to your account</SectionDescription>
@@ -219,19 +219,19 @@ export function SecurityTab() {
             const Icon = session.icon
             return (
               <Paper key={session.id} elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-                <Stack direction="row" alignItems="center" gap={1.5}>
+                <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                   <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Icon size={16} color="text.secondary" />
+                    <Icon size={16} sx={{ color: 'text.secondary' }} />
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Stack direction="row" alignItems="center" gap={1}>
+                    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                       <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: session.current ? 'success.main' : 'text.disabled' }} />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>{session.device}</Typography>
                       {session.current && (
-                        <Chip label="Current" size="small" color="success" variant="outlined" />
+                        <Chip label="Current" size="small" sx={{ color: 'success.main' }} variant="outlined" />
                       )}
                     </Stack>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                       {session.ip} · {session.lastActive}
                     </Typography>
                   </Box>
@@ -239,7 +239,7 @@ export function SecurityTab() {
                     <Button
                       variant="text"
                       size="small"
-                      color="error"
+                      sx={{ color: 'error.main' }}
                       onClick={() => handleRevokeSession(session.id)}
                     >
                       Revoke
@@ -255,8 +255,8 @@ export function SecurityTab() {
       {/* Change Password */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <KeyRound size={16} color="primary" /> {t.settings.changePassword}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <KeyRound size={16} sx={{ color: 'primary.main' }} /> {t.settings.changePassword}
           </Stack>
         </SectionTitle>
         <SectionDescription>Update your password to keep your account secure</SectionDescription>
@@ -322,8 +322,8 @@ export function SecurityTab() {
       {/* Privacy Controls */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Eye size={16} color="primary" /> Privacy Controls
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Eye size={16} sx={{ color: 'primary.main' }} /> Privacy Controls
           </Stack>
         </SectionTitle>
         <SectionDescription>Manage your privacy and visibility settings</SectionDescription>
@@ -344,15 +344,15 @@ export function SecurityTab() {
       {/* Delete Account */}
       <SectionCard sx={{ borderColor: 'error.light' }}>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <AlertTriangle size={16} color="error" /> {t.settings.deleteAccount}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={16} sx={{ color: 'error.main' }} /> {t.settings.deleteAccount}
           </Stack>
         </SectionTitle>
         <SectionDescription>Permanently delete your account and all associated data</SectionDescription>
 
         <Button
           variant="contained"
-          color="error"
+          sx={{ color: 'error.main' }}
           size="small"
           startIcon={<Trash2 size={16} />}
           onClick={() => setDeleteDialogOpen(true)}
@@ -370,7 +370,7 @@ export function SecurityTab() {
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)}>{t.common.cancel}</Button>
             <Button
-              color="error"
+              sx={{ color: 'error.main' }}
               variant="contained"
               onClick={() => { handleDeleteAccount(); setDeleteDialogOpen(false) }}
               disabled={deletingAccount}

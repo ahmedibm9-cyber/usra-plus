@@ -136,10 +136,10 @@ export function SubscriptionTab() {
     <Stack spacing={3}>
       {/* Current Plan */}
       <SectionCard>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
           <Box>
             <SectionTitle>
-              <Stack direction="row" alignItems="center" gap={1}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                 <Crown size={16} /> {t.settings.currentPlan}
               </Stack>
             </SectionTitle>
@@ -152,7 +152,7 @@ export function SubscriptionTab() {
       {/* Manage Subscription Button */}
       {subscriptionPlan !== 'free' && (
         <SectionCard>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
             <Box>
               <SectionTitle>{isRTL ? 'إدارة الاشتراك' : 'Manage Subscription'}</SectionTitle>
               <SectionDescription>{isRTL ? 'تحديث خطة الدفع أو إلغاؤها' : 'Update your plan or cancel subscription'}</SectionDescription>
@@ -201,7 +201,7 @@ export function SubscriptionTab() {
                     <Chip
                       icon={<Sparkles size={12} />}
                       label={isRTL ? 'موصى به' : 'Popular'}
-                      color="primary"
+                      sx={{ color: 'primary.main' }}
                       size="small"
                     />
                   </Box>
@@ -209,9 +209,9 @@ export function SubscriptionTab() {
 
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>{plan.name}</Typography>
-                  <Stack direction="row" alignItems="baseline" gap={0.5} sx={{ mt: 0.5 }}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'baseline', gap: 0.5 }} sx={{ mt: 0.5 }}>
                     <Typography variant="h5" sx={{ fontWeight: 700 }}>{plan.price}</Typography>
-                    <Typography variant="body2" color="text.secondary">{plan.period}</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>{plan.period}</Typography>
                   </Stack>
                 </Box>
 
@@ -219,7 +219,7 @@ export function SubscriptionTab() {
                   {plan.features.map((feature) => (
                     <Stack key={feature.label} direction="row" alignItems="center" gap={1}>
                       {feature.included ? (
-                        <Check size={14} color="success" />
+                        <Check size={14} sx={{ color: 'success.main' }} />
                       ) : (
                         <X size={14} color="disabled" />
                       )}
@@ -262,23 +262,23 @@ export function SubscriptionTab() {
         <Grid container spacing={1.5}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-              <Infinity size={24} color="primary" />
+              <Infinity size={24} sx={{ color: 'primary.main' }} />
               <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>{isRTL ? 'مهام غير محدودة' : 'Unlimited Tasks'}</Typography>
-              <Typography variant="caption" color="text.secondary">{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{isRTL ? 'بدون حدود على إنشاء المهام' : 'No limits on task creation'}</Typography>
             </Paper>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-              <Zap size={24} color="secondary" />
+              <Zap size={24} sx={{ color: 'secondary.main' }} />
               <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>{isRTL ? 'مزامنة فورية' : 'Real-time Sync'}</Typography>
-              <Typography variant="caption" color="text.secondary">{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{isRTL ? 'تحديثات فورية عبر الأجهزة' : 'Instant updates across devices'}</Typography>
             </Paper>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-              <BarChart3 size={24} color="secondary" />
+              <BarChart3 size={24} sx={{ color: 'secondary.main' }} />
               <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>{isRTL ? 'التحليلات' : 'Analytics'}</Typography>
-              <Typography variant="caption" color="text.secondary">{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{isRTL ? 'رؤى إنتاجية العائلة' : 'Family productivity insights'}</Typography>
             </Paper>
           </Grid>
         </Grid>

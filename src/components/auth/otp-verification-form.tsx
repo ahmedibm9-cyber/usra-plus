@@ -18,17 +18,7 @@ import {
   Alert,
   Tooltip,
 } from '@mui/material'
-import {
-  CheckCircle,
-  Refresh,
-  Shield,
-  ArrowBack,
-  AutoAwesome,
-  VpnKey,
-  ContentCopy,
-  Check,
-  Error as ErrorOutline,
-} from '@mui/icons-material'
+import { CheckCircle, Refresh, Shield, ArrowBack, AutoAwesome, VpnKey, ContentCopy, Check, Error as ErrorOutline } from '@mui/icons-material'
 import { LanguageSelector } from './language-selector'
 import { ThemeToggle } from './theme-toggle'
 import { toast } from 'sonner'
@@ -274,7 +264,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0 }}
             >
-              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+              <Stack sx={{ flexDirection: 'row' }} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                 <ThemeToggle />
                 <LanguageSelector />
               </Stack>
@@ -495,7 +485,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                 </motion.div>
 
                 {/* Progress indicator dots */}
-                <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'center', mt: 1.5 }}>
+                <Stack sx={{ flexDirection: 'row' }} spacing={0.5} sx={{ justifyContent: 'center', mt: 1.5 }}>
                   {otp.map((digit, index) => (
                     <Box
                       key={index}
@@ -558,7 +548,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                         {isResending ? '...' : (isRTL ? 'إعادة إرسال الرمز' : 'Resend Code')}
                       </Button>
                     ) : (
-                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'center' }}>
+                      <Stack sx={{ flexDirection: 'row' }} spacing={1} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* Circular progress indicator */}
                         <Box sx={{ position: 'relative', width: 24, height: 24 }}>
                           <svg width="24" height="24" style={{ transform: 'rotate(-90deg)' }} viewBox="0 0 24 24">
@@ -617,7 +607,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                         <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                           {isRTL ? 'رمز التحقق (البريد الإلكتروني غير مُفعّل بعد):' : 'Your verification code (email not yet active):'}
                         </Typography>
-                        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Stack sx={{ flexDirection: 'row' }} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                           <Typography
                             variant="h5"
                             sx={{
@@ -629,7 +619,7 @@ export function OtpVerificationForm({ email, devCode: initialDevCode, onVerified
                           >
                             {devCode}
                           </Typography>
-                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                          <Stack sx={{ flexDirection: 'row' }} spacing={1} sx={{ alignItems: 'center' }}>
                             <Button
                               type="button"
                               size="small"

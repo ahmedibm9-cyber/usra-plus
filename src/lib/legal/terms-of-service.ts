@@ -66,7 +66,7 @@ Prices are subject to change with 30 days' notice.
 
 ### 4.2 Billing
 - Subscriptions are billed in advance on a monthly or annual basis.
-- Payment is processed through Stripe or RevenueCat.
+- Payment is processed through our secure payment system.
 - We do not store credit card information — payment processors are PCI-DSS compliant.
 - Applicable taxes (including VAT for Saudi Arabia at 15%) are added to the subscription price.
 

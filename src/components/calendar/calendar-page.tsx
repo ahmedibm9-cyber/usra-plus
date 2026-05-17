@@ -65,21 +65,7 @@ import {
   useMediaQuery,
   Fab,
 } from '@mui/material'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Add,
-  CalendarMonth,
-  ViewWeek,
-  ViewDay,
-  ViewAgenda,
-  AccessTime,
-  Delete,
-  LocationOn,
-  Repeat,
-  Person,
-  CalendarToday,
-} from '@mui/icons-material'
+import { ChevronLeft, ChevronRight, Add, CalendarMonth, ViewWeek, ViewDay, ViewAgenda, AccessTime, Delete, LocationOn, Repeat, Person, CalendarToday } from '@mui/icons-material'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -258,12 +244,12 @@ function EventCard({
     >
       <Stack spacing={0.5}>
         <Typography variant="body2" fontWeight={500} noWrap>{event.title}</Typography>
-        <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
           <AccessTime sx={{ fontSize: 12 }} color="action" />
-          <Typography variant="caption" color="text.secondary">{formatEventTime(event)}</Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{formatEventTime(event)}</Typography>
         </Stack>
         {creatorName && (
-          <Typography variant="caption" color="text.secondary">by {creatorName}</Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>by {creatorName}</Typography>
         )}
       </Stack>
     </Paper>
@@ -313,7 +299,7 @@ const MonthDayCell = React.memo(function MonthDayCell({
         ...(today && { boxShadow: `inset 0 0 0 1px ${theme.palette.primary.main}60` }),
       }}
     >
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+      <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="flex-start">
         <Box
           sx={{
             display: 'inline-flex',
@@ -363,7 +349,7 @@ const MonthDayCell = React.memo(function MonthDayCell({
           )
         })}
         {moreCount > 0 && (
-          <Typography variant="caption" sx={{ fontSize: 10, px: 0.5 }} color="text.secondary">
+          <Typography variant="caption" sx={{ fontSize: 10, px: 0.5 }} sx={{ color: 'text.secondary' }}>
             +{moreCount} {moreEventsLabel}
           </Typography>
         )}
@@ -496,7 +482,7 @@ function WeekView({
           {HOURS.map((hour) => (
             <React.Fragment key={hour}>
               <Box sx={{ height: 64, borderBottom: '1px solid', borderColor: 'divider', pr: 1, textAlign: 'right', display: 'flex', alignItems: 'flex-start', pt: 0.5 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>{formatHour(hour)}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ fontSize: 10 }}>{formatHour(hour)}</Typography>
               </Box>
               {weekDays.map((day, di) => {
                 const hourEvents = getEventsForDay(events, day).filter((event) => {
@@ -572,7 +558,7 @@ function DayView({
     <Stack sx={{ height: '100%', overflow: 'hidden' }}>
       {/* Day header */}
       <Box sx={{ py: 2, px: 2, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
               display: 'inline-flex',
@@ -591,12 +577,12 @@ function DayView({
             {format(currentDate, 'd')}
           </Box>
           <Stack>
-            <Typography variant="body2" color="text.secondary">{format(currentDate, 'EEEE')}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{format(currentDate, 'EEEE')}</Typography>
             <Typography variant="h6">{format(currentDate, 'MMMM yyyy')}</Typography>
           </Stack>
         </Stack>
         {allDayEvents.length > 0 && (
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
             {allDayEvents.map((event, idx) => {
               const eColor = resolveEventColor(event.color, theme, idx)
               return (
@@ -624,7 +610,7 @@ function DayView({
           {HOURS.map((hour) => (
             <Stack key={hour} direction="row" sx={{ minHeight: 60, borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ width: 64, flexShrink: 0, pr: 1, textAlign: 'right', pt: 0.5 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>{formatHour(hour)}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ fontSize: 10 }}>{formatHour(hour)}</Typography>
               </Box>
               <Box sx={{ flex: 1, position: 'relative', borderLeft: '1px solid', borderColor: 'divider' }}>
                 {timedEvents
@@ -658,7 +644,7 @@ function DayView({
                         }}
                       >
                         <Typography variant="caption" fontWeight={500} noWrap sx={{ color: eColor }}>{event.title}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontSize: 10 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ display: 'block', mt: 0.25, fontSize: 10 }}>
                           {formatEventTime(event)}
                         </Typography>
                       </Box>
@@ -718,7 +704,7 @@ function AgendaView({
     return (
       <Stack alignItems="center" justifyContent="center" sx={{ py: 12 }}>
         <CalendarMonth sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-        <Typography variant="body2" color="text.secondary">{noEventsLabel}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{noEventsLabel}</Typography>
       </Stack>
     )
   }
@@ -730,7 +716,7 @@ function AgendaView({
           const today = isToday(group.date)
           return (
             <Box key={group.date.toISOString()}>
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }} sx={{ mb: 1.5 }}>
                 <Box
                   sx={{
                     display: 'inline-flex',
@@ -751,9 +737,9 @@ function AgendaView({
                 </Box>
                 <Stack>
                   <Typography variant="body2" fontWeight={500}>{format(group.date, 'EEEE')}</Typography>
-                  <Typography variant="caption" color="text.secondary">{format(group.date, 'MMMM yyyy')}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{format(group.date, 'MMMM yyyy')}</Typography>
                 </Stack>
-                {today && <Chip label="Today" size="small" color="primary" sx={{ ml: 'auto !important', fontSize: 10, height: 20 }} />}
+                {today && <Chip label="Today" size="small" sx={{ color: 'primary.main' }} sx={{ ml: 'auto !important', fontSize: 10, height: 20 }} />}
               </Stack>
               <Stack spacing={1} sx={{ pl: 0.5 }}>
                 {group.events.map((event, idx) => (
@@ -986,7 +972,7 @@ function EventModal({
             fullWidth
           />
 
-          <Stack direction="row" spacing={2}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={2}>
             <TextField
               label="Start date"
               type="date"
@@ -1009,7 +995,7 @@ function EventModal({
             )}
           </Stack>
 
-          <Stack direction="row" spacing={2}>
+          <Stack sx={{ flexDirection: 'row' }} spacing={2}>
             <TextField
               label="End date"
               type="date"
@@ -1073,7 +1059,7 @@ function EventModal({
                 <MenuItem value="__none__">Unassigned</MenuItem>
                 {members.map((member) => (
                   <MenuItem key={member.user_id} value={member.user_id}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                       <Avatar sx={{ width: 24, height: 24, fontSize: 10, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
                         {getMemberInitials(member)}
                       </Avatar>
@@ -1088,7 +1074,7 @@ function EventModal({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         {isEditing && (
-          <Button onClick={handleDelete} color="error" startIcon={<Delete sx={{ fontSize: 16 }} />}>Delete</Button>
+          <Button onClick={handleDelete} sx={{ color: 'error.main' }} startIcon={<Delete sx={{ fontSize: 16 }} />}>Delete</Button>
         )}
         <Box sx={{ flex: 1 }} />
         <Button onClick={() => onOpenChange(false)} color="inherit">{t.common.cancel}</Button>
@@ -1145,9 +1131,9 @@ function MiniCalendar({
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+      <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
         <Typography variant="caption" fontWeight={600}>{t.calendar.miniCalendar}</Typography>
-        <Stack direction="row" spacing={0}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={0}>
           <IconButton size="small" onClick={() => setMiniMonth((d) => subMonths(d, 1))} sx={{ p: 0.25 }}>
             <ChevronLeft sx={{ fontSize: 14 }} />
           </IconButton>
@@ -1157,13 +1143,13 @@ function MiniCalendar({
         </Stack>
       </Stack>
 
-      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ display: 'block', mb: 1 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary' }} textAlign="center" sx={{ display: 'block', mb: 1 }}>
         {format(miniMonth, 'MMMM yyyy')}
       </Typography>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', mb: 0.5 }}>
         {DAY_LABELS_SHORT.map((d, i) => (
-          <Typography key={i} variant="caption" color="text.secondary" sx={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 500 }}>
+          <Typography key={i} variant="caption" sx={{ color: 'text.secondary' }} sx={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 500 }}>
             {d}
           </Typography>
         ))}
@@ -1246,13 +1232,13 @@ function UpcomingEventsPanel({
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+      <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
         <Typography variant="caption" fontWeight={600}>{t.calendar.upcomingEvents}</Typography>
         <Button size="small" onClick={onViewAll} sx={{ fontSize: 10, minWidth: 0, p: 0 }}>{t.calendar.viewAll}</Button>
       </Stack>
 
       {upcomingEvents.length === 0 ? (
-        <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ display: 'block', py: 2 }}>{t.calendar.noEvents}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }} textAlign="center" sx={{ display: 'block', py: 2 }}>{t.calendar.noEvents}</Typography>
       ) : (
         <Stack spacing={0}>
           {upcomingEvents.map((event, idx) => {
@@ -1278,7 +1264,7 @@ function UpcomingEventsPanel({
                 <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: eColor, flexShrink: 0 }} />
                 <Stack sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="caption" fontWeight={500} noWrap>{event.title}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ fontSize: 10 }}>
                     {event.all_day
                       ? format(parseISO(event.start_time), 'MMM d')
                       : format(parseISO(event.start_time), 'MMM d, h:mm a')}
@@ -1424,18 +1410,18 @@ export default function CalendarPage() {
     <Container maxWidth="lg" sx={{ py: 3 }} dir={isRTL ? 'rtl' : 'ltr'}>
       <Stack spacing={2}>
         {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30`, display: 'flex' }}>
               <CalendarToday sx={{ color: 'primary.main' }} />
             </Box>
             <Box>
               <Typography variant="h5" fontWeight={700}>{headerLabel}</Typography>
-              <Typography variant="body2" color="text.secondary">{events.length} events</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>{events.length} events</Typography>
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack sx={{ flexDirection: 'row' }} spacing={1} alignItems="center">
             <IconButton onClick={navigatePrev} size="small"><ChevronLeft /></IconButton>
             <Button size="small" variant="outlined" onClick={navigateToday}>Today</Button>
             <IconButton onClick={navigateNext} size="small"><ChevronRight /></IconButton>
@@ -1473,7 +1459,7 @@ export default function CalendarPage() {
         </Stack>
 
         {/* Main content area */}
-        <Stack direction="row" spacing={2}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={2}>
           {/* Calendar view */}
           <Paper variant="outlined" sx={{ flex: 1, minHeight: { xs: 400, md: 600 }, overflow: 'hidden', borderRadius: 2 }}>
             {view === 'month' && (
@@ -1548,14 +1534,14 @@ export default function CalendarPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirmOpen(false)} color="inherit">Cancel</Button>
-          <Button onClick={handleDeleteEvent} color="error" variant="contained">Delete</Button>
+          <Button onClick={handleDeleteEvent} sx={{ color: 'error.main' }} variant="contained">Delete</Button>
         </DialogActions>
       </Dialog>
 
       {/* FAB for mobile */}
       {isMobile && (
         <Fab
-          color="primary"
+          sx={{ color: 'primary.main' }}
           onClick={handleAddEvent}
           sx={{ position: 'fixed', bottom: 80, right: 16 }}
         >

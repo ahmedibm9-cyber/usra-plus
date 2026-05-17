@@ -1,116 +1,44 @@
-"use client"
+import React from 'react'
+import MuiTable from '@mui/material/Table'
+import MuiTableBody from '@mui/material/TableBody'
+import MuiTableCell from '@mui/material/TableCell'
+import MuiTableHead from '@mui/material/TableHead'
+import MuiTableRow from '@mui/material/TableRow'
+import MuiTableContainer from '@mui/material/TableContainer'
+import MuiTablePagination from '@mui/material/TablePagination'
 
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
-
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+export function Table({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      data-slot="table-container"
-      className="relative w-full overflow-x-auto"
-    >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
-    </div>
+    <MuiTableContainer className={className}>
+      <MuiTable>{children}</MuiTable>
+    </MuiTableContainer>
   )
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return (
-    <thead
-      data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
-      {...props}
-    />
-  )
+export function TableHeader({ children }: { children: React.ReactNode }) {
+  return <MuiTableHead>{children}</MuiTableHead>
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return (
-    <tbody
-      data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
-      {...props}
-    />
-  )
+export function TableBody({ children }: { children: React.ReactNode }) {
+  return <MuiTableBody>{children}</MuiTableBody>
 }
 
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
-  return (
-    <tfoot
-      data-slot="table-footer"
-      className={cn(
-        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
-        className
-      )}
-      {...props}
-    />
-  )
+export function TableHead({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <MuiTableCell component="th" className={className}>{children}</MuiTableCell>
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
-  return (
-    <tr
-      data-slot="table-row"
-      className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
-        className
-      )}
-      {...props}
-    />
-  )
+export function TableRow({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <MuiTableRow className={className}>{children}</MuiTableRow>
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
-  return (
-    <th
-      data-slot="table-head"
-      className={cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className
-      )}
-      {...props}
-    />
-  )
+export function TableCell({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <MuiTableCell className={className}>{children}</MuiTableCell>
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
-  return (
-    <td
-      data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className
-      )}
-      {...props}
-    />
-  )
+export function TableFooter({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <MuiTableRow className={className}>{children}</MuiTableRow>
 }
 
-function TableCaption({
-  className,
-  ...props
-}: React.ComponentProps<"caption">) {
-  return (
-    <caption
-      data-slot="table-caption"
-      className={cn("text-[--text-muted] mt-4 text-sm", className)}
-      {...props}
-    />
-  )
-}
-
-export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
+export function TableCaption({ children }: { children: React.ReactNode }) {
+  return <caption>{children}</caption>
 }

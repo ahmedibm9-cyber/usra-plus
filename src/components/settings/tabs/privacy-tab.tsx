@@ -161,8 +161,8 @@ export function PrivacyTab() {
       {/* Consent Management */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <ShieldCheck size={16} color="primary" />
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <ShieldCheck size={16} sx={{ color: 'primary.main' }} />
             {isRTL ? 'إدارة الموافقة' : 'Consent Management'}
           </Stack>
         </SectionTitle>
@@ -172,7 +172,7 @@ export function PrivacyTab() {
 
         {loadingConsents ? (
           <Stack alignItems="center" sx={{ py: 4 }}>
-            <Loader2 size={20} className="animate-spin" color="primary" />
+            <Loader2 size={20} className="animate-spin" sx={{ color: 'primary.main' }} />
           </Stack>
         ) : (
           <Stack spacing={1.5} sx={{ mt: 2 }}>
@@ -181,19 +181,19 @@ export function PrivacyTab() {
               const isChecked = latest?.granted ?? (type === 'terms' || type === 'privacy')
               return (
                 <Paper key={type} elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {isRTL ? labelAr : labelEn}
                         {required && (
-                          <Typography variant="caption" color="text.secondary" component="span" sx={{ ml: 0.5 }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }} component="span" sx={{ ml: 0.5 }}>
                             ({isRTL ? 'مطلوب' : 'required'})
                           </Typography>
                         )}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">{isRTL ? descAr : descEn}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{isRTL ? descAr : descEn}</Typography>
                       {latest && (
-                        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.25 }}>
+                        <Typography variant="caption" sx={{ color: 'text.disabled' }} sx={{ display: 'block', mt: 0.25 }}>
                           {isRTL ? 'آخر تحديث:' : 'Last updated:'} {new Date(latest.createdAt).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US')}
                         </Typography>
                       )}
@@ -215,8 +215,8 @@ export function PrivacyTab() {
       {/* Legal Documents */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <FileJson size={16} color="primary" />
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <FileJson size={16} sx={{ color: 'primary.main' }} />
             {isRTL ? 'الوثائق القانونية' : 'Legal Documents'}
           </Stack>
         </SectionTitle>
@@ -234,15 +234,15 @@ export function PrivacyTab() {
               href={`?page=${doc.type}`}
               sx={{ p: 1.5, borderRadius: 3, textDecoration: 'none', display: 'block', transition: 'all 0.15s', '&:hover': { bgcolor: 'action.hover' } }}
             >
-              <Stack direction="row" alignItems="center" gap={1.5}>
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                 <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'secondary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CheckCircle2 size={16} color="secondary" />
+                  <CheckCircle2 size={16} sx={{ color: 'secondary.main' }} />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>{isRTL ? doc.labelAr : doc.labelEn}</Typography>
-                  <Typography variant="caption" color="text.secondary">{isRTL ? doc.descAr : doc.descEn}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{isRTL ? doc.descAr : doc.descEn}</Typography>
                 </Box>
-                <ChevronRight size={16} color="text.secondary" />
+                <ChevronRight size={16} sx={{ color: 'text.secondary' }} />
               </Stack>
             </Paper>
           ))}
@@ -252,8 +252,8 @@ export function PrivacyTab() {
       {/* Data Export */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Download size={16} color="primary" />
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Download size={16} sx={{ color: 'primary.main' }} />
             {isRTL ? 'تصدير البيانات' : 'Data Export'}
           </Stack>
         </SectionTitle>
@@ -262,18 +262,18 @@ export function PrivacyTab() {
         </SectionDescription>
 
         <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between">
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
                 {isRTL ? 'تصدير بياناتي' : 'Export My Data'}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 {isRTL ? 'ملف JSON يحتوي على جميع بياناتك' : 'JSON file containing all your data'}
               </Typography>
             </Box>
             <Button
               variant="contained"
-              color="secondary"
+              sx={{ color: 'secondary.main' }}
               size="small"
               onClick={handleExportData}
               disabled={exporting}
@@ -284,7 +284,7 @@ export function PrivacyTab() {
           </Stack>
         </Paper>
 
-        <Typography variant="caption" color="text.disabled" sx={{ mt: 1 }}>
+        <Typography variant="caption" sx={{ color: 'text.disabled' }} sx={{ mt: 1 }}>
           {isRTL ? 'محدود بطلب واحد في الساعة. البيانات تشمل: الملف الشخصي، الجلسات، الاشتراكات، العائلة، القسائم، الإحالات، الموافقات.'
             : 'Limited to 1 request per hour. Data includes: profile, sessions, subscriptions, family, coupons, referrals, consents.'}
         </Typography>
@@ -293,8 +293,8 @@ export function PrivacyTab() {
       {/* Account Deletion */}
       <SectionCard sx={{ borderColor: 'error.light' }}>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <AlertTriangle size={16} color="error" /> {isRTL ? 'منطقة الخطر' : 'Danger Zone'}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={16} sx={{ color: 'error.main' }} /> {isRTL ? 'منطقة الخطر' : 'Danger Zone'}
           </Stack>
         </SectionTitle>
         <SectionDescription>
@@ -303,7 +303,7 @@ export function PrivacyTab() {
 
         <Button
           variant="contained"
-          color="error"
+          sx={{ color: 'error.main' }}
           size="small"
           disabled={isDeleting}
           startIcon={<Trash2 size={16} />}
@@ -324,7 +324,7 @@ export function PrivacyTab() {
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
             <Button
-              color="error"
+              sx={{ color: 'error.main' }}
               variant="contained"
               onClick={() => { handleDeleteAccount(); setDeleteDialogOpen(false) }}
             >
@@ -337,8 +337,8 @@ export function PrivacyTab() {
       {/* Data Retention Info */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Clock size={16} color="primary" />
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Clock size={16} sx={{ color: 'primary.main' }} />
             {isRTL ? 'فترات الاحتفاظ بالبيانات' : 'Data Retention Periods'}
           </Stack>
         </SectionTitle>
@@ -360,7 +360,7 @@ export function PrivacyTab() {
               }}
             >
               <Typography variant="body2">{item.type}</Typography>
-              <Typography variant="caption" color="text.secondary">{item.period}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{item.period}</Typography>
             </Stack>
           ))}
         </Stack>
@@ -369,8 +369,8 @@ export function PrivacyTab() {
       {/* Contact */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Mail size={16} color="primary" />
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Mail size={16} sx={{ color: 'primary.main' }} />
             {isRTL ? 'اتصل بنا' : 'Contact Us'}
           </Stack>
         </SectionTitle>
@@ -380,15 +380,15 @@ export function PrivacyTab() {
 
         <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3, borderColor: 'secondary.light' }}>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>privacy@usraplus.com</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ mt: 0.5 }}>
             {isRTL ? 'سنرد خلال 30 يومًا من استلام طلبك' : 'We will respond within 30 days of receiving your request'}
           </Typography>
         </Paper>
 
-        <Stack direction="row" gap={1} sx={{ mt: 1.5, flexWrap: 'wrap' }}>
-          <Chip label="GDPR Compliant" size="small" variant="outlined" color="secondary" />
-          <Chip label="PDPL Compliant" size="small" variant="outlined" color="secondary" />
-          <Chip label="SOC 2 Aligned" size="small" variant="outlined" color="secondary" />
+        <Stack sx={{ flexDirection: 'row', gap: 1 }} sx={{ mt: 1.5, flexWrap: 'wrap' }}>
+          <Chip label="GDPR Compliant" size="small" variant="outlined" sx={{ color: 'secondary.main' }} />
+          <Chip label="PDPL Compliant" size="small" variant="outlined" sx={{ color: 'secondary.main' }} />
+          <Chip label="SOC 2 Aligned" size="small" variant="outlined" sx={{ color: 'secondary.main' }} />
         </Stack>
       </SectionCard>
     </Stack>

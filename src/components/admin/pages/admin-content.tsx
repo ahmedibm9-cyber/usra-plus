@@ -589,8 +589,8 @@ export function AdminContent() {
     try {
       const res = await fetch('/api/admin/content', { credentials: 'same-origin' })
       if (res.ok) {
-        const json = await safeJsonResponse(res)
-        const c = json.content || {}
+        const json = await safeJsonResponse(res) as Record<string, unknown>
+        const c = (json as any).content || {}
 
         if (c.terms_of_service_en) setTermsEn(c.terms_of_service_en)
         if (c.terms_of_service_ar) setTermsAr(c.terms_of_service_ar)
@@ -636,8 +636,8 @@ export function AdminContent() {
         setLastSavedAt(new Date().toLocaleTimeString())
         addAuditLog('content_saved', 'content', null, { keys: 7 })
       } else {
-        const json = await safeJsonResponse(res)
-        toast.error(json.error || 'Failed to save content')
+        const json = await safeJsonResponse(res) as Record<string, unknown>
+        toast.error((json.error as string) || 'Failed to save content')
       }
     } catch {
       toast.error('Failed to save — check your connection')

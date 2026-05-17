@@ -441,7 +441,7 @@ function sharedComponents(): ThemeOptions['components'] {
           borderColor: 'divider',
           backgroundImage: 'none',
         },
-        paperAnchorBottom: {
+        anchorBottom: {
           borderRadius: `${SHAPE.bottomSheet}px ${SHAPE.bottomSheet}px 0 0`,
           borderTop: '1px solid',
           borderColor: 'divider',
@@ -534,16 +534,6 @@ function sharedComponents(): ThemeOptions['components'] {
           fontFamily: HEADING_FONT_FAMILY,
           transition: transition(['box-shadow', 'border-color']),
         },
-        sizeSmall: {
-          width: 28,
-          height: 28,
-          fontSize: '0.6875rem',
-        },
-        sizeMedium: {
-          width: 40,
-          height: 40,
-          fontSize: '1rem',
-        },
       },
     },
 
@@ -627,10 +617,6 @@ function sharedComponents(): ThemeOptions['components'] {
           width: 48,
           height: 48,
         },
-        sizeLarge: {
-          width: 56,
-          height: 56,
-        },
       },
     },
 
@@ -654,16 +640,7 @@ function sharedComponents(): ThemeOptions['components'] {
           fontWeight: 500,
           padding: `${SPACING[1]}px ${SPACING[2]}px`,
         },
-        standardInfo: {
-          border: '1px solid',
-        },
-        standardSuccess: {
-          border: '1px solid',
-        },
-        standardWarning: {
-          border: '1px solid',
-        },
-        standardError: {
+        standard: {
           border: '1px solid',
         },
       },
@@ -874,15 +851,6 @@ function sharedComponents(): ThemeOptions['components'] {
     MuiTypography: {
       defaultProps: {
         variantMapping: {
-          display2: 'h1',
-          display1: 'h1',
-          headline1: 'h2',
-          headline2: 'h3',
-          title1: 'h4',
-          title2: 'h5',
-          title3: 'h6',
-          label1: 'span',
-          label2: 'span',
           overline: 'span',
         },
       },

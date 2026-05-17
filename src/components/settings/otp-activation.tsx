@@ -97,20 +97,20 @@ export function OtpActivation() {
     <Stack spacing={3}>
       {/* OTP Input Section */}
       <Paper elevation={0} variant="outlined" sx={{ p: 3, borderRadius: 4 }}>
-        <Stack direction="row" alignItems="center" gap={1.5} sx={{ mb: 0.5 }}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }} sx={{ mb: 0.5 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <KeyRound size={16} />
           </Box>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Activate Subscription</Typography>
-            <Typography variant="caption" color="text.secondary">Enter the OTP code provided by your administrator</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Enter the OTP code provided by your administrator</Typography>
           </Box>
         </Stack>
 
         <Stack spacing={2} sx={{ mt: 2.5 }}>
           <Box>
             <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 500 }}>OTP Code</Typography>
-            <Stack direction="row" gap={1}>
+            <Stack sx={{ flexDirection: 'row', gap: 1 }}>
               <TextField
                 value={otpCode}
                 onChange={(e) => {
@@ -141,18 +141,18 @@ export function OtpActivation() {
         result.success ? (
           <Alert severity="success" variant="outlined" sx={{ borderRadius: 4 }}>
             <Stack spacing={2}>
-              <Stack direction="row" alignItems="center" gap={1.5}>
-                <CheckCircle2 size={20} color="success" />
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
+                <CheckCircle2 size={20} sx={{ color: 'success.main' }} />
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Subscription Activated!</Typography>
-                  <Typography variant="caption" color="text.secondary">Your plan has been upgraded successfully</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>Your plan has been upgraded successfully</Typography>
                 </Box>
               </Stack>
               <Grid container spacing={1.5}>
                 <Grid size={{ xs: 12, sm: 4 }}>
                   <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Plan</Typography>
-                    <Stack direction="row" alignItems="center" gap={0.5}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Plan</Typography>
+                    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {result.plan === 'family_plus' ? 'Family+' : result.plan?.charAt(0).toUpperCase() + result.plan?.slice(1)}
                       </Typography>
@@ -164,7 +164,7 @@ export function OtpActivation() {
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
                   <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Start Date</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Start Date</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {result.startDate ? new Date(result.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                     </Typography>
@@ -172,7 +172,7 @@ export function OtpActivation() {
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
                   <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>End Date</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>End Date</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {result.endDate ? new Date(result.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                     </Typography>
@@ -183,11 +183,11 @@ export function OtpActivation() {
           </Alert>
         ) : (
           <Alert severity="error" variant="outlined" sx={{ borderRadius: 4 }}>
-            <Stack direction="row" alignItems="center" gap={1.5}>
-              <AlertTriangle size={20} color="error" />
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
+              <AlertTriangle size={20} sx={{ color: 'error.main' }} />
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Activation Failed</Typography>
-                <Typography variant="caption" color="text.secondary">{result.error || 'Please check your OTP code and try again.'}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{result.error || 'Please check your OTP code and try again.'}</Typography>
               </Box>
             </Stack>
           </Alert>
@@ -196,7 +196,7 @@ export function OtpActivation() {
 
       {/* Help Text */}
       <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ lineHeight: 1.6 }}>
           <strong>How to get an OTP code:</strong> Contact your administrator to receive a subscription activation code.
           Each code is valid for 7 days and can only be used once. The code is tied to your account and cannot be transferred.
         </Typography>

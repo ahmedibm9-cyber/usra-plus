@@ -26,26 +26,7 @@ import {
   alpha,
   useTheme,
 } from '@mui/material'
-import {
-  Dashboard,
-  CheckBox,
-  CalendarMonth,
-  ShoppingCart,
-  Chat,
-  FolderOpen,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Logout,
-  Group,
-  UnfoldMore,
-  AccountBalanceWallet,
-  Restaurant,
-  Cake,
-  Brush,
-  Add,
-  Lock,
-} from '@mui/icons-material'
+import { Dashboard, CheckBox, CalendarMonth, ShoppingCart, Chat, FolderOpen, Settings, ChevronLeft, ChevronRight, Logout, Group, UnfoldMore, AccountBalanceWallet, Restaurant, Cake, Brush, Add, Lock } from '@mui/icons-material'
 import { useAppStore } from '@/stores/app-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useCurrentPage, useCurrentFamily, useSidebarCollapsed, useCurrentUser, useCurrentPlan } from '@/stores/selectors'
@@ -477,7 +458,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
           <Fab
             variant="extended"
             size="medium"
-            color="primary"
+            sx={{ color: 'primary.main' }}
             onClick={() => setCurrentPage('tasks')}
             sx={{
               width: '100%',

@@ -1,66 +1,82 @@
-"use client"
+import React from 'react'
+import MuiTabs from '@mui/material/Tabs'
+import MuiTab from '@mui/material/Tab'
+import type { TabsProps as MuiTabsProps, TabProps } from '@mui/material'
 
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
+interface TabsRootProps {
+  value: string | number
+  onValueChange?: (value: string) => void
+  children: React.ReactNode
+  className?: string
+}
 
-import { cn } from "@/lib/utils"
-
-function Tabs({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+export function Tabs({ value, onValueChange, children, className }: TabsRootProps) {
   return (
-    <TabsPrimitive.Root
-      data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
-      {...props}
+    <div className={className}>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child as React.ReactElement<any>, {
+            value,
+            onChange: (_event: React.SyntheticEvent, newValue: string | number) => onValueChange?.(String(newValue)),
+          })
+        }
+        return child
+      })}
+    </div>
+  )
+}
+
+interface TabsListProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function TabsList({ children, className }: TabsListProps) {
+  return (
+    <MuiTabs
+      value={React.Children.toArray(children).find(
+        (c): c is React.ReactElement<TabProps> =>
+          React.isValidElement(c) && (c as React.ReactElement<any>).props.value
+      )?.props?.value}
+      className={className}
+    >
+      {children}
+    </MuiTabs>
+  )
+}
+
+export function TabsTrigger({
+  value,
+  children,
+  className,
+}: {
+  value: string | number
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <MuiTab
+      value={value}
+      label={children}
+      className={className}
     />
   )
 }
 
-function TabsList({
+export function TabsContent({
+  value,
+  children,
   className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+  forceMount,
+}: {
+  value: string | number
+  children: React.ReactNode
+  className?: string
+  forceMount?: boolean
+}) {
   return (
-    <TabsPrimitive.List
-      data-slot="tabs-list"
-      className={cn(
-        "bg-[--bg-surface-2] text-[--text-muted] inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
-        className
-      )}
-      {...props}
-    />
+    <div role="tabpanel" className={className}>
+      {children}
+    </div>
   )
 }
-
-function TabsTrigger({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
-  return (
-    <TabsPrimitive.Trigger
-      data-slot="tabs-trigger"
-      className={cn(
-        "data-[state=active]:bg-[--bg-surface] data-[state=active]:text-[--text-primary] data-[state=active]:border-[--border-medium] text-[--text-muted] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function TabsContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
-  return (
-    <TabsPrimitive.Content
-      data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
-      {...props}
-    />
-  )
-}
-
-export { Tabs, TabsList, TabsTrigger, TabsContent }

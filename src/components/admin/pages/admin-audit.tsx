@@ -223,10 +223,10 @@ export function AdminAudit() {
         credentials: 'same-origin',
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await safeJsonResponse(res)
+      const json = await safeJsonResponse(res) as Record<string, unknown>
       if (!controller.signal.aborted) {
-        setData(json.data)
-        setSource(json.source === 'live' ? 'live' : 'demo')
+        setData((json as any).data)
+        setSource((json as any).source === 'live' ? 'live' : 'demo')
       }
     } catch {
       if (!controller.signal.aborted) {

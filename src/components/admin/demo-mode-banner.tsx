@@ -6,7 +6,7 @@ import { X, BarChart3, AlertTriangle } from 'lucide-react'
 
 interface DemoModeBannerProps {
   /** Whether the data is currently from demo mode */
-  isDemo: boolean
+  isDemo?: boolean
   /** Optional callback when dismissed */
   onDismiss?: () => void
 }

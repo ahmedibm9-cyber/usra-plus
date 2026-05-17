@@ -27,14 +27,7 @@ import {
   LinearProgress,
   IconButton,
 } from '@mui/material'
-import {
-  Mail,
-  Lock,
-  Visibility,
-  VisibilityOff,
-  Person,
-  Phone,
-} from '@mui/icons-material'
+import { Mail, Lock, Visibility, VisibilityOff, Person, Phone } from '@mui/icons-material'
 import { LanguageSelector } from './language-selector'
 import { ThemeToggle } from './theme-toggle'
 import { TermsModal } from './terms-modal'
@@ -326,7 +319,7 @@ export function SignupForm() {
             <CardContent sx={{ p: 3 }}>
               {/* Top bar */}
               <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0 }}>
-                <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                <Stack sx={{ flexDirection: 'row' }} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                   <ThemeToggle />
                   <LanguageSelector />
                 </Stack>
@@ -365,7 +358,7 @@ export function SignupForm() {
               >
                 {/* Name Row */}
                 <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.1 }}>
-                  <Stack direction="row" spacing={1.5}>
+                  <Stack sx={{ flexDirection: 'row' }} spacing={1.5}>
                     <TextField
                       fullWidth
                       id="signup-firstName"
@@ -444,7 +437,7 @@ export function SignupForm() {
 
                 {/* Phone with country code */}
                 <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.2 }}>
-                  <Stack direction="row" spacing={1}>
+                  <Stack sx={{ flexDirection: 'row' }} spacing={1}>
                     <FormControl sx={{ minWidth: 110, flexShrink: 0 }}>
                       <InputLabel sx={{ '&.Mui-shrink': { bgcolor: 'background.paper', px: 0.5 } }}>Code</InputLabel>
                       <Select
@@ -455,7 +448,7 @@ export function SignupForm() {
                       >
                         {countryCodes.map((cc) => (
                           <MenuItem key={cc.code} value={cc.code} sx={{ py: 0.75 }}>
-                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                            <Stack sx={{ flexDirection: 'row' }} spacing={1} sx={{ alignItems: 'center' }}>
                               <span style={{ fontSize: 14 }}>{cc.flag}</span>
                               <Typography variant="caption" sx={{ color: 'text.secondary' }}>{cc.code}</Typography>
                             </Stack>

@@ -1,13 +1,7 @@
-import { cn } from "@/lib/utils"
+import React from 'react'
+import MuiSkeleton from '@mui/material/Skeleton'
+import type { SkeletonProps } from '@mui/material/Skeleton'
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="skeleton"
-      className={cn("bg-accent animate-pulse rounded-md", className)}
-      {...props}
-    />
-  )
+export function Skeleton({ className, ...props }: Partial<SkeletonProps>) {
+  return <MuiSkeleton animation="wave" {...props} />
 }
-
-export { Skeleton }

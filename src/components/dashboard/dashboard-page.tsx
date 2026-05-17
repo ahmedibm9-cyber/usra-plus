@@ -3,30 +3,8 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, isToday, isTomorrow, isThisWeek, parseISO, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns'
-import {
-  CheckCircle,
-  CalendarMonth,
-  Group,
-  ShoppingCart,
-  Add,
-  Chat,
-  Schedule,
-  Warning,
-  AutoAwesome,
-  ArrowForward,
-  Checklist,
-  CalendarToday,
-  ShoppingBag,
-  Home,
-  DarkMode,
-  TrendingUp,
-  TrendingDown,
-  Dashboard,
-  BarChart,
-  LocalFireDepartment,
-  EmojiEvents,
-  FormatQuote,
-} from '@mui/icons-material'
+import { CheckCircle, CalendarMonth, Group, ShoppingCart, Add, Chat, Schedule, Warning, AutoAwesome, ArrowForward, Checklist, CalendarToday, Home, DarkMode, TrendingUp, TrendingDown, Dashboard, BarChart, LocalFireDepartment, EmojiEvents, FormatQuote } from '@mui/icons-material'
+import { ShoppingBag } from 'lucide-react'
 import {
   Chip,
   Button,

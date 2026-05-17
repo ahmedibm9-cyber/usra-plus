@@ -166,10 +166,11 @@ export function AdminActivity() {
   useEffect(() => {
     fetch('/api/admin/db-info', { credentials: 'same-origin' })
       .then(async (res) => res.ok ? await safeJsonResponse(res) : null)
-      .then(data => {
-        if (data) {
-          setDbLabel(data.displayBadge || 'SQLite')
-          setDbSource(data.source || 'Local Database')
+      .then((data: unknown) => {
+        if (data && typeof data === 'object') {
+          const record = data as Record<string, unknown>
+          setDbLabel((record.displayBadge as string) || 'SQLite')
+          setDbSource((record.source as string) || 'Local Database')
         }
       })
       .catch(() => {})
@@ -192,16 +193,18 @@ export function AdminActivity() {
       const analyticsJson = analyticsRes.ok ? await safeJsonResponse(analyticsRes) : null
 
       // Get real user counts
-      const users = analyticsJson?.data?.users?.total ?? 0
-      const sessions = analyticsJson?.data?.sessions?.total ?? 0
-      const active = analyticsJson?.data?.sessions?.active ?? 0
+      const analyticsData = (analyticsJson as Record<string, unknown> | null)
+      const overviewData = (overviewJson as Record<string, unknown> | null)
+      const users = (analyticsData as any)?.data?.users?.total ?? 0
+      const sessions = (analyticsData as any)?.data?.sessions?.total ?? 0
+      const active = (analyticsData as any)?.data?.sessions?.active ?? 0
       setTotalUsers(users)
       setTotalSessions(sessions)
       setActiveSessions(active)
 
       // Build activity events from real data (overview API returns activity feed from real signups)
-      if (overviewJson?.data?.activityFeed && overviewJson.data.activityFeed.length > 0) {
-        const feedEvents: ActivityEvent[] = overviewJson.data.activityFeed.map((item: { id: string; type: string; text: string; time: string }, i: number) => ({
+      if ((overviewData as any)?.data?.activityFeed && (overviewData as any).data.activityFeed.length > 0) {
+        const feedEvents: ActivityEvent[] = (overviewData as any).data.activityFeed.map((item: { id: string; type: string; text: string; time: string }, i: number) => ({
           id: item.id || `live-${i}`,
           type: mapFeedType(item.type),
           description: item.text,

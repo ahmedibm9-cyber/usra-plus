@@ -20,24 +20,8 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material'
-import {
-  Users,
-  PersonAdd,
-  Home,
-  ContentCopy,
-  Check,
-  ChevronRight,
-  AutoAwesome,
-  AutoFixHigh,
-  WifiOff,
-  CalendarMonth,
-  Checklist,
-  ShoppingCart,
-  Chat,
-  Shield,
-  Bolt,
-  Star,
-} from '@mui/icons-material'
+import { PersonAdd, Home, ContentCopy, Check, ChevronRight, AutoAwesome, AutoFixHigh, WifiOff, CalendarMonth, Checklist, ShoppingCart, Chat, Shield, Bolt, Star } from '@mui/icons-material'
+import { Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AvatarGenerator } from '@/components/shared/avatar-generator'
@@ -110,7 +94,7 @@ function StepProgressBar({ currentStep }: { currentStep: OnboardingStep }) {
 
   return (
     <Box sx={{ width: '100%', mb: 4 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ mb: 1.5 }}>
+      <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" sx={{ mb: 1.5 }}>
         {steps.map((step) => (
           <Stack key={step.num} direction="row" alignItems="center" spacing={0.5}>
             <Typography variant="caption" sx={{
@@ -140,7 +124,7 @@ function StepProgressBar({ currentStep }: { currentStep: OnboardingStep }) {
           transition={{ duration: 0.6, ease: 'easeOut' }}
         />
       </Box>
-      <Stack direction="row" justifyContent="flex-end" sx={{ mt: 0.5 }}>
+      <Stack sx={{ flexDirection: 'row' }} justifyContent="flex-end" sx={{ mt: 0.5 }}>
         <Typography variant="caption" color="secondary.main" sx={{ fontSize: 10, letterSpacing: '0.1em' }}>
           {percentage}%
         </Typography>
@@ -190,7 +174,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
       </motion.div>
 
       <Box sx={{ height: 32, mb: 4 }}>
-        <Typography variant="h6" color="text.secondary" fontWeight={500}>
+        <Typography variant="h6" sx={{ color: 'text.secondary' }} fontWeight={500}>
           {displayedText}
           <Box component="span" sx={{ display: 'inline-block', width: 2, height: 20, bgcolor: 'primary.main', ml: 0.5, verticalAlign: 'middle', animation: 'blink 0.5s infinite alternate' }} />
         </Typography>
@@ -210,7 +194,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
                           <Icon sx={{ fontSize: 16, color: `${feature.color}.main` }} />
                         </Box>
                         <Typography variant="body2" fontWeight={600} sx={{ mb: 0.25 }}>{feature.title}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11, lineHeight: 1.3 }}>{feature.description}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ fontSize: 11, lineHeight: 1.3 }}>{feature.description}</Typography>
                       </Paper>
                     </motion.div>
                   </Grid>
@@ -312,7 +296,7 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
   return (
     <Box sx={{ maxWidth: 500, mx: 'auto', width: '100%' }}>
       {isDemoMode() && (
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, py: 1.5, borderRadius: 3, bgcolor: 'success.main', opacity: 0.1, mb: 2, border: 1, borderColor: 'success.main' }}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ px: 2, py: 1.5, borderRadius: 3, bgcolor: 'success.main', opacity: 0.1, mb: 2, border: 1, borderColor: 'success.main' }}>
           <WifiOff sx={{ fontSize: 16, color: 'success.main', flexShrink: 0 }} />
           <Typography variant="caption" sx={{ color: 'success.light' }}>{isRTL ? 'الوضع بدون إنترنت' : 'Offline mode — family will be stored locally'}</Typography>
         </Stack>
@@ -325,7 +309,7 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
               {createdCode && (
                 <Paper sx={{ p: 2, border: 1, borderColor: 'success.main', bgcolor: 'success.main' + '10' }}>
                   <Typography variant="body2" color="success.main" fontWeight={500} sx={{ mb: 1 }}>Family created! Share this invite code:</Typography>
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
                     <Box sx={{ bgcolor: 'action.hover', px: 2, py: 0.75, borderRadius: 2 }}>
                       <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '0.2em', fontFamily: 'monospace' }}>{createdCode}</Typography>
                     </Box>
@@ -345,7 +329,7 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
                       <Users sx={{ fontSize: 28, color: 'primary.main' }} />
                     </Box>
                     <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>{t.onboarding.createFamily}</Typography>
-                    <Typography variant="body2" color="text.secondary">Start a new family space</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>Start a new family space</Typography>
                   </Paper>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
@@ -358,13 +342,13 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
                       <PersonAdd sx={{ fontSize: 28, color: 'secondary.main' }} />
                     </Box>
                     <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>{t.onboarding.joinFamily}</Typography>
-                    <Typography variant="body2" color="text.secondary">Enter an invite code</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>Enter an invite code</Typography>
                   </Paper>
                 </Grid>
               </Grid>
 
               <Paper variant="outlined" sx={{ p: 2 }}>
-                <Typography variant="caption" color="text.disabled" sx={{ letterSpacing: '0.2em', textTransform: 'uppercase', mb: 1.5, display: 'block' }}>What you get</Typography>
+                <Typography variant="caption" sx={{ color: 'text.disabled' }} sx={{ letterSpacing: '0.2em', textTransform: 'uppercase', mb: 1.5, display: 'block' }}>What you get</Typography>
                 <Stack spacing={1.5}>
                   {FAMILY_BENEFITS.map((benefit, i) => {
                     const Icon = benefit.icon
@@ -373,13 +357,13 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
                         <Box sx={{ width: 24, height: 24, borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: `${theme.palette[benefit.color].main}15`, flexShrink: 0 }}>
                           <Icon sx={{ fontSize: 14, color: `${benefit.color}.main` }} />
                         </Box>
-                        <Typography variant="body2" color="text.secondary">{benefit.text}</Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{benefit.text}</Typography>
                       </Stack>
                     )
                   })}
                 </Stack>
               </Paper>
-              <Typography variant="caption" color="text.disabled" sx={{ textAlign: 'center', pt: 0.5 }}>{t.onboarding.chooseOrCreate || 'Choose an option to continue'}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled' }} sx={{ textAlign: 'center', pt: 0.5 }}>{t.onboarding.chooseOrCreate || 'Choose an option to continue'}</Typography>
             </Stack>
           </motion.div>
         )}
@@ -389,18 +373,18 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
             <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden' }}>
               <Box sx={{ height: 2, background: `linear-gradient(90deg, transparent, ${theme.palette.primary.main}, transparent)` }} />
               <Stack spacing={2.5} sx={{ p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={1.5}>
+                <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                   <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Users sx={{ color: 'primary.main' }} />
                   </Box>
                   <Box>
                     <Typography variant="subtitle1" fontWeight={600}>{t.onboarding.createFamily}</Typography>
-                    <Typography variant="caption" color="text.secondary">Set up your family space</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Set up your family space</Typography>
                   </Box>
                 </Stack>
                 <TextField label={t.onboarding.familyName} value={familyName} onChange={(e) => setFamilyName(e.target.value)} placeholder="The Smith Family" size="small" fullWidth />
                 <TextField label={t.onboarding.familyDescription} value={familyDescription} onChange={(e) => setFamilyDescription(e.target.value)} placeholder="A loving family..." multiline rows={3} size="small" fullWidth />
-                <Stack direction="row" spacing={1.5} sx={{ pt: 0.5 }}>
+                <Stack sx={{ flexDirection: 'row' }} spacing={1.5} sx={{ pt: 0.5 }}>
                   <Button variant="outlined" onClick={() => setAction('choose')} fullWidth sx={{ height: 44 }}>{t.common.cancel}</Button>
                   <Button variant="contained" onClick={handleCreateFamily} disabled={isLoading || !familyName.trim()} fullWidth sx={{ height: 44 }}>{isLoading ? t.common.loading : t.onboarding.create}</Button>
                 </Stack>
@@ -414,19 +398,19 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
             <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden' }}>
               <Box sx={{ height: 2, background: `linear-gradient(90deg, transparent, ${theme.palette.secondary.main}, transparent)` }} />
               <Stack spacing={2.5} sx={{ p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={1.5}>
+                <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                   <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'secondary.main', opacity: 0.15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <PersonAdd sx={{ color: 'secondary.main' }} />
                   </Box>
                   <Box>
                     <Typography variant="subtitle1" fontWeight={600}>{t.onboarding.joinFamily}</Typography>
-                    <Typography variant="caption" color="text.secondary">Enter an invite code from your family</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Enter an invite code from your family</Typography>
                   </Box>
                 </Stack>
                 <TextField label={t.onboarding.enterCode} value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} placeholder="ABCD1234" inputProps={{ maxLength: 8, style: { textAlign: 'center', letterSpacing: '0.3em', fontFamily: 'monospace', fontSize: 18 } }} size="small" fullWidth />
-                <Stack direction="row" spacing={1.5} sx={{ pt: 0.5 }}>
+                <Stack sx={{ flexDirection: 'row' }} spacing={1.5} sx={{ pt: 0.5 }}>
                   <Button variant="outlined" onClick={() => setAction('choose')} fullWidth sx={{ height: 44 }}>{t.common.cancel}</Button>
-                  <Button variant="contained" color="secondary" onClick={handleJoinFamily} disabled={isLoading || !inviteCode.trim()} fullWidth sx={{ height: 44 }}>{isLoading ? t.common.loading : t.onboarding.join}</Button>
+                  <Button variant="contained" sx={{ color: 'secondary.main' }} onClick={handleJoinFamily} disabled={isLoading || !inviteCode.trim()} fullWidth sx={{ height: 44 }}>{isLoading ? t.common.loading : t.onboarding.join}</Button>
                 </Stack>
               </Stack>
             </Paper>
@@ -456,7 +440,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
     <Stack spacing={3.5} sx={{ maxWidth: 500, mx: 'auto', width: '100%' }}>
       {currentFamily?.name && (
         <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="caption" color="text.disabled" sx={{ letterSpacing: '0.25em', textTransform: 'uppercase', mb: 0.5, display: 'block' }}>Your Family</Typography>
+          <Typography variant="caption" sx={{ color: 'text.disabled' }} sx={{ letterSpacing: '0.25em', textTransform: 'uppercase', mb: 0.5, display: 'block' }}>Your Family</Typography>
           <Typography variant="subtitle1" fontWeight={600}>{currentFamily.name}</Typography>
         </Box>
       )}
@@ -473,12 +457,12 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
             <Typography sx={{ fontSize: 48 }}>{familyAvatar}</Typography>
           )}
         </Box>
-        <Typography variant="body2" color="text.secondary">{t.onboarding.familyAvatar || 'Choose your family avatar'}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.onboarding.familyAvatar || 'Choose your family avatar'}</Typography>
       </Stack>
 
       <Box>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-          <Typography variant="body2" color="text.secondary" fontWeight={500}>{t.onboarding.pickAvatar || 'Pick an avatar'}</Typography>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }} fontWeight={500}>{t.onboarding.pickAvatar || 'Pick an avatar'}</Typography>
           <Button variant="outlined" size="small" onClick={() => setAvatarGenOpen(true)} startIcon={<AutoFixHigh sx={{ fontSize: 12 }} />}>
             {t.avatarGen.generateWithAI}
           </Button>
@@ -505,7 +489,7 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
       </Box>
 
       <Box>
-        <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 1.5 }}>{t.onboarding.pickColor || 'Pick a color theme'}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }} fontWeight={500} sx={{ mb: 1.5 }}>{t.onboarding.pickColor || 'Pick a color theme'}</Typography>
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           {COLOR_OPTIONS.map((color, i) => (
             <Grid size={2} key={color.name}>
@@ -526,12 +510,12 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
           ))}
         </Grid>
         <Paper variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="caption" color="text.disabled" sx={{ letterSpacing: '0.2em', textTransform: 'uppercase', mb: 1.5, display: 'block' }}>Preview</Typography>
+          <Typography variant="caption" sx={{ color: 'text.disabled' }} sx={{ letterSpacing: '0.2em', textTransform: 'uppercase', mb: 1.5, display: 'block' }}>Preview</Typography>
           <Stack spacing={1.5}>
             <Box sx={{ height: 32, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: `${selectedColorOption.muiColor}.main`, color: 'white', fontSize: 12, fontWeight: 600, boxShadow: `0 0 12px ${theme.palette[selectedColorOption.muiColor].main}30` }}>
               Sample Action Button
             </Box>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
               <Chip label="Family Badge" size="small" sx={{ bgcolor: `${theme.palette[selectedColorOption.muiColor].main}20`, color: `${selectedColorOption.muiColor}.main`, fontWeight: 600, fontSize: 10 }} />
               <Box sx={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: `${theme.palette[selectedColorOption.muiColor].main}20`, color: `${selectedColorOption.muiColor}.main`, fontSize: 10, fontWeight: 700 }}>U</Box>
               <Box sx={{ height: 6, flex: 1, borderRadius: 5, bgcolor: 'action.hover', overflow: 'hidden' }}>
@@ -543,13 +527,13 @@ function PersonalizeStep({ onComplete }: { onComplete: () => void }) {
       </Box>
 
       <Paper variant="outlined" sx={{ p: 2, borderStyle: 'dashed' }}>
-        <Stack direction="row" spacing={1.5}>
+        <Stack sx={{ flexDirection: 'row' }} spacing={1.5}>
           <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3 }}>
             <Star sx={{ color: 'secondary.main' }} />
           </motion.div>
           <Box>
             <Typography variant="body2" fontWeight={600}>Ready to go!</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: 'block' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ mt: 0.25, display: 'block' }}>
               {currentFamily?.name ? `${currentFamily.name} is set up and waiting for you.` : 'Your family space is ready.'}
             </Typography>
           </Box>
@@ -585,8 +569,8 @@ export function OnboardingFlow() {
       <Box sx={{ width: '100%', maxWidth: 500, position: 'relative', zIndex: 10 }}>
         <StepProgressBar currentStep={currentStep} />
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
             <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', boxShadow: `0 0 6px ${theme.palette.primary.main}80` }} />
             <Typography variant="caption" sx={{ letterSpacing: '0.3em', textTransform: 'uppercase', color: 'primary.main', fontSize: 10 }}>
               {currentStep}/3
@@ -606,7 +590,7 @@ export function OnboardingFlow() {
             <motion.div key="step-2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
               <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>{t.onboarding.setupFamily || 'Set Up Your Family'}</Typography>
-                <Typography variant="body2" color="text.secondary">{t.onboarding.setupFamilyDesc || 'Create a new family or join an existing one'}</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.onboarding.setupFamilyDesc || 'Create a new family or join an existing one'}</Typography>
               </Box>
               <FamilyStep onAdvance={() => goToStep(3)} />
             </motion.div>
@@ -615,7 +599,7 @@ export function OnboardingFlow() {
             <motion.div key="step-3" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
               <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>{t.onboarding.personalize || 'Personalize'}</Typography>
-                <Typography variant="body2" color="text.secondary">{t.onboarding.personalizeDesc || 'Make it yours'}</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.onboarding.personalizeDesc || 'Make it yours'}</Typography>
               </Box>
               <PersonalizeStep onComplete={handleComplete} />
             </motion.div>

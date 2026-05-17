@@ -156,9 +156,9 @@ function GenerateOtpDialog({
 
   return (
     <Paper elevation={0} variant="outlined" sx={{ p: 3, borderRadius: 4 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Stack direction="row" alignItems="center" gap={1}>
-          <KeyRound size={16} color="success" />
+      <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between">
+        <Stack sx={{ flexDirection: 'row', gap: 1 }}>
+          <KeyRound size={16} sx={{ color: 'success.main' }} />
           <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600 }}>
             Generate Subscription OTP
           </Typography>
@@ -171,14 +171,14 @@ function GenerateOtpDialog({
       {generatedCode ? (
         <Stack spacing={2} sx={{ mt: 2 }}>
           <Alert severity="success" variant="outlined" sx={{ textAlign: 'center', borderRadius: 3, p: 3 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 1, display: 'block' }}>OTP Code Generated</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 1, display: 'block' }}>OTP Code Generated</Typography>
             <Typography variant="h4" sx={{ fontFamily: 'monospace', letterSpacing: '0.3em', fontWeight: 700, color: 'success.main' }}>{generatedCode}</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>Share this code with the user. It expires in 7 days.</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1.5, display: 'block' }}>Share this code with the user. It expires in 7 days.</Typography>
           </Alert>
-          <Stack direction="row" justifyContent="center" gap={1.5}>
+          <Stack sx={{ flexDirection: 'row', justifyContent: 'center', gap: 1.5 }}>
             <Button
               variant="outlined"
-              color="success"
+              sx={{ color: 'success.main' }}
               size="small"
               onClick={handleCopy}
               startIcon={copied ? <Check size={14} /> : <Copy size={14} />}
@@ -192,7 +192,7 @@ function GenerateOtpDialog({
         <Stack spacing={2} sx={{ mt: 2 }}>
           {/* User Search & Select */}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>User *</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>User *</Typography>
             <TextField
               type="text"
               value={userSearch}
@@ -220,7 +220,7 @@ function GenerateOtpDialog({
 
           {/* Plan Selector */}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Plan *</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Plan *</Typography>
             <Grid container spacing={1}>
               {['pro', 'family_plus', 'max'].map(plan => {
                 const { color, Icon } = planConfig(plan)
@@ -247,21 +247,21 @@ function GenerateOtpDialog({
           {/* Date Pickers */}
           <Grid container spacing={2}>
             <Grid size={{ xs: 6 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Start Date *</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Start Date *</Typography>
               <TextField type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} fullWidth size="small" />
             </Grid>
             <Grid size={{ xs: 6 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>End Date *</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>End Date *</Typography>
               <TextField type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} fullWidth size="small" />
             </Grid>
           </Grid>
 
           {/* Actions */}
-          <Stack direction="row" justifyContent="flex-end" gap={1} sx={{ pt: 1 }}>
+          <Stack sx={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 1, pt: 1 }}>
             <Button variant="outlined" size="small" onClick={onClose}>Cancel</Button>
             <Button
               variant="contained"
-              color="success"
+              sx={{ color: 'success.main' }}
               size="small"
               onClick={handleGenerate}
               disabled={isGenerating || !selectedUserId}
@@ -305,38 +305,38 @@ function OtpRow({
   return (
     <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, gap: 1.5, transition: 'border-color 0.15s', '&:hover': { borderColor: 'success.light' } }}>
       {/* Plan + Code */}
-      <Stack direction="row" alignItems="center" gap={1.5} sx={{ flex: 1, minWidth: 0 }}>
+      <Stack sx={{ flexDirection: 'row', gap: 1.5 }} sx={{ flex: 1, minWidth: 0 }}>
         <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Icon size={16} />
         </Box>
         <Box sx={{ minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" gap={1}>
+          <Stack sx={{ flexDirection: 'row', gap: 1 }}>
             <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 700, letterSpacing: 1 }}>
               {otp.status === 'used' || otp.status === 'revoked' ? '••••••' : otp.code}
             </Typography>
             {otp.status === 'pending' && (
               <IconButton size="small" onClick={handleCopy} title="Copy code">
-                {copied ? <Check size={12} color="success" /> : <Copy size={12} />}
+                {copied ? <Check size={12} sx={{ color: 'success.main' }} /> : <Copy size={12} />}
               </IconButton>
             )}
           </Stack>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {otp.planSlug === 'family_plus' ? 'Family+' : otp.planSlug.charAt(0).toUpperCase() + otp.planSlug.slice(1)} plan · {formatDate(otp.startDate)} → {formatDate(otp.endDate)}
           </Typography>
         </Box>
       </Stack>
 
       {/* Status + Meta */}
-      <Stack direction="row" alignItems="center" gap={1.5}>
+      <Stack sx={{ flexDirection: 'row', gap: 1.5 }}>
         <Chip label={chipProps.label} size="small" color={chipProps.color} variant="outlined" />
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <Clock size={12} color="text.secondary" />
-          <Typography variant="caption" color="text.secondary">{formatDate(otp.createdAt)}</Typography>
+        <Stack sx={{ flexDirection: 'row', gap: 0.5 }}>
+          <Clock size={12} sx={{ color: 'text.secondary' }} />
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{formatDate(otp.createdAt)}</Typography>
         </Stack>
         {otp.status === 'pending' && (
           <IconButton
             size="small"
-            color="error"
+            sx={{ color: 'error.main' }}
             onClick={handleRevoke}
             disabled={isRevoking}
             title="Revoke OTP"
@@ -447,26 +447,26 @@ export function AdminSubscriptionOtp() {
   return (
     <Stack spacing={3}>
       {/* Header */}
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} justifyContent="space-between" gap={2}>
+      <Stack sx={{ flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' } }} justifyContent="space-between" gap={2}>
         <Box>
-          <Stack direction="row" alignItems="center" gap={1.5}>
+          <Stack sx={{ flexDirection: 'row', gap: 1.5 }}>
             <Box sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: 'success.main', opacity: 0.1, border: 1, borderColor: 'success.light', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <KeyRound size={20} color="success" />
+              <KeyRound size={20} sx={{ color: 'success.main' }} />
             </Box>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>Subscription OTP</Typography>
               <Divider sx={{ height: 2, borderRadius: 1, bgcolor: 'success.main', mt: 0.5 }} />
             </Box>
           </Stack>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, ml: 6.5 }}>Manually generate and manage subscription access codes</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ mt: 1, ml: 6.5 }}>Manually generate and manage subscription access codes</Typography>
         </Box>
-        <Stack direction="row" gap={1}>
+        <Stack sx={{ flexDirection: 'row', gap: 1 }}>
           <IconButton size="small" onClick={fetchOtps} title="Refresh" sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}>
             <RefreshCw size={16} />
           </IconButton>
           <Button
             variant="contained"
-            color="success"
+            sx={{ color: 'success.main' }}
             size="small"
             onClick={() => setShowGenerateForm(!showGenerateForm)}
             startIcon={<Plus size={14} />}
@@ -489,9 +489,9 @@ export function AdminSubscriptionOtp() {
               variant="outlined"
               sx={{ p: 2, borderRadius: 3, transition: 'all 0.2s', '&:hover': { boxShadow: 1, transform: 'translateY(-2px)' }, borderColor: stat.color === 'default' ? 'divider' : `${stat.color}.light` }}
             >
-              <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
+              <Stack sx={{ flexDirection: 'row', gap: 1 }} sx={{ mb: 1 }}>
                 <stat.icon size={16} color={stat.color === 'default' ? 'text.secondary' : stat.color} />
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>{stat.label}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>{stat.label}</Typography>
               </Stack>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>{stat.value}</Typography>
             </Paper>
@@ -508,12 +508,12 @@ export function AdminSubscriptionOtp() {
       )}
 
       {/* Filters */}
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} gap={1.5}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Filter size={14} color="text.secondary" />
-          <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Filters:</Typography>
+      <Stack sx={{ flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' } }} gap={1.5}>
+        <Stack sx={{ flexDirection: 'row', gap: 1 }}>
+          <Filter size={14} sx={{ color: 'text.secondary' }} />
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Filters:</Typography>
         </Stack>
-        <Stack direction="row" gap={1} flexWrap="wrap">
+        <Stack sx={{ flexDirection: 'row', gap: 1 }} flexWrap="wrap">
           <TextField
             select
             value={filterStatus}
@@ -562,15 +562,15 @@ export function AdminSubscriptionOtp() {
           ))
         ) : (
           <Paper elevation={0} variant="outlined" sx={{ p: 6, borderRadius: 3, textAlign: 'center' }}>
-            <KeyRound size={40} color="text.disabled" />
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>No OTP codes found</Typography>
-            <Typography variant="caption" color="text.disabled">Generate a new OTP to grant subscription access</Typography>
+            <KeyRound size={40} sx={{ color: 'text.disabled' }} />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ mt: 1.5 }}>No OTP codes found</Typography>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>Generate a new OTP to grant subscription access</Typography>
           </Paper>
         )}
       </Stack>
 
       {/* Total count */}
-      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', textTransform: 'uppercase', letterSpacing: 2 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ textAlign: 'center', textTransform: 'uppercase', letterSpacing: 2 }}>
         Showing {filteredOtps.length} of {otps.length} OTP codes
       </Typography>
     </Stack>

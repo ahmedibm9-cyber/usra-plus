@@ -61,7 +61,7 @@ import type { Task, CalendarEvent, GroceryItem, ChatMessage } from '@/types'
 
 import { SectionCard, SectionTitle, SectionDescription, SettingRow } from '../settings-helpers'
 
-const FamilyQRCode = dynamic(() => import('@/components/shared/family-qr-code').then(m => ({ default: m.FamilyQRCode })), { ssr: false, loading: () => <Stack alignItems="center" sx={{ p: 4 }}><Loader2 size={20} className="animate-spin" color="primary" /></Stack> })
+const FamilyQRCode = dynamic(() => import('@/components/shared/family-qr-code').then(m => ({ default: m.FamilyQRCode })), { ssr: false, loading: () => <Stack alignItems="center" sx={{ p: 4 }}><Loader2 size={20} className="animate-spin" sx={{ color: 'primary.main' }} /></Stack> })
 
 export function AdvancedTab() {
   return (
@@ -83,8 +83,8 @@ function AccentColorSection() {
   return (
     <SectionCard>
       <SectionTitle>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Palette size={16} color="primary" />
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+          <Palette size={16} sx={{ color: 'primary.main' }} />
           {isRTL ? 'لون التمييز' : 'Accent Color'}
         </Stack>
       </SectionTitle>
@@ -130,7 +130,7 @@ function AccentColorSection() {
       </Grid>
 
       {/* Preview */}
-      <Stack direction="row" alignItems="center" gap={1.5} sx={{ mt: 2 }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }} sx={{ mt: 2 }}>
         <Button
           variant="contained"
           sx={{
@@ -150,7 +150,7 @@ function AccentColorSection() {
             boxShadow: `0 0 8px rgba(${ACCENT_COLORS[accentColor].glow}, 0.5)`,
           }}
         />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {isRTL ? 'هذا كيف سيبدو اللون' : 'This is how the color looks'}
         </Typography>
       </Stack>
@@ -167,8 +167,8 @@ function VisualEffectsSection() {
   return (
     <SectionCard>
       <SectionTitle>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Eye size={16} color="primary" />
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+          <Eye size={16} sx={{ color: 'primary.main' }} />
           {isRTL ? 'تأثيرات بصرية' : 'Visual Effects'}
         </Stack>
       </SectionTitle>
@@ -185,7 +185,7 @@ function VisualEffectsSection() {
 
       {!reflectionsEnabled && (
         <Paper elevation={0} variant="outlined" sx={{ mt: 1, p: 1.5, borderRadius: 2 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {isRTL
               ? 'الوضع المسطّح Premium — بدون تأثيرات ضبابية أو انعكاسات زجاجية'
               : 'Flat Premium mode — no blur effects or glass reflections'}
@@ -204,8 +204,8 @@ function GuidedTourSection() {
   return (
     <SectionCard>
       <SectionTitle>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Sparkles size={16} color="primary" />
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+          <Sparkles size={16} sx={{ color: 'primary.main' }} />
           {isRTL ? 'جولة تطبيق' : 'App Tour'}
         </Stack>
       </SectionTitle>
@@ -435,17 +435,17 @@ function DataControlSection() {
       {/* Storage */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <HardDrive size={16} color="primary" /> {isRTL ? 'استخدام التخزين' : 'Storage Usage'}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <HardDrive size={16} sx={{ color: 'primary.main' }} /> {isRTL ? 'استخدام التخزين' : 'Storage Usage'}
           </Stack>
         </SectionTitle>
         <SectionDescription>{isRTL ? 'استهلاك التخزين الحالي' : 'Your current storage consumption'}</SectionDescription>
 
         <Stack spacing={2}>
           <Box>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+            <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
               <Typography variant="body2">2.4 GB of 5 GB</Typography>
-              <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>48%</Typography>
+              <Typography variant="body2" sx={{ color: 'primary.main' }} sx={{ fontWeight: 500 }}>48%</Typography>
             </Stack>
             <LinearProgress variant="determinate" value={48} sx={{ height: 8, borderRadius: 4 }} />
           </Box>
@@ -453,25 +453,25 @@ function DataControlSection() {
           <Grid container spacing={1.5}>
             <Grid size={{ xs: 6 }}>
               <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-                <Typography variant="caption" color="text.secondary">{t.files.title}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.files.title}</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>1.8 GB</Typography>
               </Paper>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-                <Typography variant="caption" color="text.secondary">{t.chat.title}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.chat.title}</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>0.4 GB</Typography>
               </Paper>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-                <Typography variant="caption" color="text.secondary">{t.tasks.title} & {t.calendar.title}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.tasks.title} & {t.calendar.title}</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>0.1 GB</Typography>
               </Paper>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3 }}>
-                <Typography variant="caption" color="text.secondary">{isRTL ? 'أخرى' : 'Other'}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{isRTL ? 'أخرى' : 'Other'}</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>0.1 GB</Typography>
               </Paper>
             </Grid>
@@ -482,8 +482,8 @@ function DataControlSection() {
       {/* Export Section */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Download size={16} color="primary" /> {t.dataControl.exportData}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Download size={16} sx={{ color: 'primary.main' }} /> {t.dataControl.exportData}
           </Stack>
         </SectionTitle>
         <SectionDescription>
@@ -493,7 +493,7 @@ function DataControlSection() {
         <Stack spacing={2.5}>
           <Box>
             <Typography variant="caption" sx={{ mb: 1, display: 'block' }}>{t.dataControl.exportFormat}</Typography>
-            <Stack direction="row" gap={1}>
+            <Stack sx={{ flexDirection: 'row', gap: 1 }}>
               <Button
                 variant={exportFormat === 'json' ? 'contained' : 'outlined'}
                 size="small"
@@ -514,9 +514,9 @@ function DataControlSection() {
           </Box>
 
           <Box>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+            <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
               <Typography variant="caption">{t.dataControl.selectData}</Typography>
-              <Button variant="text" size="small" color="primary" onClick={toggleAllExport} sx={{ fontSize: 12, minHeight: 24, px: 1 }}>
+              <Button variant="text" size="small" sx={{ color: 'primary.main' }} onClick={toggleAllExport} sx={{ fontSize: 12, minHeight: 24, px: 1 }}>
                 {isAllExportSelected ? t.dataControl.deselectAll : t.dataControl.selectAll}
               </Button>
             </Stack>
@@ -530,9 +530,9 @@ function DataControlSection() {
                   onClick={() => toggleExport(key)}
                   sx={{ p: 1.5, borderRadius: 3, cursor: 'pointer', transition: 'background 0.15s', '&:hover': { bgcolor: 'action.hover' } }}
                 >
-                  <Stack direction="row" alignItems="center" gap={1.5}>
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                     <Checkbox checked={exportSelection[key]} size="small" />
-                    <Icon size={16} color="secondary" />
+                    <Icon size={16} sx={{ color: 'secondary.main' }} />
                     <Typography variant="body2" sx={{ flex: 1 }}>{label}</Typography>
                     <Chip label={count} size="small" variant="outlined" />
                   </Stack>
@@ -556,8 +556,8 @@ function DataControlSection() {
       {/* Import Section */}
       <SectionCard>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Upload size={16} color="primary" /> {t.dataControl.importData}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <Upload size={16} sx={{ color: 'primary.main' }} /> {t.dataControl.importData}
           </Stack>
         </SectionTitle>
         <SectionDescription>
@@ -592,17 +592,17 @@ function DataControlSection() {
             <input id="import-file-input" type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileInput} />
             <Upload size={40} color={isDragging ? 'primary' : 'text.secondary'} />
             <Typography variant="body2" sx={{ fontWeight: 500, mt: 1.5 }}>{t.dataControl.dropzone}</Typography>
-            <Typography variant="caption" color="text.secondary">{t.dataControl.supportedFormats}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dataControl.supportedFormats}</Typography>
           </Paper>
 
           {/* File Selected */}
           {importFile && (
             <Paper elevation={0} variant="outlined" sx={{ p: 1.5, borderRadius: 3, borderColor: 'primary.light' }}>
-              <Stack direction="row" alignItems="center" gap={1.5}>
-                <FileJson size={20} color="secondary" />
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
+                <FileJson size={20} sx={{ color: 'secondary.main' }} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>{importFile.name}</Typography>
-                  <Typography variant="caption" color="text.secondary">{(importFile.size / 1024).toFixed(1)} KB</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{(importFile.size / 1024).toFixed(1)} KB</Typography>
                 </Box>
                 <IconButton size="small" onClick={() => { setImportFile(null); setImportPreview(null); setImportData(null) }}>
                   <X size={16} />
@@ -614,15 +614,15 @@ function DataControlSection() {
           {/* Import Preview */}
           {importPreview && (
             <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-              <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1.5 }}>
-                <Eye size={16} color="secondary" />
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
+                <Eye size={16} sx={{ color: 'secondary.main' }} />
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>{t.dataControl.importPreviewTitle}</Typography>
               </Stack>
               <Grid container spacing={1}>
                 {importPreview.tasks > 0 && (
                   <Grid size={{ xs: 6 }}>
                     <Paper elevation={0} variant="outlined" sx={{ p: 1, borderRadius: 2 }}>
-                      <Typography variant="caption" color="text.secondary">{t.dataControl.tasks}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dataControl.tasks}</Typography>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {t.dataControl.itemCount.replace('{count}', String(importPreview.tasks))}
                       </Typography>
@@ -632,7 +632,7 @@ function DataControlSection() {
                 {importPreview.events > 0 && (
                   <Grid size={{ xs: 6 }}>
                     <Paper elevation={0} variant="outlined" sx={{ p: 1, borderRadius: 2 }}>
-                      <Typography variant="caption" color="text.secondary">{t.dataControl.events}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dataControl.events}</Typography>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {t.dataControl.itemCount.replace('{count}', String(importPreview.events))}
                       </Typography>
@@ -642,7 +642,7 @@ function DataControlSection() {
                 {importPreview.grocery > 0 && (
                   <Grid size={{ xs: 6 }}>
                     <Paper elevation={0} variant="outlined" sx={{ p: 1, borderRadius: 2 }}>
-                      <Typography variant="caption" color="text.secondary">{t.dataControl.grocery}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dataControl.grocery}</Typography>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {t.dataControl.itemCount.replace('{count}', String(importPreview.grocery))}
                       </Typography>
@@ -652,7 +652,7 @@ function DataControlSection() {
                 {importPreview.messages > 0 && (
                   <Grid size={{ xs: 6 }}>
                     <Paper elevation={0} variant="outlined" sx={{ p: 1, borderRadius: 2 }}>
-                      <Typography variant="caption" color="text.secondary">{t.dataControl.messages}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t.dataControl.messages}</Typography>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {t.dataControl.itemCount.replace('{count}', String(importPreview.messages))}
                       </Typography>
@@ -661,7 +661,7 @@ function DataControlSection() {
                 )}
               </Grid>
               <Divider sx={{ my: 1.5 }} />
-              <Typography variant="caption" color="primary" sx={{ fontWeight: 500 }}>
+              <Typography variant="caption" sx={{ color: 'primary.main' }} sx={{ fontWeight: 500 }}>
                 {isRTL ? 'الإجمالي' : 'Total'}: {t.dataControl.itemCount.replace('{count}', String(importPreview.total))}
               </Typography>
             </Paper>
@@ -696,8 +696,8 @@ function DataControlSection() {
       {/* Clear Data Section */}
       <SectionCard sx={{ borderColor: 'error.light' }}>
         <SectionTitle>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <AlertTriangle size={16} color="error" /> {t.dataControl.clearData}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={16} sx={{ color: 'error.main' }} /> {t.dataControl.clearData}
           </Stack>
         </SectionTitle>
         <SectionDescription>
@@ -707,13 +707,13 @@ function DataControlSection() {
         <Stack spacing={2}>
           <Alert severity="error" variant="outlined">
             <AlertTriangle size={16} />
-            <Typography variant="caption" color="error">{t.dataControl.clearWarning}</Typography>
+            <Typography variant="caption" sx={{ color: 'error.main' }}>{t.dataControl.clearWarning}</Typography>
           </Alert>
 
           <Box>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+            <Stack sx={{ flexDirection: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
               <Typography variant="caption">{t.dataControl.selectData}</Typography>
-              <Button variant="text" size="small" color="error" onClick={toggleAllClear} sx={{ fontSize: 12, minHeight: 24, px: 1 }}>
+              <Button variant="text" size="small" sx={{ color: 'error.main' }} onClick={toggleAllClear} sx={{ fontSize: 12, minHeight: 24, px: 1 }}>
                 {isAllClearSelected ? t.dataControl.deselectAll : t.dataControl.selectAll}
               </Button>
             </Stack>
@@ -727,11 +727,11 @@ function DataControlSection() {
                   onClick={() => toggleClear(key)}
                   sx={{ p: 1.5, borderRadius: 3, cursor: 'pointer', transition: 'background 0.15s', '&:hover': { bgcolor: 'action.hover' } }}
                 >
-                  <Stack direction="row" alignItems="center" gap={1.5}>
-                    <Checkbox checked={clearSelection[key]} size="small" color="error" />
-                    <Icon size={16} color="error" />
+                  <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
+                    <Checkbox checked={clearSelection[key]} size="small" sx={{ color: 'error.main' }} />
+                    <Icon size={16} sx={{ color: 'error.main' }} />
                     <Typography variant="body2" sx={{ flex: 1 }}>{label}</Typography>
-                    <Chip label={count} size="small" variant="outlined" color="error" />
+                    <Chip label={count} size="small" variant="outlined" sx={{ color: 'error.main' }} />
                   </Stack>
                 </Paper>
               ))}
@@ -740,7 +740,7 @@ function DataControlSection() {
 
           <Button
             variant="contained"
-            color="error"
+            sx={{ color: 'error.main' }}
             onClick={() => setClearConfirmOpen(true)}
             disabled={!Object.values(clearSelection).some(Boolean)}
             fullWidth
@@ -758,7 +758,7 @@ function DataControlSection() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setClearConfirmOpen(false)}>{t.common.cancel}</Button>
-              <Button color="error" variant="contained" onClick={handleClearConfirm}>{t.common.confirm}</Button>
+              <Button sx={{ color: 'error.main' }} variant="contained" onClick={handleClearConfirm}>{t.common.confirm}</Button>
             </DialogActions>
           </Dialog>
         </Stack>

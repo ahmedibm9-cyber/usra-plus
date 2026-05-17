@@ -1,53 +1,23 @@
-"use client"
+import React from 'react'
+import MuiAvatar from '@mui/material/Avatar'
 
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+interface AvatarProps {
+  children?: React.ReactNode
+  className?: string
+}
 
-import { cn } from "@/lib/utils"
-
-function Avatar({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
+export function Avatar({ children, className }: AvatarProps) {
   return (
-    <AvatarPrimitive.Root
-      data-slot="avatar"
-      className={cn(
-        "relative flex size-8 shrink-0 overflow-hidden rounded-full",
-        className
-      )}
-      {...props}
-    />
+    <MuiAvatar className={className}>
+      {children}
+    </MuiAvatar>
   )
 }
 
-function AvatarImage({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
-  return (
-    <AvatarPrimitive.Image
-      data-slot="avatar-image"
-      className={cn("aspect-square size-full", className)}
-      {...props}
-    />
-  )
+export function AvatarImage({ src, alt }: { src?: string; alt?: string }) {
+  return <MuiAvatar src={src} alt={alt} />
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
-  return (
-    <AvatarPrimitive.Fallback
-      data-slot="avatar-fallback"
-      className={cn(
-        "bg-muted flex size-full items-center justify-center rounded-full",
-        className
-      )}
-      {...props}
-    />
-  )
+export function AvatarFallback({ children }: { children: React.ReactNode }) {
+  return <MuiAvatar>{children}</MuiAvatar>
 }
-
-export { Avatar, AvatarImage, AvatarFallback }

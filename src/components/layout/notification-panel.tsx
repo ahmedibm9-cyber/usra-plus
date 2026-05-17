@@ -18,21 +18,7 @@ import {
   Paper,
   Tooltip,
 } from '@mui/material'
-import {
-  Notifications as BellIcon,
-  CheckBox,
-  CalendarMonth,
-  ShoppingCart,
-  Chat,
-  Group,
-  Error as ErrorIcon,
-  Check,
-  Delete,
-  Wifi,
-  WifiOff,
-  VolumeUp,
-  VolumeOff,
-} from '@mui/icons-material'
+import { Notifications as BellIcon, CheckBox, CalendarMonth, ShoppingCart, Chat, Group, Error as ErrorIcon, Check, Delete, Wifi, WifiOff, VolumeUp, VolumeOff } from '@mui/icons-material'
 import { toast } from 'sonner'
 import { useNotificationStore } from '@/stores/notification-store'
 import { useNotificationPreferencesStore } from '@/stores/notification-preferences-store'
@@ -430,7 +416,7 @@ function NotificationPanelInner() {
         >
           <Badge
             badgeContent={unreadCount > 9 ? '9+' : unreadCount}
-            color="primary"
+            sx={{ color: 'primary.main' }}
             sx={{
               '& .MuiBadge-badge': {
                 fontSize: '0.5625rem',

@@ -1,33 +1,26 @@
-"use client"
+import React from 'react'
+import MuiCollapsible from '@mui/material/Collapse'
 
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
-
-function Collapsible({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
+export function Collapsible({
+  children,
+  open,
+}: {
+  children: React.ReactNode
+  open?: boolean
+}) {
+  return <MuiCollapsible in={open}>{children}</MuiCollapsible>
 }
 
-function CollapsibleTrigger({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
-  return (
-    <CollapsiblePrimitive.CollapsibleTrigger
-      data-slot="collapsible-trigger"
-      {...props}
-    />
-  )
+export function CollapsibleTrigger({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode
+  onClick?: () => void
+}) {
+  return <div onClick={onClick}>{children}</div>
 }
 
-function CollapsibleContent({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
-  return (
-    <CollapsiblePrimitive.CollapsibleContent
-      data-slot="collapsible-content"
-      {...props}
-    />
-  )
+export function CollapsibleContent({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
 }
-
-export { Collapsible, CollapsibleTrigger, CollapsibleContent }
