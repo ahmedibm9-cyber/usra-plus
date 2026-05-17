@@ -286,3 +286,35 @@ Stage Summary:
 - Dev server works but gets OOM killed after first page compilation (8GB sandbox limitation)
 - Auto-restart script keeps server available
 - App will work fine on Vercel (no memory constraints)
+
+---
+Task ID: 7
+Agent: mui-improvement-agent
+Task: MUI Design System improvements and UI polish
+
+Work Log:
+- Audited all MUI icon imports across the entire codebase — all `@mui/icons-material` imports are valid MUI icon names (no Lucide names mistakenly imported from MUI)
+- Verified all Lucide icon usage in settings tabs uses correct `size={N}` prop syntax (not MUI `fontSize`)
+- Verified all MUI icon usage in auth/dashboard/layout pages uses correct `sx={{ fontSize: N }}` prop syntax (not Lucide `size`)
+- Found and fixed 7 broken/non-functional CSS animation usages in MUI `sx` props that referenced `@keyframes` without inline definitions:
+  1. `terms-modal.tsx:456` — `animation: 'bounce 1s infinite'` had no `@keyframes bounce` defined. Added inline `@keyframes bounce` to the sx prop.
+  2. `ai-summary-widget.tsx:333` — `animation: 'pulse 2s infinite'` on AutoAwesome icon relied on global CSS. Added inline `@keyframes pulse` for self-contained animation.
+  3. `ai-summary-widget.tsx:388` — `animation: 'pulse 1s infinite'` on cursor blink had no inline keyframes. Added `@keyframes pulse`.
+  4. `meal-plan-page.tsx:621` — `animation: 'pulse 2s infinite'` on AutoAwesome loading icon. Added inline `@keyframes pulse`.
+  5. `chat-page.tsx:1095-1097` — Three typing indicator dots with `animation: 'pulse 1.2s infinite'`. Added inline `@keyframes pulse`.
+  6. `chat-page.tsx:1181` — Recording indicator dot `animation: 'pulse 1.5s infinite'`. Added inline `@keyframes pulse`.
+  7. `chat-page.tsx:1223` — Send button spinner `animation: 'spin 1s linear infinite'` had no inline keyframes. Added inline `@keyframes spin`.
+  8. `onboarding-flow.tsx:195` — Typing cursor `animation: 'blink 0.5s infinite alternate'` had no inline keyframes. Added inline `@keyframes blink`.
+- Verified auth pages (login-form, signup-form, forgot-password-form, otp-verification-form) all use proper MUI components: Card, TextField with proper validation, InputAdornment with MUI icons, proper `dir={isRTL ? 'rtl' : 'ltr'}` for RTL support
+- Verified dashboard page uses proper MUI Grid/Container layout, DashCard wrapping (Paper + motion), consistent elevation, and proper Recharts integration
+- Verified admin pages use Lucide icons correctly with Tailwind/CSS approach (not MUI), which is consistent with their Tailwind-heavy design system
+- Verified settings page and all tabs use proper MUI Paper (via SectionCard), Grid, Stack, Typography, TextField, Switch, Dialog components
+- Lint passes with zero errors after all changes
+
+Stage Summary:
+- No broken MUI icon imports found — previous Task 1 fixes were comprehensive
+- Fixed 8 CSS animation references in MUI `sx` props that were missing `@keyframes` definitions — these animations would silently fail (no animation rendered)
+- All icon usage is correct: Lucide icons use `size={N}`, MUI icons use `sx={{ fontSize: N }}`
+- All auth pages have proper RTL support via `dir` attribute
+- Dashboard, settings, and admin pages use proper MUI component patterns
+- Zero lint errors

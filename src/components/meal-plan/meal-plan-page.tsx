@@ -618,7 +618,7 @@ function AISuggestionsDialog({
         <Stack spacing={1.5}>
           {isLoading ? (
             <Stack alignItems="center" sx={{ py: 4 }}>
-              <AutoAwesome sx={{ fontSize: 24, color: 'primary.main', animation: 'pulse 2s infinite' }} />
+              <AutoAwesome sx={{ fontSize: 24, color: 'primary.main', animation: 'pulse 2s infinite', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } } }} />
               <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>{isRTL ? 'جاري التحميل...' : 'Loading...'}</Typography>
             </Stack>
           ) : (

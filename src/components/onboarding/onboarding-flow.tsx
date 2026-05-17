@@ -192,7 +192,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
       <Box sx={{ height: 32, mb: 4 }}>
         <Typography variant="h6" color="text.secondary" fontWeight={500}>
           {displayedText}
-          <Box component="span" sx={{ display: 'inline-block', width: 2, height: 20, bgcolor: 'primary.main', ml: 0.5, verticalAlign: 'middle', animation: 'blink 0.5s infinite alternate' }} />
+          <Box component="span" sx={{ display: 'inline-block', width: 2, height: 20, bgcolor: 'primary.main', ml: 0.5, verticalAlign: 'middle', animation: 'blink 0.5s infinite alternate', '@keyframes blink': { from: { opacity: 1 }, to: { opacity: 0 } } }} />
         </Typography>
       </Box>
 

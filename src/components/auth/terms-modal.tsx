@@ -453,7 +453,7 @@ export function TermsModal() {
               spacing={0.75}
               sx={{ py: 0.5, color: 'text.secondary', alignItems: 'center', justifyContent: 'center' }}
             >
-              <ExpandMore sx={{ fontSize: 14, animation: 'bounce 1s infinite' }} />
+              <ExpandMore sx={{ fontSize: 14, animation: 'bounce 1s infinite', '@keyframes bounce': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } } }} />
               <Typography variant="caption">
                 {isRTL ? 'مرر للأسفل لقراءة المزيد' : 'Scroll down to read more'}
               </Typography>

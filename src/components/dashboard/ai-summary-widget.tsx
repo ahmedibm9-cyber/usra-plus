@@ -330,7 +330,7 @@ export function AISummaryWidget({
                   borderRadius: 1.5,
                   background: `linear-gradient(135deg, ${alpha('#0D6B58', 0.15)}, ${alpha('var(--accent)', 0.15)})`,
                 }}>
-                  <AutoAwesome sx={{ fontSize: 16, color: 'secondary.main', animation: 'pulse 2s infinite' }} />
+                  <AutoAwesome sx={{ fontSize: 16, color: 'secondary.main', animation: 'pulse 2s infinite', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } } }} />
                 </Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   {t.dashboard.familyInsights}
@@ -387,6 +387,7 @@ export function AISummaryWidget({
                       display: 'inline-block', width: 2, height: 14, ml: 0.25,
                       bgcolor: 'primary.main', animation: 'pulse 1s infinite',
                       verticalAlign: 'middle',
+                      '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } },
                     }} />
                   )}
                 </Typography>
