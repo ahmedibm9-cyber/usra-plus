@@ -67,10 +67,10 @@ function planConfig(slug: string) {
   }
 }
 
-function statusChipProps(status: string): { label: string; color: 'default' | 'success' | 'error' | 'warning' } {
+function statusChipProps(status: string): { label: string; color: 'default' | 'success' | 'error' | 'warning' | 'info' | 'primary' } {
   switch (status) {
     case 'pending': return { label: 'Pending', color: 'success' }
-    case 'used': return { label: 'Used', color: 'primary' }
+    case 'used': return { label: 'Used', color: 'info' }
     case 'expired': return { label: 'Expired', color: 'default' }
     case 'revoked': return { label: 'Revoked', color: 'error' }
     default: return { label: status, color: 'default' }
@@ -222,10 +222,10 @@ function GenerateOtpDialog({
           <Box>
             <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Plan *</Typography>
             <Grid container spacing={1}>
-              {['pro', 'family_plus', 'max'].map(plan => {
+              {['pro', 'family_plus', 'max', 'ultimate'].map(plan => {
                 const { color, Icon } = planConfig(plan)
                 return (
-                  <Grid key={plan} size={{ xs: 4 }}>
+                  <Grid key={plan} size={{ xs: 3 }}>
                     <Button
                       fullWidth
                       variant={planSlug === plan ? 'contained' : 'outlined'}
@@ -265,7 +265,7 @@ function GenerateOtpDialog({
               size="small"
               onClick={handleGenerate}
               disabled={isGenerating || !selectedUserId}
-              startIcon={isGenerating ? <Loader2 size={14} sx={{ animation: 'spin 1s linear infinite' }} /> : <KeyRound size={14} />}
+              startIcon={isGenerating ? <Loader2 size={14} className="animate-spin" /> : <KeyRound size={14} />}
             >
               Generate OTP
             </Button>
@@ -341,7 +341,7 @@ function OtpRow({
             disabled={isRevoking}
             title="Revoke OTP"
           >
-            {isRevoking ? <Loader2 size={14} sx={{ animation: 'spin 1s linear infinite' }} /> : <Ban size={14} />}
+            {isRevoking ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
           </IconButton>
         )}
       </Stack>

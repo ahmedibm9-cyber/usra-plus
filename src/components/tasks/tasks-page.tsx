@@ -43,7 +43,24 @@ import {
   Fab,
   InputAdornment,
 } from '@mui/material'
-import { Add, Search, SwapVert, CalendarToday, CheckCircle, RadioButtonUnchecked, AccessTime, Edit, Delete, ChatBubbleOutline, Send, PlaylistAddCheck, GridView, ViewList, Warning, Person } from '@mui/icons-material'
+import {
+  Add,
+  Search,
+  SwapVert,
+  CalendarToday,
+  CheckCircle,
+  RadioButtonUnchecked,
+  AccessTime,
+  Edit,
+  Delete,
+  ChatBubbleOutlined,
+  Send,
+  PlaylistAddCheck,
+  GridView,
+  ViewList,
+  Warning,
+  Person,
+} from '@mui/icons-material'
 
 // ─── Priority Config ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<TaskPriority, { chipColor: 'error' | 'primary' | 'secondary' | 'success'; label: string }> = {

@@ -36,16 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Sentry
+.env.sentry-build-plugin
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-<<<<<<< HEAD
-local.env*
-local-config*
-=======
 local-*
->>>>>>> f7d082d (f4e04d7a-c95e-42ec-88f1-2b7f13773bfa)
 .claude
 .z-ai-config
 *.log

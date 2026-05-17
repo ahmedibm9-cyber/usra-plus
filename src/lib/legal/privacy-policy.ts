@@ -43,7 +43,7 @@ For the purposes of the PDPL, USRA PLUS is the "Controller" as defined under Art
 - **Family Data:** Family names, descriptions, and invite codes you create or join.
 - **Content:** Tasks, calendar events, grocery lists, chat messages, chore assignments, budget entries, meal plans, and milestones you create within the Service.
 - **Consent Records:** Records of your consent to our terms, privacy policy, marketing communications, and cookies, including timestamps and IP addresses.
-- **Payment Information:** Subscription plan selections and transaction records. We do not store credit card numbers — payment processing is handled by PCI-DSS compliant payment processors.
+- **Payment Information:** Subscription plan selections and transaction records. We do not store credit card numbers — payment processing is handled by RevenueCat, which is PCI-DSS compliant.
 
 ### 3.2 Data Collected Automatically
 
@@ -55,7 +55,7 @@ For the purposes of the PDPL, USRA PLUS is the "Controller" as defined under Art
 ### 3.3 Data from Third Parties
 
 - **Authentication Data:** When you sign in using third-party providers, we receive your email and basic profile information.
-- **Payment Data:** Subscription status and transaction confirmations from our payment processor.
+- **Payment Data:** Subscription status and transaction confirmations from RevenueCat.
 
 ## 4. Legal Basis for Processing (GDPR)
 
@@ -91,7 +91,7 @@ We use your personal data to:
 
 We do not sell your personal data. We may share data with:
 
-- **Service Providers:** Payment processors, Sentry (error monitoring), and cloud hosting providers.
+- **Service Providers:** RevenueCat (subscriptions), Sentry (error monitoring), and cloud hosting providers.
 - **Family Members:** Data you choose to share within family groups (tasks, events, messages, etc.).
 - **Legal Authorities:** When required by law, court order, or regulatory request.
 - **Business Transfers:** In connection with a merger, acquisition, or sale of assets.

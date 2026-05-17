@@ -1069,10 +1069,10 @@ export function ChatPage() {
                     <Box sx={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main', border: 2, borderColor: 'background.paper' }} />
                   </Box>
                   <Paper variant="outlined" sx={{ px: 2, py: 1, borderRadius: 4, borderBottomLeftRadius: 1, display: 'flex', alignItems: 'center', gap: 1, boxShadow: 1 }}>
-                    <Stack sx={{ flexDirection: 'row' }} spacing={0.5}>
-                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite' }} />
-                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite 0.2s' }} />
-                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite 0.4s' }} />
+                    <Stack direction="row" spacing={0.5}>
+                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.4 } } }} />
+                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite 0.2s', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.4 } } }} />
+                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', animation: 'pulse 1.2s infinite 0.4s', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.4 } } }} />
                     </Stack>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                       {typingUsers[0].userName} {t.chat.isTyping}
@@ -1155,8 +1155,8 @@ export function ChatPage() {
               <IconButton onClick={handleCancelRecording} aria-label={t.chat.cancelRecording} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.main' + '15' } }}>
                 <Close />
               </IconButton>
-              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ flexShrink: 0 }}>
-                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'error.main', animation: 'pulse 1.5s infinite' }} />
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'error.main', animation: 'pulse 1.5s infinite', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.4 } } }} />
                 <Typography variant="body2" fontWeight={500}>{t.chat.recording}</Typography>
               </Stack>
               <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
@@ -1198,7 +1198,7 @@ export function ChatPage() {
             </IconButton>
             {showSendButton ? (
               <IconButton onClick={handleSendMessage} disabled={isSending} aria-label="Send message" size="small" sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, '&.Mui-disabled': { opacity: 0.5 } }}>
-                {isSending ? <Box sx={{ width: 16, height: 16, border: 2, borderColor: 'divider', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Send sx={{ fontSize: 16 }} />}
+                {isSending ? <Box sx={{ width: 16, height: 16, border: 2, borderColor: 'divider', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite', '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }} /> : <Send sx={{ fontSize: 16 }} />}
               </IconButton>
             ) : (
               <IconButton onClick={handleStartRecording} aria-label="Record voice message" size="small" sx={{ bgcolor: 'primary.main', color: 'white', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' } }}>

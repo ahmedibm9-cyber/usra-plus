@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   {
@@ -107,11 +106,16 @@ const nextConfig: NextConfig = {
   ],
 };
 
+// Sentry withSentryConfig is disabled in dev to reduce memory overhead (OOM issues)
+// It will be re-enabled for production builds via Vercel
+const { withSentryConfig } = process.env.VERCEL
+  ? require("@sentry/nextjs")
+  : { withSentryConfig: (c: NextConfig) => c };
+
 export default withSentryConfig(nextConfig, {
-  org: 'plus-studios',
-  project: 'javascript-nextjs',
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: !process.env.CI,
+  silent: true,
+  org: "plus-studios",
+  project: "javascript-nextjs",
   sourcemaps: {
     disable: true,
   },

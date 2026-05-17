@@ -1,8 +1,35 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { Search, Check, Home, X, Download } from '@mui/icons-material'
-import { Plus, Trash2, ShoppingBag, Apple, Milk, Fish, Croissant, CupSoda, Cookie, Snowflake, Package, Sparkles, GripVertical, ArrowUpDown, ChefHat, Clock, Users, RefreshCw, Copy, Share2, FileText, Trash } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Trash2,
+  ShoppingBag,
+  Check,
+  Apple,
+  Milk,
+  Fish,
+  Croissant,
+  CupSoda,
+  Cookie,
+  Snowflake,
+  Home,
+  Package,
+  X,
+  Sparkles,
+  GripVertical,
+  ArrowUpDown,
+  ChefHat,
+  Clock,
+  Users,
+  RefreshCw,
+  Download,
+  Copy,
+  Share2,
+  FileText,
+  Trash,
+} from 'lucide-react'
 import {
   Container,
   Stack,
@@ -240,7 +267,7 @@ export function GroceryPage() {
         <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
           <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${theme.palette.primary.main}15`, border: `1px solid ${theme.palette.primary.main}30` }}>
-              <ShoppingBag sx={{ color: 'primary.main' }} />
+              <ShoppingBag size={24} style={{ color: theme.palette.primary.main }} />
             </Box>
             <Box>
               <Typography variant="h5" fontWeight={700}>{t.grocery.title}</Typography>
@@ -249,7 +276,7 @@ export function GroceryPage() {
           </Stack>
           <Stack sx={{ flexDirection: 'row' }} spacing={1} alignItems="center">
             <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel><Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}><ArrowUpDown sx={{ fontSize: 12 }} /><Typography variant="caption">Sort</Typography></Stack></InputLabel>
+              <InputLabel><Stack direction="row" alignItems="center" spacing={0.5}><ArrowUpDown size={12} /><Typography variant="caption">Sort</Typography></Stack></InputLabel>
               <Select value={sortBy} label="Sort" onChange={(e) => setSortBy(e.target.value as typeof sortBy)}>
                 <MenuItem value="created_at">Created Date</MenuItem>
                 <MenuItem value="name">Name</MenuItem>
@@ -257,7 +284,7 @@ export function GroceryPage() {
                 <MenuItem value="manual">Manual Order</MenuItem>
               </Select>
             </FormControl>
-            <Button variant="contained" startIcon={<Plus sx={{ fontSize: 16 }} />} onClick={() => setShowAddItem(true)}>
+            <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setShowAddItem(true)}>
               {t.grocery.addItem}
             </Button>
           </Stack>
@@ -275,9 +302,9 @@ export function GroceryPage() {
         {/* Recent Items */}
         {recentItems.length > 0 && (
           <Stack spacing={1}>
-            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
-              <Sparkles sx={{ fontSize: 14, color: 'secondary.main' }} />
-              <Typography variant="caption" fontWeight={500} sx={{ color: 'text.secondary' }}>Quick Add</Typography>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Sparkles size={14} style={{ color: theme.palette.secondary.main }} />
+              <Typography variant="caption" fontWeight={500} color="text.secondary">Quick Add</Typography>
             </Stack>
             <Stack sx={{ flexDirection: 'row' }} spacing={0.5} flexWrap="wrap" useFlexGap>
               {recentItems.map((recent) => (
@@ -295,7 +322,7 @@ export function GroceryPage() {
           size="small"
           fullWidth
           sx={{ '& .MuiInputAdornment-root': { mr: 1 } }}
-          InputProps={{ startAdornment: <Search sx={{ fontSize: 18, color: 'text.secondary', mr: 1 }} /> }}
+          InputProps={{ startAdornment: <Search size={18} style={{ color: theme.palette.text.secondary, marginRight: 4 }} /> }}
         />
 
         {/* Category Tabs */}
@@ -307,7 +334,7 @@ export function GroceryPage() {
             return (
               <Chip
                 key={cat.key}
-                icon={<Icon sx={{ fontSize: 14 }} />}
+                icon={<Icon size={14} />}
                 label={`${cat.label} (${count})`}
                 size="small"
                 variant={isActive ? 'filled' : 'outlined'}
@@ -339,8 +366,8 @@ export function GroceryPage() {
               </Stack>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>x{item.quantity}</Typography>
               <Chip label={item.category ? t.grocery.categories[item.category as keyof typeof t.grocery.categories] ?? item.category : 'Other'} size="small" color={getCategoryChipColor(item.category)} variant="outlined" sx={{ fontSize: 10, height: 20 }} />
-              <IconButton size="small" sx={{ color: 'error.main' }} onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
-                <Trash2 sx={{ fontSize: 14 }} />
+              <IconButton size="small" color="error" onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
+                <Trash2 size={14} />
               </IconButton>
             </Paper>
           ))}
@@ -358,9 +385,9 @@ export function GroceryPage() {
                 <Paper key={item.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, borderRadius: 2, opacity: 0.6 }}>
                   <Checkbox checked={item.checked} onChange={() => handleToggleChecked(item)} size="small" />
                   <Typography variant="body2" sx={{ flex: 1, textDecoration: 'line-through', color: 'text.disabled' }} noWrap>{item.name}</Typography>
-                  <Typography variant="caption" sx={{ color: 'text.disabled' }}>x{item.quantity}</Typography>
-                  <IconButton size="small" sx={{ color: 'error.main' }} onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
-                    <Trash2 sx={{ fontSize: 14 }} />
+                  <Typography variant="caption" color="text.disabled">x{item.quantity}</Typography>
+                  <IconButton size="small" color="error" onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id}>
+                    <Trash2 size={14} />
                   </IconButton>
                 </Paper>
               ))}
@@ -369,8 +396,8 @@ export function GroceryPage() {
 
           {filteredItems.length === 0 && (
             <Stack alignItems="center" sx={{ py: 6 }}>
-              <ShoppingBag sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>No items found</Typography>
+              <ShoppingBag size={48} style={{ color: theme.palette.text.disabled, marginBottom: 4 }} />
+              <Typography variant="body2" color="text.secondary">No items found</Typography>
             </Stack>
           )}
         </Stack>

@@ -1,8 +1,31 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { Wallet, ChevronLeft, ChevronRight, Home, Search, TrendingDown, TrendingUp, Receipt } from '@mui/icons-material'
-import { Plus, UtensilsCrossed, Car, GraduationCap, HeartPulse, Gamepad2, ShoppingBag, Zap, MoreHorizontal, Trash2, CalendarDays, ArrowUpDown, Edit3, Coins, HandCoins } from 'lucide-react'
+import {
+  Wallet,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  UtensilsCrossed,
+  Home,
+  Car,
+  GraduationCap,
+  HeartPulse,
+  Gamepad2,
+  ShoppingBag,
+  Zap,
+  MoreHorizontal,
+  Search,
+  Trash2,
+  CalendarDays,
+  ArrowUpDown,
+  Edit3,
+  TrendingDown,
+  TrendingUp,
+  Coins,
+  Receipt,
+  HandCoins,
+} from 'lucide-react'
 import {
   Container,
   Stack,
@@ -158,8 +181,8 @@ export default function BudgetPage() {
         {/* Header */}
         <Stack sx={{ flexDirection: 'row' }} justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={2}>
           <Box>
-            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
-              <Wallet sx={{ color: 'primary.main' }} />
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Wallet style={{ color: theme.palette.primary.main }} />
               <Typography variant="h5" fontWeight={700}>{t.budget.title}</Typography>
             </Stack>
             <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mt: 1 }}>
@@ -168,9 +191,9 @@ export default function BudgetPage() {
               <IconButton size="small" onClick={() => navigateMonth(1)}>{isRTL ? <ChevronLeft /> : <ChevronRight />}</IconButton>
             </Stack>
           </Box>
-          <Stack sx={{ flexDirection: 'row' }} spacing={1}>
-            {budgetMonth && <Button variant="outlined" size="small" startIcon={<Edit3 sx={{ fontSize: 14 }} />} onClick={openSetBudget}>{t.budget.editBudget}</Button>}
-            <Button variant="contained" size="small" startIcon={<Plus sx={{ fontSize: 14 }} />} onClick={() => { if (!budgetMonth) openSetBudget(); else setShowAddExpense(true) }}>
+          <Stack direction="row" spacing={1}>
+            {budgetMonth && <Button variant="outlined" size="small" startIcon={<Edit3 size={14} />} onClick={openSetBudget}>{t.budget.editBudget}</Button>}
+            <Button variant="contained" size="small" startIcon={<Plus size={14} />} onClick={() => { if (!budgetMonth) openSetBudget(); else setShowAddExpense(true) }}>
               {budgetMonth ? t.budget.addExpense : t.budget.setBudget}
             </Button>
           </Stack>
@@ -179,7 +202,7 @@ export default function BudgetPage() {
         {!budgetMonth ? (
           <Stack alignItems="center" sx={{ py: 8 }}>
             <Box sx={{ width: 80, height: 80, borderRadius: 3, bgcolor: theme.palette.action.hover, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-              <Wallet sx={{ fontSize: 40, color: 'text.disabled' }} />
+              <Wallet size={40} style={{ color: theme.palette.text.disabled }} />
             </Box>
             <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{t.budget.noBudget}</Typography>
             <Button variant="contained" startIcon={<Coins />} onClick={openSetBudget} sx={{ mt: 1 }}>{t.budget.setBudget}</Button>
@@ -195,10 +218,10 @@ export default function BudgetPage() {
                 </Stack>
                 <Stack sx={{ flexDirection: 'row' }} spacing={2} flexWrap="wrap" useFlexGap sx={{ flex: 1, width: '100%' }}>
                   {[
-                    { label: t.budget.totalBudget, value: budgetMonth.totalBudget.toLocaleString(), icon: <Coins sx={{ fontSize: 20 }} />, color: 'primary.main' },
-                    { label: t.budget.totalSpent, value: totalSpent.toLocaleString(), icon: <TrendingDown sx={{ fontSize: 20 }} />, color: 'warning.main', sub: `${spentPercent}% ${t.budget.ofBudget}` },
-                    { label: t.budget.remaining, value: Math.abs(remaining).toLocaleString(), icon: remaining >= 0 ? <TrendingUp sx={{ fontSize: 20 }} /> : <TrendingDown sx={{ fontSize: 20 }} />, color: remaining >= 0 ? 'success.main' : 'error.main', sub: remaining < 0 ? t.budget.overBudget : undefined },
-                    { label: t.budget.transactions, value: expenses.length, icon: <Receipt sx={{ fontSize: 20 }} />, color: 'primary.main' },
+                    { label: t.budget.totalBudget, value: budgetMonth.totalBudget.toLocaleString(), icon: <Coins size={20} />, color: 'primary.main' },
+                    { label: t.budget.totalSpent, value: totalSpent.toLocaleString(), icon: <TrendingDown size={20} />, color: 'warning.main', sub: `${spentPercent}% ${t.budget.ofBudget}` },
+                    { label: t.budget.remaining, value: Math.abs(remaining).toLocaleString(), icon: remaining >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />, color: remaining >= 0 ? 'success.main' : 'error.main', sub: remaining < 0 ? t.budget.overBudget : undefined },
+                    { label: t.budget.transactions, value: expenses.length, icon: <Receipt size={20} />, color: 'primary.main' },
                   ].map((stat) => (
                     <Paper key={stat.label} variant="outlined" sx={{ flex: '1 1 120px', p: 2, textAlign: 'center' }}>
                       <Box sx={{ color: stat.color, mb: 1, display: 'flex', justifyContent: 'center' }}>{stat.icon}</Box>
@@ -225,7 +248,7 @@ export default function BudgetPage() {
                       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                         <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ mb: 1.5 }}>
                           <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: `${theme.palette[cat.chipColor].main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Icon sx={{ fontSize: 16, color: `${cat.chipColor}.main` }} />
+                            <Icon size={16} style={{ color: theme.palette[cat.chipColor].main }} />
                           </Box>
                           <Typography variant="body2" fontWeight={500} noWrap>{t.budget[cat.key as keyof typeof t.budget]}</Typography>
                         </Stack>
@@ -264,14 +287,14 @@ export default function BudgetPage() {
               </Stack>
 
               <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t.budget.searchExpenses} size="small" fullWidth sx={{ mb: 2 }}
-                InputProps={{ startAdornment: <Search sx={{ fontSize: 16, color: 'text.secondary', mr: 1 }} /> }}
+                InputProps={{ startAdornment: <Search size={16} style={{ color: theme.palette.text.secondary, marginRight: 4 }} /> }}
               />
 
               {filteredExpenses.length === 0 ? (
                 <Stack alignItems="center" sx={{ py: 6 }}>
-                  <HandCoins sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t.budget.noExpenses}</Typography>
-                  <Button variant="contained" size="small" startIcon={<Plus sx={{ fontSize: 14 }} />} onClick={() => setShowAddExpense(true)} sx={{ mt: 2 }}>{t.budget.addExpense}</Button>
+                  <HandCoins size={48} style={{ color: theme.palette.text.disabled, marginBottom: 4 }} />
+                  <Typography variant="body2" color="text.secondary">{t.budget.noExpenses}</Typography>
+                  <Button variant="contained" size="small" startIcon={<Plus size={14} />} onClick={() => setShowAddExpense(true)} sx={{ mt: 2 }}>{t.budget.addExpense}</Button>
                 </Stack>
               ) : (
                 <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
@@ -283,7 +306,7 @@ export default function BudgetPage() {
                       return (
                         <Paper key={expense.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, borderRadius: 2, '&:hover': { bgcolor: theme.palette.action.hover } }}>
                           <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${theme.palette[catConfig.chipColor].main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <CatIcon sx={{ fontSize: 20, color: `${catConfig.chipColor}.main` }} />
+                            <CatIcon size={20} style={{ color: theme.palette[catConfig.chipColor].main }} />
                           </Box>
                           <Stack sx={{ flex: 1, minWidth: 0 }}>
                             <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
@@ -298,9 +321,9 @@ export default function BudgetPage() {
                               {expense.notes && <><Typography variant="caption" sx={{ color: 'text.secondary' }}>·</Typography><Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap sx={{ maxWidth: 100 }}>{expense.notes}</Typography></>}
                             </Stack>
                           </Stack>
-                          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }} sx={{ flexShrink: 0 }}>
-                            <Typography variant="body2" fontWeight={600}>{expense.amount.toLocaleString()}<Typography variant="caption" sx={{ color: 'text.secondary' }} sx={{ ml: 0.25 }}>{t.budget.currency}</Typography></Typography>
-                            <IconButton size="small" sx={{ color: 'error.main' }} onClick={() => setDeleteConfirmId(expense.id)}><Trash2 sx={{ fontSize: 14 }} /></IconButton>
+                          <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+                            <Typography variant="body2" fontWeight={600}>{expense.amount.toLocaleString()}<Typography variant="caption" color="text.secondary" sx={{ ml: 0.25 }}>{t.budget.currency}</Typography></Typography>
+                            <IconButton size="small" color="error" onClick={() => setDeleteConfirmId(expense.id)}><Trash2 size={14} /></IconButton>
                           </Stack>
                         </Paper>
                       )
@@ -326,7 +349,7 @@ export default function BudgetPage() {
                     const Icon = cat.icon
                     const isSelected = expenseForm.category === cat.key
                     return (
-                      <Chip key={cat.key} icon={<Icon sx={{ fontSize: 14 }} />} label={t.budget[cat.key as keyof typeof t.budget]} variant={isSelected ? 'filled' : 'outlined'} color={cat.chipColor} onClick={() => setExpenseForm((p) => ({ ...p, category: cat.key }))} sx={{ cursor: 'pointer' }} />
+                      <Chip key={cat.key} icon={<Icon size={14} />} label={t.budget[cat.key as keyof typeof t.budget]} variant={isSelected ? 'filled' : 'outlined'} color={cat.chipColor} onClick={() => setExpenseForm((p) => ({ ...p, category: cat.key }))} sx={{ cursor: 'pointer' }} />
                     )
                   })}
                 </Stack>
@@ -353,13 +376,13 @@ export default function BudgetPage() {
           <DialogContent>
             <Stack spacing={2} sx={{ pt: 1 }}>
               <TextField label={`${t.budget.totalBudget} (${t.budget.currency})`} type="number" value={budgetForm.totalBudget} onChange={(e) => setBudgetForm((p) => ({ ...p, totalBudget: e.target.value }))} placeholder="12000" size="small" fullWidth />
-              <Button variant="outlined" size="small" fullWidth startIcon={<Zap sx={{ fontSize: 14 }} />} onClick={handleAutoDistribute} disabled={!budgetForm.totalBudget}>{t.budget.autoDistribute}</Button>
+              <Button variant="outlined" size="small" fullWidth startIcon={<Zap size={14} />} onClick={handleAutoDistribute} disabled={!budgetForm.totalBudget}>{t.budget.autoDistribute}</Button>
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon
                 return (
                   <Stack key={cat.key} direction="row" alignItems="center" spacing={1.5}>
                     <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: `${theme.palette[cat.chipColor].main}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon sx={{ fontSize: 16, color: `${cat.chipColor}.main` }} />
+                      <Icon size={16} style={{ color: theme.palette[cat.chipColor].main }} />
                     </Box>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }} sx={{ minWidth: 80 }}>{t.budget[cat.key as keyof typeof t.budget]}</Typography>
                     <TextField type="number" value={budgetForm[cat.key]} onChange={(e) => setBudgetForm((p) => ({ ...p, [cat.key]: e.target.value }))} placeholder="0" size="small" fullWidth />

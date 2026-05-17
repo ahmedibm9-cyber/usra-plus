@@ -48,10 +48,17 @@ interface SubscriptionState {
   trialEnd: string | null
   isLoading: boolean
   lastFetched: number | null
+  // RevenueCat integration
+  isRevenueCatPro: boolean
+  revenuecatEntitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>
   // Setters
   setPlan: (plan: SubscriptionPlan) => void
   fetchPlanFromServer: (userId: string) => Promise<void>
-  // Tier checks — use resolveEffectivePlan
+  // RevenueCat integration
+  setRevenueCatPro: (isPro: boolean) => void
+  setRevenueCatEntitlements: (entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>) => void
+  syncWithRevenueCat: (isPro: boolean, entitlements: Record<string, { isActive: boolean; willRenew: boolean; productIdentifier: string }>, plan?: SubscriptionPlan) => void
+  // Tier checks — use resolveEffectivePlan instead of raw isRevenueCatPro bypass
   isPro: () => boolean
   isPremium: () => boolean
   isFamilyPlus: () => boolean
@@ -88,6 +95,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       trialEnd: null,
       isLoading: false,
       lastFetched: null,
+      isRevenueCatPro: false,
+      revenuecatEntitlements: {},
 
       setPlan: (plan) => set({ plan }),
 
@@ -119,6 +128,37 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         } finally {
           set({ isLoading: false })
         }
+      },
+
+      // RevenueCat integration methods
+      setRevenueCatPro: (isPro) => set({ isRevenueCatPro: isPro }),
+
+      setRevenueCatEntitlements: (entitlements) => set({ revenuecatEntitlements: entitlements }),
+
+      syncWithRevenueCat: (isPro, entitlements, plan) => {
+        const updates: Partial<SubscriptionState> = {
+          isRevenueCatPro: isPro,
+          revenuecatEntitlements: entitlements,
+        }
+        // If RevenueCat provides a specific plan (mapped from product identifier), use it
+        if (isPro && plan) {
+          updates.plan = plan
+        } else if (isPro) {
+          // If RevenueCat says user is pro but no specific plan is given,
+          // only upgrade to 'pro' (the lowest paid tier), NOT to ultimate/max.
+          // This prevents the old bug where isRevenueCatPro bypassed all limits.
+          const currentPlan = get().plan
+          if (currentPlan === 'free') {
+            updates.plan = 'pro'
+          }
+          // If the user already has a higher plan from server data, keep it
+        }
+        // If RevenueCat says user is not pro, and the current plan is pro-level,
+        // the RevenueCat data is the source of truth for revocation
+        if (!isPro && ['pro', 'family_plus', 'max', 'ultimate'].includes(get().plan)) {
+          updates.plan = 'free'
+        }
+        set(updates)
       },
 
       // ─── Tier Checks ──────────────────────────────────────────────────────

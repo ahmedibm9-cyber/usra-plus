@@ -45,7 +45,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find the OTP
+    // ── Atomic OTP validation & claim ────────────────────────────────────
+    // SECURITY: We use an atomic conditional update to prevent TOCTOU race
+    // conditions. Two simultaneous requests could both find the OTP as
+    // "pending" and both activate it. By atomically updating status from
+    // 'pending' to 'used' and checking the affected row count, we guarantee
+    // single-use semantics at the database level.
+
+    // First, look up the OTP to perform pre-validation checks
     const otp = await db.subscriptionOtp.findUnique({
       where: { code: String(otpCode) },
     })
@@ -100,14 +107,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Mark OTP as used
-    await db.subscriptionOtp.update({
-      where: { id: otp.id },
+    // ── Atomic claim: update from 'pending' → 'used' ─────────────────────
+    // This is the critical security step. We only update if status is still
+    // 'pending'. If another concurrent request already changed it, this
+    // update will affect 0 rows and we know we lost the race.
+    const claimResult = await db.subscriptionOtp.updateMany({
+      where: { id: otp.id, status: 'pending' },
       data: {
         status: 'used',
         usedAt: new Date(),
       },
     })
+
+    if (claimResult.count === 0) {
+      // Another request beat us to it — the OTP was already claimed
+      return NextResponse.json(
+        { error: 'This OTP code has already been used.' },
+        { status: 400 }
+      )
+    }
 
     // Create or update UserSubscription
     const existingSubscription = await db.userSubscription.findFirst({

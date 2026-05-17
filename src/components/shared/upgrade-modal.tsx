@@ -21,14 +21,13 @@ import {
  ShieldCheck,
  BarChart3,
  MessageSquare,
- Loader2,
- KeyRound,
 } from 'lucide-react'
 import { useI18n } from '@/i18n/use-translation'
 import { useSubscriptionStore } from '@/stores/subscription-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
 import type { SubscriptionPlan } from '@/types'
+import { toast } from 'sonner'
 
 interface UpgradeModalProps {
  open: boolean
@@ -51,8 +50,7 @@ const PLAN_FEATURES = [
 
 export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit }: UpgradeModalProps) {
  const { t, isRTL } = useI18n()
- const { plan, setPlan, fetchPlanFromServer } = useSubscriptionStore()
- const { user } = useAuthStore()
+ const { plan } = useSubscriptionStore()
  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
  const [showOtpInput, setShowOtpInput] = useState(false)
  const [otpCode, setOtpCode] = useState('')
@@ -69,13 +67,15 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
 
  const handleUpgrade = (targetPlan: SubscriptionPlan) => {
   setSelectedPlan(targetPlan)
-  setShowOtpInput(true)
- }
-
- const handleActivateOtp = async () => {
-  if (!otpCode.trim()) {
-   toast.error('Please enter an OTP code')
-   return
+  try {
+   // Manual OTP subscription: navigate to settings subscription page
+   // or show a toast directing the user to the subscription management flow
+   toast.info(isRTL ? 'يرجى الذهاب إلى الإعدادات > الاشتراك لتفعيل خطتك باستخدام رمز OTP' : 'Please go to Settings > Subscription to activate your plan using an OTP code')
+   onOpenChange(false)
+  } catch {
+   // Error handling
+  } finally {
+   setSelectedPlan(null)
   }
   setIsActivating(true)
   try {
@@ -298,18 +298,18 @@ export function UpgradeModal({ open, onOpenChange, feature, currentCount, limit 
            })}
           </div>
 
-           <Button
-            onClick={() => handleUpgrade('family_plus')}
-            variant="outline"
-            className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-            disabled={plan === 'family_plus'}
-           >
-            {plan === 'family_plus' ? (
-             isRTL ? 'الخطة الحالية' : 'Current Plan'
-            ) : (
-             isRTL ? 'تفعيل Family+' : 'Activate Family+'
-            )}
-           </Button>
+          <Button
+           onClick={() => handleUpgrade('family_plus')}
+           variant="outline"
+           className="w-full mt-3 h-8 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+           disabled={plan === 'family_plus'}
+          >
+           {plan === 'family_plus' ? (
+            isRTL ? 'الخطة الحالية' : 'Current Plan'
+           ) : (
+            isRTL ? 'الترقية إلى Family+' : 'Upgrade to Family+'
+           )}
+          </Button>
          </div>
         </div>
        </motion.div>

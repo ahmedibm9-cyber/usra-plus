@@ -22,6 +22,8 @@ export const PLAN_LIMITS = {
   free: { families: 1, members: 4, tasks: 50, storage: 100 * 1024 * 1024, aiCalls: 5, mealPlans: 0 },
   pro: { families: 3, members: 8, tasks: 500, storage: 5 * 1024 * 1024 * 1024, aiCalls: 100, mealPlans: 4 },
   family_plus: { families: 5, members: 20, tasks: Infinity, storage: 20 * 1024 * 1024 * 1024, aiCalls: Infinity, mealPlans: Infinity },
+  max: { families: 10, members: 25, tasks: Infinity, storage: 50 * 1024 * 1024 * 1024, aiCalls: Infinity, mealPlans: Infinity },
+  ultimate: { families: Infinity, members: Infinity, tasks: Infinity, storage: Infinity, aiCalls: Infinity, mealPlans: Infinity },
 } as const
 
 export type PlanTier = keyof typeof PLAN_LIMITS
@@ -30,7 +32,7 @@ export type PlanResource = keyof typeof PLAN_LIMITS.free
 
 // ─── Tier Ordering ───────────────────────────────────────────────────────
 
-const TIER_ORDER: PlanTier[] = ['free', 'pro', 'family_plus']
+const TIER_ORDER: PlanTier[] = ['free', 'pro', 'family_plus', 'max', 'ultimate']
 
 // ─── getUserPlan ─────────────────────────────────────────────────────────
 
@@ -50,7 +52,10 @@ export async function getUserPlan(request: NextRequest): Promise<PlanTier> {
     })
     if (!sub) return 'free'
     if (sub.currentPeriodEnd && new Date(sub.currentPeriodEnd) < new Date()) return 'free'
-    return (sub.plan as PlanTier) || 'free'
+    const planTier = (sub.plan as PlanTier) || 'free'
+    // Safety: if the plan string isn't a known tier, fall back to 'free'
+    if (!PLAN_LIMITS[planTier]) return 'free'
+    return planTier
   } catch {
     return 'free'
   }

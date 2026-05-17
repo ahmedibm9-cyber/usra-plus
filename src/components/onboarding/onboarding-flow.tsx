@@ -20,8 +20,24 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material'
-import { PersonAdd, Home, ContentCopy, Check, ChevronRight, AutoAwesome, AutoFixHigh, WifiOff, CalendarMonth, Checklist, ShoppingCart, Chat, Shield, Bolt, Star } from '@mui/icons-material'
-import { Users } from 'lucide-react'
+import {
+  People,
+  PersonAdd,
+  Home,
+  ContentCopy,
+  Check,
+  ChevronRight,
+  AutoAwesome,
+  AutoFixHigh,
+  WifiOff,
+  CalendarMonth,
+  Checklist,
+  ShoppingCart,
+  Chat,
+  Shield,
+  Bolt,
+  Star,
+} from '@mui/icons-material'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AvatarGenerator } from '@/components/shared/avatar-generator'
@@ -49,7 +65,7 @@ const FEATURE_CARDS = [
 
 const FAMILY_BENEFITS = [
   { icon: Shield, text: 'Private & secure space', color: 'primary' as const },
-  { icon: Users, text: 'Up to 20 family members', color: 'secondary' as const },
+  { icon: People, text: 'Up to 20 family members', color: 'secondary' as const },
   { icon: Bolt, text: 'Real-time sync & updates', color: 'primary' as const },
 ]
 
@@ -176,7 +192,7 @@ function WelcomeStep({ onGetStarted, onSkip }: { onGetStarted: () => void; onSki
       <Box sx={{ height: 32, mb: 4 }}>
         <Typography variant="h6" sx={{ color: 'text.secondary' }} fontWeight={500}>
           {displayedText}
-          <Box component="span" sx={{ display: 'inline-block', width: 2, height: 20, bgcolor: 'primary.main', ml: 0.5, verticalAlign: 'middle', animation: 'blink 0.5s infinite alternate' }} />
+          <Box component="span" sx={{ display: 'inline-block', width: 2, height: 20, bgcolor: 'primary.main', ml: 0.5, verticalAlign: 'middle', animation: 'blink 0.5s infinite alternate', '@keyframes blink': { from: { opacity: 1 }, to: { opacity: 0 } } }} />
         </Typography>
       </Box>
 
@@ -326,7 +342,7 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
                     sx={{ p: 3, cursor: 'pointer', borderRadius: 4, textAlign: 'left', transition: 'all 0.3s', '&:hover': { borderColor: 'primary.main', boxShadow: `0 8px 30px ${theme.palette.primary.main}15` } }}
                   >
                     <Box sx={{ width: 56, height: 56, borderRadius: 3, bgcolor: 'primary.main', opacity: 0.15, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-                      <Users sx={{ fontSize: 28, color: 'primary.main' }} />
+                      <People sx={{ fontSize: 28, color: 'primary.main' }} />
                     </Box>
                     <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>{t.onboarding.createFamily}</Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>Start a new family space</Typography>
@@ -375,7 +391,7 @@ function FamilyStep({ onAdvance }: { onAdvance: () => void }) {
               <Stack spacing={2.5} sx={{ p: 3 }}>
                 <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
                   <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.main', opacity: 0.15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Users sx={{ color: 'primary.main' }} />
+                    <People sx={{ color: 'primary.main' }} />
                   </Box>
                   <Box>
                     <Typography variant="subtitle1" fontWeight={600}>{t.onboarding.createFamily}</Typography>
